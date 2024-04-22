@@ -1,0 +1,11 @@
+{
+    "name": "got",
+    "private": true,
+    "type": "module",
+    "workspaces": [
+        "packages/*"
+    ],
+    "devDependencies": {
+        "prettier": "^3.2.5"
+    }
+}
