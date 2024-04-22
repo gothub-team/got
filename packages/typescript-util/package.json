@@ -1,5 +1,5 @@
 {
-    "name": "typescript-util",
+    "name": "@gothub/typescript-util",
     "type": "module",
     "devDependencies": {
         "@eslint/js": "^9.1.1",

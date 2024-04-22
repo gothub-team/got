@@ -1,4 +1,4 @@
-# typescript-util
+# @gothub/typescript-util
 
 To install dependencies:
 
