@@ -1,0 +1,19 @@
+{
+    "name": "@pulumi/gotiac",
+    "version": "${VERSION}",
+    "scripts": {
+        "build": "tsc"
+    },
+    "dependencies": {
+        "@pulumi/aws": "^6.0.0",
+        "@pulumi/pulumi": "^3.42.0"
+    },
+    "devDependencies": {
+        "@types/node": "^14",
+        "typescript": "*"
+    },
+    "pulumi": {
+        "resource": true,
+        "name": "gotiac"
+    }
+}
