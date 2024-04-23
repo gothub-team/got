@@ -1,16 +1,7 @@
 {
-    "extends": "@gothub/typescript-util/tsconfig-backend.json",
+    "extends": "@gothub/typescript-util/tsconfig-pulumi.json",
     "compilerOptions": {
-        "outDir": "bin",
-
-        // Bundler mode
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
-        "allowImportingTsExtensions": false,
-        "verbatimModuleSyntax": false,
-        "noEmit": false,
-
-        "types": ["@types/node"]
+        "outDir": "bin"
     },
     "include": ["**/*.ts"]
 }

@@ -72,7 +72,7 @@ build_nodejs_sdk:: gen_nodejs_sdk
 		rm ./bin/package.json.bak
 
 install_nodejs_sdk:: build_nodejs_sdk
-	yarn link --cwd ${WORKING_DIR}/sdk/nodejs/bin
+	bun link --cwd ${WORKING_DIR}/sdk/nodejs/bin
 
 
 # Python SDK
