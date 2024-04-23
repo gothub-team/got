@@ -5,11 +5,14 @@
         "lint": "eslint ."
     },
     "devDependencies": {
-        "@types/bun": "latest",
-        "@gothub/typescript-util": "workspace:*"
+        "@gothub/typescript-util": "workspace:*",
+        "@types/aws-lambda": "8.10.137",
+        "@types/bun": "latest"
     },
     "peerDependencies": {
         "typescript": "^5.0.0"
     },
-    "dependencies": {}
+    "dependencies": {
+        "sst": "ion"
+    }
 }

@@ -15,6 +15,11 @@ export type Provider = import("./provider").Provider;
 export const Provider: typeof import("./provider").Provider = null as any;
 utilities.lazyLoad(exports, ["Provider"], () => require("./provider"));
 
+export { TestAdminUserArgs } from "./testAdminUser";
+export type TestAdminUser = import("./testAdminUser").TestAdminUser;
+export const TestAdminUser: typeof import("./testAdminUser").TestAdminUser = null as any;
+utilities.lazyLoad(exports, ["TestAdminUser"], () => require("./testAdminUser"));
+
 
 const _module = {
     version: utilities.getVersion(),
@@ -22,6 +27,8 @@ const _module = {
         switch (type) {
             case "gotiac:index:FileHosting":
                 return new FileHosting(name, <any>undefined, { urn })
+            case "gotiac:index:TestAdminUser":
+                return new TestAdminUser(name, <any>undefined, { urn })
             default:
                 throw new Error(`unknown resource type ${type}`);
         }

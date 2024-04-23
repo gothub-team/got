@@ -9,6 +9,8 @@ export default tseslint.config(
     ...tseslint.configs.recommended,
     prettier,
     {
-        rules: {},
+        rules: {
+            "@typescript-eslint/triple-slash-reference": "off"
+        },
     }
 );
