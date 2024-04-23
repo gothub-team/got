@@ -63,10 +63,11 @@ gen_nodejs_sdk::
 
 build_nodejs_sdk:: gen_nodejs_sdk
 	cd sdk/nodejs/ && \
-		yarn install && \
-		yarn run tsc --version && \
-		yarn run tsc && \
-		cp ../../README.md ../../LICENSE package.json yarn.lock ./bin/ && \
+		cp ../../tsconfig.template.json tsconfig.json && \
+		bun install && \
+		bun x tsc --version && \
+		bun x tsc && \
+		cp ../../README.md ../../LICENSE package.json bun.lockb ./bin/ && \
 		sed -i.bak -e "s/\$${VERSION}/$(VERSION)/g" ./bin/package.json && \
 		rm ./bin/package.json.bak
 
