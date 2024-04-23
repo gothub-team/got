@@ -15,11 +15,6 @@ export type Provider = import("./provider").Provider;
 export const Provider: typeof import("./provider").Provider = null as any;
 utilities.lazyLoad(exports, ["Provider"], () => require("./provider"));
 
-export { StaticPageArgs } from "./staticPage";
-export type StaticPage = import("./staticPage").StaticPage;
-export const StaticPage: typeof import("./staticPage").StaticPage = null as any;
-utilities.lazyLoad(exports, ["StaticPage"], () => require("./staticPage"));
-
 
 const _module = {
     version: utilities.getVersion(),
@@ -27,8 +22,6 @@ const _module = {
         switch (type) {
             case "gotiac:index:FileHosting":
                 return new FileHosting(name, <any>undefined, { urn })
-            case "gotiac:index:StaticPage":
-                return new StaticPage(name, <any>undefined, { urn })
             default:
                 throw new Error(`unknown resource type ${type}`);
         }
