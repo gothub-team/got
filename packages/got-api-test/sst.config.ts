@@ -1,5 +1,6 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 import * as gotiac from '@pulumi/gotiac';
+import * as fs from 'fs';
 
 import { env } from './env';
 
@@ -23,8 +24,8 @@ export default $config({
             email: env.TEST_ADMIN_USER_EMAIL,
         });
 
-        return {
-            password: user.password,
-        };
+        user.password.apply((password) => {
+            fs.writeFileSync('.test-admin-pw.env', `TEST_ADMIN_PW='${password}'`);
+        });
     },
 });

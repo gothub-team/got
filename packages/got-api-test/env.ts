@@ -40,6 +40,7 @@ export const envSchema = z.object({
     AWS_PROFILE: z.string(),
     USER_POOL_ID: z.string(),
     TEST_ADMIN_USER_EMAIL: z.string(),
+    TEST_ADMIN_PW: z.string().optional(),
 });
 
 export const env = envSchema.parse(process.env);
