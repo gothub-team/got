@@ -1,6 +1,7 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 import * as pulumi from '@pulumi/pulumi';
 import * as gotiac from '@pulumi/gotiac';
+import { env } from './env';
 
 export default $config({
     app(input) {
@@ -10,16 +11,16 @@ export default $config({
             home: 'aws',
             providers: {
                 aws: {
-                    region: process.env.AWS_REGION as $util.Input<aws.Region>,
-                    profile: process.env.AWS_PROFILE,
+                    region: env.AWS_REGION,
+                    profile: env.AWS_PROFILE,
                 },
             },
         };
     },
     async run() {
         const fileHosting = new gotiac.FileHosting('FileHosting', {
-            domain: process.env.FILE_HOSTING_DOMAIN,
-            bucketName: process.env.FILE_HOSTING_BUCKET,
+            domain: env.FILE_HOSTING_DOMAIN,
+            bucketName: env.FILE_HOSTING_BUCKET,
         });
 
         return {
