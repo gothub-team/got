@@ -6,8 +6,7 @@
     },
     "eslint.workingDirectories": [{ "pattern": "./packages/*" }, "./packages/got-api-core"],
     "eslint.experimental.useFlatConfig": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "[typescript]": {
+    "[javascript,javascript,json,yaml]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
-    }
+    },
 }
