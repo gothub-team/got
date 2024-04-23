@@ -2,6 +2,4 @@
 
 import eslint from '@gothub/typescript-util/eslint-backend.config.js';
 
-export default [
-    ...eslint
-];
+export default [...eslint];
