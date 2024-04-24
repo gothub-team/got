@@ -25,7 +25,7 @@ export default $config({
         });
 
         user.password.apply((password) => {
-            fs.writeFileSync('.test-admin-pw.env', `TEST_ADMIN_PW='${password}'`);
+            fs.writeFileSync('.test-admin-pw.env', `export TEST_ADMIN_PW='${password}'`);
         });
     },
 });
