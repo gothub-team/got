@@ -2,7 +2,7 @@
     "editor.formatOnSave": true,
     "typescript.validate.enable": true,
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "never"
+        "source.fixAll.eslint": "always"
     },
     "eslint.workingDirectories": [{ "pattern": "./packages/*" }, "./packages/got-api-core"],
     "eslint.experimental.useFlatConfig": true,
