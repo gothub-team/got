@@ -1,6 +1,13 @@
 import { Buffer } from 'buffer';
 import { useSrp } from '@gothub-team/got-srp';
-import { createLowApi, type LoginVerifyOutput, type ResetPasswordVerifyInput } from './api.js';
+import {
+    createLowApi,
+    type GotLowApi,
+    type InviteUserInput,
+    type LoginVerifyOutput,
+    type ResetPasswordVerifyInput,
+    type User,
+} from './api.js';
 import { put } from './fetch.js';
 
 export { createLowApi } from './api.js';
@@ -43,6 +50,158 @@ export interface PasswordChallengeInput extends LoginInput {
     newPassword: string;
 }
 
+export declare interface GotApi extends GotLowApi {
+    /**
+     * This operation is a convenience function that combines loginInit and loginVerify.
+     * It establishes an SRP session using `@gothub-team/got-srp` and computes the signature
+     * on the client side using the specified password. If verification is successful, it
+     * returns all authentication tokens.
+     *
+     *  @throws
+     * ```JS
+     * {
+     *     name: 'InvalidEmailError',
+     *     message: 'The email must be valid and must not contain upper case letters or spaces.',
+     * }
+     * ```
+     * @throws
+     * ```JS
+     * {
+     *     name: 'LoginVerifyError',
+     *     message: 'The password could not be verified. Please check userId, secretBlock, signature and timestamp.',
+     * }
+     * ```
+     * @throws
+     * ```JS
+     * {
+     *     name: 'UserNotVerifiedError',
+     *     message: 'The user must be verified with Register Verify operation.',
+     * }
+     * ```
+     * @throws
+     * ```JS
+     * {
+     *     name: 'PasswordResetRequiredError',
+     *     message: 'The password must be reset.',
+     * }
+     * ```
+     * @throws
+     * ```JS
+     * {
+     *     name: 'UserNotFoundError',
+     *     message: 'No user was found under the given email or user ID.',
+     * }
+     * ```
+     */
+    login: (input: LoginInput) => Promise<void>;
+    /**
+     * This operation removes the current session.
+     */
+    logout: () => void;
+    /**
+     * This operation attempts to refresh the current session calling loginRefresh with
+     * the refresh token from session.
+     * @throws
+     * ```JS
+     * {
+     *     name: 'InvalidRefreshTokenError',
+     *     message: 'Refresh token is invalid.',
+     * }
+     * ```
+     * @throws
+     * ```JS
+     * {
+     *     name: 'UserNotVerifiedError',
+     *     message: 'The user must be verified with Register Verify operation.',
+     * }
+     * ```
+     * @throws
+     * ```JS
+     * {
+     *     name: 'PasswordResetRequiredError',
+     *     message: 'The password must be reset.',
+     * }
+     * ```
+     * @throws
+     * ```JS
+     * {
+     *     name: 'UserNotFoundError',
+     *     message: 'No user was found under the given email or user ID.',
+     * }
+     * ```
+     */
+    refreshSession: () => Promise<void>;
+    /**
+     * TODO: Implement this operation.
+     * This operation is a convenience function that combines loginInit and passwordChallengeVerify.
+     * It establishes an SRP session using `@gothub-team/got-srp` and computes the signature
+     * on the client side using the specified password. If the new password challenge is required,
+     * the users password will be changed to the new password.
+     *
+     *  @throws
+     * ```JS
+     * {
+     *     name: 'InvalidEmailError',
+     *     message: 'The email must be valid and must not contain upper case letters or spaces.',
+     * }
+     * ```
+     * @throws
+     * ```JS
+     * {
+     *     name: 'LoginVerifyError',
+     *     message: 'The password could not be verified. Please check userId, secretBlock, signature and timestamp.',
+     * }
+     * ```
+     * @throws
+     * ```JS
+     * {
+     *     name: 'UserNotVerifiedError',
+     *     message: 'The user must be verified with Register Verify operation.',
+     * }
+     * ```
+     * @throws
+     * ```JS
+     * {
+     *     name: 'UserNotFoundError',
+     *     message: 'No user was found under the given email or user ID.',
+     * }
+     * ```
+     */
+    // passwordChallenge: (input: PasswordChallengeInput) => Promise<void>;
+    /**
+     * Returns the current session. Returns `undefined` in case no session exists.
+     */
+    getCurrentSession: () => Session | undefined;
+    /**
+     * Sets the current session.
+     */
+    setCurrentSession: (session: Session) => void;
+    /**
+     * Returns the user from the current session. Returns `undefined` in case no session exists.
+     */
+    getCurrentUser: () => User | undefined;
+    /**
+     * Returns if admin mode is enabled.
+     */
+    getAdminMode: () => boolean;
+    /**
+     * Sets the admin mode.
+     */
+    setAdminMode: (adminMode: boolean) => void;
+    /**
+     * This operation uploads a file blob using a given set of uploadUrls.
+     * If the length of uploadUrls is greater than 1 does multipart upload.
+     */
+    upload: (uploadUrls: string[], file: Blob, options: UploadOptions) => Promise<void>;
+    /**
+     * This operation creates a user with the given email provided they do not exist yet.
+     *
+     */
+    inviteUser: <const TInviteUserInput extends InviteUserInput>(
+        input: TInviteUserInput,
+    ) => Promise<TInviteUserInput extends LoginInput ? Session : void>;
+}
+
 const isExpired = (msTimestamp?: number) => msTimestamp && msTimestamp * 1000 < Date.now() + 100000;
 
 const decodeJwt = (jwt: string) => {
@@ -78,7 +237,7 @@ const useSingletonPromise = <T>(asyncFn: () => Promise<T>) => {
             setSingletonPromise(null);
             return result;
         }
-        return getSingletonPromise();
+        getSingletonPromise();
     };
 };
 
@@ -120,7 +279,7 @@ export const createApi = ({
     },
     adminMode = false,
     sessionExpireTime = 2419200000, // 28 days
-}: CreateApiOptions) => {
+}: CreateApiOptions): GotApi => {
     if (!host) throw new Error('Provide host argument to create API.');
     const _host = host.endsWith('/') ? host.substring(0, host.length - 1) : host;
 
@@ -213,6 +372,7 @@ export const createApi = ({
                     refreshTokenExpires: (Date.now() + sessionExpireTime) / 1000,
                 });
             }
+            return result;
         },
         refreshSession,
         getCurrentSession,
@@ -253,5 +413,6 @@ export const createApi = ({
             }
         },
         setCurrentSession: _setSession,
+        inviteUser: (async (input) => api.inviteUser(input)) as GotApi['inviteUser'],
     };
 };

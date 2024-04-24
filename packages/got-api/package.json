@@ -1,6 +1,8 @@
 {
     "name": "@gothub/got-api",
     "type": "module",
+    "module": "client-js/index.ts",
+    "types": "client-js/index.ts",
     "scripts": {
         "lint": "eslint .",
         "generate:client-js": "bun client-js/generate.ts"
