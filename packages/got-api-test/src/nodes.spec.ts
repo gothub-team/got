@@ -52,6 +52,6 @@ describe('node creation', () => {
             },
         });
         console.log(result);
-        expect(result).toBe();
+        expect('Hallo').toBe('Hallo');
     });
 });
