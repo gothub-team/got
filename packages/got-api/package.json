@@ -2,13 +2,19 @@
     "name": "@gothub/got-api",
     "type": "module",
     "scripts": {
-        "lint": "eslint ."
+        "lint": "eslint .",
+        "generate:client-js": "bun client-js/generate.ts"
     },
     "devDependencies": {
+        "@gothub/typescript-util": "workspace:*",
         "@types/bun": "latest",
-        "@gothub/typescript-util": "workspace:*"
+        "@types/ramda": "^0.29.12",
+        "openapi-types": "^12.1.3",
+        "quicktype-core": "^6.0.71",
+        "ramda": "^0.29.1"
     },
     "peerDependencies": {
+        "@gothub-team/got-srp": "^0.3.20",
         "typescript": "^5.0.0"
     },
     "dependencies": {}
