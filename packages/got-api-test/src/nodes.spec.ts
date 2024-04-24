@@ -1,6 +1,6 @@
 import { describe, beforeAll, beforeEach, afterEach, it, expect } from 'bun:test';
 import { env } from '../env';
-import { createApi } from '@gothub-team/got-api';
+import { createApi } from '@gothub/got-api';
 import crypto from 'crypto';
 
 let adminApi: ReturnType<typeof createApi>;

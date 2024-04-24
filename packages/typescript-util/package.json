@@ -2,7 +2,6 @@
     "name": "@gothub/typescript-util",
     "type": "module",
     "devDependencies": {
-        "@gothub-team/got-api": "link:@gothub-team/got-api",
         "@eslint/js": "^9.1.1",
         "@types/bun": "latest",
         "eslint": "^9.1.0",

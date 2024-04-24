@@ -1,18 +1,19 @@
 {
-  "name": "@gothub/got-api-test",
-  "type": "module",
-  "scripts": {
-    "lint": "eslint ."
-  },
-  "devDependencies": {
-    "@gothub/typescript-util": "workspace:*",
-    "@types/aws-lambda": "8.10.137",
-    "@types/bun": "^1.1.0"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "sst": "ion"
-  }
+    "name": "@gothub/got-api-test",
+    "type": "module",
+    "scripts": {
+        "lint": "eslint ."
+    },
+    "devDependencies": {
+        "@gothub/typescript-util": "workspace:*",
+        "@gothub/got-api": "workspace:*",
+        "@types/aws-lambda": "8.10.137",
+        "@types/bun": "^1.1.0"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "sst": "ion"
+    }
 }
