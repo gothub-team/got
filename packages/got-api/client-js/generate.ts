@@ -62,6 +62,7 @@ const getOutputSchema = R.compose(
     const { components } = schema;
 
     const types = `import { post } from './fetch.js';
+import type { Graph, View, PushBody, PushResult } from '@gothub-team/got-core';
 
 export interface CreateLowApiOtions {
     /**
@@ -157,5 +158,15 @@ ${await R.compose(
 `;
 
     fs.mkdirSync('./client-js', { recursive: true });
-    fs.writeFileSync('./client-js/api.ts', types.replaceAll(/any/g, 'unknown'), {});
+    fs.writeFileSync(
+        './client-js/api.ts',
+        types
+            .replaceAll(/any/g, 'unknown')
+            .replace('pull: (input: PullInput) => Promise<unknown>;', 'pull: (input: View) => Promise<Graph>;')
+            .replace(
+                'push: (input: PushInput) => Promise<unknown>;',
+                'push: (input: PushBody) => Promise<PushResult>;',
+            ),
+        {},
+    );
 })();

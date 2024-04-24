@@ -1,58 +1,58 @@
 import { post } from './fetch.js';
+import type { Graph, View, PushBody, PushResult } from '@gothub-team/got-core';
 
 export interface CreateLowApiOtions {
     /**
      * Host of got provider API to connect to. (e.g. https://api.gothub.io)
      */
-    host: string,
+    host: string;
     /**
      * Function to get the ID token which is used with all API requests that require authentication.
      */
-    getIdToken: () => Promise<string | undefined>,
+    getIdToken: () => Promise<string | undefined>;
     /**
      * Function to get whether or not to call the API in admin mode.
      */
-    getAdminMode: () => boolean,
+    getAdminMode: () => boolean;
 }
 
 export type CreateLowApiFn = (options: CreateLowApiOtions) => GotLowApi;
 
-/** 
+/**
  * Creates the low level API which wraps all got REST API operations.
  */
 export const createLowApi: CreateLowApiFn = ({ host, getIdToken = async () => '', getAdminMode = () => false }) => ({
-    pull: async input => post(`${host}/pull`, input, await getIdToken(), getAdminMode()),
-    push: async input => post(`${host}/push`, input, await getIdToken(), getAdminMode()),
-    completeUpload: async input => post(`${host}/media/complete-upload`, input, await getIdToken(), getAdminMode()),
-    loginInit: async input => post(`${host}/auth/login-init`, input),
-    loginVerify: async input => post(`${host}/auth/login-verify`, input),
-    loginRefresh: async input => post(`${host}/auth/login-refresh`, input),
-    registerInit: async input => post(`${host}/auth/register-init`, input),
-    registerVerify: async input => post(`${host}/auth/register-verify`, input),
-    registerVerifyResend: async input => post(`${host}/auth/register-verify-resend`, input),
-    resetPasswordInit: async input => post(`${host}/auth/reset-password-init`, input),
-    resetPasswordVerify: async input => post(`${host}/auth/reset-password-verify`, input),
-    inviteUser: async input => post(`${host}/auth/invite-user`, input, await getIdToken(), getAdminMode()),
-    deleteUser: async input => post(`${host}/auth/delete-user`, input, await getIdToken(), getAdminMode()),
+    pull: async (input) => post(`${host}/pull`, input, await getIdToken(), getAdminMode()),
+    push: async (input) => post(`${host}/push`, input, await getIdToken(), getAdminMode()),
+    completeUpload: async (input) => post(`${host}/media/complete-upload`, input, await getIdToken(), getAdminMode()),
+    loginInit: async (input) => post(`${host}/auth/login-init`, input),
+    loginVerify: async (input) => post(`${host}/auth/login-verify`, input),
+    loginRefresh: async (input) => post(`${host}/auth/login-refresh`, input),
+    registerInit: async (input) => post(`${host}/auth/register-init`, input),
+    registerVerify: async (input) => post(`${host}/auth/register-verify`, input),
+    registerVerifyResend: async (input) => post(`${host}/auth/register-verify-resend`, input),
+    resetPasswordInit: async (input) => post(`${host}/auth/reset-password-init`, input),
+    resetPasswordVerify: async (input) => post(`${host}/auth/reset-password-verify`, input),
+    inviteUser: async (input) => post(`${host}/auth/invite-user`, input, await getIdToken(), getAdminMode()),
+    deleteUser: async (input) => post(`${host}/auth/delete-user`, input, await getIdToken(), getAdminMode()),
 });
 
 export interface GotLowApi {
-
     /**
      * This operation pulls a graph based on a given hashmap of queries.
-     * 
+     *
      */
-    pull: (input: PullInput) => Promise<unknown>;
+    pull: (input: View) => Promise<Graph>;
 
     /**
      * This operation pushes the graph from the request body into the database.
-     * 
+     *
      */
-    push: (input: PushInput) => Promise<unknown>;
+    push: (input: PushBody) => Promise<PushResult>;
 
     /**
      * This operation completes a previously executed multipart upload. Multipart uploads are initiated via push operations.
-     * 
+     *
      */
     completeUpload: (input: CompleteUploadInput) => Promise<unknown>;
 
@@ -315,16 +315,15 @@ export interface GotLowApi {
 
     /**
      * This operation creates a user with the given email provided they do not exist yet.
-     * 
+     *
      */
     inviteUser: (input: InviteUserInput) => Promise<unknown>;
 
     /**
      * This operation deletes a user with the given email.
-     * 
+     *
      */
     deleteUser: (input: DeleteUserInput) => Promise<unknown>;
-
 }
 
 export interface PullInput {
@@ -396,12 +395,29 @@ export interface Include {
     rights?: boolean;
 }
 
-
 export interface PushInput {
     /**
      * `fromType`s: A `fromType` hashmap representing all `fromType`s of all present edges.
      */
-    edges?: { [key: string]: { [key: string]: { [key: string]: { [key: string]: boolean | { [key: string]: Array<boolean | number | { [key: string]: unknown } | null | string> | boolean | number | { [key: string]: unknown } | null | string } } } } };
+    edges?: {
+        [key: string]: {
+            [key: string]: {
+                [key: string]: {
+                    [key: string]:
+                        | boolean
+                        | {
+                              [key: string]:
+                                  | Array<boolean | number | { [key: string]: unknown } | null | string>
+                                  | boolean
+                                  | number
+                                  | { [key: string]: unknown }
+                                  | null
+                                  | string;
+                          };
+                };
+            };
+        };
+    };
     /**
      * `id`s: A node `id` hashmap representing all nodes which files should be uploaded for.
      */
@@ -443,7 +459,13 @@ export interface NodeObject {
      * The id of the node which should be updated.
      */
     id: string;
-    [property: string]: Array<boolean | number | { [key: string]: unknown } | null | string> | boolean | number | { [key: string]: unknown } | null | string;
+    [property: string]:
+        | Array<boolean | number | { [key: string]: unknown } | null | string>
+        | boolean
+        | number
+        | { [key: string]: unknown }
+        | null
+        | string;
 }
 
 /**
@@ -456,7 +478,7 @@ export interface Right {
      * property. All rights of the given node are deleted and copied from the other node.
      */
     inherit?: Inherit;
-    user?:    { [key: string]: User };
+    user?: { [key: string]: User };
 }
 
 /**
@@ -489,12 +511,10 @@ export interface User {
     write?: boolean;
 }
 
-
 export interface CompleteUploadInput {
     partEtags: string[];
-    uploadId:  string;
+    uploadId: string;
 }
-
 
 export interface LoginInitInput {
     /**
@@ -609,7 +629,6 @@ export interface RegisterInitInput {
     password: string;
 }
 
-
 export interface RegisterVerifyInput {
     /**
      * Email of the user to be registerVerifyd.
@@ -621,7 +640,6 @@ export interface RegisterVerifyInput {
     verificationCode: string;
 }
 
-
 export interface RegisterVerifyResendInput {
     /**
      * Email of the user which the verification code should be resent for.
@@ -629,14 +647,12 @@ export interface RegisterVerifyResendInput {
     email: string;
 }
 
-
 export interface ResetPasswordInitInput {
     /**
      * Email of the user which wants to reset the password.
      */
     email: string;
 }
-
 
 export interface ResetPasswordVerifyInput {
     /**
@@ -657,8 +673,7 @@ export interface ResetPasswordVerifyInput {
     verificationCode?: string;
 }
 
-export interface ResetPasswordVerifyOutput {
-}
+export interface ResetPasswordVerifyOutput {}
 
 export interface InviteUserInput {
     /**
@@ -680,12 +695,9 @@ export interface InviteUserInput {
     templateId?: string;
 }
 
-
 export interface DeleteUserInput {
     /**
      * Email of the user to be deleted.
      */
     email: string;
 }
-
-
