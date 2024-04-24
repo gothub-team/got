@@ -2,9 +2,9 @@ import { describe, beforeAll, beforeEach, afterEach, it, expect } from 'bun:test
 import { env } from '../env';
 import { createApi } from '@gothub/got-api';
 import crypto from 'crypto';
+import type { Graph, PushResult } from '@gothub-team/got-core';
 
 let adminApi: ReturnType<typeof createApi>;
-
 beforeAll(async () => {
     if (!env.TEST_ADMIN_PW) {
         throw new Error('TEST_ADMIN_PW is not set');
@@ -35,14 +35,15 @@ beforeEach(async () => {
     });
     api.setCurrentSession(session);
 });
-
 afterEach(async () => {
     await adminApi.deleteUser({ email: userEmail });
 });
 
-describe('node creation', () => {
-    it('creates and returns a node', async () => {
-        const result = await api.push({
+describe('new node', () => {
+    let pushResult: PushResult;
+    let graph: Graph;
+    beforeEach(async () => {
+        pushResult = await api.push({
             nodes: {
                 [testId]: {
                     id: testId,
@@ -51,7 +52,28 @@ describe('node creation', () => {
                 },
             },
         });
-        console.log(result);
-        expect('Hallo').toBe('Hallo');
+        graph = await api.pull({
+            [testId]: {
+                include: { node: true },
+            },
+        });
+    });
+    afterEach(async () => {
+        await adminApi.push({ nodes: { [testId]: false } });
+    });
+
+    it('pushes one node', async () => {
+        expect(pushResult).toEqual({ nodes: { [testId]: { statusCode: 200 } } });
+    });
+    it('pulls the same node', async () => {
+        expect(graph).toEqual({
+            nodes: {
+                [testId]: {
+                    id: testId,
+                    name: 'Test Node',
+                    prop: 'value1',
+                },
+            },
+        });
     });
 });

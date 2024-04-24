@@ -11,6 +11,7 @@
         "@types/bun": "^1.1.0"
     },
     "peerDependencies": {
+        "@gothub-team/got-core": "^0.24.1",
         "typescript": "^5.0.0"
     },
     "dependencies": {
