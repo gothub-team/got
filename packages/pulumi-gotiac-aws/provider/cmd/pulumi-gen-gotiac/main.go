@@ -58,7 +58,9 @@ func emitSDK(language, outdir, schemaPath string) error {
 	var generator func() (map[string][]byte, error)
 	switch language {
 	case "dotnet":
-		generator = func() (map[string][]byte, error) { return dotnetgen.GeneratePackage(tool, pkg, extraFiles) }
+		generator = func() (map[string][]byte, error) {
+			return dotnetgen.GeneratePackage(tool, pkg, extraFiles, localDependencies)
+		}
 	case "go":
 		generator = func() (map[string][]byte, error) { return gogen.GeneratePackage(tool, pkg) }
 	case "nodejs":
