@@ -146,15 +146,36 @@ describe('new nodes', () => {
         it('pushes updated node', async () => {
             expect(pushResult).toEqual({ nodes: { [testId]: { statusCode: 200 } } });
         });
-        it('pulls the updated node', async () => {
-            expect(graph).toEqual({
-                nodes: {
-                    [testId]: {
-                        id: testId,
-                        name: 'Test Node',
-                        prop: 'value2',
+        it('pulls the node with updated prop', async () => {
+            expect(graph).toHaveProperty(['nodes', testId, 'prop'], 'value2');
+        });
+
+        describe('with new prop', () => {
+            beforeEach(async () => {
+                pushResult = await api.push({
+                    nodes: {
+                        [testId]: {
+                            id: testId,
+                            newProp: 'newValue',
+                        },
                     },
-                },
+                });
+                graph = await api.pull({
+                    [testId]: {
+                        include: { node: true },
+                    },
+                });
+            });
+
+            it('pushes updated node with new prop', async () => {
+                expect(pushResult).toEqual({ nodes: { [testId]: { statusCode: 200 } } });
+            });
+            it('updated node with new prop', async () => {
+                expect(graph).toHaveProperty(['nodes', testId, 'newProp'], 'newValue');
+            });
+            it('keeps the old props', async () => {
+                expect(graph).toHaveProperty(['nodes', testId, 'name'], 'Test Node');
+                expect(graph).toHaveProperty(['nodes', testId, 'prop'], 'value2');
             });
         });
     });
