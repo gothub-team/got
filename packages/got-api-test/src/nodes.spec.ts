@@ -126,28 +126,30 @@ describe('new nodes', () => {
     });
 
     describe('update node', () => {
-        beforeEach(async () => {
-            pushResult = await api.push({
-                nodes: {
-                    [testId]: {
-                        id: testId,
-                        name: 'Test Node',
-                        prop: 'value2',
+        describe('with old prop', () => {
+            beforeEach(async () => {
+                pushResult = await api.push({
+                    nodes: {
+                        [testId]: {
+                            id: testId,
+                            name: 'Test Node',
+                            prop: 'value2',
+                        },
                     },
-                },
+                });
+                graph = await api.pull({
+                    [testId]: {
+                        include: { node: true },
+                    },
+                });
             });
-            graph = await api.pull({
-                [testId]: {
-                    include: { node: true },
-                },
-            });
-        });
 
-        it('pushes updated node', async () => {
-            expect(pushResult).toEqual({ nodes: { [testId]: { statusCode: 200 } } });
-        });
-        it('pulls the node with updated prop', async () => {
-            expect(graph).toHaveProperty(['nodes', testId, 'prop'], 'value2');
+            it('pushes updated node', async () => {
+                expect(pushResult).toEqual({ nodes: { [testId]: { statusCode: 200 } } });
+            });
+            it('pulls the node with updated prop', async () => {
+                expect(graph).toHaveProperty(['nodes', testId, 'prop'], 'value2');
+            });
         });
 
         describe('with new prop', () => {
@@ -175,7 +177,7 @@ describe('new nodes', () => {
             });
             it('keeps the old props', async () => {
                 expect(graph).toHaveProperty(['nodes', testId, 'name'], 'Test Node');
-                expect(graph).toHaveProperty(['nodes', testId, 'prop'], 'value2');
+                expect(graph).toHaveProperty(['nodes', testId, 'prop'], 'value1');
             });
         });
 
