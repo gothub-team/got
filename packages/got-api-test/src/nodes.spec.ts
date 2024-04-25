@@ -1,23 +1,12 @@
 import { describe, beforeAll, beforeEach, afterEach, it, expect } from 'bun:test';
-import { env } from '../env';
 import { createApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import type { Graph, Node, PushResult } from '@gothub-team/got-core';
+import { createAdminApi, createNewUserApi } from './shared';
 
 let adminApi: ReturnType<typeof createApi>;
 beforeAll(async () => {
-    if (!env.TEST_ADMIN_PW) {
-        throw new Error('TEST_ADMIN_PW is not set');
-    }
-    adminApi = createApi({
-        host: env.GOT_API_URL,
-        adminMode: true,
-        sessionExpireTime: 1000 * 60 * 20,
-    });
-    await adminApi.login({
-        email: env.TEST_ADMIN_USER_EMAIL,
-        password: env.TEST_ADMIN_PW,
-    });
+    adminApi = await createAdminApi();
 });
 
 let testId: string;
@@ -26,14 +15,7 @@ let userEmail: string;
 beforeEach(async () => {
     testId = `test-${crypto.randomBytes(8).toString('hex')}`;
     userEmail = `aws+api.test${testId}@gothub.io`;
-    const password = crypto.randomBytes(8).toString('hex');
-    const session = await adminApi.inviteUser({ email: userEmail, password });
-    api = createApi({
-        host: env.GOT_API_URL,
-        adminMode: false,
-        sessionExpireTime: 1000 * 60 * 5,
-    });
-    api.setCurrentSession(session);
+    api = await createNewUserApi(adminApi, userEmail);
 });
 afterEach(async () => {
     await adminApi.deleteUser({ email: userEmail });
