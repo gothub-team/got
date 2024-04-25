@@ -1,0 +1,13 @@
+{
+    "name": "@gothub/gothub-iac",
+    "module": "index.ts",
+    "type": "module",
+    "devDependencies": {
+        "@types/bun": "latest",
+        "@pulumi/pulumi": "^3.113.3",
+        "@pulumi/gotiac": "link:@pulumi/gotiac"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    }
+}

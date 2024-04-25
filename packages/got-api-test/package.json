@@ -2,14 +2,20 @@
     "name": "@gothub/got-api-test",
     "type": "module",
     "scripts": {
-        "lint": "eslint ."
+        "lint": "eslint .",
+        "test": "bun test --timeout 40000"
     },
     "devDependencies": {
-        "@types/bun": "latest",
-        "@gothub/typescript-util": "workspace:*"
+        "@gothub-team/got-core": "^0.24.2",
+        "@gothub/typescript-util": "workspace:*",
+        "@gothub/got-api": "workspace:*",
+        "@types/aws-lambda": "8.10.137",
+        "@types/bun": "^1.1.0"
     },
     "peerDependencies": {
         "typescript": "^5.0.0"
     },
-    "dependencies": {}
+    "dependencies": {
+        "sst": "ion"
+    }
 }

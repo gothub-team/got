@@ -28,6 +28,26 @@ resources:
             - url
             - privateKeyParameterName
             - privateKeyId
+    gotiac:index:TestAdminUser:
+        isComponent: true
+        inputProperties:
+            userPoolId:
+                type: string
+                description: The ID of the user pool where the test admin user is created. UserPool must exist.
+            email:
+                type: string
+                description: The email of the test admin user. Throws an error if the user already exists.
+        requiredInputs:
+            - userPoolId
+            - email
+        properties:
+            password:
+                type: string
+                description:
+                    The temporary password of the test admin user. Make sure to destroy the test admin user after each
+                    test run.
+        required:
+            - password
 language:
     csharp:
         packageReferences:
