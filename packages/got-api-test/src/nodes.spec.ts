@@ -233,7 +233,7 @@ describe('nodes', () => {
                 },
                 rights: {
                     [testId]: {
-                        user: { [userEmail]: { read: true, write: false, admin: false } },
+                        user: { [userEmail]: { read: true } },
                     },
                 },
             });
@@ -243,6 +243,19 @@ describe('nodes', () => {
                 },
                 [`other-${testId}`]: {
                     include: { node: true },
+                },
+            });
+        });
+        afterEach(async () => {
+            await adminApi.push({
+                nodes: {
+                    [testId]: false,
+                    [`other-${testId}`]: false,
+                },
+                rights: {
+                    [testId]: {
+                        user: { [userEmail]: { read: false } },
+                    },
                 },
             });
         });
