@@ -265,6 +265,74 @@ describe('nodes', () => {
             expect(graph).not.toHaveProperty(['nodes', `${testId}-other`]);
         });
     });
+
+    describe('write rights', () => {
+        let otherUserApi: GotApi;
+        let otherUserEmail: string;
+        beforeEach(async () => {
+            otherUserEmail = `aws+${testId}-other@gothub.io`;
+            otherUserApi = await createNewUserApi(adminApi, otherUserEmail);
+            await api.push({
+                nodes: {
+                    [`${testId}-other`]: {
+                        id: `${testId}-other`,
+                        prop: 'value1',
+                    },
+                },
+                rights: {
+                    [testId]: {
+                        user: { [otherUserEmail]: { write: true } },
+                    },
+                },
+            });
+            pushResult = await otherUserApi.push({
+                nodes: {
+                    [testId]: {
+                        id: testId,
+                        prop: 'value2',
+                    },
+                    [`${testId}-other`]: {
+                        id: `${testId}-other`,
+                        prop: 'value2',
+                    },
+                },
+            });
+            graph = await api.pull({
+                [testId]: {
+                    include: { node: true },
+                },
+                [`${testId}-other`]: {
+                    include: { node: true },
+                },
+            });
+        });
+        afterEach(async () => {
+            await adminApi.push({
+                nodes: {
+                    [testId]: false,
+                    [`${testId}-other`]: false,
+                },
+                rights: {
+                    [testId]: {
+                        user: { [userEmail]: { write: false } },
+                    },
+                },
+            });
+        });
+
+        it('can push node with write right for other user', async () => {
+            expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 200);
+        });
+        it('cannot push other node without write right for other user', async () => {
+            expect(pushResult).toHaveProperty(['nodes', `${testId}-other`, 'statusCode'], 403);
+        });
+        it('pulls updated node', async () => {
+            expect(graph).toHaveProperty(['nodes', testId, 'prop'], 'value2');
+        });
+        it('keeps the other node unchanged', async () => {
+            expect(graph).toHaveProperty(['nodes', `${testId}-other`, 'prop'], 'value1');
+        });
+    });
 });
 
 describe('big node', () => {
