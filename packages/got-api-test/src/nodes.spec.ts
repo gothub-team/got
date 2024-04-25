@@ -2,7 +2,7 @@ import { describe, beforeAll, beforeEach, afterEach, it, expect } from 'bun:test
 import { env } from '../env';
 import { createApi } from '@gothub/got-api';
 import crypto from 'crypto';
-import type { Graph, PushResult } from '@gothub-team/got-core';
+import type { Graph, Node, PushResult } from '@gothub-team/got-core';
 
 let adminApi: ReturnType<typeof createApi>;
 beforeAll(async () => {
@@ -39,7 +39,7 @@ afterEach(async () => {
     await adminApi.deleteUser({ email: userEmail });
 });
 
-describe('nodes', () => {
+describe('new nodes', () => {
     let pushResult: PushResult;
     let graph: Graph;
     beforeEach(async () => {
@@ -178,6 +178,92 @@ describe('nodes', () => {
         });
         it('returns no node', async () => {
             expect(graph).toEqual({});
+        });
+    });
+});
+
+describe('new big node', () => {
+    let pushResult: PushResult;
+    let graph: Graph;
+    let node: Node;
+    beforeEach(async () => {
+        node = {
+            id: testId,
+            amount: 'gjhjhhgffgh',
+            invoiceNumber: 123456,
+            paid: false,
+            date: 'Tue Jan 24 2023 18:56:13 GMT+0100 (Central European Standard Time)',
+            info: {
+                sender: 'Albert',
+                recipient: 'adfgr sdfesf',
+                companyInfo: 'Albertabcqweqwe\n12345 Musterstadt',
+                textTop: 'some text top',
+                textBottom: 'some text bottom',
+                footer: [
+                    'Bankverbindung: aBank IBAN: AL1234512345 BIC:1234512345',
+                    'Tel.: 12345 Fax.: 1234512345 Mail: albert@mail.de',
+                    'Amtsgericht: aGericht Geschäftsführer: undefined Steuernummer: 1234512345',
+                ],
+            },
+            invoice: {
+                contractTimePeriod: '01.10.2020 - 31.12.2020',
+                rentTimePeriod: '01.10.2020 - 31.12.2020',
+                days: '92',
+                invoiceDate: '07.04.2021',
+                invoiceNumber: '2019-01-01-001',
+                invoiceLocation: 'Musterstadt',
+                object: 'Wohnung Erdgeschoss links',
+                tenant: 'adfgr sdfesf',
+            },
+            positions: [
+                {
+                    name: 'Tag Strom',
+                    amount: '313 kWh',
+                    unitPrice: '23.23 Rp./kWh',
+                    totalPrice: '72.74 CHF',
+                },
+                {
+                    name: 'Nacht Strom',
+                    amount: '383 kWh',
+                    unitPrice: '24.66 Rp./kWh',
+                    totalPrice: '94.50 CHF',
+                },
+                {
+                    name: 'Grundpreis',
+                    amount: '92/365',
+                    unitPrice: '50 CHF/Jahr',
+                    totalPrice: '12.65 CHF',
+                },
+            ],
+            sums: {
+                net: '1000 CHF',
+                vat: '190 CHF',
+                gross: 'gjhjhhgffgh',
+            },
+        };
+        pushResult = await api.push({
+            nodes: {
+                [testId]: node,
+            },
+        });
+        graph = await api.pull({
+            [testId]: {
+                include: { node: true },
+            },
+        });
+    });
+    afterEach(async () => {
+        await adminApi.push({ nodes: { [testId]: false } });
+    });
+
+    it('pushes a new big node', async () => {
+        expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 200);
+    });
+    it('pulls the same node', async () => {
+        expect(graph).toEqual({
+            nodes: {
+                [testId]: node,
+            },
         });
     });
 });
