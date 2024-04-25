@@ -14,7 +14,7 @@ let api: GotApi;
 let userEmail: string;
 beforeEach(async () => {
     testId = `test-${crypto.randomBytes(8).toString('hex')}`;
-    userEmail = `aws+api.test${testId}@gothub.io`;
+    userEmail = `aws+${testId}@gothub.io`;
     api = await createNewUserApi(adminApi, userEmail);
 });
 afterEach(async () => {
@@ -44,18 +44,20 @@ describe('nodes', () => {
         await adminApi.push({ nodes: { [testId]: false } });
     });
 
-    it('pushes one node', async () => {
-        expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 200);
-    });
-    it('pulls the same node', async () => {
-        expect(graph).toEqual({
-            nodes: {
-                [testId]: {
-                    id: testId,
-                    name: 'Test Node',
-                    prop: 'value1',
+    describe('one node', () => {
+        it('pushes one node', async () => {
+            expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 200);
+        });
+        it('pulls the same node', async () => {
+            expect(graph).toEqual({
+                nodes: {
+                    [testId]: {
+                        id: testId,
+                        name: 'Test Node',
+                        prop: 'value1',
+                    },
                 },
-            },
+            });
         });
     });
 
@@ -216,32 +218,28 @@ describe('nodes', () => {
 
     describe('read rights', () => {
         let otherUserApi: GotApi;
+        let otherUserEmail: string;
         beforeEach(async () => {
-            otherUserApi = await createNewUserApi(adminApi, `aws+api.test-other${testId}@gothub.io`);
-            await otherUserApi.push({
+            otherUserEmail = `aws+${testId}-other@gothub.io`;
+            otherUserApi = await createNewUserApi(adminApi, otherUserEmail);
+            await api.push({
                 nodes: {
-                    [testId]: {
-                        id: testId,
-                        name: 'Test Node',
-                        prop: 'value1',
-                    },
-                    [`other-${testId}`]: {
-                        id: `other-${testId}`,
-                        name: 'Other Node',
+                    [`${testId}-other`]: {
+                        id: `${testId}-other`,
                         prop: 'value1',
                     },
                 },
                 rights: {
                     [testId]: {
-                        user: { [userEmail]: { read: true } },
+                        user: { [otherUserEmail]: { read: true } },
                     },
                 },
             });
-            graph = await api.pull({
+            graph = await otherUserApi.pull({
                 [testId]: {
                     include: { node: true },
                 },
-                [`other-${testId}`]: {
+                [`${testId}-other`]: {
                     include: { node: true },
                 },
             });
@@ -250,7 +248,7 @@ describe('nodes', () => {
             await adminApi.push({
                 nodes: {
                     [testId]: false,
-                    [`other-${testId}`]: false,
+                    [`${testId}-other`]: false,
                 },
                 rights: {
                     [testId]: {
@@ -264,7 +262,7 @@ describe('nodes', () => {
             expect(graph).toHaveProperty(['nodes', testId, 'id'], testId);
         });
         it('cannot pull other node without read right', async () => {
-            expect(graph).not.toHaveProperty(['nodes', `other-${testId}`]);
+            expect(graph).not.toHaveProperty(['nodes', `${testId}-other`]);
         });
     });
 });
