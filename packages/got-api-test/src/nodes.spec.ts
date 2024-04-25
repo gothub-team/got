@@ -1,5 +1,5 @@
 import { describe, beforeAll, beforeEach, afterEach, it, expect } from 'bun:test';
-import { createApi } from '@gothub/got-api';
+import { createApi, type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import type { Graph, Node, PushResult } from '@gothub-team/got-core';
 import { createAdminApi, createNewUserApi } from './shared';
@@ -10,7 +10,7 @@ beforeAll(async () => {
 });
 
 let testId: string;
-let api: ReturnType<typeof createApi>;
+let api: GotApi;
 let userEmail: string;
 beforeEach(async () => {
     testId = `test-${crypto.randomBytes(8).toString('hex')}`;
@@ -211,6 +211,47 @@ describe('nodes', () => {
         });
         it('returns no node', async () => {
             expect(graph).toEqual({});
+        });
+    });
+
+    describe('read rights', () => {
+        let otherUserApi: GotApi;
+        beforeEach(async () => {
+            otherUserApi = await createNewUserApi(adminApi, `aws+api.test-other${testId}@gothub.io`);
+            await otherUserApi.push({
+                nodes: {
+                    [testId]: {
+                        id: testId,
+                        name: 'Test Node',
+                        prop: 'value1',
+                    },
+                    [`other-${testId}`]: {
+                        id: `other-${testId}`,
+                        name: 'Other Node',
+                        prop: 'value1',
+                    },
+                },
+                rights: {
+                    [testId]: {
+                        user: { [userEmail]: { read: true, write: false, admin: false } },
+                    },
+                },
+            });
+            graph = await api.pull({
+                [testId]: {
+                    include: { node: true },
+                },
+                [`other-${testId}`]: {
+                    include: { node: true },
+                },
+            });
+        });
+
+        it('can pull node with read right', async () => {
+            expect(graph).toHaveProperty(['nodes', testId, 'id'], testId);
+        });
+        it('cannot pull other node without read right', async () => {
+            expect(graph).not.toHaveProperty(['nodes', `other-${testId}`]);
         });
     });
 });
