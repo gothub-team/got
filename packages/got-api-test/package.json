@@ -2,7 +2,8 @@
     "name": "@gothub/got-api-test",
     "type": "module",
     "scripts": {
-        "lint": "eslint ."
+        "lint": "eslint .",
+        "test": "bun test --timeout 15000"
     },
     "devDependencies": {
         "@gothub/typescript-util": "workspace:*",

@@ -39,7 +39,7 @@ afterEach(async () => {
     await adminApi.deleteUser({ email: userEmail });
 });
 
-describe('new nodes', () => {
+describe('nodes', () => {
     let pushResult: PushResult;
     let graph: Graph;
     beforeEach(async () => {
@@ -156,6 +156,28 @@ describe('new nodes', () => {
                     },
                 },
             });
+        });
+    });
+
+    describe('delete node', () => {
+        beforeEach(async () => {
+            pushResult = await api.push({
+                nodes: {
+                    [testId]: false,
+                },
+            });
+            graph = await api.pull({
+                [testId]: {
+                    include: { node: true },
+                },
+            });
+        });
+
+        it('pushes node in delete mode', async () => {
+            expect(pushResult).toEqual({ nodes: { [testId]: { statusCode: 200 } } });
+        });
+        it('returns no node', async () => {
+            expect(graph).toEqual({});
         });
     });
 });
