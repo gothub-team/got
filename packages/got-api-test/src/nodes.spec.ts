@@ -39,7 +39,7 @@ afterEach(async () => {
     await adminApi.deleteUser({ email: userEmail });
 });
 
-describe('new nodes', () => {
+describe('nodes', () => {
     let pushResult: PushResult;
     let graph: Graph;
     beforeEach(async () => {
@@ -233,7 +233,7 @@ describe('new nodes', () => {
     });
 });
 
-describe('new big node', () => {
+describe('big node', () => {
     let pushResult: PushResult;
     let graph: Graph;
     let node: Node;
