@@ -178,6 +178,34 @@ describe('new nodes', () => {
                 expect(graph).toHaveProperty(['nodes', testId, 'prop'], 'value2');
             });
         });
+
+        describe('delete prop', () => {
+            beforeEach(async () => {
+                pushResult = await api.push({
+                    nodes: {
+                        [testId]: {
+                            id: testId,
+                            prop: null,
+                        },
+                    },
+                });
+                graph = await api.pull({
+                    [testId]: {
+                        include: { node: true },
+                    },
+                });
+            });
+
+            it('pushes updated node with deleted prop', async () => {
+                expect(pushResult).toEqual({ nodes: { [testId]: { statusCode: 200 } } });
+            });
+            it('updated node without prop', async () => {
+                expect(graph).not.toHaveProperty(['nodes', testId, 'prop']);
+            });
+            it('keeps the other props', async () => {
+                expect(graph).toHaveProperty(['nodes', testId, 'name'], 'Test Node');
+            });
+        });
     });
 
     describe('delete node', () => {
