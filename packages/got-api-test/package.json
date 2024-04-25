@@ -6,13 +6,13 @@
         "test": "bun test --timeout 30000"
     },
     "devDependencies": {
+        "@gothub-team/got-core": "^0.24.2",
         "@gothub/typescript-util": "workspace:*",
         "@gothub/got-api": "workspace:*",
         "@types/aws-lambda": "8.10.137",
         "@types/bun": "^1.1.0"
     },
     "peerDependencies": {
-        "@gothub-team/got-core": "^0.24.1",
         "typescript": "^5.0.0"
     },
     "dependencies": {
