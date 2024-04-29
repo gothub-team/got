@@ -1,31 +1,35 @@
-import { describe, beforeAll, beforeEach, afterEach, it, expect } from 'bun:test';
+import { describe, beforeAll, afterAll, beforeEach, afterEach, it, expect } from 'bun:test';
 import { createApi, type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import type { Graph, Node, PushResult } from '@gothub-team/got-core';
 import { createAdminApi, createNewUserApi } from './shared';
 
 let adminApi: ReturnType<typeof createApi>;
+let testId: string;
+let user1Api: GotApi;
+let user1Email: string;
+let user2Api: GotApi;
+let user2Email: string;
 beforeAll(async () => {
     adminApi = await createAdminApi();
+    user1Email = `aws+test-user-1@gothub.io`;
+    user1Api = await createNewUserApi(adminApi, user1Email);
+    user2Email = `aws+test-user-2@gothub.io`;
+    user2Api = await createNewUserApi(adminApi, user2Email);
 });
-
-let testId: string;
-let api: GotApi;
-let userEmail: string;
 beforeEach(async () => {
     testId = `test-${crypto.randomBytes(8).toString('hex')}`;
-    userEmail = `aws+${testId}@gothub.io`;
-    api = await createNewUserApi(adminApi, userEmail);
 });
-afterEach(async () => {
-    await adminApi.deleteUser({ email: userEmail });
+afterAll(async () => {
+    await adminApi.deleteUser({ email: user1Email });
+    await adminApi.deleteUser({ email: user2Email });
 });
 
 describe('nodes', () => {
     let pushResult: PushResult;
     let graph: Graph;
     beforeEach(async () => {
-        pushResult = await api.push({
+        pushResult = await user1Api.push({
             nodes: {
                 [testId]: {
                     id: testId,
@@ -34,7 +38,7 @@ describe('nodes', () => {
                 },
             },
         });
-        graph = await api.pull({
+        graph = await user1Api.pull({
             [testId]: {
                 include: { node: true },
             },
@@ -63,7 +67,7 @@ describe('nodes', () => {
 
     describe('two more nodes', () => {
         beforeEach(async () => {
-            pushResult = await api.push({
+            pushResult = await user1Api.push({
                 nodes: {
                     [`${testId}-1`]: {
                         id: `${testId}-1`,
@@ -77,7 +81,7 @@ describe('nodes', () => {
                     },
                 },
             });
-            graph = await api.pull({
+            graph = await user1Api.pull({
                 [testId]: {
                     include: { node: true },
                 },
@@ -112,7 +116,7 @@ describe('nodes', () => {
     describe('update node', () => {
         describe('with old prop', () => {
             beforeEach(async () => {
-                pushResult = await api.push({
+                pushResult = await user1Api.push({
                     nodes: {
                         [testId]: {
                             id: testId,
@@ -121,7 +125,7 @@ describe('nodes', () => {
                         },
                     },
                 });
-                graph = await api.pull({
+                graph = await user1Api.pull({
                     [testId]: {
                         include: { node: true },
                     },
@@ -138,7 +142,7 @@ describe('nodes', () => {
 
         describe('with new prop', () => {
             beforeEach(async () => {
-                pushResult = await api.push({
+                pushResult = await user1Api.push({
                     nodes: {
                         [testId]: {
                             id: testId,
@@ -146,7 +150,7 @@ describe('nodes', () => {
                         },
                     },
                 });
-                graph = await api.pull({
+                graph = await user1Api.pull({
                     [testId]: {
                         include: { node: true },
                     },
@@ -167,7 +171,7 @@ describe('nodes', () => {
 
         describe('delete prop', () => {
             beforeEach(async () => {
-                pushResult = await api.push({
+                pushResult = await user1Api.push({
                     nodes: {
                         [testId]: {
                             id: testId,
@@ -175,7 +179,7 @@ describe('nodes', () => {
                         },
                     },
                 });
-                graph = await api.pull({
+                graph = await user1Api.pull({
                     [testId]: {
                         include: { node: true },
                     },
@@ -196,12 +200,12 @@ describe('nodes', () => {
 
     describe('delete node', () => {
         beforeEach(async () => {
-            pushResult = await api.push({
+            pushResult = await user1Api.push({
                 nodes: {
                     [testId]: false,
                 },
             });
-            graph = await api.pull({
+            graph = await user1Api.pull({
                 [testId]: {
                     include: { node: true },
                 },
@@ -217,12 +221,8 @@ describe('nodes', () => {
     });
 
     describe('read rights', () => {
-        let otherUserApi: GotApi;
-        let otherUserEmail: string;
         beforeEach(async () => {
-            otherUserEmail = `aws+${testId}-other@gothub.io`;
-            otherUserApi = await createNewUserApi(adminApi, otherUserEmail);
-            await api.push({
+            await user1Api.push({
                 nodes: {
                     [`${testId}-other`]: {
                         id: `${testId}-other`,
@@ -231,11 +231,11 @@ describe('nodes', () => {
                 },
                 rights: {
                     [testId]: {
-                        user: { [otherUserEmail]: { read: true } },
+                        user: { [user2Email]: { read: true } },
                     },
                 },
             });
-            graph = await otherUserApi.pull({
+            graph = await user2Api.pull({
                 [testId]: {
                     include: { node: true },
                 },
@@ -252,7 +252,7 @@ describe('nodes', () => {
                 },
                 rights: {
                     [testId]: {
-                        user: { [userEmail]: { read: false } },
+                        user: { [user1Email]: { read: false } },
                     },
                 },
             });
@@ -267,12 +267,8 @@ describe('nodes', () => {
     });
 
     describe('write rights', () => {
-        let otherUserApi: GotApi;
-        let otherUserEmail: string;
         beforeEach(async () => {
-            otherUserEmail = `aws+${testId}-other@gothub.io`;
-            otherUserApi = await createNewUserApi(adminApi, otherUserEmail);
-            await api.push({
+            await user1Api.push({
                 nodes: {
                     [`${testId}-other`]: {
                         id: `${testId}-other`,
@@ -281,11 +277,11 @@ describe('nodes', () => {
                 },
                 rights: {
                     [testId]: {
-                        user: { [otherUserEmail]: { write: true } },
+                        user: { [user2Email]: { write: true } },
                     },
                 },
             });
-            pushResult = await otherUserApi.push({
+            pushResult = await user2Api.push({
                 nodes: {
                     [testId]: {
                         id: testId,
@@ -297,7 +293,7 @@ describe('nodes', () => {
                     },
                 },
             });
-            graph = await api.pull({
+            graph = await user1Api.pull({
                 [testId]: {
                     include: { node: true },
                 },
@@ -314,7 +310,7 @@ describe('nodes', () => {
                 },
                 rights: {
                     [testId]: {
-                        user: { [userEmail]: { write: false } },
+                        user: { [user1Email]: { write: false } },
                     },
                 },
             });
@@ -394,12 +390,12 @@ describe('big node', () => {
                 gross: 'gjhjhhgffgh',
             },
         };
-        pushResult = await api.push({
+        pushResult = await user1Api.push({
             nodes: {
                 [testId]: node,
             },
         });
-        graph = await api.pull({
+        graph = await user1Api.pull({
             [testId]: {
                 include: { node: true },
             },
