@@ -1,0 +1,86 @@
+import { describe, beforeAll, afterAll, beforeEach, afterEach, it, expect } from 'bun:test';
+import { createApi, type GotApi } from '@gothub/got-api';
+import crypto from 'crypto';
+import type { Graph, PushResult } from '@gothub-team/got-core';
+import { createAdminApi, createNewUserApi } from './shared';
+import { env } from '../env';
+
+let adminApi: ReturnType<typeof createApi>;
+let testId: string;
+let user1Api: GotApi;
+let user1Email: string;
+// let user2Api: GotApi;
+// let user2Email: string;
+beforeAll(async () => {
+    adminApi = await createAdminApi();
+    user1Email = env.TEST_USER_1_EMAIL;
+    user1Api = await createNewUserApi(adminApi, user1Email);
+    // user2Email = env.TEST_USER_2_EMAIL;
+    // user2Api = await createNewUserApi(adminApi, user2Email);
+});
+beforeEach(async () => {
+    testId = `test-${crypto.randomBytes(8).toString('hex')}`;
+});
+afterAll(async () => {
+    await adminApi.deleteUser({ email: user1Email });
+    // await adminApi.deleteUser({ email: user2Email });
+});
+
+describe('edges', () => {
+    let pushResult: PushResult;
+    let graph: Graph;
+    beforeEach(async () => {
+        pushResult = await user1Api.push({
+            nodes: {
+                [`${testId}-1`]: {
+                    id: `${testId}-1`,
+                },
+                [`${testId}-2`]: {
+                    id: `${testId}-2`,
+                },
+            },
+            edges: {
+                from: {
+                    [`${testId}-1`]: {
+                        to: { [`${testId}-2`]: true },
+                    },
+                },
+            },
+        });
+        graph = await user1Api.pull({
+            [`${testId}-1`]: {
+                edges: {
+                    'from/to': {
+                        include: {
+                            edges: true,
+                        },
+                    },
+                },
+            },
+        });
+    });
+    afterEach(async () => {
+        await adminApi.push({
+            nodes: {
+                [`${testId}-1`]: false,
+                [`${testId}-2`]: false,
+            },
+            edges: {
+                from: {
+                    [`${testId}-1`]: {
+                        to: { [`${testId}-2`]: false },
+                    },
+                },
+            },
+        });
+    });
+
+    describe('one edge', () => {
+        it('pushes the edge', () => {
+            expect(pushResult).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`, 'statusCode'], 200);
+        });
+        it('pulls the edge', () => {
+            expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
+        });
+    });
+});
