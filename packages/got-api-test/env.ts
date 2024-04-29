@@ -43,6 +43,8 @@ export const envSchema = z.object({
     USER_POOL_ID: z.string(),
     TEST_ADMIN_USER_EMAIL: z.string(),
     TEST_ADMIN_PW: z.string().optional(),
+    TEST_USER_1_EMAIL: z.string(),
+    TEST_USER_2_EMAIL: z.string(),
 });
 
 export const env = envSchema.parse(process.env);

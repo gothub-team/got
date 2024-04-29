@@ -3,6 +3,7 @@ import { createApi, type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import type { Graph, Node, PushResult } from '@gothub-team/got-core';
 import { createAdminApi, createNewUserApi } from './shared';
+import { env } from '../env';
 
 let adminApi: ReturnType<typeof createApi>;
 let testId: string;
@@ -12,9 +13,9 @@ let user2Api: GotApi;
 let user2Email: string;
 beforeAll(async () => {
     adminApi = await createAdminApi();
-    user1Email = `aws+test-user-1@gothub.io`;
+    user1Email = env.TEST_USER_1_EMAIL;
     user1Api = await createNewUserApi(adminApi, user1Email);
-    user2Email = `aws+test-user-2@gothub.io`;
+    user2Email = env.TEST_USER_2_EMAIL;
     user2Api = await createNewUserApi(adminApi, user2Email);
 });
 beforeEach(async () => {
