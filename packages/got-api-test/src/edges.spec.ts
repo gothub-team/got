@@ -141,7 +141,7 @@ describe('edges', () => {
             expect(pushResult).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`, 'statusCode'], 200);
             expect(pushResult).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-4`, 'statusCode'], 200);
         });
-        it('pulls the edges', () => {
+        it('pulls the new edges and the old edge', () => {
             expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
             expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`], true);
             expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-4`], true);
