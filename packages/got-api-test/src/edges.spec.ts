@@ -137,14 +137,66 @@ describe('edges', () => {
             });
         });
 
-        it('pushes the edges', () => {
-            expect(pushResult).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`, 'statusCode'], 200);
-            expect(pushResult).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-4`, 'statusCode'], 200);
+        describe('push and pull', () => {
+            it('pushes the edges', () => {
+                expect(pushResult).toHaveProperty(
+                    ['edges', 'from', `${testId}-1`, 'to', `${testId}-3`, 'statusCode'],
+                    200,
+                );
+                expect(pushResult).toHaveProperty(
+                    ['edges', 'from', `${testId}-1`, 'to', `${testId}-4`, 'statusCode'],
+                    200,
+                );
+            });
+            it('pulls the new edges and the old edge', () => {
+                expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
+                expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`], true);
+                expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-4`], true);
+            });
         });
-        it('pulls the new edges and the old edge', () => {
-            expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
-            expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`], true);
-            expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-4`], true);
+
+        describe('delete edges', () => {
+            beforeEach(async () => {
+                pushResult = await user1Api.push({
+                    edges: {
+                        from: {
+                            [`${testId}-1`]: {
+                                to: {
+                                    [`${testId}-2`]: false,
+                                    [`${testId}-4`]: false,
+                                },
+                            },
+                        },
+                    },
+                });
+                graph = await user1Api.pull({
+                    [`${testId}-1`]: {
+                        edges: {
+                            'from/to': {
+                                include: {
+                                    edges: true,
+                                },
+                            },
+                        },
+                    },
+                });
+            });
+
+            it('pushes the edges in delete mode', () => {
+                expect(pushResult).toHaveProperty(
+                    ['edges', 'from', `${testId}-1`, 'to', `${testId}-2`, 'statusCode'],
+                    200,
+                );
+                expect(pushResult).toHaveProperty(
+                    ['edges', 'from', `${testId}-1`, 'to', `${testId}-4`, 'statusCode'],
+                    200,
+                );
+            });
+            it('pulls the only left edge', () => {
+                expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`], true);
+                expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`]);
+                expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-4`]);
+            });
         });
     });
 });
