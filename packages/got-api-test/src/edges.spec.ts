@@ -83,4 +83,68 @@ describe('edges', () => {
             expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
         });
     });
+
+    describe('two more edges', () => {
+        beforeEach(async () => {
+            pushResult = await user1Api.push({
+                nodes: {
+                    [`${testId}-3`]: {
+                        id: `${testId}-3`,
+                    },
+                    [`${testId}-4`]: {
+                        id: `${testId}-4`,
+                    },
+                },
+                edges: {
+                    from: {
+                        [`${testId}-1`]: {
+                            to: {
+                                [`${testId}-3`]: true,
+                                [`${testId}-4`]: true,
+                            },
+                        },
+                    },
+                },
+            });
+            graph = await user1Api.pull({
+                [`${testId}-1`]: {
+                    edges: {
+                        'from/to': {
+                            include: {
+                                edges: true,
+                            },
+                        },
+                    },
+                },
+            });
+        });
+        afterEach(async () => {
+            await adminApi.push({
+                nodes: {
+                    [`${testId}-3`]: false,
+                    [`${testId}-4`]: false,
+                },
+                edges: {
+                    from: {
+                        [`${testId}-1`]: {
+                            to: {
+                                [`${testId}-3`]: false,
+                                [`${testId}-4`]: false,
+                            },
+                        },
+                    },
+                },
+            });
+        });
+
+        it('pushes the edges', () => {
+            expect(pushResult).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`, 'statusCode'], 200);
+            expect(pushResult).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-4`, 'statusCode'], 200);
+        });
+        it('pulls the edges', () => {
+            expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
+            expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`], true);
+            expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-4`], true);
+        });
+    });
 });
