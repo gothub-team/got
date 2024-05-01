@@ -331,6 +331,33 @@ describe('nodes', () => {
                 expect(graph).toHaveProperty(['nodes', `${testId}-other`, 'prop'], 'value1');
             });
         });
+
+        describe('delete node', () => {
+            beforeEach(async () => {
+                pushResult = await user2Api.push({
+                    nodes: {
+                        [testId]: false,
+                        [`${testId}-other`]: false,
+                    },
+                });
+                graph = await user1Api.pull({
+                    [testId]: {
+                        include: { node: true },
+                    },
+                    [`${testId}-other`]: {
+                        include: { node: true },
+                    },
+                });
+            });
+
+            it('pushes node in delete mode', async () => {
+                expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 200);
+            });
+            it('returns no node', async () => {
+                expect(graph).not.toHaveProperty(['nodes', testId]);
+                expect(graph).toHaveProperty(['nodes', `${testId}-other`, 'id'], `${testId}-other`);
+            });
+        });
     });
 });
 
