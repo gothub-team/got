@@ -9,21 +9,21 @@ let adminApi: ReturnType<typeof createApi>;
 let testId: string;
 let user1Api: GotApi;
 let user1Email: string;
-// let user2Api: GotApi;
-// let user2Email: string;
+let user2Api: GotApi;
+let user2Email: string;
 beforeAll(async () => {
     adminApi = await createAdminApi();
     user1Email = env.TEST_USER_1_EMAIL;
     user1Api = await createNewUserApi(adminApi, user1Email);
-    // user2Email = env.TEST_USER_2_EMAIL;
-    // user2Api = await createNewUserApi(adminApi, user2Email);
+    user2Email = env.TEST_USER_2_EMAIL;
+    user2Api = await createNewUserApi(adminApi, user2Email);
 });
 beforeEach(async () => {
     testId = `test-${crypto.randomBytes(8).toString('hex')}`;
 });
 afterAll(async () => {
     await adminApi.deleteUser({ email: user1Email });
-    // await adminApi.deleteUser({ email: user2Email });
+    await adminApi.deleteUser({ email: user2Email });
 });
 
 describe('edges', () => {
@@ -276,6 +276,99 @@ describe('edges', () => {
             expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
             expect(graph).toHaveProperty(['edges', 'from', `${testId}-2`, 'to', `${testId}-3`], true);
             expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-3`, 'to', `${testId}-4`]);
+        });
+    });
+
+    describe('write rights', () => {
+        beforeEach(async () => {
+            await user1Api.push({
+                nodes: {
+                    [`${testId}-3`]: {
+                        id: `${testId}-3`,
+                    },
+                },
+                rights: {
+                    [`${testId}-1`]: {
+                        user: {
+                            [user2Email]: {
+                                write: true,
+                            },
+                        },
+                    },
+                    [`${testId}-2`]: {
+                        user: {
+                            [user2Email]: {
+                                write: true,
+                            },
+                        },
+                    },
+                },
+            });
+            pushResult = await user2Api.push({
+                edges: {
+                    from: {
+                        [`${testId}-1`]: {
+                            to: {
+                                [`${testId}-2`]: true,
+                                [`${testId}-3`]: true,
+                            },
+                        },
+                    },
+                },
+            });
+            graph = await user1Api.pull({
+                [`${testId}-1`]: {
+                    edges: {
+                        'from/to': {
+                            include: {
+                                edges: true,
+                            },
+                        },
+                    },
+                },
+            });
+        });
+        afterEach(async () => {
+            await adminApi.push({
+                nodes: {
+                    [`${testId}-3`]: false,
+                },
+                edges: {
+                    from: {
+                        [`${testId}-1`]: {
+                            to: {
+                                [`${testId}-2`]: false,
+                                [`${testId}-3`]: false,
+                            },
+                        },
+                    },
+                },
+                rights: {
+                    [`${testId}-1`]: {
+                        user: {
+                            [user2Email]: {
+                                write: false,
+                            },
+                        },
+                    },
+                    [`${testId}-2`]: {
+                        user: {
+                            [user2Email]: {
+                                write: false,
+                            },
+                        },
+                    },
+                },
+            });
+        });
+
+        it('pushes the edge where for both nodes are write rights', () => {
+            expect(pushResult).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`, 'statusCode'], 200);
+            expect(pushResult).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`, 'statusCode'], 403);
+        });
+        it('pulls only the edge that was pushed', () => {
+            expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
+            expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`]);
         });
     });
 });
