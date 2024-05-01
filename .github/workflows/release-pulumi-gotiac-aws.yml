@@ -2,7 +2,7 @@ name: release-pulumi-gotiac-aws
 on:
     push:
         tags:
-            - v*.*.*
+            - \@pulumi/gotiac/v*.*.*
             - '!v*.*.*-**'
 env:
     # THIS GITHUB_TOKEN IS A REQUIREMENT TO BE ABLE TO WRITE TO GH RELEASES
