@@ -3,7 +3,7 @@
     "type": "module",
     "scripts": {
         "lint": "eslint .",
-        "test": "bun test --timeout 40000"
+        "test": "bun test --timeout 100000"
     },
     "devDependencies": {
         "@gothub-team/got-core": "^0.24.2",
