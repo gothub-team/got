@@ -356,6 +356,13 @@ describe('edges', () => {
                             },
                         },
                     },
+                    [`${testId}-3`]: {
+                        user: {
+                            [user2Email]: {
+                                read: false,
+                            },
+                        },
+                    },
                 },
             });
         });
@@ -365,6 +372,76 @@ describe('edges', () => {
                 expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
             });
             it('cannot pull the edge with read rights missing at one end', () => {
+                expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`]);
+            });
+        });
+
+        describe('non-existing to-node', () => {
+            beforeEach(async () => {
+                await user1Api.push({
+                    nodes: {
+                        [`${testId}-3`]: false,
+                    },
+                    rights: {
+                        [`${testId}-3`]: {
+                            user: {
+                                [user2Email]: {
+                                    read: true,
+                                },
+                            },
+                        },
+                    },
+                });
+                graph = await user2Api.pull({
+                    [`${testId}-1`]: {
+                        edges: {
+                            'from/to': {
+                                include: {
+                                    edges: true,
+                                },
+                            },
+                        },
+                    },
+                });
+            });
+
+            it('does only pull the edge with two existing nodes', () => {
+                expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
+                expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`]);
+            });
+        });
+
+        describe('non-existing from-node', () => {
+            beforeEach(async () => {
+                await user1Api.push({
+                    nodes: {
+                        [`${testId}-1`]: false,
+                    },
+                    rights: {
+                        [`${testId}-3`]: {
+                            user: {
+                                [user2Email]: {
+                                    read: true,
+                                },
+                            },
+                        },
+                    },
+                });
+                graph = await user2Api.pull({
+                    [`${testId}-1`]: {
+                        edges: {
+                            'from/to': {
+                                include: {
+                                    edges: true,
+                                },
+                            },
+                        },
+                    },
+                });
+            });
+
+            it('does not pull the edge', () => {
+                expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`]);
                 expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`]);
             });
         });
