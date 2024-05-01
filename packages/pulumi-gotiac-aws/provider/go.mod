@@ -1,4 +1,4 @@
-module github.com/gothub-team/got/tree/main/packages/pulumi-gotiac-aws/provider
+module github.com/gothub-team/got/packages/pulumi-gotiac-aws/provider
 
 go 1.21
 

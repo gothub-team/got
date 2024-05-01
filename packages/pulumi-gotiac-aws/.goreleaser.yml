@@ -18,7 +18,7 @@ builds:
           - linux
       ldflags:
           # The line below MUST align with the module in current provider/go.mod
-          - -X github.com/gothub-team/got/packages/pulumi-gotiac-aws/provider/pkg/version.Version={{.Tag }}
+          - -X github.com/gothub-team/got/packages/pulumi-gotiac-aws/provider.Version={{.Tag }}
       main: ./cmd/pulumi-resource-gotiac/
 changelog:
     skip: true
