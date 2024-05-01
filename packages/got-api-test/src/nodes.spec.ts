@@ -317,17 +317,19 @@ describe('nodes', () => {
             });
         });
 
-        it('can push node with write right for other user', async () => {
-            expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 200);
-        });
-        it('cannot push other node without write right for other user', async () => {
-            expect(pushResult).toHaveProperty(['nodes', `${testId}-other`, 'statusCode'], 403);
-        });
-        it('pulls updated node', async () => {
-            expect(graph).toHaveProperty(['nodes', testId, 'prop'], 'value2');
-        });
-        it('keeps the other node unchanged', async () => {
-            expect(graph).toHaveProperty(['nodes', `${testId}-other`, 'prop'], 'value1');
+        describe('push and pull', () => {
+            it('can push node with write right for other user', async () => {
+                expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 200);
+            });
+            it('cannot push other node without write right for other user', async () => {
+                expect(pushResult).toHaveProperty(['nodes', `${testId}-other`, 'statusCode'], 403);
+            });
+            it('pulls updated node', async () => {
+                expect(graph).toHaveProperty(['nodes', testId, 'prop'], 'value2');
+            });
+            it('keeps the other node unchanged', async () => {
+                expect(graph).toHaveProperty(['nodes', `${testId}-other`, 'prop'], 'value1');
+            });
         });
     });
 });
