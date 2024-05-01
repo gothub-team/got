@@ -267,6 +267,36 @@ describe('nodes', () => {
                 expect(graph).not.toHaveProperty(['nodes', `${testId}-other`]);
             });
         });
+
+        describe('non-existing node but read right', () => {
+            beforeEach(async () => {
+                await user1Api.push({
+                    rights: {
+                        [testId]: {
+                            user: { [user2Email]: { read: true } },
+                        },
+                    },
+                });
+                graph = await user2Api.pull({
+                    [`${testId}-non-existing`]: {
+                        include: { node: true },
+                    },
+                });
+            });
+            afterEach(async () => {
+                await adminApi.push({
+                    rights: {
+                        [testId]: {
+                            user: { [user2Email]: { read: false } },
+                        },
+                    },
+                });
+            });
+
+            it('returns no node', async () => {
+                expect(graph).toEqual({});
+            });
+        });
     });
 
     describe('write rights', () => {
