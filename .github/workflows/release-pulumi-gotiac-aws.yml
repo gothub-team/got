@@ -49,6 +49,7 @@ jobs:
             - name: Run GoReleaser
               uses: goreleaser/goreleaser-action@v2
               with:
+                  workdir: packages/pulumi-gotiac-aws
                   args: -p 3 release --rm-dist
                   version: latest
         strategy:
