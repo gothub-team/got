@@ -1,8 +1,3 @@
-// no ramda
-// efficient and readable
-// no curry
-// no 'use'
-
 type Subscriber<TEvent> = {
     next?: (e: TEvent) => void;
     complete?: (e: TEvent) => void;
