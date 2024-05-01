@@ -1,0 +1,6 @@
+{
+    "extends": "@gothub/typescript-util/tsconfig-front.json",
+    "include": [
+        "**/*.ts"
+    ]
+}
