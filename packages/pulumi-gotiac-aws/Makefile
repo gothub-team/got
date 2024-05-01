@@ -1,4 +1,4 @@
-VERSION         := 0.0.6
+VERSION         := 0.0.7
 
 PACK            := gotiac
 PROJECT         := github.com/pulumi/pulumi-${PACK}
