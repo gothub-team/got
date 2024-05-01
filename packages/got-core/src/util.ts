@@ -14,6 +14,9 @@ type Observable<TEvent> = {
     unsubscribe: (sub: Subscriber<TEvent>) => void;
 };
 
+/**
+ * Collects all Subscribers and handles calling of their handlers when handlers of the returned subscriber are invoked.
+ */
 export const createSubscribable = <TEvent>() => {
     let subscribers: Subscriber<TEvent>[] = [];
     const subscribe = (sub: Subscriber<TEvent> | ((e: TEvent) => void)) => {
@@ -60,6 +63,12 @@ export const createSubscribable = <TEvent>() => {
     return { subscribe, unsubscribe, subscriber: { next, complete, error } };
 };
 
+/**
+ * Creates a promise that will resolve when a complete event is recieved or rejects when an error event is recieved
+ * from the input observable.
+ *
+ * @returns an array of recieved events.
+ */
 export const toPromise = <TEvent>(observable: Observable<TEvent>) =>
     new Promise((resolve, reject) => {
         let results: TEvent[] = [];
@@ -76,7 +85,10 @@ export const toPromise = <TEvent>(observable: Observable<TEvent>) =>
         });
     });
 
-export const mergeGraphObjRight = (left, right) => {
+/**
+ * Merges two objects with props of the right input taking priority over those of the left.
+ */
+export const mergeGraphObjRight = <TGraphObj>(left: TGraphObj, right: TGraphObj) => {
     // right does not overwrite
     if (right === undefined) {
         return left;
@@ -103,6 +115,9 @@ export const mergeGraphObjRight = (left, right) => {
     return { ...left, ...right };
 };
 
+/**
+ * Deep merges two objects with data of the right input taking priority over those of the left.
+ */
 const mergeDeepRight = (l: unknown, r: unknown) => {
     if (typeof l !== 'object' || typeof r !== 'object') return r;
 
@@ -127,6 +142,9 @@ const mergeDeepRight = (l: unknown, r: unknown) => {
     return result;
 };
 
+/**
+ * Traverses an object to the given depth and calls fnMap with every value and path found.
+ */
 export const forEachObjDepth = (
     obj: unknown,
     fnMap: (val: unknown, path: string[]) => void,
@@ -149,6 +167,11 @@ export const forEachObjDepth = (
     }
 };
 
+/**
+ * Will mutate an object and assoc the given value at the specified path, creating objects along the way if they don't exist yet.
+ *
+ * @returns the mutated object
+ */
 export const assocPathMutate = <TInput extends object>(path: string[], val: unknown, input: TInput): TInput => {
     let obj = input;
     for (let i = 0; i < path.length - 1; i += 1) {
@@ -167,6 +190,11 @@ export const assocPathMutate = <TInput extends object>(path: string[], val: unkn
     return input;
 };
 
+/**
+ * Will mutate an object and delete the given value at the specified path.
+ *
+ * @returns the mutated object
+ */
 export const dissocPathMutate = <TInput extends object>(path: string[], input: TInput) => {
     let obj = input;
     for (let i = 0; i < path.length - 1; i += 1) {
