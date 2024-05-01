@@ -451,13 +451,21 @@ describe('edges', () => {
             });
         });
 
-        it('pushes the edge where for both nodes are write rights', () => {
-            expect(pushResult).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`, 'statusCode'], 200);
-            expect(pushResult).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`, 'statusCode'], 403);
-        });
-        it('pulls only the edge that was pushed', () => {
-            expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
-            expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`]);
+        describe('push and pull', () => {
+            it('pushes the edge where for both nodes are write rights', () => {
+                expect(pushResult).toHaveProperty(
+                    ['edges', 'from', `${testId}-1`, 'to', `${testId}-2`, 'statusCode'],
+                    200,
+                );
+                expect(pushResult).toHaveProperty(
+                    ['edges', 'from', `${testId}-1`, 'to', `${testId}-3`, 'statusCode'],
+                    403,
+                );
+            });
+            it('pulls only the edge that was pushed', () => {
+                expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
+                expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`]);
+            });
         });
     });
 });
