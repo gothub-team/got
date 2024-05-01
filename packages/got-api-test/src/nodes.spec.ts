@@ -259,11 +259,13 @@ describe('nodes', () => {
             });
         });
 
-        it('can pull node with read right', async () => {
-            expect(graph).toHaveProperty(['nodes', testId, 'id'], testId);
-        });
-        it('cannot pull other node without read right', async () => {
-            expect(graph).not.toHaveProperty(['nodes', `${testId}-other`]);
+        describe('push and pull', async () => {
+            it('can pull node with read right', async () => {
+                expect(graph).toHaveProperty(['nodes', testId, 'id'], testId);
+            });
+            it('cannot pull other node without read right', async () => {
+                expect(graph).not.toHaveProperty(['nodes', `${testId}-other`]);
+            });
         });
     });
 
