@@ -332,7 +332,7 @@ describe('nodes', () => {
             });
         });
 
-        describe.only('delete node', () => {
+        describe('delete node', () => {
             beforeEach(async () => {
                 pushResult = await user2Api.push({
                     nodes: {
