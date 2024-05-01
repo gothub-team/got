@@ -360,11 +360,13 @@ describe('edges', () => {
             });
         });
 
-        it('can pull the edge with read rights for both ends', () => {
-            expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
-        });
-        it('cannot pull the edge with read rights missing at one end', () => {
-            expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`]);
+        describe('push and pull', () => {
+            it('can pull the edge with read rights for both ends', () => {
+                expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
+            });
+            it('cannot pull the edge with read rights missing at one end', () => {
+                expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`]);
+            });
         });
     });
 
