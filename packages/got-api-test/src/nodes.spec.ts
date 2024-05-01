@@ -332,7 +332,7 @@ describe('nodes', () => {
             });
         });
 
-        describe('delete node', () => {
+        describe.only('delete node', () => {
             beforeEach(async () => {
                 pushResult = await user2Api.push({
                     nodes: {
@@ -352,8 +352,9 @@ describe('nodes', () => {
 
             it('pushes node in delete mode', async () => {
                 expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 200);
+                expect(pushResult).toHaveProperty(['nodes', `${testId}-other`, 'statusCode'], 403);
             });
-            it('returns no node', async () => {
+            it('returns only node without write rights', async () => {
                 expect(graph).not.toHaveProperty(['nodes', testId]);
                 expect(graph).toHaveProperty(['nodes', `${testId}-other`, 'id'], `${testId}-other`);
             });
