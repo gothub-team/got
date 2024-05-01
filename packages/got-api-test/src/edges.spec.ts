@@ -467,5 +467,59 @@ describe('edges', () => {
                 expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`]);
             });
         });
+
+        describe('delete edges', () => {
+            beforeEach(async () => {
+                await user1Api.push({
+                    edges: {
+                        from: {
+                            [`${testId}-1`]: {
+                                to: {
+                                    [`${testId}-3`]: true,
+                                },
+                            },
+                        },
+                    },
+                });
+                pushResult = await user2Api.push({
+                    edges: {
+                        from: {
+                            [`${testId}-1`]: {
+                                to: {
+                                    [`${testId}-2`]: false,
+                                    [`${testId}-3`]: false,
+                                },
+                            },
+                        },
+                    },
+                });
+                graph = await user1Api.pull({
+                    [`${testId}-1`]: {
+                        edges: {
+                            'from/to': {
+                                include: {
+                                    edges: true,
+                                },
+                            },
+                        },
+                    },
+                });
+            });
+
+            it('pushes the edges in delete mode', () => {
+                expect(pushResult).toHaveProperty(
+                    ['edges', 'from', `${testId}-1`, 'to', `${testId}-2`, 'statusCode'],
+                    200,
+                );
+                expect(pushResult).toHaveProperty(
+                    ['edges', 'from', `${testId}-1`, 'to', `${testId}-3`, 'statusCode'],
+                    403,
+                );
+            });
+            it('pulls only the edge that was not deleted', () => {
+                expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`]);
+                expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`], true);
+            });
+        });
     });
 });
