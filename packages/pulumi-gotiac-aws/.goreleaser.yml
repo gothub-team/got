@@ -1,6 +1,13 @@
+project_name: '@pulumi/gotiac'
+
 archives:
     - id: archive
       name_template: '{{ .Binary }}-{{ .Tag }}-{{ .Os }}-{{ .Arch }}'
+
+monorepo:
+    tag_prefix: '@pulumi/gotiac/'
+    dir: packages/pulumi-gotiac-aws
+
 before:
     hooks:
         - make build_provider
