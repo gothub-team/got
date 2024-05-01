@@ -47,7 +47,7 @@ jobs:
               with:
                   repo: pulumi/pulumictl
             - name: Run GoReleaser
-              uses: goreleaser/goreleaser-action@v2
+              uses: goreleaser/goreleaser-action@v5
               with:
                   workdir: packages/pulumi-gotiac-aws
                   args: -p 3 release --rm-dist
