@@ -279,6 +279,95 @@ describe('edges', () => {
         });
     });
 
+    describe('read rights', () => {
+        beforeEach(async () => {
+            await user1Api.push({
+                nodes: {
+                    [`${testId}-3`]: {
+                        id: `${testId}-3`,
+                    },
+                },
+                edges: {
+                    from: {
+                        [`${testId}-1`]: {
+                            to: {
+                                [`${testId}-2`]: true,
+                                [`${testId}-3`]: true,
+                            },
+                        },
+                    },
+                },
+                rights: {
+                    [`${testId}-1`]: {
+                        user: {
+                            [user2Email]: {
+                                read: true,
+                            },
+                        },
+                    },
+                    [`${testId}-2`]: {
+                        user: {
+                            [user2Email]: {
+                                read: true,
+                            },
+                        },
+                    },
+                },
+            });
+            graph = await user2Api.pull({
+                [`${testId}-1`]: {
+                    edges: {
+                        'from/to': {
+                            include: {
+                                edges: true,
+                            },
+                        },
+                    },
+                },
+            });
+        });
+        afterEach(async () => {
+            await adminApi.push({
+                nodes: {
+                    [`${testId}-3`]: false,
+                },
+                edges: {
+                    from: {
+                        [`${testId}-1`]: {
+                            to: {
+                                [`${testId}-2`]: false,
+                                [`${testId}-3`]: false,
+                            },
+                        },
+                    },
+                },
+                rights: {
+                    [`${testId}-1`]: {
+                        user: {
+                            [user2Email]: {
+                                read: false,
+                            },
+                        },
+                    },
+                    [`${testId}-2`]: {
+                        user: {
+                            [user2Email]: {
+                                read: false,
+                            },
+                        },
+                    },
+                },
+            });
+        });
+
+        it('can pull the edge with read rights for both ends', () => {
+            expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
+        });
+        it('cannot pull the edge with read rights missing at one end', () => {
+            expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`]);
+        });
+    });
+
     describe('write rights', () => {
         beforeEach(async () => {
             await user1Api.push({
