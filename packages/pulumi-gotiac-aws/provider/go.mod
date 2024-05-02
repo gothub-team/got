@@ -4,6 +4,10 @@ go 1.21
 
 toolchain go1.22.2
 
+retract (
+	[v0.0.1, v0.0.15]
+)
+
 require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/pkg/errors v0.9.1
