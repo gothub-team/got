@@ -94,6 +94,7 @@ jobs:
               working-directory: ./packages/pulumi-gotiac-aws
               run: make build_${{ matrix.language }}_sdk
             - name: Check worktree clean
+              working-directory: ./packages/pulumi-gotiac-aws
               run: |
                   git update-index -q --refresh
                   if ! git diff-files --quiet; then
