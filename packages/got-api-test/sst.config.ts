@@ -1,5 +1,5 @@
 /// <reference path="./.sst/platform/config.d.ts" />
-import * as gotiac from '@pulumi/gotiac';
+import * as gotiac from '@gothub/pulumi-gotiac-aws';
 import * as fs from 'fs';
 
 import { env } from './env';

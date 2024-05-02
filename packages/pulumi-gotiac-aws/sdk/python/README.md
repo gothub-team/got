@@ -36,7 +36,7 @@ deployments. If creating a provider for distribution to other users, you should 
 
 ## Prerequisites
 
--   Go 1.17
+-   Go 1.22
 -   Pulumi CLI
 -   Node.js (to build the Node.js SDK)
 -   Yarn (to build the Node.js SDK)
@@ -56,7 +56,7 @@ make generate
 $ make install_nodejs_sdk
 $ cd examples/simple
 $ yarn install
-$ yarn link @pulumi/gotiac
+$ yarn link @gothub/pulumi-gotiac-aws
 $ pulumi stack init test
 $ pulumi config set aws:region us-east-1
 $ pulumi up

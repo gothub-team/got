@@ -55,13 +55,17 @@ language:
             Pulumi.Aws: 4.*
     go:
         generateResourceContainerTypes: true
-        importBasePath: github.com/pulumi/pulumi-gotiac/sdk/go/gotiac
+        importBasePath: github.com/gothub-team/got/packages/pulumi-gotiac-aws/sdk
     nodejs:
+        packageName: '@gothub/pulumi-gotiac-aws'
         dependencies:
             '@pulumi/aws': '^6.0.0'
         devDependencies:
             typescript: '*'
             '@types/node': '*'
+            '@gothub/typescript-util': 'workspace:*'
+        trustedDependencies:
+            - 'protobufjs'
     python:
         requires:
             pulumi: '>=3.0.0,<4.0.0'

@@ -56,7 +56,7 @@ make generate
 $ make install_nodejs_sdk
 $ cd examples/simple
 $ yarn install
-$ yarn link @pulumi/gotiac
+$ yarn link @gothub/pulumi-gotiac-aws
 $ pulumi stack init test
 $ pulumi config set aws:region us-east-1
 $ pulumi up
