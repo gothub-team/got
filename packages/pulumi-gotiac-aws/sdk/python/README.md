@@ -36,7 +36,7 @@ deployments. If creating a provider for distribution to other users, you should 
 
 ## Prerequisites
 
--   Go 1.17
+-   Go 1.22
 -   Pulumi CLI
 -   Node.js (to build the Node.js SDK)
 -   Yarn (to build the Node.js SDK)

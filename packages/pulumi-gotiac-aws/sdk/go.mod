@@ -1,8 +1,12 @@
-module github.com/pulumi/pulumi-gotiac/sdk
+module github.com/gothub-team/got/packages/pulumi-gotiac-aws/sdk
 
 go 1.21
 
 toolchain go1.22.2
+
+retract (
+	[v0.0.1, v0.0.15]
+)
 
 require (
 	github.com/blang/semver v3.5.1+incompatible

@@ -55,7 +55,7 @@ language:
             Pulumi.Aws: 4.*
     go:
         generateResourceContainerTypes: true
-        importBasePath: github.com/pulumi/pulumi-gotiac/sdk/go/gotiac
+        importBasePath: github.com/gothub-team/got/packages/pulumi-gotiac-aws/sdk
     nodejs:
         dependencies:
             '@pulumi/aws': '^6.0.0'

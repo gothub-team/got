@@ -1,7 +1,7 @@
-VERSION         := 0.0.1
+VERSION         := 0.0.20
 
 PACK            := gotiac
-PROJECT         := github.com/pulumi/pulumi-${PACK}
+PROJECT         := github.com/gothub-team/got/packages/pulumi-${PACK}-aws/sdk
 
 PROVIDER        := pulumi-resource-${PACK}
 CODEGEN         := pulumi-gen-${PACK}
