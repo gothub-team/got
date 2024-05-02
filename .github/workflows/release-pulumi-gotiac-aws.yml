@@ -75,19 +75,24 @@ jobs:
                   repo: pulumi/pulumictl
             - name: Install Pulumi CLI
               uses: pulumi/action-install-pulumi-cli@v2.0.0
-            - name: Setup Node
+            - if: ${{ matrix.language == 'nodejs' && env.PUBLISH_NPM == 'true' }}
+              name: Setup Node
               uses: actions/setup-node@v1
               with:
                   node-version: ${{matrix.nodeversion}}
                   registry-url: ${{env.NPM_REGISTRY_URL}}
-            - name: Setup DotNet
+            - if: ${{ matrix.language == 'dotnet' && env.PUBLISH_NUGET == 'true' }}
+              name: Setup DotNet
               uses: actions/setup-dotnet@v1
               with:
                   dotnet-version: ${{matrix.dotnetverson}}
-            - name: Setup Python
+            - if: ${{ matrix.language == 'python' && env.PUBLISH_PYPI == 'true' }}
+              name: Setup Python
               uses: actions/setup-python@v1
               with:
                   python-version: ${{matrix.pythonversion}}
+            - name: Setup Bun
+              uses: oven-sh/setup-bun@v1
             - name: Build SDK
               working-directory: ./packages/pulumi-gotiac-aws
               run: make build_${{ matrix.language }}_sdk
