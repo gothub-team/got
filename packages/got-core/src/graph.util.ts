@@ -1,5 +1,14 @@
-import { Graph } from './graph.types';
-import { assocPathMutate, forEachObjDepth, getPathOr, mergeDeepRight, mergeGraphObjRight } from './util';
+import { Edges, Files, Graph, NodeFilesView, Nodes, Rights } from './graph.types';
+import { Metadata, NodeFileView, NodeRightsView } from './graphObjects';
+import { State } from './state.types';
+import {
+    assocPathMutate,
+    dissocPathMutate,
+    forEachObjDepth,
+    getPathOr,
+    mergeDeepRight,
+    mergeGraphObjRight,
+} from './util';
 
 export const isEdgeTypeString = (edgeTypes: string) => {
     const [fromType, toType] = edgeTypes.split('/');
@@ -69,4 +78,166 @@ export const mergeGraphsRight = (left: Graph, right: Graph): Graph => {
     }
 
     return result;
+};
+
+const overwriteObjRight =
+    (depth: number) =>
+    <TInput extends object>(left?: TInput, right?: TInput): TInput | undefined => {
+        if (!right) return left;
+
+        let result: TInput = left ?? ({} as TInput);
+        forEachObjDepth(
+            right,
+            (valRight, path) => {
+                if (typeof valRight === 'undefined') {
+                    dissocPathMutate(path, result);
+                    return;
+                }
+
+                if (valRight === false || typeof valRight === 'object') {
+                    assocPathMutate(path, valRight, result);
+                    return;
+                }
+
+                const valLeft = getPathOr(undefined, path, left);
+                if (!(valRight === true && typeof valLeft === 'object')) {
+                    assocPathMutate(path, valRight, result);
+                    return;
+                }
+
+                assocPathMutate(path, valLeft, result);
+            },
+            depth,
+        );
+
+        return result;
+    };
+
+const overwriteNodesRight = overwriteObjRight(1);
+const overwriteEdgesRight = overwriteObjRight(4);
+const overwriteRightsRight = overwriteObjRight(1);
+const overwriteFilesRight = overwriteObjRight(1);
+const overwriteIndexRight = overwriteObjRight(5);
+
+export const mergeOverwriteGraphsRight = (left: Graph, right: Graph) => {
+    if (!right) return left;
+    if (!left) return right;
+
+    let result = left;
+
+    const nodes = overwriteNodesRight(left?.nodes, right?.nodes);
+    if (nodes) {
+        result.nodes = nodes;
+    }
+
+    const edges = overwriteEdgesRight(left?.edges, right?.edges);
+    if (edges) {
+        result.edges = edges;
+    }
+
+    const rights = overwriteRightsRight(left?.rights, right?.rights);
+    if (rights) {
+        result.rights = rights;
+    }
+
+    const files = overwriteFilesRight(left?.files, right?.files);
+    if (files) {
+        result.files = files;
+    }
+
+    const index = overwriteIndexRight(left?.index, right?.index);
+    if (index) {
+        result.index = index;
+    }
+    return result;
+};
+
+const getAnyStack =
+    <TRes>(fnSelect: (state: State, graphName: string) => TRes) =>
+    (state: State, stack: string[]): TRes[] => {
+        let acc = [];
+        for (let i = 0; i < stack.length; i += 1) {
+            const graphName = stack[i];
+            const val = fnSelect(state, graphName);
+            val && acc.push(val);
+        }
+        return acc;
+    };
+
+export const getNodeStack = getAnyStack((state, graphName) => state[graphName]?.graph?.nodes);
+export const getEdgeStack = getAnyStack((state, graphName) => state[graphName]?.graph?.edges);
+export const getReverseEdgeStack = getAnyStack((state, graphName) => state[graphName]?.graph?.index?.reverseEdges);
+export const getRightStack = getAnyStack((state, graphName) => state[graphName]?.graph?.rights);
+export const getFileStack = getAnyStack((state, graphName) => state[graphName]?.graph?.files);
+
+export const nodeFromNodeStack = (nodeStack: Array<Nodes<Node>>, nodeId: string): Node => {
+    let acc: Node;
+    for (let i = 0; i < nodeStack.length; i += 1) {
+        const node = nodeStack[i][nodeId];
+        acc = mergeGraphObjRight(acc, node);
+    }
+    return acc;
+};
+
+export const edgeFromEdgeStack = (
+    edgeStack: Array<Edges<Metadata>>,
+    fromType: string,
+    fromId: string,
+    toType: string,
+): Metadata => {
+    if (edgeStack.length === 0) return {};
+
+    let acc = {};
+    for (let i = 0; i < edgeStack.length; i += 1) {
+        const edge = edgeStack[i][fromType]?.[fromId]?.[toType];
+        if (edge != null) {
+            const toIds = Object.keys(edge);
+            for (let j = 0; j < toIds.length; j += 1) {
+                const toId = toIds[j];
+                const metadata = edge[toId];
+                if (metadata) {
+                    acc[toId] = mergeGraphObjRight(acc[toId], metadata);
+                } else if (metadata === false || metadata === null) {
+                    delete acc[toId];
+                }
+            }
+        }
+    }
+    return acc;
+};
+
+export const metadataFromEdgeStack = (
+    edgeStack: Array<Edges<Metadata>>,
+    fromType: string,
+    fromId: string,
+    toType: string,
+    toId: string,
+): Metadata => {
+    let acc: Metadata;
+    for (let i = 0; i < edgeStack.length; i += 1) {
+        const node = edgeStack[i][fromType]?.[fromId]?.[toType]?.[toId];
+        acc = mergeGraphObjRight(acc, node);
+    }
+    return acc;
+};
+
+export const rightFromRightStack = (rightStack: Array<Rights<boolean, string>>, nodeId: string): NodeRightsView => {
+    let acc: NodeRightsView;
+    for (let i = 0; i < rightStack.length; i += 1) {
+        const node = rightStack[i][nodeId];
+        acc = mergeDeepRight(acc, node);
+    }
+    return acc;
+};
+
+export const filesFromFileStack = (
+    fileStack: Array<Files<NodeFileView>>,
+    nodeId: string,
+): NodeFilesView<NodeFileView> => {
+    let acc: NodeFilesView<NodeFileView>;
+    for (let i = 0; i < fileStack.length; i += 1) {
+        const files = fileStack[i][nodeId];
+        acc = mergeGraphObjRight(acc, files);
+    }
+    return acc;
 };

@@ -7,11 +7,11 @@ import {
     UploadNodeFileView,
 } from './graphObjects';
 
-declare type Nodes<TNode> = {
+export declare type Nodes<TNode> = {
     [nodeId: string]: TNode;
 };
 
-declare type Edges<TEdge> = {
+export declare type Edges<TEdge> = {
     [fromType: string]: {
         [fromId: string]: {
             [toType: string]: {
@@ -21,7 +21,7 @@ declare type Edges<TEdge> = {
     };
 };
 
-declare type Rights<TRight, TInheritRights> = {
+export declare type Rights<TRight, TInheritRights> = {
     [nodeId: string]: {
         user?: {
             [email: string]: {
@@ -43,10 +43,10 @@ declare type Rights<TRight, TInheritRights> = {
     };
 };
 
-declare type Files<TFile> = {
-    [nodeId: string]: {
-        [prop: string]: TFile;
-    };
+export declare type NodeFilesView<TFile> = Record<string, TFile>;
+
+export declare type Files<TFile> = {
+    [nodeId: string]: NodeFilesView<TFile>;
 };
 
 export declare interface GraphLayer<TNode, TEdge, TReverseEdge, TRight, TInheritRights, TFile> {

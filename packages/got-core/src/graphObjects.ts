@@ -43,7 +43,10 @@ export declare type RightTypes = {
 };
 
 export declare type NodeRightsView = {
-    user: {
+    user?: {
+        [email: string]: RightTypes;
+    };
+    roles?: {
         [email: string]: RightTypes;
     };
 };
