@@ -104,31 +104,26 @@ jobs:
               working-directory: ./packages/pulumi-gotiac-aws
               run: tar -zcf sdk/${{ matrix.language }}.tar.gz -C sdk/${{ matrix.language }} .
             - name: Upload artifacts
-              working-directory: ./packages/pulumi-gotiac-aws
               uses: actions/upload-artifact@v4
               with:
                   name: ${{ matrix.language  }}-sdk.tar.gz
-                  path: ${{ github.workspace}}/sdk/${{ matrix.language }}.tar.gz
+                  path: ${{ github.workspace}}/packages/pulumi-gotiac-aws/sdk/${{ matrix.language }}.tar.gz
             - if: ${{ matrix.language == 'python' && env.PUBLISH_PYPI == 'true' }}
-              working-directory: ./packages/pulumi-gotiac-aws
               name: Publish package to PyPI
-              uses: pypa/gh-action-pypi-publish@release/v1
               with:
                   user: ${{ env.PYPI_USERNAME }}
                   password: ${{ env.PYPI_PASSWORD }}
-                  packages_dir: ${{github.workspace}}/sdk/python/bin/dist
+                  packages_dir: ${{github.workspace}}/packages/pulumi-gotiac-aws/sdk/python/bin/dist
             - if: ${{ matrix.language == 'nodejs' && env.PUBLISH_NPM == 'true' }}
-              working-directory: ./packages/pulumi-gotiac-aws
               uses: JS-DevTools/npm-publish@v1
               with:
                   access: 'public'
                   token: ${{ env.NPM_TOKEN }}
-                  package: ${{github.workspace}}/sdk/nodejs/bin/package.json
+                  package: ${{github.workspace}}/packages/pulumi-gotiac-aws/sdk/nodejs/bin/package.json
             - if: ${{ matrix.language == 'dotnet' && env.PUBLISH_NUGET == 'true' }}
-              working-directory: ./packages/pulumi-gotiac-aws
               name: publish nuget package
               run: |
-                  dotnet nuget push ${{github.workspace}}/sdk/dotnet/bin/Debug/*.nupkg -s ${{ env.NUGET_FEED_URL }} -k ${{ env.NUGET_PUBLISH_KEY }}
+                  dotnet nuget push ${{github.workspace}}/packages/pulumi-gotiac-aws/sdk/dotnet/bin/Debug/*.nupkg -s ${{ env.NUGET_FEED_URL }} -k ${{ env.NUGET_PUBLISH_KEY }}
                   echo "done publishing packages"
         strategy:
             fail-fast: true
