@@ -154,44 +154,30 @@ export const mergeOverwriteGraphsRight = (left: Graph, right: Graph) => {
     return result;
 };
 
-const getAnyStack =
-    <TRes>(fnSelect: (state: State, graphName: string) => TRes) =>
-    (state: State, stack: string[]): TRes[] => {
-        let acc = [];
-        for (let i = 0; i < stack.length; i += 1) {
-            const graphName = stack[i];
-            const val = fnSelect(state, graphName);
-            val && acc.push(val);
-        }
-        return acc;
-    };
-
-export const getNodeStack = getAnyStack((state, graphName) => state[graphName]?.graph?.nodes);
-export const getEdgeStack = getAnyStack((state, graphName) => state[graphName]?.graph?.edges);
-export const getReverseEdgeStack = getAnyStack((state, graphName) => state[graphName]?.graph?.index?.reverseEdges);
-export const getRightStack = getAnyStack((state, graphName) => state[graphName]?.graph?.rights);
-export const getFileStack = getAnyStack((state, graphName) => state[graphName]?.graph?.files);
-
-export const nodeFromNodeStack = (nodeStack: Array<Nodes<Node | boolean>>, nodeId: string): Node | boolean => {
+export const selectGraphStack = (state: State, stack: string[]): Graph[] => {
+    let acc = [];
+    for (let i = 0; i < stack.length; i += 1) {
+        const graphName = stack[i];
+        const graph = state[graphName]?.graph;
+        graph && acc.push(graph);
+    }
+    return acc;
+};
+export const nodeFromStack = (graphStack: Graph[], nodeId: string): Node | boolean => {
     let acc: Node | boolean;
-    for (let i = 0; i < nodeStack.length; i += 1) {
-        const node = nodeStack[i][nodeId];
+    for (let i = 0; i < graphStack.length; i += 1) {
+        const node = graphStack[i].nodes?.[nodeId];
         acc = mergeGraphObjRight(acc, node);
     }
     return acc;
 };
 
-export const edgeFromEdgeStack = (
-    edgeStack: Array<Edges<Metadata>>,
-    fromType: string,
-    fromId: string,
-    toType: string,
-): Metadata => {
-    if (edgeStack.length === 0) return {};
+export const edgeFromStack = (graphStack: Graph[], fromType: string, fromId: string, toType: string): Metadata => {
+    if (graphStack.length === 0) return {};
 
     let acc = {};
-    for (let i = 0; i < edgeStack.length; i += 1) {
-        const edge = edgeStack[i][fromType]?.[fromId]?.[toType];
+    for (let i = 0; i < graphStack.length; i += 1) {
+        const edge = graphStack[i].edges?.[fromType]?.[fromId]?.[toType];
         if (edge != null) {
             const toIds = Object.keys(edge);
             for (let j = 0; j < toIds.length; j += 1) {
@@ -208,49 +194,62 @@ export const edgeFromEdgeStack = (
     return acc;
 };
 
-export const metadataFromEdgeStack = (
-    edgeStack: Array<Edges<Metadata>>,
+export const reverseEdgeFromStack = (graphStack: Graph[], toType: string, toId: string, fromType: string): Metadata => {
+    if (graphStack.length === 0) return {};
+
+    let acc = {};
+    for (let i = 0; i < graphStack.length; i += 1) {
+        const edge = graphStack[i].index?.reverseEdges?.[toType]?.[toId]?.[fromType];
+        if (edge != null) {
+            const toIds = Object.keys(edge);
+            for (let j = 0; j < toIds.length; j += 1) {
+                const toId = toIds[j];
+                const metadata = edge[toId];
+                if (metadata) {
+                    acc[toId] = mergeGraphObjRight(acc[toId], metadata);
+                } else if (metadata === false || metadata === null) {
+                    delete acc[toId];
+                }
+            }
+        }
+    }
+    return acc;
+};
+
+export const metadataFromStack = (
+    graphStack: Graph[],
     fromType: string,
     fromId: string,
     toType: string,
     toId: string,
 ): Metadata => {
     let acc: Metadata;
-    for (let i = 0; i < edgeStack.length; i += 1) {
-        const node = edgeStack[i][fromType]?.[fromId]?.[toType]?.[toId];
+    for (let i = 0; i < graphStack.length; i += 1) {
+        const node = graphStack[i].edges?.[fromType]?.[fromId]?.[toType]?.[toId];
         acc = mergeGraphObjRight(acc, node);
     }
     return acc;
 };
 
-export const rightFromRightStack = (rightStack: Array<Rights<boolean, string>>, nodeId: string): NodeRightsView => {
+export const rightFromStack = (graphStack: Graph[], nodeId: string): NodeRightsView => {
     let acc: NodeRightsView;
-    for (let i = 0; i < rightStack.length; i += 1) {
-        const node = rightStack[i][nodeId];
-        acc = mergeDeepRight(acc, node);
+    for (let i = 0; i < graphStack.length; i += 1) {
+        const rights = graphStack[i].rights?.[nodeId];
+        acc = mergeDeepRight(acc, rights);
     }
     return acc;
 };
 
-export const filesFromFileStack = (
-    fileStack: Array<Files<NodeFileView>>,
-    nodeId: string,
-): NodeFilesView<NodeFileView> => {
+export const filesFromStack = (graphStack: Graph[], nodeId: string): NodeFilesView<NodeFileView> => {
     let acc: NodeFilesView<NodeFileView>;
-    for (let i = 0; i < fileStack.length; i += 1) {
-        const files = fileStack[i][nodeId];
+    for (let i = 0; i < graphStack.length; i += 1) {
+        const files = graphStack[i].files?.[nodeId];
         acc = mergeGraphObjRight(acc, files);
     }
     return acc;
 };
 
-const selectView = <TView extends View>(stack: string[], view: TView, state: State): ViewResult<TView> => {
-    const nodeStack = getNodeStack(state, stack);
-    const edgeStack = getEdgeStack(state, stack);
-    const reverseEdgeStack = getReverseEdgeStack(state, stack);
-    const fileStack = getFileStack(state, stack);
-    const rightStack = getRightStack(state, stack);
-
+const selectView = <TView extends View>(graphStack: Graph[], view: TView, state: State): ViewResult<TView> => {
     const queryNode = <TSubView extends NodeView | EdgeView>(
         queryObj: TSubView,
         nodeId: string,
@@ -268,10 +267,10 @@ const selectView = <TView extends View>(stack: string[], view: TView, state: Sta
             bag.node = node;
         }
         if (include?.rights) {
-            bag.rights = rightFromRightStack(rightStack, nodeId);
+            bag.rights = rightFromStack(graphStack, nodeId);
         }
         if (include?.files) {
-            bag.files = filesFromFileStack(fileStack, nodeId);
+            bag.files = filesFromStack(graphStack, nodeId);
         }
 
         // include edges
@@ -294,8 +293,8 @@ const selectView = <TView extends View>(stack: string[], view: TView, state: Sta
     const queryEdge = (queryObj: EdgeView, edgeTypes: string, nodeId: string) => {
         const [fromType, toType] = edgeTypes.split('/');
         const edgeIds = queryObj.reverse
-            ? edgeFromEdgeStack(reverseEdgeStack, toType, nodeId, fromType)
-            : edgeFromEdgeStack(edgeStack, fromType, nodeId, toType);
+            ? reverseEdgeFromStack(graphStack, toType, nodeId, fromType)
+            : edgeFromStack(graphStack, fromType, nodeId, toType);
 
         if (!edgeIds) return;
 
@@ -304,11 +303,11 @@ const selectView = <TView extends View>(stack: string[], view: TView, state: Sta
         for (let i = 0; i < keys.length; i += 1) {
             const toId = keys[i];
             const metadata = queryObj.reverse
-                ? metadataFromEdgeStack(edgeStack, fromType, toId, toType, nodeId)
+                ? metadataFromStack(graphStack, fromType, toId, toType, nodeId)
                 : edgeIds[toId];
             if (!metadata) continue;
 
-            const toNode = nodeFromNodeStack(nodeStack, toId);
+            const toNode = nodeFromStack(graphStack, toId);
             if (!toNode) continue;
 
             edgeBag[toId] = queryNode(queryObj, toId, toNode, metadata);
@@ -325,7 +324,7 @@ const selectView = <TView extends View>(stack: string[], view: TView, state: Sta
         if (!queryObj) continue;
 
         const nodeAlias = queryObj?.as ?? nodeId;
-        const node = nodeFromNodeStack(nodeStack, nodeId);
+        const node = nodeFromStack(graphStack, nodeId);
         if (!node) continue;
 
         result[nodeAlias] = queryNode(queryObj, nodeId, node);
