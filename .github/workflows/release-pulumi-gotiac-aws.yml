@@ -2,7 +2,7 @@ name: release-pulumi-gotiac-aws
 on:
     push:
         tags:
-            - '@pulumi/gotiac/v*.*.*'
+            - 'packages/pulumi-gotiac-aws/sdk/v*.*.*'
             - '!v*.*.*-**'
 env:
     # THIS GITHUB_TOKEN IS A REQUIREMENT TO BE ABLE TO WRITE TO GH RELEASES
@@ -89,6 +89,7 @@ jobs:
               with:
                   python-version: ${{matrix.pythonversion}}
             - name: Build SDK
+              working-directory: ./packages/pulumi-gotiac-aws
               run: make build_${{ matrix.language }}_sdk
             - name: Check worktree clean
               run: |
@@ -100,13 +101,16 @@ jobs:
                       exit 1
                   fi
             - name: Compress SDK folder
+              working-directory: ./packages/pulumi-gotiac-aws
               run: tar -zcf sdk/${{ matrix.language }}.tar.gz -C sdk/${{ matrix.language }} .
             - name: Upload artifacts
+              working-directory: ./packages/pulumi-gotiac-aws
               uses: actions/upload-artifact@v4
               with:
                   name: ${{ matrix.language  }}-sdk.tar.gz
                   path: ${{ github.workspace}}/sdk/${{ matrix.language }}.tar.gz
             - if: ${{ matrix.language == 'python' && env.PUBLISH_PYPI == 'true' }}
+              working-directory: ./packages/pulumi-gotiac-aws
               name: Publish package to PyPI
               uses: pypa/gh-action-pypi-publish@release/v1
               with:
@@ -114,12 +118,14 @@ jobs:
                   password: ${{ env.PYPI_PASSWORD }}
                   packages_dir: ${{github.workspace}}/sdk/python/bin/dist
             - if: ${{ matrix.language == 'nodejs' && env.PUBLISH_NPM == 'true' }}
+              working-directory: ./packages/pulumi-gotiac-aws
               uses: JS-DevTools/npm-publish@v1
               with:
                   access: 'public'
                   token: ${{ env.NPM_TOKEN }}
                   package: ${{github.workspace}}/sdk/nodejs/bin/package.json
             - if: ${{ matrix.language == 'dotnet' && env.PUBLISH_NUGET == 'true' }}
+              working-directory: ./packages/pulumi-gotiac-aws
               name: publish nuget package
               run: |
                   dotnet nuget push ${{github.workspace}}/sdk/dotnet/bin/Debug/*.nupkg -s ${{ env.NUGET_FEED_URL }} -k ${{ env.NUGET_PUBLISH_KEY }}
