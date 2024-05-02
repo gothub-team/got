@@ -1,4 +1,4 @@
-import { ErrorGraph, Graph } from './graph.types';
+import { ErrorGraph, Graph } from './graph';
 
 export declare interface GraphState {
     graph: Graph;

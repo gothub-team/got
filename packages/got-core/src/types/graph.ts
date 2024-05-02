@@ -5,7 +5,7 @@ import {
     NodeFileView,
     UploadElementResult,
     UploadNodeFileView,
-} from './graphObjects';
+} from '../graphObjects';
 
 export declare type Nodes<TNode> = {
     [nodeId: string]: TNode;

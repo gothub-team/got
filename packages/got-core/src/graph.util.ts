@@ -1,6 +1,6 @@
-import { Edges, Files, Graph, NodeFilesView, Nodes, Rights } from './graph.types';
+import { Edges, Files, Graph, NodeFilesView, Nodes, Rights } from './types/graph';
 import { Metadata, NodeFileView, NodeRightsView } from './graphObjects';
-import { State } from './state.types';
+import { State } from './types/state';
 import {
     assocPathMutate,
     dissocPathMutate,
@@ -9,7 +9,7 @@ import {
     mergeDeepRight,
     mergeGraphObjRight,
 } from './util';
-import { View } from './view.types';
+import { View } from './types/view';
 
 export const isEdgeTypeString = (edgeTypes: string) => {
     const [fromType, toType] = edgeTypes.split('/');
