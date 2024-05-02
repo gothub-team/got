@@ -9,7 +9,8 @@ import {
     mergeDeepRight,
     mergeGraphObjRight,
 } from './util';
-import { View } from './types/view';
+import { EdgeView, NodeView, View } from './types/view';
+import { NodeBag, NodeBagInternal, ViewResult } from './types/ViewResult';
 
 export const isEdgeTypeString = (edgeTypes: string) => {
     const [fromType, toType] = edgeTypes.split('/');
@@ -243,22 +244,27 @@ export const filesFromFileStack = (
     return acc;
 };
 
-const selectView = (stack: string[], view: View, state: State) => {
+const selectView = <TView extends View>(stack: string[], view: TView, state: State): ViewResult<TView> => {
     const nodeStack = getNodeStack(state, stack);
     const edgeStack = getEdgeStack(state, stack);
     const reverseEdgeStack = getReverseEdgeStack(state, stack);
     const fileStack = getFileStack(state, stack);
     const rightStack = getRightStack(state, stack);
 
-    const queryNode = (queryObj, nodeId: string, node: Node | boolean, metadata?: Metadata) => {
-        const bag = { nodeId };
+    const queryNode = <TSubView extends NodeView | EdgeView>(
+        queryObj: TSubView,
+        nodeId: string,
+        node: Node | boolean,
+        metadata?: Metadata,
+    ): NodeBagInternal => {
+        const bag = { nodeId } as NodeBagInternal;
         const { include } = queryObj;
 
         // include node bag info
         if (include?.metadata && metadata) {
             bag.metadata = metadata;
         }
-        if (include?.node) {
+        if (include?.node && typeof node === 'object') {
             bag.node = node;
         }
         if (include?.rights) {
@@ -285,7 +291,7 @@ const selectView = (stack: string[], view: View, state: State) => {
         return bag;
     };
 
-    const queryEdge = (queryObj, edgeTypes: string, nodeId: string) => {
+    const queryEdge = (queryObj: EdgeView, edgeTypes: string, nodeId: string) => {
         const [fromType, toType] = edgeTypes.split('/');
         const edgeIds = queryObj.reverse
             ? edgeFromEdgeStack(reverseEdgeStack, toType, nodeId, fromType)
@@ -311,7 +317,7 @@ const selectView = (stack: string[], view: View, state: State) => {
         return edgeBag;
     };
 
-    const result = {};
+    const result = {} as ViewResult<TView>;
     const rootIds = Object.keys(view);
     for (let i = 0; i < rootIds.length; i += 1) {
         const nodeId = rootIds[i];
