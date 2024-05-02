@@ -249,7 +249,7 @@ export const filesFromStack = (graphStack: Graph[], nodeId: string): NodeFilesVi
     return acc;
 };
 
-const selectView = <TView extends View>(graphStack: Graph[], view: TView, state: State): ViewResult<TView> => {
+export const selectView = <TView extends View>(graphStack: Graph[], view: TView, state: State): ViewResult<TView> => {
     const queryNode = <TSubView extends NodeView | EdgeView>(
         queryObj: TSubView,
         nodeId: string,
@@ -331,4 +331,99 @@ const selectView = <TView extends View>(graphStack: Graph[], view: TView, state:
     }
 
     return result;
+};
+
+export const selectSubGraph = (graphStack: Graph[], view: View, state: State): Graph => {
+    const nodes = {};
+    const edges = {};
+    const reverseEdges = {};
+    const rights = {};
+    const files = {};
+
+    const queryNode = <TSubView extends NodeView | EdgeView>(
+        queryObj: TSubView,
+        nodeId: string,
+        node: Node | boolean,
+        metadata?: Metadata,
+    ) => {
+        const { include } = queryObj;
+
+        if (include?.node) {
+            nodes[nodeId] = node;
+        }
+        if (include?.rights) {
+            rights[nodeId] = rightFromStack(graphStack, nodeId);
+        }
+        if (include?.files) {
+            files[nodeId] = filesFromStack(graphStack, nodeId);
+        }
+
+        // include edges
+        const { edges } = queryObj;
+        if (edges) {
+            const keys = Object.keys(edges);
+            for (let i = 0; i < keys.length; i += 1) {
+                const edgeTypes = keys[i];
+                const subQueryObj = edges[edgeTypes];
+                if (!subQueryObj) continue;
+
+                queryEdge(subQueryObj, edgeTypes, nodeId);
+            }
+        }
+    };
+
+    const queryEdge = (queryObj: EdgeView, edgeTypes: string, nodeId: string) => {
+        const [fromType, toType] = edgeTypes.split('/');
+        const edgeIds = queryObj.reverse
+            ? reverseEdgeFromStack(graphStack, toType, nodeId, fromType)
+            : edgeFromStack(graphStack, fromType, nodeId, toType);
+
+        if (!edgeIds) return;
+
+        const keys = Object.keys(edgeIds);
+        for (let i = 0; i < keys.length; i += 1) {
+            const edgeId = keys[i];
+            const metadata = queryObj.reverse
+                ? metadataFromStack(graphStack, fromType, edgeId, toType, nodeId)
+                : edgeIds[edgeId];
+            if (!metadata) continue;
+
+            const toNode = nodeFromStack(graphStack, edgeId);
+            if (!toNode) continue;
+
+            // include node bag info
+            if (metadata && (queryObj?.include?.metadata || queryObj?.include?.edges)) {
+                const _metadata = queryObj.include?.metadata ? metadata : true;
+                if (queryObj.reverse) {
+                    assocPathMutate([fromType, edgeId, toType, nodeId], _metadata, edges);
+                    assocPathMutate([toType, nodeId, fromType, edgeId], true, reverseEdges);
+                } else {
+                    assocPathMutate([fromType, nodeId, toType, edgeId], _metadata, edges);
+                    assocPathMutate([toType, edgeId, fromType, nodeId], true, reverseEdges);
+                }
+            }
+
+            queryNode(queryObj, edgeId, toNode, metadata);
+        }
+    };
+
+    const rootIds = Object.keys(view);
+    for (let i = 0; i < rootIds.length; i += 1) {
+        const nodeId = rootIds[i];
+        const queryObj = view[nodeId];
+        if (!queryObj) continue;
+
+        const node = nodeFromStack(graphStack, nodeId);
+        if (!node) continue;
+
+        queryNode(queryObj, nodeId, node);
+    }
+
+    return {
+        nodes,
+        edges,
+        index: { reverseEdges },
+        rights,
+        files,
+    };
 };
