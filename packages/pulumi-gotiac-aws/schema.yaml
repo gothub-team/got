@@ -62,6 +62,9 @@ language:
         devDependencies:
             typescript: '*'
             '@types/node': '*'
+            '@gothub/typescript-util': 'workspace:*'
+        trustedDependencies:
+            - 'protobufjs'
     python:
         requires:
             pulumi: '>=3.0.0,<4.0.0'

@@ -1,4 +1,4 @@
-VERSION         := 0.0.21
+VERSION         := 0.0.22
 
 PACK            := gotiac
 PROJECT         := github.com/gothub-team/got/packages/pulumi-${PACK}-aws/sdk
@@ -64,10 +64,11 @@ gen_nodejs_sdk::
 build_nodejs_sdk:: gen_nodejs_sdk
 	cd sdk/nodejs/ && \
 		cp ../../tsconfig.template.json tsconfig.json && \
+		jq '. + {trustedDependencies: ["protobufjs"]}' package.json > temp.json && mv temp.json package.json && \
 		bun install && \
 		bun x tsc --version && \
 		bun x tsc && \
-		cp ../../README.md ../../LICENSE package.json bun.lockb ./bin/ && \
+		cp ../../README.md ../../LICENSE package.json ./bin/ && \
 		sed -i.bak -e "s/\$${VERSION}/$(VERSION)/g" ./bin/package.json && \
 		rm ./bin/package.json.bak
 		bun run prettier --write ./sdk/nodejs/**/*.ts
