@@ -2,6 +2,8 @@ module github.com/gothub-team/got/packages/pulumi-gotiac-aws/provider
 
 go 1.21
 
+toolchain go1.22.2
+
 require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/pkg/errors v0.9.1

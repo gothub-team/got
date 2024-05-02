@@ -1,4 +1,4 @@
-module github.com/pulumi/pulumi-gotiac/sdk
+module github.com/gothub-team/got/packages/pulumi-gotiac-aws/sdk
 
 go 1.21
 
