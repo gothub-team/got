@@ -15,5 +15,8 @@
     "pulumi": {
         "resource": true,
         "name": "gotiac"
-    }
+    },
+    "trustedDependencies": [
+        "protobufjs"
+    ]
 }

@@ -75,19 +75,16 @@ jobs:
                   repo: pulumi/pulumictl
             - name: Install Pulumi CLI
               uses: pulumi/action-install-pulumi-cli@v2.0.0
-            - if: ${{ matrix.language == 'nodejs' && env.PUBLISH_NPM == 'true' }}
-              name: Setup Node
+            - name: Setup Node
               uses: actions/setup-node@v1
               with:
                   node-version: ${{matrix.nodeversion}}
                   registry-url: ${{env.NPM_REGISTRY_URL}}
-            - if: ${{ matrix.language == 'dotnet' && env.PUBLISH_NUGET == 'true' }}
-              name: Setup DotNet
+            - name: Setup DotNet
               uses: actions/setup-dotnet@v1
               with:
                   dotnet-version: ${{matrix.dotnetverson}}
-            - if: ${{ matrix.language == 'python' && env.PUBLISH_PYPI == 'true' }}
-              name: Setup Python
+            - name: Setup Python
               uses: actions/setup-python@v1
               with:
                   python-version: ${{matrix.pythonversion}}
@@ -140,8 +137,8 @@ jobs:
                     - 1.22.x
                 language:
                     - nodejs
-                    - python
-                    - dotnet
+                    # - python
+                    # - dotnet
                     - go
                 nodeversion:
                     - 14.x
