@@ -113,7 +113,7 @@ export const mergeGraphObjRight = <TGraphObj>(left: TGraphObj, right: TGraphObj)
 /**
  * Deep merges two objects with data of the right input taking priority over those of the left.
  */
-const mergeDeepRight = (l: unknown, r: unknown) => {
+export const mergeDeepRight = (l: unknown, r: unknown) => {
     if (typeof l !== 'object' || typeof r !== 'object') return r;
 
     const result = {};
@@ -159,6 +159,27 @@ export const forEachObjDepth = (
         } else {
             forEachObjDepth(val, fnMap, depth - 1, [...path, key]);
         }
+    }
+};
+
+export const getPathOr = <TInput extends object, TRes>(
+    or: TRes | undefined,
+    path: string[],
+    input: TInput,
+): TRes | undefined => {
+    try {
+        let obj = input;
+        for (let i = 0; i < path.length; i += 1) {
+            const key = path[i];
+            if (key in obj) {
+                obj = obj[key];
+            } else {
+                return or;
+            }
+        }
+        return obj as unknown as TRes;
+    } catch (err) {
+        return or;
     }
 };
 
