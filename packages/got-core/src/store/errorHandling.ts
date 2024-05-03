@@ -263,7 +263,7 @@ export const createErrorHandledStore = (
             return store.setRoleRights(graphName, nodeId, role, rights);
         }
     };
-    const inheritRights = (graphName: string, nodeId: string, fromId: string) => {
+    const inheritRights = (graphName: string, fromId: string, nodeId: string) => {
         if (
             validateError('GOT_INHERIT_RIGHTS', 'function', 'dispatch', dispatch) &&
             validateError('GOT_INHERIT_RIGHTS', 'string', 'graphName', graphName) &&

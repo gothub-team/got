@@ -252,7 +252,7 @@ export const createStore = ({ dispatch, select }: CreateStoreOptions) => {
             },
         });
     };
-    const inheritRights = (graphName: string, nodeId: string, fromId: string) => {
+    const inheritRights = (graphName: string, fromId: string, nodeId: string) => {
         dispatch({
             type: 'GOT/INHERIT_RIGHTS',
             payload: {
