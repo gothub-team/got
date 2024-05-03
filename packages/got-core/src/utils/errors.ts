@@ -93,7 +93,12 @@ const examples: Partial<Record<ParameterType, string>> = {
 const validate = (type: ParameterType, value: unknown) => {
     switch (type) {
         case 'api':
-            return value && typeof value === 'object' && value.pull && value.push;
+            return (
+                value &&
+                typeof value === 'object' &&
+                (value as Record<string, unknown>).pull &&
+                (value as Record<string, unknown>).push
+            );
         case 'function':
             return value && typeof value === 'function';
         case 'stack':
@@ -101,7 +106,7 @@ const validate = (type: ParameterType, value: unknown) => {
         case 'string':
             return value && typeof value === 'string' && value.length > 0;
         case 'node':
-            return value && typeof value === 'object' && value.id;
+            return value && typeof value === 'object' && (value as Record<string, unknown>).id;
         case 'edgeTypes':
             return value && typeof value === 'string' && isEdgeTypeString(value);
         case 'view':
