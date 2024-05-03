@@ -4,7 +4,7 @@
     "type": "module",
     "workspaces": [
         "packages/*",
-        "packages/pulumi-gotiac-aws/sdk/*"
+        "packages/pulumi-gotiac-aws/sdk/nodejs"
     ],
     "devDependencies": {
         "prettier": "^3.2.5"

@@ -1,29 +1,23 @@
-import { describe, beforeAll, afterAll, beforeEach, afterEach, it, expect } from 'bun:test';
-import { createApi, type GotApi } from '@gothub/got-api';
+import { describe, beforeAll, beforeEach, it, expect } from 'bun:test';
+import { type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import type { Graph, Node, PushResult } from '@gothub-team/got-core';
-import { createAdminApi, createNewUserApi } from './shared';
+import { createNewUserApi } from './shared';
 import { env } from '../env';
 
-let adminApi: ReturnType<typeof createApi>;
 let testId: string;
 let user1Api: GotApi;
 let user1Email: string;
 let user2Api: GotApi;
 let user2Email: string;
 beforeAll(async () => {
-    adminApi = await createAdminApi();
     user1Email = env.TEST_USER_1_EMAIL;
-    user1Api = await createNewUserApi(adminApi, user1Email);
+    user1Api = await createNewUserApi(user1Email, env.TEST_USER_1_PW);
     user2Email = env.TEST_USER_2_EMAIL;
-    user2Api = await createNewUserApi(adminApi, user2Email);
+    user2Api = await createNewUserApi(user2Email, env.TEST_USER_2_PW);
 });
 beforeEach(async () => {
     testId = `test-${crypto.randomBytes(8).toString('hex')}`;
-});
-afterAll(async () => {
-    await adminApi.deleteUser({ email: user1Email });
-    await adminApi.deleteUser({ email: user2Email });
 });
 
 describe('nodes', () => {
@@ -44,9 +38,6 @@ describe('nodes', () => {
                 include: { node: true },
             },
         });
-    });
-    afterEach(async () => {
-        await adminApi.push({ nodes: { [testId]: false } });
     });
 
     describe('one node', () => {
@@ -91,14 +82,6 @@ describe('nodes', () => {
                 },
                 [`${testId}-2`]: {
                     include: { node: true },
-                },
-            });
-        });
-        afterEach(async () => {
-            await adminApi.push({
-                nodes: {
-                    [`${testId}-1`]: false,
-                    [`${testId}-2`]: false,
                 },
             });
         });
@@ -245,19 +228,6 @@ describe('nodes', () => {
                 },
             });
         });
-        afterEach(async () => {
-            await adminApi.push({
-                nodes: {
-                    [testId]: false,
-                    [`${testId}-other`]: false,
-                },
-                rights: {
-                    [testId]: {
-                        user: { [user1Email]: { read: false } },
-                    },
-                },
-            });
-        });
 
         describe('push and pull', async () => {
             it('can pull node with read right', async () => {
@@ -280,15 +250,6 @@ describe('nodes', () => {
                 graph = await user2Api.pull({
                     [`${testId}-non-existing`]: {
                         include: { node: true },
-                    },
-                });
-            });
-            afterEach(async () => {
-                await adminApi.push({
-                    rights: {
-                        [testId]: {
-                            user: { [user2Email]: { read: false } },
-                        },
                     },
                 });
             });
@@ -332,19 +293,6 @@ describe('nodes', () => {
                 },
                 [`${testId}-other`]: {
                     include: { node: true },
-                },
-            });
-        });
-        afterEach(async () => {
-            await adminApi.push({
-                nodes: {
-                    [testId]: false,
-                    [`${testId}-other`]: false,
-                },
-                rights: {
-                    [testId]: {
-                        user: { [user1Email]: { write: false } },
-                    },
                 },
             });
         });
@@ -463,9 +411,6 @@ describe('big node', () => {
                 include: { node: true },
             },
         });
-    });
-    afterEach(async () => {
-        await adminApi.push({ nodes: { [testId]: false } });
     });
 
     it('pushes a new big node', async () => {

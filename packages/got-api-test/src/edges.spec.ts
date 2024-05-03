@@ -1,29 +1,23 @@
-import { describe, beforeAll, afterAll, beforeEach, afterEach, it, expect } from 'bun:test';
-import { createApi, type GotApi } from '@gothub/got-api';
+import { describe, beforeAll, beforeEach, it, expect } from 'bun:test';
+import { type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import type { Graph, PushResult } from '@gothub-team/got-core';
-import { createAdminApi, createNewUserApi } from './shared';
+import { createNewUserApi } from './shared';
 import { env } from '../env';
 
-let adminApi: ReturnType<typeof createApi>;
 let testId: string;
 let user1Api: GotApi;
 let user1Email: string;
 let user2Api: GotApi;
 let user2Email: string;
 beforeAll(async () => {
-    adminApi = await createAdminApi();
     user1Email = env.TEST_USER_1_EMAIL;
-    user1Api = await createNewUserApi(adminApi, user1Email);
+    user1Api = await createNewUserApi(user1Email, env.TEST_USER_1_PW);
     user2Email = env.TEST_USER_2_EMAIL;
-    user2Api = await createNewUserApi(adminApi, user2Email);
+    user2Api = await createNewUserApi(user2Email, env.TEST_USER_2_PW);
 });
 beforeEach(async () => {
     testId = `test-${crypto.randomBytes(8).toString('hex')}`;
-});
-afterAll(async () => {
-    await adminApi.deleteUser({ email: user1Email });
-    await adminApi.deleteUser({ email: user2Email });
 });
 
 describe('edges', () => {
@@ -54,21 +48,6 @@ describe('edges', () => {
                         include: {
                             edges: true,
                         },
-                    },
-                },
-            },
-        });
-    });
-    afterEach(async () => {
-        await adminApi.push({
-            nodes: {
-                [`${testId}-1`]: false,
-                [`${testId}-2`]: false,
-            },
-            edges: {
-                from: {
-                    [`${testId}-1`]: {
-                        to: { [`${testId}-2`]: false },
                     },
                 },
             },
@@ -112,24 +91,6 @@ describe('edges', () => {
                         'from/to': {
                             include: {
                                 edges: true,
-                            },
-                        },
-                    },
-                },
-            });
-        });
-        afterEach(async () => {
-            await adminApi.push({
-                nodes: {
-                    [`${testId}-3`]: false,
-                    [`${testId}-4`]: false,
-                },
-                edges: {
-                    from: {
-                        [`${testId}-1`]: {
-                            to: {
-                                [`${testId}-3`]: false,
-                                [`${testId}-4`]: false,
                             },
                         },
                     },
@@ -245,28 +206,6 @@ describe('edges', () => {
                 },
             });
         });
-        afterEach(async () => {
-            await adminApi.push({
-                nodes: {
-                    [`${testId}-3`]: false,
-                    [`${testId}-4`]: false,
-                },
-                edges: {
-                    from: {
-                        [`${testId}-2`]: {
-                            to: {
-                                [`${testId}-3`]: false,
-                            },
-                        },
-                        [`${testId}-3`]: {
-                            to: {
-                                [`${testId}-4`]: false,
-                            },
-                        },
-                    },
-                },
-            });
-        });
 
         it('pushes the edges', () => {
             expect(pushResult).toHaveProperty(['edges', 'from', `${testId}-2`, 'to', `${testId}-3`, 'statusCode'], 200);
@@ -320,46 +259,6 @@ describe('edges', () => {
                         'from/to': {
                             include: {
                                 edges: true,
-                            },
-                        },
-                    },
-                },
-            });
-        });
-        afterEach(async () => {
-            await adminApi.push({
-                nodes: {
-                    [`${testId}-3`]: false,
-                },
-                edges: {
-                    from: {
-                        [`${testId}-1`]: {
-                            to: {
-                                [`${testId}-2`]: false,
-                                [`${testId}-3`]: false,
-                            },
-                        },
-                    },
-                },
-                rights: {
-                    [`${testId}-1`]: {
-                        user: {
-                            [user2Email]: {
-                                read: false,
-                            },
-                        },
-                    },
-                    [`${testId}-2`]: {
-                        user: {
-                            [user2Email]: {
-                                read: false,
-                            },
-                        },
-                    },
-                    [`${testId}-3`]: {
-                        user: {
-                            [user2Email]: {
-                                read: false,
                             },
                         },
                     },
@@ -490,39 +389,6 @@ describe('edges', () => {
                         'from/to': {
                             include: {
                                 edges: true,
-                            },
-                        },
-                    },
-                },
-            });
-        });
-        afterEach(async () => {
-            await adminApi.push({
-                nodes: {
-                    [`${testId}-3`]: false,
-                },
-                edges: {
-                    from: {
-                        [`${testId}-1`]: {
-                            to: {
-                                [`${testId}-2`]: false,
-                                [`${testId}-3`]: false,
-                            },
-                        },
-                    },
-                },
-                rights: {
-                    [`${testId}-1`]: {
-                        user: {
-                            [user2Email]: {
-                                write: false,
-                            },
-                        },
-                    },
-                    [`${testId}-2`]: {
-                        user: {
-                            [user2Email]: {
-                                write: false,
                             },
                         },
                     },
