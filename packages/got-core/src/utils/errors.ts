@@ -1,21 +1,23 @@
 import { isEdgeTypeString } from './util';
 
+export const MISSING_PARAM_ERROR = 'MissingParamError';
 export class MissingParamError extends Error {
     public missing: string;
 
     constructor(fnName: string, missing: string, example: string) {
         super(missingStr(fnName, missing, example));
-        this.name = 'MissingParamError';
+        this.name = MISSING_PARAM_ERROR;
         this.missing = missing;
     }
 }
 
+export const INVALID_PARAM_ERROR = 'InvalidParamError';
 export class InvalidParamError extends Error {
     public invalid: string;
 
     constructor(fnName: string, invalid: string, example: string) {
         super(invalidStr(fnName, invalid, example));
-        this.name = 'InvalidParamError';
+        this.name = INVALID_PARAM_ERROR;
         this.invalid = invalid;
     }
 }
