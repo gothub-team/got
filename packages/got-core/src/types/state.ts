@@ -3,9 +3,6 @@ import { ErrorGraph, Graph } from './graph';
 export declare interface GraphState {
     graph: Graph;
     errors: ErrorGraph;
-    vars: {
-        [name: string]: any;
-    };
     files: {
         [nodeId: string]: {
             [name: string]: {

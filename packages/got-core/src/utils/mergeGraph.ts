@@ -13,7 +13,7 @@ const mergeObjRight =
     <TInput extends object>(left?: TInput, right?: TInput): TInput | undefined => {
         if (!right) return left;
 
-        let result: TInput = left ?? ({} as TInput);
+        const result: TInput = left ?? ({} as TInput);
         forEachObjDepth(
             right,
             (valRight: TMerge, path: string[]) => {
@@ -43,7 +43,7 @@ export const mergeGraphsRight = (left: Graph, right: Graph): Graph => {
     if (!right) return left;
     if (!left) return right;
 
-    let result = left;
+    const result = left;
 
     const nodes = mergeNodesRight(left?.nodes, right?.nodes);
     if (nodes) {
@@ -78,7 +78,7 @@ const overwriteObjRight =
     <TInput extends object>(left?: TInput, right?: TInput): TInput | undefined => {
         if (!right) return left;
 
-        let result: TInput = left ?? ({} as TInput);
+        const result: TInput = left ?? ({} as TInput);
         forEachObjDepth(
             right,
             (valRight, path) => {
@@ -116,7 +116,7 @@ export const mergeOverwriteGraphsRight = (left: Graph, right: Graph) => {
     if (!right) return left;
     if (!left) return right;
 
-    let result = left;
+    const result = left;
 
     const nodes = overwriteNodesRight(left?.nodes, right?.nodes);
     if (nodes) {

@@ -66,7 +66,7 @@ export const createSubscribable = <TEvent>() => {
  */
 export const toPromise = <TEvent>(observable: Observable<TEvent>) =>
     new Promise((resolve, reject) => {
-        let results: TEvent[] = [];
+        const results: TEvent[] = [];
         observable.subscribe({
             next: results.push,
             complete: (e: TEvent) => {

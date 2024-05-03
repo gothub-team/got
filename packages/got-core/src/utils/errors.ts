@@ -90,10 +90,10 @@ const examples: Partial<Record<ParameterType, string>> = {
     ),
 };
 
-const validate = (type: ParameterType, value: any) => {
+const validate = (type: ParameterType, value: unknown) => {
     switch (type) {
         case 'api':
-            return value && value.pull && value.push;
+            return value && typeof value === 'object' && value.pull && value.push;
         case 'function':
             return value && typeof value === 'function';
         case 'stack':

@@ -293,7 +293,7 @@ export const createStore = ({ dispatch, select }: CreateStoreOptions) => {
 
     const selectView = <TView extends View>(stack: string[], view: TView, state: State): ViewResult<TView> => {
         const graphStack = selectGraphStack(state, stack);
-        return viewResFromStack(graphStack, view, state);
+        return viewResFromStack(graphStack, view);
     };
     const getView = <TView extends View>(stack: string[], view: TView): ViewResult<TView> =>
         select((state) => selectView(stack, view, state));
@@ -301,7 +301,7 @@ export const createStore = ({ dispatch, select }: CreateStoreOptions) => {
     // TODO: tests for this?
     const selectSubgraph = (stack: string[], view: View, state: State): Graph => {
         const graphStack = selectGraphStack(state, stack);
-        return subgraphFromStack(graphStack, view, state);
+        return subgraphFromStack(graphStack, view);
     };
     const getSubgraph = (stack: string[], view: View): Graph => select((state) => selectSubgraph(stack, view, state));
 

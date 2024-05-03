@@ -4,7 +4,7 @@ import { State } from '../types/state';
 import { mergeDeepRight, mergeGraphObjRight } from './util';
 
 export const selectGraphStack = (state: State, stack: string[]): Graph[] => {
-    let acc = [];
+    const acc = [];
     for (let i = 0; i < stack.length; i += 1) {
         const graphName = stack[i];
         const graph = state[graphName]?.graph;
@@ -24,7 +24,7 @@ export const nodeFromStack = (graphStack: Graph[], nodeId: string): Node | boole
 export const edgeFromStack = (graphStack: Graph[], fromType: string, fromId: string, toType: string): Metadata => {
     if (graphStack.length === 0) return {};
 
-    let acc = {};
+    const acc = {};
     for (let i = 0; i < graphStack.length; i += 1) {
         const edge = graphStack[i].edges?.[fromType]?.[fromId]?.[toType];
         if (edge != null) {
@@ -46,7 +46,7 @@ export const edgeFromStack = (graphStack: Graph[], fromType: string, fromId: str
 export const reverseEdgeFromStack = (graphStack: Graph[], toType: string, toId: string, fromType: string): Metadata => {
     if (graphStack.length === 0) return {};
 
-    let acc = {};
+    const acc = {};
     for (let i = 0; i < graphStack.length; i += 1) {
         const edge = graphStack[i].index?.reverseEdges?.[toType]?.[toId]?.[fromType];
         if (edge != null) {

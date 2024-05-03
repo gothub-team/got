@@ -1,6 +1,5 @@
 import { Graph } from '../types/graph';
 import { Metadata } from '../types/graphObjects';
-import { State } from '../types/state';
 import { assocPathMutate } from './util';
 import { EdgeView, NodeView, View } from '../types/view';
 import { NodeBagInternal, ViewResult } from '../types/ViewResult';
@@ -13,11 +12,7 @@ import {
     rightFromStack,
 } from './stack';
 
-export const viewResFromStack = <TView extends View>(
-    graphStack: Graph[],
-    view: TView,
-    state: State,
-): ViewResult<TView> => {
+export const viewResFromStack = <TView extends View>(graphStack: Graph[], view: TView): ViewResult<TView> => {
     const queryNode = <TSubView extends NodeView | EdgeView>(
         queryObj: TSubView,
         nodeId: string,
@@ -101,7 +96,7 @@ export const viewResFromStack = <TView extends View>(
     return result;
 };
 
-export const subgraphFromStack = (graphStack: Graph[], view: View, state: State): Graph => {
+export const subgraphFromStack = (graphStack: Graph[], view: View): Graph => {
     const nodes = {};
     const edges = {};
     const reverseEdges = {};
@@ -112,7 +107,6 @@ export const subgraphFromStack = (graphStack: Graph[], view: View, state: State)
         queryObj: TSubView,
         nodeId: string,
         node: Node | boolean,
-        metadata?: Metadata,
     ) => {
         const { include } = queryObj;
 
@@ -171,7 +165,7 @@ export const subgraphFromStack = (graphStack: Graph[], view: View, state: State)
                 }
             }
 
-            queryNode(queryObj, edgeId, toNode, metadata);
+            queryNode(queryObj, edgeId, toNode);
         }
     };
 
