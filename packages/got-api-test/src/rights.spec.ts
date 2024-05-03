@@ -128,4 +128,52 @@ describe('rights', () => {
             expect(graph).not.toHaveProperty(['rights', `${testId}-2`, 'user', 'someEmail']);
         });
     });
+
+    describe('delete', () => {
+        beforeEach(async () => {
+            pushResult = await user2Api.push({
+                rights: {
+                    [`${testId}-1`]: {
+                        user: {
+                            [user1Email]: {
+                                read: false,
+                            },
+                        },
+                    },
+                    [`${testId}-2`]: {
+                        user: {
+                            [user1Email]: {
+                                read: false,
+                            },
+                        },
+                    },
+                },
+            });
+            graph = await user1Api.pull({
+                [`${testId}-1`]: {
+                    include: {
+                        rights: true,
+                    },
+                },
+                [`${testId}-2`]: {
+                    include: {
+                        rights: true,
+                    },
+                },
+            });
+        });
+
+        it('pushes rights for node 1 in delete mode', async () => {
+            expect(pushResult).toHaveProperty(['rights', `${testId}-1`, 'user', user1Email, 'read', 'statusCode'], 200);
+        });
+        it('does not push rights for node 2', async () => {
+            expect(pushResult).toHaveProperty(['rights', `${testId}-2`, 'user', user1Email, 'read', 'statusCode'], 403);
+        });
+        it('does not pull rights for node 1', async () => {
+            expect(graph).not.toHaveProperty(['rights', `${testId}-1`, 'user', user1Email]);
+        });
+        it('pulls rights for node 2', async () => {
+            expect(graph).toHaveProperty(['rights', `${testId}-2`, 'user', user1Email, 'read'], true);
+        });
+    });
 });
