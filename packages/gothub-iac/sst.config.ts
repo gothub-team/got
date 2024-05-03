@@ -1,6 +1,6 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 import * as pulumi from '@pulumi/pulumi';
-import * as gotiac from '@pulumi/gotiac';
+import * as gotiac from '@gothub/pulumi-gotiac-aws';
 import { env } from './env';
 
 export default $config({
