@@ -228,3 +228,8 @@ export const dissocPathMutate = <TInput extends object>(path: string[], input: T
 
     return input;
 };
+
+export const isEdgeTypeString = (edgeTypes: string) => {
+    const [fromType, toType] = edgeTypes.split('/');
+    return fromType && toType && fromType.length > 0 && toType.length > 0;
+};

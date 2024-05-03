@@ -2,11 +2,6 @@ import { Edges, ErrorGraph, Files, Graph, Nodes, PushResult, Rights } from '../t
 import { GraphElementResult, GraphError, Metadata, NodeFileView, UploadNodeFileView } from '../types/graphObjects';
 import { assocPathMutate, forEachObjDepth, getPathOr } from './util';
 
-export const isEdgeTypeString = (edgeTypes: string) => {
-    const [fromType, toType] = edgeTypes.split('/');
-    return fromType && toType && fromType.length > 0 && toType.length > 0;
-};
-
 export const selectSuccessAndErrorGraphs = (pushGraph: Graph, pushResult: PushResult): [Graph, ErrorGraph] => {
     const successNodes = {} as Nodes<Node | boolean>;
     const successEdges = {} as Edges<Metadata>;

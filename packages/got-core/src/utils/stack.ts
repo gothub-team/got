@@ -3,11 +3,6 @@ import { Metadata, NodeFileView, NodeRightsView } from '../types/graphObjects';
 import { State } from '../types/state';
 import { mergeDeepRight, mergeGraphObjRight } from './util';
 
-export const isEdgeTypeString = (edgeTypes: string) => {
-    const [fromType, toType] = edgeTypes.split('/');
-    return fromType && toType && fromType.length > 0 && toType.length > 0;
-};
-
 export const selectGraphStack = (state: State, stack: string[]): Graph[] => {
     let acc = [];
     for (let i = 0; i < stack.length; i += 1) {
