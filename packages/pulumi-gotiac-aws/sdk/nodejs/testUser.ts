@@ -20,7 +20,7 @@ export class TestUser extends pulumi.ComponentResource {
     }
 
     /**
-     * The temporary password of the test  user. Make sure to destroy the test  user after each test run.
+     * The temporary password of the test user. Make sure to destroy the test user after each test run.
      */
     public /*out*/ readonly password!: pulumi.Output<string>;
 
@@ -57,11 +57,11 @@ export class TestUser extends pulumi.ComponentResource {
  */
 export interface TestUserArgs {
     /**
-     * The email of the test  user. Throws an error if the user already exists.
+     * The email of the test user. Throws an error if the user already exists.
      */
     email: pulumi.Input<string>;
     /**
-     * The ID of the user pool where the test  user is created. UserPool must exist.
+     * The ID of the user pool where the test user is created. UserPool must exist.
      */
     userPoolId: pulumi.Input<string>;
 }
