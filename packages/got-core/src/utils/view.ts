@@ -13,7 +13,11 @@ import {
     rightFromStack,
 } from './stack';
 
-export const selectView = <TView extends View>(graphStack: Graph[], view: TView, state: State): ViewResult<TView> => {
+export const viewResFromStack = <TView extends View>(
+    graphStack: Graph[],
+    view: TView,
+    state: State,
+): ViewResult<TView> => {
     const queryNode = <TSubView extends NodeView | EdgeView>(
         queryObj: TSubView,
         nodeId: string,
@@ -97,7 +101,7 @@ export const selectView = <TView extends View>(graphStack: Graph[], view: TView,
     return result;
 };
 
-export const selectSubGraph = (graphStack: Graph[], view: View, state: State): Graph => {
+export const subgraphFromStack = (graphStack: Graph[], view: View, state: State): Graph => {
     const nodes = {};
     const edges = {};
     const reverseEdges = {};
