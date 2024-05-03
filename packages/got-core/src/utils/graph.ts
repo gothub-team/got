@@ -1,6 +1,6 @@
 import { Edges, ErrorGraph, Files, Graph, Nodes, PushResult, Rights } from '../types/graph';
 import { GraphElementResult, GraphError, Metadata, NodeFileView, UploadNodeFileView } from '../types/graphObjects';
-import { assocPathMutate, forEachObjDepth, getPathOr } from '../util';
+import { assocPathMutate, forEachObjDepth, getPathOr } from './util';
 
 export const isEdgeTypeString = (edgeTypes: string) => {
     const [fromType, toType] = edgeTypes.split('/');

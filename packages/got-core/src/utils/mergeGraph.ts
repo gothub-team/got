@@ -6,7 +6,7 @@ import {
     getPathOr,
     mergeDeepRight,
     mergeGraphObjRight,
-} from '../util';
+} from './util';
 
 const mergeObjRight =
     <TMerge>(depth: number, fnMergeRight: (l: TMerge, r: TMerge) => TMerge) =>

@@ -1,9 +1,9 @@
-import { Graph } from './types/graph';
-import { Metadata } from './types/graphObjects';
-import { State } from './types/state';
+import { Graph } from '../types/graph';
+import { Metadata } from '../types/graphObjects';
+import { State } from '../types/state';
 import { assocPathMutate } from './util';
-import { EdgeView, NodeView, View } from './types/view';
-import { NodeBagInternal, ViewResult } from './types/ViewResult';
+import { EdgeView, NodeView, View } from '../types/view';
+import { NodeBagInternal, ViewResult } from '../types/ViewResult';
 import {
     edgeFromStack,
     filesFromStack,
@@ -11,7 +11,7 @@ import {
     nodeFromStack,
     reverseEdgeFromStack,
     rightFromStack,
-} from './utils/stack.util';
+} from './stack';
 
 export const selectView = <TView extends View>(graphStack: Graph[], view: TView, state: State): ViewResult<TView> => {
     const queryNode = <TSubView extends NodeView | EdgeView>(

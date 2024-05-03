@@ -1,7 +1,7 @@
 import { Graph, NodeFilesView } from '../types/graph';
 import { Metadata, NodeFileView, NodeRightsView } from '../types/graphObjects';
 import { State } from '../types/state';
-import { mergeDeepRight, mergeGraphObjRight } from '../util';
+import { mergeDeepRight, mergeGraphObjRight } from './util';
 
 export const isEdgeTypeString = (edgeTypes: string) => {
     const [fromType, toType] = edgeTypes.split('/');
