@@ -106,7 +106,7 @@ export const createErrorHandledStore = (
         if (
             validateError('GOT_SELECT_METADATA', 'function', 'select', select) &&
             validateError('GOT_SELECT_METADATA', 'stack', 'stack', stack) &&
-            validateError('GOT_SELECT_METADATA', 'string', 'edgeTypes', edgeTypes) &&
+            validateError('GOT_SELECT_METADATA', 'edgeTypes', 'edgeTypes', edgeTypes) &&
             validateError('GOT_SELECT_METADATA', 'string', 'fromId', fromId) &&
             validateError('GOT_SELECT_METADATA', 'string', 'toId', toId)
         ) {
@@ -117,7 +117,7 @@ export const createErrorHandledStore = (
         if (
             validateError('GOT_GET_METADATA', 'function', 'select', select) &&
             validateError('GOT_GET_METADATA', 'stack', 'stack', stack) &&
-            validateError('GOT_GET_METADATA', 'string', 'edgeTypes', edgeTypes) &&
+            validateError('GOT_GET_METADATA', 'edgeTypes', 'edgeTypes', edgeTypes) &&
             validateError('GOT_GET_METADATA', 'string', 'fromId', fromId) &&
             validateError('GOT_GET_METADATA', 'string', 'toId', toId)
         ) {
@@ -128,7 +128,7 @@ export const createErrorHandledStore = (
         if (
             validateError('GOT_SELECT_EDGE', 'function', 'select', select) &&
             validateError('GOT_SELECT_EDGE', 'stack', 'stack', stack) &&
-            validateError('GOT_SELECT_EDGE', 'string', 'edgeTypes', edgeTypes) &&
+            validateError('GOT_SELECT_EDGE', 'edgeTypes', 'edgeTypes', edgeTypes) &&
             validateError('GOT_SELECT_EDGE', 'string', 'fromId', fromId)
         ) {
             return store.selectEdge(stack, edgeTypes, fromId, state);
@@ -138,7 +138,7 @@ export const createErrorHandledStore = (
         if (
             validateError('GOT_GET_EDGE', 'function', 'select', select) &&
             validateError('GOT_GET_EDGE', 'stack', 'stack', stack) &&
-            validateError('GOT_GET_EDGE', 'string', 'edgeTypes', edgeTypes) &&
+            validateError('GOT_GET_EDGE', 'edgeTypes', 'edgeTypes', edgeTypes) &&
             validateError('GOT_GET_EDGE', 'string', 'fromId', fromId)
         ) {
             return store.getEdge(stack, edgeTypes, fromId);
@@ -153,7 +153,7 @@ export const createErrorHandledStore = (
         if (
             validateError('GOT_SELECT_REVERSE_EDGE', 'function', 'select', select) &&
             validateError('GOT_SELECT_REVERSE_EDGE', 'stack', 'stack', stack) &&
-            validateError('GOT_SELECT_REVERSE_EDGE', 'string', 'edgeTypes', edgeTypes) &&
+            validateError('GOT_SELECT_REVERSE_EDGE', 'edgeTypes', 'edgeTypes', edgeTypes) &&
             validateError('GOT_SELECT_REVERSE_EDGE', 'string', 'toId', toId)
         ) {
             return store.selectReverseEdge(stack, edgeTypes, toId, state);
@@ -163,7 +163,7 @@ export const createErrorHandledStore = (
         if (
             validateError('GOT_GET_REVERSE_EDGE', 'function', 'select', select) &&
             validateError('GOT_GET_REVERSE_EDGE', 'stack', 'stack', stack) &&
-            validateError('GOT_GET_REVERSE_EDGE', 'string', 'edgeTypes', edgeTypes) &&
+            validateError('GOT_GET_REVERSE_EDGE', 'edgeTypes', 'edgeTypes', edgeTypes) &&
             validateError('GOT_GET_REVERSE_EDGE', 'string', 'toId', toId)
         ) {
             return store.getReverseEdge(stack, edgeTypes, toId);
@@ -174,7 +174,7 @@ export const createErrorHandledStore = (
         if (
             validateError('GOT_ADD', 'function', 'dispatch', dispatch) &&
             validateError('GOT_ADD', 'string', 'graphName', graphName) &&
-            validateError('GOT_ADD', 'string', 'edgeTypes', edgeTypes) &&
+            validateError('GOT_ADD', 'edgeTypes', 'edgeTypes', edgeTypes) &&
             validateError('GOT_ADD', 'string', 'fromId', fromId) &&
             validateError('GOT_ADD', 'node', 'toNode', toNode) &&
             validateError('GOT_ADD', 'metadata', 'metadata', metadata)
@@ -186,7 +186,7 @@ export const createErrorHandledStore = (
         if (
             validateError('GOT_REMOVE', 'function', 'dispatch', dispatch) &&
             validateError('GOT_REMOVE', 'string', 'graphName', graphName) &&
-            validateError('GOT_REMOVE', 'string', 'edgeTypes', edgeTypes) &&
+            validateError('GOT_REMOVE', 'edgeTypes', 'edgeTypes', edgeTypes) &&
             validateError('GOT_REMOVE', 'string', 'fromId', fromId) &&
             validateError('GOT_REMOVE', 'node', 'toNode', toNode)
         ) {
