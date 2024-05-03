@@ -119,7 +119,7 @@ export const mergeDeepRight = (l: unknown, r: unknown) => {
     const result = {};
 
     const lKeys = Object.keys(l);
-    for (let i = 0; i < lKeys.length; i = +1) {
+    for (let i = 0; i < lKeys.length; i += 1) {
         const key = lKeys[i];
         const lVal = l[key];
         const rVal = r[key];
@@ -127,7 +127,7 @@ export const mergeDeepRight = (l: unknown, r: unknown) => {
     }
 
     const rKeys = Object.keys(r);
-    for (let i = 0; i < rKeys.length; i = +1) {
+    for (let i = 0; i < rKeys.length; i += 1) {
         const key = rKeys[i];
         if (result[key] === undefined) {
             result[key] = r[key];
