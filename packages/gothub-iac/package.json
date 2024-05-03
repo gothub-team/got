@@ -4,8 +4,7 @@
     "type": "module",
     "devDependencies": {
         "@types/bun": "latest",
-        "@pulumi/pulumi": "^3.113.3",
-        "@gothub/pulumi-gotiac-aws": "workspace:*"
+        "@pulumi/pulumi": "^3.113.3"
     },
     "peerDependencies": {
         "typescript": "^5.0.0"
