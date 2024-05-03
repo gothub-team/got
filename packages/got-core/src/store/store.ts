@@ -9,6 +9,7 @@ import {
     filesFromStack,
     metadataFromStack,
     nodeFromStack,
+    reverseEdgeFromStack,
     rightFromStack,
     selectGraphStack,
 } from '../utils/stack';
@@ -141,7 +142,7 @@ export const createStore = ({ dispatch, select }: CreateStoreOptions) => {
 
         if (!nodeFromStack(graphStack, toId)) return {};
 
-        const fromIds = Object.keys(edgeFromStack(graphStack, toType, toId, fromType));
+        const fromIds = Object.keys(reverseEdgeFromStack(graphStack, toType, toId, fromType));
 
         const edge = {};
         for (let i = 0; i < fromIds.length; i += 1) {
