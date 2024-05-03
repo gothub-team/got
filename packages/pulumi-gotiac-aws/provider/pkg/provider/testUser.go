@@ -6,38 +6,38 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-// The set of arguments for creating a TestAdminUser component resource.
-type TestAdminUserArgs struct {
-	// The ID of the user pool where the test admin user is created. UserPool must exist.
+// The set of arguments for creating a TestUser component resource.
+type TestUserArgs struct {
+	// The ID of the user pool where the test  user is created. UserPool must exist.
 	UserPoolId pulumi.StringInput `pulumi:"userPoolId"`
-	// The email of the test admin user. Throws an error if the user already exists.
+	// The email of the test  user. Throws an error if the user already exists.
 	Email pulumi.StringInput `pulumi:"email"`
 }
 
-// The TestAdminUser component resource.
-type TestAdminUser struct {
+// The TestUser component resource.
+type TestUser struct {
 	pulumi.ResourceState
 
-	// The temporary password of the test admin user. Make sure to destroy the test admin user after each
+	// The temporary password of the test  user. Make sure to destroy the test  user after each
 	// test run.
 	Password pulumi.StringOutput `pulumi:"password"`
 }
 
-// NewTestAdminUser creates a new TestAdminUser component resource.
-func NewTestAdminUser(ctx *pulumi.Context,
-	name string, args *TestAdminUserArgs, opts ...pulumi.ResourceOption) (*TestAdminUser, error) {
+// NewTestUser creates a new TestUser component resource.
+func NewTestUser(ctx *pulumi.Context,
+	name string, args *TestUserArgs, opts ...pulumi.ResourceOption) (*TestUser, error) {
 	if args == nil {
-		args = &TestAdminUserArgs{}
+		args = &TestUserArgs{}
 	}
 
-	component := &TestAdminUser{}
-	err := ctx.RegisterComponentResource("gotiac:index:TestAdminUser", name, component, opts...)
+	component := &TestUser{}
+	err := ctx.RegisterComponentResource("gotiac:index:TestUser", name, component, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create a random password for the test admin user.
-	password, err := random.NewRandomPassword(ctx, "password", &random.RandomPasswordArgs{
+	// Create a random password for the test  user.
+	password, err := random.NewRandomPassword(ctx, name+"Password", &random.RandomPasswordArgs{
 		Length:     pulumi.Int(64),
 		MinLower:   pulumi.Int(1),
 		MinUpper:   pulumi.Int(1),
