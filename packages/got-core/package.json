@@ -8,11 +8,10 @@
     },
     "devDependencies": {
         "@gothub/typescript-util": "workspace:*",
-        "@types/bun": "latest",
+        "@types/bun": "latest"
     },
     "peerDependencies": {
         "typescript": "^5.0.0"
     },
-    "dependencies": {
-    }
+    "dependencies": {}
 }
