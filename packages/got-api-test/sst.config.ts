@@ -19,13 +19,27 @@ export default $config({
         };
     },
     async run() {
-        const user = new gotiac.TestAdminUser('TestAdminUser', {
+        const adminUser = new gotiac.TestUser('TestAdminUser', {
             userPoolId: env.USER_POOL_ID,
-            email: env.TEST_ADMIN_USER_EMAIL,
+            email: env.TEST_ADMIN_EMAIL,
         });
-
-        user.password.apply((password) => {
-            fs.writeFileSync('.test-admin-pw.env', `export TEST_ADMIN_PW='${password}'`);
+        const testUser1 = new gotiac.TestUser('TestUser1', {
+            userPoolId: env.USER_POOL_ID,
+            email: env.TEST_USER_1_EMAIL,
+        });
+        const testUser2 = new gotiac.TestUser('TestUser2', {
+            userPoolId: env.USER_POOL_ID,
+            email: env.TEST_USER_2_EMAIL,
+        });
+        fs.writeFileSync('.test-users.env', '');
+        adminUser.password.apply((password) => {
+            fs.appendFileSync('.test-users.env', `export TEST_ADMIN_PW='${password}'\n`);
+        });
+        testUser1.password.apply((password) => {
+            fs.appendFileSync('.test-users.env', `export TEST_USER_1_PW='${password}'\n`);
+        });
+        testUser2.password.apply((password) => {
+            fs.appendFileSync('.test-users.env', `export TEST_USER_2_PW='${password}'\n`);
         });
     },
 });
