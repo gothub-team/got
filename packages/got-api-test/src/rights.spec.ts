@@ -3,7 +3,7 @@ import { type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import { env } from '../env';
 import { createUserApi } from './shared';
-import type { Graph } from '@gothub-team/got-core';
+import type { Graph, PushResult } from '@gothub-team/got-core';
 
 let testId: string;
 let user1Api: GotApi;
@@ -21,7 +21,7 @@ beforeEach(async () => {
 });
 
 describe('rights', () => {
-    // let pushResult: PushResult;
+    let pushResult: PushResult;
     let graph: Graph;
     beforeEach(async () => {
         await user1Api.push({
@@ -46,7 +46,7 @@ describe('rights', () => {
         });
     });
 
-    describe('pull rights', () => {
+    describe('pull', () => {
         beforeEach(async () => {
             graph = await user2Api.pull({
                 [`${testId}-1`]: {
@@ -72,6 +72,60 @@ describe('rights', () => {
 
         it('does not pull rights for node 2', async () => {
             expect(graph).not.toHaveProperty(['rights', `${testId}-2`]);
+        });
+    });
+
+    describe('push', () => {
+        beforeEach(async () => {
+            pushResult = await user2Api.push({
+                rights: {
+                    [`${testId}-1`]: {
+                        user: {
+                            someEmail: {
+                                read: true,
+                            },
+                        },
+                    },
+                    [`${testId}-2`]: {
+                        user: {
+                            someEmail: {
+                                read: true,
+                            },
+                        },
+                    },
+                },
+            });
+            graph = await user1Api.pull({
+                [`${testId}-1`]: {
+                    include: {
+                        rights: true,
+                    },
+                },
+                [`${testId}-2`]: {
+                    include: {
+                        rights: true,
+                    },
+                },
+            });
+        });
+
+        it('pushes rights for node 1', async () => {
+            expect(pushResult).toHaveProperty(
+                ['rights', `${testId}-1`, 'user', 'someEmail', 'read', 'statusCode'],
+                200,
+            );
+        });
+        it('does not push rights for node 2', async () => {
+            expect(pushResult).toHaveProperty(
+                ['rights', `${testId}-2`, 'user', 'someEmail', 'read', 'statusCode'],
+                403,
+            );
+        });
+        it('changes rights for node 1', async () => {
+            expect(graph).toHaveProperty(['rights', `${testId}-1`, 'user', 'someEmail', 'read'], true);
+        });
+        it('does not change rights for node 2', async () => {
+            expect(graph).not.toHaveProperty(['rights', `${testId}-2`, 'user', 'someEmail']);
         });
     });
 });
