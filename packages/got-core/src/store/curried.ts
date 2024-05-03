@@ -4,6 +4,7 @@ import { View } from '../types/view';
 import { createStore } from './store';
 
 const decideStack = (stack: string[] | string[1][]): string[] => {
+    if (stack.length === 0) return undefined;
     if (stack.length === 1 && Array.isArray(stack[0])) {
         return stack[0];
     }
