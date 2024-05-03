@@ -21,7 +21,7 @@ export const createCurriedStore = (store: ReturnType<typeof createStore>) => {
         (...stack: string[]) =>
         (nodeId: string) =>
         (state: State) => {
-            store.selectNode(decideStack(stack), nodeId, state);
+            return store.selectNode(decideStack(stack), nodeId, state);
         };
     const getNode =
         (...stack: string[]) =>
@@ -41,7 +41,7 @@ export const createCurriedStore = (store: ReturnType<typeof createStore>) => {
         (fromId: string) =>
         (toId: string) =>
         (state: State) => {
-            store.selectMetadata(decideStack(stack), edgeTypes, fromId, toId, state);
+            return store.selectMetadata(decideStack(stack), edgeTypes, fromId, toId, state);
         };
     const getMetadata =
         (...stack: string[]) =>
@@ -56,7 +56,7 @@ export const createCurriedStore = (store: ReturnType<typeof createStore>) => {
         (edgeTypes: string) =>
         (fromId: string) =>
         (state: State) => {
-            store.selectEdge(decideStack(stack), edgeTypes, fromId, state);
+            return store.selectEdge(decideStack(stack), edgeTypes, fromId, state);
         };
     const getEdge =
         (...stack: string[]) =>
@@ -70,7 +70,7 @@ export const createCurriedStore = (store: ReturnType<typeof createStore>) => {
         (edgeTypes: string) =>
         (toId: string) =>
         (state: State) => {
-            store.selectReverseEdge(decideStack(stack), edgeTypes, toId, state);
+            return store.selectReverseEdge(decideStack(stack), edgeTypes, toId, state);
         };
     const getReverseEdge =
         (...stack: string[]) =>
@@ -104,7 +104,7 @@ export const createCurriedStore = (store: ReturnType<typeof createStore>) => {
         (...stack: string[]) =>
         (nodeId: string) =>
         (state: State) => {
-            store.selectRights(decideStack(stack), nodeId, state);
+            return store.selectRights(decideStack(stack), nodeId, state);
         };
     const getRights =
         (...stack: string[]) =>
@@ -128,7 +128,7 @@ export const createCurriedStore = (store: ReturnType<typeof createStore>) => {
         (...stack: string[]) =>
         (nodeId: string) =>
         (state: State) => {
-            store.selectFiles(decideStack(stack), nodeId, state);
+            return store.selectFiles(decideStack(stack), nodeId, state);
         };
     const getFiles =
         (...stack: string[]) =>
@@ -146,7 +146,7 @@ export const createCurriedStore = (store: ReturnType<typeof createStore>) => {
         (...stack: string[]) =>
         (view: View) =>
         (state: State) => {
-            store.selectView(decideStack(stack), view, state);
+            return store.selectView(decideStack(stack), view, state);
         };
     const getView =
         (...stack: string[]) =>
@@ -158,7 +158,7 @@ export const createCurriedStore = (store: ReturnType<typeof createStore>) => {
         (...stack: string[]) =>
         (view: View) =>
         (state: State) => {
-            store.selectSubgraph(decideStack(stack), view, state);
+            return store.selectSubgraph(decideStack(stack), view, state);
         };
 
     const getSubgraph =
