@@ -1,5 +1,5 @@
 import { Graph, NodeFilesView } from './types/graph';
-import { Metadata, NodeFileView, NodeRightsView } from './graphObjects';
+import { Metadata, NodeFileView, NodeRightsView } from './types/graphObjects';
 import { State } from './types/state';
 import { mergeDeepRight, mergeGraphObjRight } from './util';
 

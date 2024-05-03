@@ -1,5 +1,5 @@
 import { Graph } from './types/graph';
-import { Metadata } from './graphObjects';
+import { Metadata } from './types/graphObjects';
 import { State } from './types/state';
 import { assocPathMutate } from './util';
 import { EdgeView, NodeView, View } from './types/view';

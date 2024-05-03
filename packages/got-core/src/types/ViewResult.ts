@@ -1,4 +1,4 @@
-import { Metadata, NodeFileView, NodeRightsView } from '../graphObjects';
+import { Metadata, NodeFileView, NodeRightsView } from './graphObjects';
 import { NodeFilesView } from './graph';
 import { EdgeInclude, EdgeView, EdgesView, NodeInclude, NodeView, View } from './view';
 
