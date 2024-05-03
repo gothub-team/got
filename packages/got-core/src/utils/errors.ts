@@ -27,6 +27,7 @@ type ParameterType =
     | 'string'
     | 'node'
     | 'edgeTypes'
+    | 'metadata'
     | 'blob'
     | 'view'
     | 'graph'
@@ -106,20 +107,22 @@ const validate = (type: ParameterType, value: any) => {
         case 'view':
         case 'graph':
         case 'rights':
+        case 'metadata':
             return value && typeof value === 'object';
     }
 };
 
-export const validateInput =
-    (onError: (error: Error) => void) => (fnName: string, type: ParameterType, input: object) => {
-        const keys = Object.keys(input);
-        for (let i = 0; i < keys.length; i += 1) {
-            const key = keys[i];
-            const value = input[key];
-            if (value === undefined) {
-                onError(new MissingParamError(fnName, key, examples[type] || ''));
-            } else if (!validate(type, value)) {
-                onError(new InvalidParamError(fnName, key, examples[type] || ''));
-            }
+export const createInputValidator =
+    (onError: (error: Error) => void) => (fnName: string, type: ParameterType, key: string, value: unknown) => {
+        if (value === undefined) {
+            onError(new MissingParamError(fnName, key, examples[type] || ''));
+            return false;
         }
+
+        if (!validate(type, value)) {
+            onError(new InvalidParamError(fnName, key, examples[type] || ''));
+            return false;
+        }
+
+        return true;
     };

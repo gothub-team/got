@@ -1,6 +1,6 @@
 import { ViewResult } from '../types/ViewResult';
 import { GOT_ACTION } from '../types/actions';
-import { Graph } from '../types/graph';
+import { Graph, PushResult } from '../types/graph';
 import { Metadata, Node, RightTypes } from '../types/graphObjects';
 import { State } from '../types/state';
 import { View } from '../types/view';
@@ -14,8 +14,11 @@ import {
 } from '../utils/stack';
 import { subgraphFromStack, viewResFromStack } from '../utils/view';
 
-type CreateStoreOptions = {
-    // api: Api;
+export type CreateStoreOptions = {
+    api: {
+        push: (graph: Graph) => Promise<PushResult>;
+        pull: (view: View) => Promise<Graph>;
+    };
     dispatch: (action: GOT_ACTION) => void;
     select: <TRes>(fnSelect: (state: State) => TRes) => TRes;
 };
@@ -68,7 +71,7 @@ export const createStore = ({ dispatch, select }: CreateStoreOptions) => {
         return nodeFromStack(graphStack, nodeId);
     };
     const getNode = (stack: string[], nodeId: string) => select((state) => selectNode(stack, nodeId, state));
-    const setNode = (graphName: string, node) => {
+    const setNode = (graphName: string, node: Node) => {
         dispatch({
             type: 'GOT/SET_NODE',
             payload: {
@@ -123,7 +126,7 @@ export const createStore = ({ dispatch, select }: CreateStoreOptions) => {
 
         return edge;
     };
-    const getEdge = (stack: string[], edgeTypes: string, fromId: string) =>
+    const getEdge = (stack: string[], edgeTypes: string, fromId: string): Record<string, Metadata> =>
         select((state) => selectEdge(stack, edgeTypes, fromId, state));
 
     const selectReverseEdge = (
@@ -155,7 +158,7 @@ export const createStore = ({ dispatch, select }: CreateStoreOptions) => {
 
         return edge;
     };
-    const getReverseEdge = (stack: string[], edgeTypes: string, toId: string) =>
+    const getReverseEdge = (stack: string[], edgeTypes: string, toId: string): Record<string, Metadata> =>
         select((state) => selectReverseEdge(stack, edgeTypes, toId, state));
 
     const add = (graphName: string, edgeTypes: string, fromId: string, toNode: Node, metadata: Metadata = true) => {
@@ -296,11 +299,11 @@ export const createStore = ({ dispatch, select }: CreateStoreOptions) => {
         select((state) => selectView(stack, view, state));
 
     // TODO: tests for this?
-    const selectSubgraph = (stack: string[], view: View, state: State) => {
+    const selectSubgraph = (stack: string[], view: View, state: State): Graph => {
         const graphStack = selectGraphStack(state, stack);
         return subgraphFromStack(graphStack, view, state);
     };
-    const getSubgraph = (stack: string[], view: View) => select((state) => selectSubgraph(stack, view, state));
+    const getSubgraph = (stack: string[], view: View): Graph => select((state) => selectSubgraph(stack, view, state));
 
     return {
         merge,
@@ -308,24 +311,32 @@ export const createStore = ({ dispatch, select }: CreateStoreOptions) => {
         mergeOverwriteGraph,
         clear,
         clearAll,
+        selectNode,
         getNode,
         setNode,
         removeNode,
+        selectMetadata,
         getMetadata,
+        selectEdge,
         getEdge,
+        selectReverseEdge,
         getReverseEdge,
         add,
         remove,
         assoc,
         dissoc,
+        selectRights,
         getRights,
         setRights,
         setRoleRights,
         inheritRights,
+        selectFiles,
         getFiles,
         setFile,
         removeFile,
+        selectView,
         getView,
+        selectSubgraph,
         getSubgraph,
     };
 };
