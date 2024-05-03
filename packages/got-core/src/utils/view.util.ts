@@ -11,7 +11,7 @@ import {
     nodeFromStack,
     reverseEdgeFromStack,
     rightFromStack,
-} from './stack.util';
+} from './utils/stack.util';
 
 export const selectView = <TView extends View>(graphStack: Graph[], view: TView, state: State): ViewResult<TView> => {
     const queryNode = <TSubView extends NodeView | EdgeView>(
