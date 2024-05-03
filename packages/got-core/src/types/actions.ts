@@ -41,7 +41,7 @@ export type GOT_ACTION =
 type GOT_ACTION_MERGE = {
     type: 'GOT/MERGE';
     payload: {
-        fromGraphName: string;
+        fromGraph: Graph;
         toGraphName: string;
     };
 };
@@ -85,6 +85,7 @@ type GOT_ACTION_SET_NODE = {
 type GOT_ACTION_ADD = {
     type: 'GOT/ADD';
     payload: {
+        graphName: string;
         fromType: string;
         toType: string;
         fromId: string;
@@ -96,6 +97,7 @@ type GOT_ACTION_ADD = {
 type GOT_ACTION_REMOVE = {
     type: 'GOT/REMOVE';
     payload: {
+        graphName: string;
         fromType: string;
         toType: string;
         fromId: string;
@@ -106,6 +108,7 @@ type GOT_ACTION_REMOVE = {
 type GOT_ACTION_ASSOC = {
     type: 'GOT/ASSOC';
     payload: {
+        graphName: string;
         fromType: string;
         toType: string;
         fromId: string;
@@ -117,6 +120,7 @@ type GOT_ACTION_ASSOC = {
 type GOT_ACTION_DISSOC = {
     type: 'GOT/DISSOC';
     payload: {
+        graphName: string;
         fromType: string;
         toType: string;
         fromId: string;
