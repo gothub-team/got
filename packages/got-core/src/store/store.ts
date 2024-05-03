@@ -295,6 +295,7 @@ export const createStore = ({ dispatch, select }: CreateStoreOptions) => {
     const getView = <TView extends View>(stack: string[], view: TView): ViewResult<TView> =>
         select((state) => selectView(stack, view, state));
 
+    // TODO: tests for this?
     const selectSubgraph = (stack: string[], view: View, state: State) => {
         const graphStack = selectGraphStack(state, stack);
         return subgraphFromStack(graphStack, view, state);
