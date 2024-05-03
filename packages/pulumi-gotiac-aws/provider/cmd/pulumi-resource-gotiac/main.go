@@ -17,8 +17,8 @@
 package main
 
 import (
-	"github.com/pulumi/pulumi-gotiac/pkg/provider"
-	"github.com/pulumi/pulumi-gotiac/pkg/version"
+	"github.com/gothub-team/got/packages/pulumi-gotiac-aws/provider/pkg/provider"
+	"github.com/gothub-team/got/packages/pulumi-gotiac-aws/provider/pkg/version"
 )
 
 var providerName = "gotiac"
