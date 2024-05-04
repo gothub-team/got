@@ -23,8 +23,8 @@ func (m *module) Construct(ctx *pulumi.Context, name, typ, urn string) (r pulumi
 	switch typ {
 	case "gotiac:index:FileHosting":
 		r = &FileHosting{}
-	case "gotiac:index:TestAdminUser":
-		r = &TestAdminUser{}
+	case "gotiac:index:TestUser":
+		r = &TestUser{}
 	default:
 		return nil, fmt.Errorf("unknown resource type: %s", typ)
 	}
