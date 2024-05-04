@@ -48,12 +48,13 @@ jobs:
                   repo: pulumi/pulumictl
             - name: Build binary
               working-directory: ./packages/pulumi-gotiac-aws
-              run: make build_provider
+              run:
+                  GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o ${{ matrix.binary }}-${{ matrix.goos
+                  }} ./packages/pulumi-gotiac-aws/cmd/${{ matrix.binary }} your-source-directory
               env:
                   GOOS: ${{ matrix.goos }}
                   GOARCH: ${{ matrix.goarch }}
                   BINARY_NAME: ${{ matrix.binary }}
-                  TAG: ${{ github.ref }}
             - name: Create Release
               id: create_release
               uses: actions/create-release@v1
@@ -72,9 +73,8 @@ jobs:
               with:
                   upload_url: ${{ steps.create_release.outputs.upload_url }}
                   asset_path:
-                      'checkers/build/${{ matrix.binary }}-${{ github.ref }}-${{ matrix.goos }}-${{ matrix.goarch
-                      }}.tar.gz'
-                  asset_name: ${{ matrix.binary }}-${{ github.ref }}-${{ matrix.oos }}-${{ matrix.goarch }}.tar.gz
+                      checkers/build/${{ matrix.binary }}-${{ matrix.tag }}-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
+                  asset_name: ${{ matrix.binary }}-${{ matrix.tag }}-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
                   asset_content_type: application/gzip
             # - name: Run GoReleaser
             #   uses: goreleaser/goreleaser-action@v5
