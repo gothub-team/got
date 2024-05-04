@@ -60,7 +60,9 @@ jobs:
             - name: Create and upload Release
               uses: ncipollo/release-action@v1
               with:
-                  artifacts: '${{ matrix.binary }}-${{ matrix.version }}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz'
+                  artifacts:
+                      './packages/pulumi-gotiac-aws/${{ matrix.binary }}-${{ matrix.version }}-${{ matrix.goos }}-${{
+                      matrix.goarch }}.tar.gz'
                   allowUpdates: true
             # - name: Create Release
             #   id: create_release
@@ -92,7 +94,7 @@ jobs:
             fail-fast: true
             matrix:
                 version:
-                    - 'v0.0.42'
+                    - 'v0.0.43'
                 binary:
                     - pulumi-resource-gotiac
                 goversion:
