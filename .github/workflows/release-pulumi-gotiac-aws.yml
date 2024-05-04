@@ -48,13 +48,10 @@ jobs:
                   repo: pulumi/pulumictl
             - name: Build binary
               working-directory: ./packages/pulumi-gotiac-aws
-              run:
-                  GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o ${{ matrix.binary }}-${{ matrix.goos
-                  }} ./packages/pulumi-gotiac-aws/cmd/${{ matrix.binary }} your-source-directory
+              run: make build_provider
               env:
                   GOOS: ${{ matrix.goos }}
                   GOARCH: ${{ matrix.goarch }}
-                  BINARY_NAME: ${{ matrix.binary }}
             - name: Create Release
               id: create_release
               uses: actions/create-release@v1
