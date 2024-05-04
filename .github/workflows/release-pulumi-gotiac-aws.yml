@@ -69,9 +69,8 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                   upload_url: ${{ steps.create_release.outputs.upload_url }}
-                  asset_path:
-                      checkers/build/${{ matrix.binary }}-${{ matrix.tag }}-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
-                  asset_name: ${{ matrix.binary }}-${{ matrix.tag }}-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
+                  asset_path: './${{ matrix.binary }}-${{ github.ref }}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz'
+                  asset_name: ${{ matrix.binary }}-${{ github.ref }}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
                   asset_content_type: application/gzip
             # - name: Run GoReleaser
             #   uses: goreleaser/goreleaser-action@v5
