@@ -2,7 +2,7 @@ name: release-pulumi-gotiac-aws
 on:
     push:
         tags:
-            - 'packages/pulumi-gotiac-aws/sdk/v*.*.*'
+            - 'packages/pulumi-gotiac-aws/v*.*.*'
             - '!v*.*.*-**'
 env:
     # THIS GITHUB_TOKEN IS A REQUIREMENT TO BE ABLE TO WRITE TO GH RELEASES
@@ -46,6 +46,36 @@ jobs:
               uses: jaxxstorm/action-install-gh-release@v1.11.0
               with:
                   repo: pulumi/pulumictl
+            - name: Build binary
+              working-directory: ./packages/pulumi-gotiac-aws
+              run: make build_provider
+              env:
+                  GOOS: ${{ matrix.goos }}
+                  GOARCH: ${{ matrix.goarch }}
+                  BINARY_NAME: ${{ matrix.binary }}
+                  TAG: ${{ github.ref }}
+            - name: Create Release
+              id: create_release
+              uses: actions/create-release@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tag_name: ${{ github.ref }}
+                  release_name: Release ${{ github.ref }}
+                  draft: false
+                  prerelease: false
+            - name: Upload assets
+              id: upload-release-asset
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path:
+                      'checkers/build/${{ matrix.binary }}-${{ github.ref }}-${{ matrix.goos }}-${{ matrix.goarch
+                      }}.tar.gz'
+                  asset_name: ${{ matrix.binary }}-${{ github.ref }}-${{ matrix.oos }}-${{ matrix.goarch }}.tar.gz
+                  asset_content_type: application/gzip
             # - name: Run GoReleaser
             #   uses: goreleaser/goreleaser-action@v5
             #   with:
@@ -54,8 +84,20 @@ jobs:
         strategy:
             fail-fast: true
             matrix:
+                binary:
+                    - pulumi-resource-gotiac
                 goversion:
                     - 1.22.x
+                goarch:
+                    - amd64
+                    - arm64
+                goos:
+                    - darwin
+                    - windows
+                    - linux
+                ldflags:
+                    # The line below MUST align with the module in current provider/go.mod
+                    - -X github.com/your-org-name/pulumi-gotiac/provider/pkg/version.Version={{.Tag }}
     publish_sdk:
         name: Publish SDKs
         runs-on: ubuntu-latest
@@ -140,7 +182,7 @@ jobs:
                     - nodejs
                     # - python
                     # - dotnet
-                    - go
+                    # - go
                 nodeversion:
                     - 14.x
                 pythonversion:
