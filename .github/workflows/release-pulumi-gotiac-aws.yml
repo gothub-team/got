@@ -69,8 +69,9 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                   upload_url: ${{ steps.create_release.outputs.upload_url }}
-                  asset_path: './${{ matrix.binary }}-${{ github.ref }}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz'
-                  asset_name: ${{ matrix.binary }}-${{ github.ref }}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
+                  asset_path:
+                      './${{ matrix.binary }}-${{ matrix.version }}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz'
+                  asset_name: ${{ matrix.binary }}-${{ matrix.version }}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
                   asset_content_type: application/gzip
             # - name: Run GoReleaser
             #   uses: goreleaser/goreleaser-action@v5
@@ -80,6 +81,8 @@ jobs:
         strategy:
             fail-fast: true
             matrix:
+                version:
+                    - 'v0.0.40'
                 binary:
                     - pulumi-resource-gotiac
                 goversion:
@@ -91,9 +94,6 @@ jobs:
                     - darwin
                     - windows
                     - linux
-                ldflags:
-                    # The line below MUST align with the module in current provider/go.mod
-                    - -X github.com/your-org-name/pulumi-gotiac/provider/pkg/version.Version={{.Tag }}
     publish_sdk:
         name: Publish SDKs
         runs-on: ubuntu-latest
