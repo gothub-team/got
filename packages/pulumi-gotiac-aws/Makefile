@@ -1,4 +1,4 @@
-VERSION         := 0.0.40
+VERSION         := 0.0.41
 
 PACK            := gotiac
 PROJECT         := github.com/gothub-team/got/packages/pulumi-${PACK}-aws
