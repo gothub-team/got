@@ -53,7 +53,7 @@ export function getVersion(): string {
 
 /** @internal */
 export function resourceOptsDefaults(): any {
-    return { version: getVersion(), pluginDownloadURL: "https://api.github.com/gothub-team/got" };
+    return { version: getVersion(), pluginDownloadURL: "https://api.github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.0.47" };
 }
 
 /** @internal */
