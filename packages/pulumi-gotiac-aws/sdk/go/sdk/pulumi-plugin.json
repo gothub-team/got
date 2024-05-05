@@ -1,5 +1,5 @@
 {
   "resource": true,
   "name": "gotiac",
-  "server": "https://api.github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.0.47"
+  "server": "https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.0.48"
 }

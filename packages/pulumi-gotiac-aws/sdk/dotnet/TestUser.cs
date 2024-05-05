@@ -36,7 +36,7 @@ namespace Pulumi.Gotiac
             var defaultOptions = new ComponentResourceOptions
             {
                 Version = Utilities.Version,
-                PluginDownloadURL = "https://api.github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.0.47",
+                PluginDownloadURL = "https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.0.48",
             };
             var merged = ComponentResourceOptions.Merge(defaultOptions, options);
             // Override the ID if one was specified for consistency with other language SDKs.
