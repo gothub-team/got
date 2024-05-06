@@ -134,15 +134,26 @@ export const selectDeleteGraph = (graph: Graph): Graph => {
         4,
     );
 
-    const res = {
-        nodes: nodes,
-        edges: edges,
-        rights: rights,
-        files: files,
-        index: {
-            reverseEdges: reverseEdges,
-        },
-    };
+    const res = {} as Graph;
+    if (!isEmptyObject(nodes)) {
+        res.nodes = nodes;
+    }
+
+    if (!isEmptyObject(edges)) {
+        res.edges = edges;
+    }
+
+    if (!isEmptyObject(rights)) {
+        res.rights = rights;
+    }
+
+    if (!isEmptyObject(files)) {
+        res.files = files;
+    }
+
+    if (!isEmptyObject(reverseEdges)) {
+        res.index = { reverseEdges };
+    }
 
     return res;
 };

@@ -1,6 +1,6 @@
 import { Graph } from '../types/graph';
 import { Metadata } from '../types/graphObjects';
-import { assocPathMutate } from './util';
+import { assocPathMutate, isEmptyObject } from './util';
 import { EdgeView, NodeView, View } from '../types/view';
 import { NodeBagInternal, ViewResult } from '../types/ViewResult';
 import {
@@ -181,11 +181,26 @@ export const subgraphFromStack = (graphStack: Graph[], view: View): Graph => {
         queryNode(queryObj, nodeId, node);
     }
 
-    return {
-        nodes,
-        edges,
-        index: { reverseEdges },
-        rights,
-        files,
-    };
+    const res = {} as Graph;
+    if (!isEmptyObject(nodes)) {
+        res.nodes = nodes;
+    }
+
+    if (!isEmptyObject(edges)) {
+        res.edges = edges;
+    }
+
+    if (!isEmptyObject(rights)) {
+        res.rights = rights;
+    }
+
+    if (!isEmptyObject(files)) {
+        res.files = files;
+    }
+
+    if (!isEmptyObject(reverseEdges)) {
+        res.index = { reverseEdges };
+    }
+
+    return res;
 };
