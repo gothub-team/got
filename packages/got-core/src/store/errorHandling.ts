@@ -200,10 +200,11 @@ export const createErrorHandledStore = (
         toNode: Node | string,
         metadata: Metadata = true,
     ) => {
+        console.log('assoc error handling', graphName, edgeTypes, fromId, toNode, metadata);
         if (
             validateError('GOT_ASSOC', 'function', 'dispatch', dispatch) &&
             validateError('GOT_ASSOC', 'string', 'graphName', graphName) &&
-            validateError('GOT_ASSOC', 'string', 'edgeTypes', edgeTypes) &&
+            validateError('GOT_ASSOC', 'edgeTypes', 'edgeTypes', edgeTypes) &&
             validateError('GOT_ASSOC', 'string', 'fromId', fromId) &&
             validateError('GOT_ASSOC', 'node', 'toNode', toNode) &&
             validateError('GOT_ASSOC', 'metadata', 'metadata', metadata)
@@ -215,7 +216,7 @@ export const createErrorHandledStore = (
         if (
             validateError('GOT_DISSOC', 'function', 'dispatch', dispatch) &&
             validateError('GOT_DISSOC', 'string', 'graphName', graphName) &&
-            validateError('GOT_DISSOC', 'string', 'edgeTypes', edgeTypes) &&
+            validateError('GOT_DISSOC', 'edgeTypes', 'edgeTypes', edgeTypes) &&
             validateError('GOT_DISSOC', 'string', 'fromId', fromId) &&
             validateError('GOT_DISSOC', 'node', 'toNode', toNode)
         ) {

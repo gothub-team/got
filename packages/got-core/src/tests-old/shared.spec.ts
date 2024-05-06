@@ -1,15 +1,13 @@
 import * as uuid from 'uuid';
-import { describe, beforeAll, beforeEach, afterEach, test, expect, mock } from 'bun:test';
+import { test, expect, mock } from 'bun:test';
 import { assocPathMutate } from '@gothub-team/got-util';
 import * as R from 'ramda';
-import { State } from '../types/state.js';
-import { GOT_ACTION } from '../types/actions.js';
-import { createCurriedStore } from '../store/curried.js';
-import { createErrorHandledStore } from '../store/errorHandling.js';
-import { createStore as _createStore } from '../store/store.js';
+import { createCurriedStore } from '../store/curried';
+import { createErrorHandledStore } from '../store/errorHandling';
+import { createStore as _createStore } from '../store/store';
+import { gotReducer } from '../reducer/reducer';
 
 export const createStore = (options) => createCurriedStore(createErrorHandledStore(options, _createStore(options)));
-const gotReducer = (state: State, action: GOT_ACTION): State => ({}) as State;
 
 test('dummy test', () => {
     expect(true).toBe(true);
@@ -30,6 +28,7 @@ export const createTestStore = (initialState = {}, api = undefined, clone = true
         }
     });
 
+    // const onError = mock((e) => console.error(e));
     const onError = mock();
     const onWarn = mock();
 

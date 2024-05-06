@@ -1442,7 +1442,7 @@ describe('store:Edges', () => {
         });
     });
 
-    describe.skip('add', () => {
+    describe('add', () => {
         test('should call `dispatch` with correct parameters', () => {
             /* #region Test Bed Creation */
             const fromType = 'fromType';
@@ -1699,8 +1699,8 @@ describe('store:Edges', () => {
             add(graphName1)(`${fromType}/${toType}`)(fromId)({ prop: 'someProp' }, node1metadata);
             expect(onError).toBeCalledWith(
                 expect.objectContaining({
-                    name: MISSING_PARAM_ERROR,
-                    missing: 'toNode.id',
+                    name: INVALID_PARAM_ERROR,
+                    invalid: 'toNode',
                 }),
             );
 
@@ -1718,7 +1718,7 @@ describe('store:Edges', () => {
         });
     });
 
-    describe.skip('remove', () => {
+    describe('remove', () => {
         test('should call `dispatch` with correct parameters', () => {
             /* #region Test Bed Creation */
             const fromType = 'fromType';
@@ -1746,7 +1746,7 @@ describe('store:Edges', () => {
                     fromType,
                     toType,
                     fromId,
-                    toNode,
+                    toId: toNode.id,
                 },
             });
             expect(onError).not.toBeCalled();
@@ -1921,8 +1921,8 @@ describe('store:Edges', () => {
             remove(graphName1)(`${fromType}/${toType}`)(fromId)({ prop: 'someProp' });
             expect(onError).toBeCalledWith(
                 expect.objectContaining({
-                    name: MISSING_PARAM_ERROR,
-                    missing: 'toNode.id',
+                    name: INVALID_PARAM_ERROR,
+                    invalid: 'toNode',
                 }),
             );
 
@@ -1940,7 +1940,7 @@ describe('store:Edges', () => {
         });
     });
 
-    describe.skip('assoc', () => {
+    describe('assoc', () => {
         test('should call `dispatch` with correct parameters', () => {
             /* #region Test Bed Creation */
             const fromType = 'fromType';
@@ -1969,7 +1969,7 @@ describe('store:Edges', () => {
                     fromType,
                     toType,
                     fromId,
-                    toNode,
+                    toId: toNode.id,
                     metadata,
                 },
             });
@@ -2157,8 +2157,8 @@ describe('store:Edges', () => {
             assoc(graphName1)(`${fromType}/${toType}`)(fromId)({ prop: 'someProp' });
             expect(onError).toBeCalledWith(
                 expect.objectContaining({
-                    name: MISSING_PARAM_ERROR,
-                    missing: 'toNode.id',
+                    name: INVALID_PARAM_ERROR,
+                    invalid: 'toNode',
                 }),
             );
 
@@ -2176,7 +2176,7 @@ describe('store:Edges', () => {
         });
     });
 
-    describe.skip('dissoc', () => {
+    describe('dissoc', () => {
         test('should call `dispatch` with correct parameters', () => {
             /* #region Test Bed Creation */
             const fromType = 'fromType';
@@ -2204,7 +2204,7 @@ describe('store:Edges', () => {
                     fromType,
                     toType,
                     fromId,
-                    toNode,
+                    toId: toNode.id,
                 },
             });
             expect(onError).not.toBeCalled();
@@ -2381,8 +2381,8 @@ describe('store:Edges', () => {
             dissoc(graphName1)(`${fromType}/${toType}`)(fromId)({ prop: 'someProp' });
             expect(onError).toBeCalledWith(
                 expect.objectContaining({
-                    name: MISSING_PARAM_ERROR,
-                    missing: 'toNode.id',
+                    name: INVALID_PARAM_ERROR,
+                    invalid: 'toNode',
                 }),
             );
 

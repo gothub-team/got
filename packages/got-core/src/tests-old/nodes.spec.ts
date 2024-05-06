@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'bun:test';
 import { createTestStore } from './shared.spec';
-import { MISSING_PARAM_ERROR } from '../utils/errors';
+import { INVALID_PARAM_ERROR, MISSING_PARAM_ERROR } from '../utils/errors';
 
 describe('store:Nodes', () => {
     describe('selectNode', () => {
@@ -274,7 +274,7 @@ describe('store:Nodes', () => {
         });
     });
 
-    describe.skip('setNode', () => {
+    describe('setNode', () => {
         test('should call `dispatch` with correct parameters', () => {
             /* #region Test Bed Creation */
             const nodeId = 'node1';
@@ -295,6 +295,7 @@ describe('store:Nodes', () => {
                 type: 'GOT/SET_NODE',
                 payload: {
                     graphName,
+                    nodeId: node.id,
                     node,
                 },
             });
@@ -383,8 +384,8 @@ describe('store:Nodes', () => {
             setNode(graphName1)({ prop: 'someProp' });
             expect(onError).toBeCalledWith(
                 expect.objectContaining({
-                    name: MISSING_PARAM_ERROR,
-                    missing: 'node.id',
+                    name: INVALID_PARAM_ERROR,
+                    invalid: 'node',
                 }),
             );
 
