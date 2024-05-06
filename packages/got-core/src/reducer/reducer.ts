@@ -1,19 +1,33 @@
 import { GOT_ACTION } from '../types/actions';
 import { State } from '../types/state';
-import { assocPathMutate, getPathOr, mergeGraphObjRight } from '../utils/util';
+import { assocPathMutate, dissocPathMutate, getPathOr, mergeGraphObjRight } from '../utils/util';
+
+const getEmptyStack = () => ({
+    graph: {},
+    errors: {},
+    files: {},
+});
+
+const getEmptyStore = () => ({
+    main: getEmptyStack(),
+});
 
 export const gotReducer = (state: State, action: GOT_ACTION): State => {
     if (!state) {
-        return {
-            main: {
-                graph: {},
-                errors: {},
-                files: {},
-            },
-        };
+        return getEmptyStore();
     }
 
-    if (action.type === 'GOT/SET_NODE') {
+    if (action.type === 'GOT/CLEAR') {
+        const { graphName } = action.payload;
+
+        if (graphName in state) {
+            delete state[graphName];
+        }
+
+        return state;
+    } else if (action.type === 'GOT/CLEAR_ALL') {
+        return getEmptyStore();
+    } else if (action.type === 'GOT/SET_NODE') {
         const { graphName, nodeId, node } = action.payload;
         const path = [graphName, 'graph', 'nodes', nodeId];
 
@@ -82,6 +96,60 @@ export const gotReducer = (state: State, action: GOT_ACTION): State => {
         // set reverse edge
         const reverseEdgePath = [graphName, 'graph', 'index', 'reverseEdges', toType, toId, fromType, fromId];
         assocPathMutate(reverseEdgePath, false, state);
+
+        return state;
+    } else if (action.type === 'GOT/SET_RIGHTS') {
+        const { email, graphName, nodeId, rights } = action.payload;
+
+        const path = [graphName, 'graph', 'rights', nodeId, 'user', email];
+        const oldRights = getPathOr(undefined, path, state);
+        const newRights = mergeGraphObjRight(oldRights, rights);
+        assocPathMutate(path, newRights, state);
+
+        return state;
+    } else if (action.type === 'GOT/SET_ROLE_RIGHTS') {
+        const { graphName, nodeId, role, rights } = action.payload;
+
+        const path = [graphName, 'graph', 'rights', nodeId, 'role', role];
+        const oldRights = getPathOr(undefined, path, state);
+        const newRights = mergeGraphObjRight(oldRights, rights);
+        assocPathMutate(path, newRights, state);
+
+        return state;
+    } else if (action.type === 'GOT/INHERIT_RIGHTS') {
+        const { graphName, fromId, nodeId } = action.payload;
+
+        const path = [graphName, 'graph', 'rights', nodeId, 'inherit', 'from'];
+        assocPathMutate(path, fromId, state);
+
+        return state;
+    } else if (action.type === 'GOT/SET_FILE') {
+        const { graphName, nodeId, prop, filename, file } = action.payload;
+
+        // set file in graph
+        const graphPath = [graphName, 'graph', 'files', nodeId, prop];
+        const fileObj = {
+            filename,
+            contentType: file.type,
+            fileSize: file.size,
+        };
+        assocPathMutate(graphPath, fileObj, state);
+
+        // set file in files
+        const filesPath = [graphName, 'files', nodeId, prop];
+        assocPathMutate(filesPath, { file }, state);
+
+        return state;
+    } else if (action.type === 'GOT/REMOVE_FILE') {
+        const { graphName, nodeId, prop } = action.payload;
+
+        // remove file in graph
+        const graphPath = [graphName, 'graph', 'files', nodeId, prop];
+        dissocPathMutate(graphPath, state);
+
+        // remove file in files
+        const filesPath = [graphName, 'files', nodeId, prop];
+        assocPathMutate(filesPath, false, state);
 
         return state;
     }

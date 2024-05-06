@@ -511,7 +511,7 @@ describe('store:Rights', () => {
         });
     });
 
-    describe.skip('setRights', () => {
+    describe('setRights', () => {
         test('should call `dispatch` with correct parameters', () => {
             /* #region Test Bed Creation */
             const nodeId = 'node1';
@@ -644,7 +644,7 @@ describe('store:Rights', () => {
         });
     });
 
-    describe.skip('setRoleRights', () => {
+    describe('setRoleRights', () => {
         test('should call `dispatch` with correct parameters', () => {
             /* #region Test Bed Creation */
             const nodeId = 'node1';
@@ -777,7 +777,7 @@ describe('store:Rights', () => {
         });
     });
 
-    describe.skip('inheritRights', () => {
+    describe('inheritRights', () => {
         test('should call `dispatch` with correct parameters', () => {
             /* #region Test Bed Creation */
             const fromId = 'fromId';

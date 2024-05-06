@@ -271,7 +271,7 @@ export const createErrorHandledStore = (
             validateError('GOT_INHERIT_RIGHTS', 'string', 'nodeId', nodeId) &&
             validateError('GOT_INHERIT_RIGHTS', 'string', 'fromId', fromId)
         ) {
-            return store.inheritRights(graphName, nodeId, fromId);
+            return store.inheritRights(graphName, fromId, nodeId);
         }
     };
 

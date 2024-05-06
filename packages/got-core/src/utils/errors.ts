@@ -116,6 +116,8 @@ const validate = (type: ParameterType, value: unknown) => {
         case 'rights':
         case 'metadata':
             return (value && value === true) || typeof value === 'object';
+        case 'blob':
+            return value && typeof value === 'object' && (value as Blob).type && (value as Blob).size;
     }
 };
 

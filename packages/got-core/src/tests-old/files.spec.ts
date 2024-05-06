@@ -369,7 +369,7 @@ describe('store:files', () => {
         });
     });
 
-    describe.skip('setFile', () => {
+    describe('setFile', () => {
         test('should call `dispatch` with correct parameters', () => {
             /* #region Test Bed Creation */
             const nodeId = 'node1';
@@ -406,7 +406,7 @@ describe('store:files', () => {
             const nodeId = 'node1';
             const prop = 'file1';
             const filename = 'file1.txt';
-            const file = new Blob(['hello there'], { type: 'text/plain' });
+            const file = new Blob(['hello there'], { type: 'text/plain;charset=utf-8' });
             const graphName = 'graph1';
 
             const {
@@ -421,7 +421,7 @@ describe('store:files', () => {
 
             const expectedFile = {
                 filename,
-                contentType: 'text/plain',
+                contentType: 'text/plain;charset=utf-8',
                 fileSize: file.size,
             };
             expect(onError).not.toBeCalled();
@@ -518,8 +518,8 @@ describe('store:files', () => {
             setFile(graphName)(nodeId)(prop, filename, new Blob(['hello there']));
             expect(onError).toBeCalledWith(
                 expect.objectContaining({
-                    name: MISSING_PARAM_ERROR,
-                    missing: 'file.type',
+                    name: INVALID_PARAM_ERROR,
+                    invalid: 'file',
                 }),
             );
 
