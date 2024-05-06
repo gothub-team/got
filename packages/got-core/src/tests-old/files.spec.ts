@@ -9,7 +9,7 @@ describe('store:files', () => {
             /* #region Test Bed Creation */
             const nodeId = 'node1';
             const name1 = 'file1';
-            const name2 = 'file1';
+            const name2 = 'file2';
             const nodeFileView = {
                 [name1]: {
                     type: 'text/plain',
