@@ -201,7 +201,6 @@ export const createErrorHandledStore = (
         toNode: Node | string,
         metadata: Metadata = true,
     ) => {
-        console.log('assoc error handling', graphName, edgeTypes, fromId, toNode, metadata);
         if (
             validateError('GOT_ASSOC', 'function', 'dispatch', dispatch) &&
             validateError('GOT_ASSOC', 'string', 'graphName', graphName) &&

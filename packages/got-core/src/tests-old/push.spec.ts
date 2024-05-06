@@ -13,7 +13,8 @@ describe('store:push', () => {
             const nodeId1 = 'node1';
             const nodeId2 = 'node2';
             const nodeId3 = 'node3';
-            const user = 'user';
+            const nodeId4 = 'node4';
+            const user = 'user@mail.me';
             const graphName = 'graph';
             const fromType1 = 'fromType1';
             const fromId1 = 'fromId1';
@@ -37,9 +38,17 @@ describe('store:push', () => {
                     },
                 },
                 rights: {
-                    [nodeId1]: { user: { [user]: { statusCode: 200 } } },
-                    [nodeId2]: { user: { [user]: { statusCode: 403, name: 'NoAdminRightError' } } },
-                    [nodeId3]: { inherit: { statusCode: 403, name: 'NoAdminRightError' } },
+                    [nodeId1]: { user: { [user]: { read: { statusCode: 200 }, write: { statusCode: 200 } } } },
+                    [nodeId2]: {
+                        user: {
+                            [user]: {
+                                read: { statusCode: 403, name: 'NoAdminRightError' },
+                                write: { statusCode: 403, name: 'NoAdminRightError' },
+                            },
+                        },
+                    },
+                    [nodeId3]: { inherit: { statusCode: 200 } },
+                    [nodeId4]: { inherit: { statusCode: 403, name: 'NoAdminRightError' } },
                 },
             };
 
@@ -69,6 +78,7 @@ describe('store:push', () => {
                                 [nodeId1]: { user: { [user]: rights } },
                                 [nodeId2]: { user: { [user]: rights } },
                                 [nodeId3]: { inherit: { from: fromId1 } },
+                                [nodeId4]: { inherit: { from: fromId1 } },
                             },
                         },
                     },
@@ -82,7 +92,9 @@ describe('store:push', () => {
             /* #region Execution and Validation */
             await push(graphName);
 
-            expect(dispatch).toBeCalledWith({
+            const dispatchCalls = dispatch.mock.calls.map(([action]) => action);
+
+            expect(dispatchCalls[0]).toEqual({
                 type: 'GOT/MERGE',
                 payload: {
                     fromGraph: {
@@ -92,14 +104,28 @@ describe('store:push', () => {
                         edges: {
                             [fromType1]: { [fromId1]: { [toType1]: { [nodeId1]: metadata1 } } },
                         },
+                        index: {
+                            reverseEdges: {
+                                [toType1]: { [nodeId1]: { [fromType1]: { [fromId1]: true } } },
+                            },
+                        },
                         rights: {
                             [nodeId1]: { user: { [user]: rights } },
+                            [nodeId3]: { inherit: { from: fromId1 } },
                         },
                     },
                     toGraphName: 'main',
                 },
             });
-            expect(dispatch).toBeCalledWith({
+
+            expect(dispatchCalls[1]).toEqual({
+                type: 'GOT/CLEAR',
+                payload: {
+                    graphName,
+                },
+            });
+
+            expect(dispatchCalls[2]).toEqual({
                 type: 'GOT/MERGE_ERROR',
                 payload: {
                     fromGraph: {
@@ -115,11 +141,27 @@ describe('store:push', () => {
                                 },
                             },
                         },
+                        index: {
+                            reverseEdges: {
+                                [toType1]: {
+                                    [nodeId2]: {
+                                        [fromType1]: {
+                                            [fromId1]: { statusCode: 403, name: 'NoWriteRightError', element: true },
+                                        },
+                                    },
+                                },
+                            },
+                        },
                         rights: {
                             [nodeId2]: {
-                                user: { [user]: { statusCode: 403, name: 'NoAdminRightError', element: rights } },
+                                user: {
+                                    [user]: {
+                                        read: { statusCode: 403, name: 'NoAdminRightError', element: true },
+                                        write: { statusCode: 403, name: 'NoAdminRightError', element: true },
+                                    },
+                                },
                             },
-                            [nodeId3]: {
+                            [nodeId4]: {
                                 inherit: { statusCode: 403, name: 'NoAdminRightError', element: { from: fromId1 } },
                             },
                         },
@@ -127,12 +169,7 @@ describe('store:push', () => {
                     toGraphName: graphName,
                 },
             });
-            expect(dispatch).toBeCalledWith({
-                type: 'GOT/CLEAR',
-                payload: {
-                    graphName,
-                },
-            });
+
             expect(onError).not.toBeCalled();
             /* #endregion */
         });
@@ -157,7 +194,7 @@ describe('store:push', () => {
                     [graphName]: { graph },
                 },
                 {
-                    push: () => {},
+                    push: () => ({}),
                 },
             );
             /* #endregion */
@@ -420,7 +457,7 @@ describe('store:push', () => {
                     [graphName]: { graph: reverseEdgesGraph },
                 },
                 {
-                    push: () => {},
+                    push: () => ({}),
                 },
             );
             /* #endregion */
@@ -677,7 +714,7 @@ describe('store:push', () => {
                     },
                 },
                 {
-                    push: () => {},
+                    push: () => ({}),
                 },
             );
             /* #endregion */
@@ -1330,7 +1367,7 @@ describe('store:push', () => {
             expect(events[0]).toEqual({
                 type: 'GOT/UPLOAD_ERROR',
                 payload: {
-                    graphName,
+                    graphName: 'main',
                     nodeId,
                     prop,
                     error: apiError,

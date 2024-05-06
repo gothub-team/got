@@ -32,14 +32,12 @@ export const createTestStore = (initialState = {}, api = undefined, clone = true
     const onError = mock();
     const onWarn = mock();
 
-    const _api = api
-        ? {
-              push: mock(api.push),
-              pull: mock(api.pull),
-              upload: mock(api.upload),
-          }
-        : undefined;
-
+    const _api = {
+        push: api ? mock(api.push) : mock(),
+        pull: api ? mock(api.pull) : mock(),
+        upload: api ? mock(api.upload) : mock(),
+    };
+    //
     const store = createStore({
         api: _api,
         dispatch,

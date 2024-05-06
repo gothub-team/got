@@ -23,6 +23,7 @@ export const selectSuccessAndErrorGraphs = (pushGraph: Graph, pushResult: PushRe
 
     const errorNodes = {} as Nodes<GraphError<Node | boolean>>;
     const errorEdges = {} as Edges<GraphError<Metadata>>;
+    const errorReverseEdges = {} as Edges<GraphError<boolean>>;
     const errorRights = {} as Rights<GraphError<boolean>, GraphError<string>>;
     const errorFiles = {} as Files<GraphError<UploadNodeFileView>>;
 
@@ -42,28 +43,47 @@ export const selectSuccessAndErrorGraphs = (pushGraph: Graph, pushResult: PushRe
         pushResult.edges,
         (res: GraphElementResult, path: string[]) => {
             const metedata = getPathOr(undefined, path, pushGraph.edges);
+            const [fromType, fromId, toType, toId] = path;
             if (res.statusCode === 200) {
                 assocPathMutate(path, metedata, successEdges);
-                const [fromType, fromId, toType, toId] = path;
                 assocPathMutate([toType, toId, fromType, fromId], true, successReverseEdges);
             } else {
                 assocPathMutate(path, { ...res, element: metedata }, errorEdges);
+                assocPathMutate([toType, toId, fromType, fromId], { ...res, element: true }, errorReverseEdges);
             }
         },
         4,
     );
+
     forEachObjDepth(
         pushResult.rights,
         (res: GraphElementResult, path: string[]) => {
-            const right = getPathOr(undefined, path, pushGraph.rights);
-            if (res.statusCode === 200) {
-                assocPathMutate(path, right, successRights);
+            const obj = getPathOr(undefined, path, pushGraph.rights);
+            if (path[1] === 'inherit') {
+                if (res.statusCode === 200) {
+                    assocPathMutate(path, obj, successRights);
+                } else {
+                    assocPathMutate(path, { ...res, element: obj }, errorRights);
+                }
             } else {
-                assocPathMutate(path, { ...res, element: right }, errorRights);
+                forEachObjDepth(
+                    res,
+                    (rightRes: GraphElementResult, p: string[]) => {
+                        const rightPath = [...path, ...p];
+                        const right = getPathOr(undefined, rightPath, pushGraph.rights);
+                        if (rightRes.statusCode === 200) {
+                            assocPathMutate(rightPath, right, successRights);
+                        } else {
+                            assocPathMutate(rightPath, { ...rightRes, element: right }, errorRights);
+                        }
+                    },
+                    2,
+                );
             }
         },
-        4,
+        2,
     );
+
     forEachObjDepth(
         pushResult.files,
         (res: GraphElementResult, path: string[]) => {
@@ -105,6 +125,10 @@ export const selectSuccessAndErrorGraphs = (pushGraph: Graph, pushResult: PushRe
 
     if (!isEmptyObject(errorEdges)) {
         errorGraph.edges = errorEdges;
+    }
+
+    if (!isEmptyObject(errorReverseEdges)) {
+        errorGraph.index = { reverseEdges: errorReverseEdges };
     }
 
     if (!isEmptyObject(errorRights)) {

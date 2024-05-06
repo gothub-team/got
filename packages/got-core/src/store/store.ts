@@ -349,10 +349,10 @@ export const createStore = ({ api, dispatch, select }: CreateStoreOptions) => {
         clear(graphName);
 
         if (!isEmptyGraph(errorGraph)) {
-            mergeErrorGraph(errorGraph, toGraphName);
+            mergeErrorGraph(errorGraph, graphName);
         }
 
-        return createFileUploader(api, graphName, graph, apiResult, successGraph, fileStore);
+        return createFileUploader(api, toGraphName, graph, apiResult, successGraph, fileStore);
     };
 
     const pull = async (view: View, toGraphName = 'main'): Promise<Graph> => {
