@@ -1,4 +1,4 @@
-type Subscriber<TEvent> = {
+export type Subscriber<TEvent> = {
     next?: (e: TEvent) => void;
     complete?: (e: TEvent) => void;
     error?: (e: TEvent) => void;

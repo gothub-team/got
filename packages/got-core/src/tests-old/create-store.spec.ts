@@ -32,7 +32,7 @@ describe('store:createStore', () => {
         );
         /* #endregion */
     });
-    test.skip('should call `onError` in case of undefined `api`', async () => {
+    test('should call `onError` in case of undefined `api`', async () => {
         /* #region Test Bed Creation */
         const nodeId = 'node1';
         const view = {

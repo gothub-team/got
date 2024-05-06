@@ -1,5 +1,5 @@
 import { ViewResult } from '../types/ViewResult';
-import { GOT_ACTION } from '../types/actions';
+import { GOT_ACTION, GOT_UPLOAD_ACTION } from '../types/actions';
 import { StoreAPI } from '../types/api';
 import { ErrorGraph, Graph } from '../types/graph';
 import { Metadata, Node, RightTypes } from '../types/graphObjects';
@@ -17,12 +17,28 @@ import {
     selectGraphStack,
 } from '../utils/stack';
 import { createFileUploader } from '../utils/uploads';
+import { Subscriber } from '../utils/util';
 import { subgraphFromStack, viewResFromStack } from '../utils/view';
 
 export type CreateStoreOptions = {
     api: StoreAPI;
     dispatch: (action: GOT_ACTION) => void;
     select: <TRes>(fnSelect: (state: State) => TRes) => TRes;
+};
+
+export type PushObservables = {
+    uploads: {
+        /**
+         * Subscribes an object to the upload events.
+         * Uploads must be initiated by calling start().
+         */
+        subscribe: (subscriber: Subscriber<GOT_UPLOAD_ACTION>) => void;
+        /**
+         * Starts the upload progress for all pushed files.
+         * Progress and completion can be observed by subscribing before or after calling start().
+         */
+        start: () => Promise<void>;
+    };
 };
 
 export const createStore = ({ api, dispatch, select }: CreateStoreOptions) => {
@@ -316,7 +332,7 @@ export const createStore = ({ api, dispatch, select }: CreateStoreOptions) => {
     };
     const getSubgraph = (stack: string[], view: View): Graph => select((state) => selectSubgraph(stack, view, state));
 
-    const push = async (graphName: string, toGraphName: string = 'main') => {
+    const push = async (graphName: string, toGraphName: string = 'main'): Promise<PushObservables> => {
         const graph = select((state) => state[graphName]?.graph);
         const pushBody = { ...graph, index: undefined };
         if (isEmptyGraph(pushBody)) return;

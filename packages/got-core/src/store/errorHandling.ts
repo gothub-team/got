@@ -4,7 +4,8 @@ import { Metadata, Node, RightTypes } from '../types/graphObjects';
 import { State } from '../types/state';
 import { View } from '../types/view';
 import { createInputValidator } from '../utils/errors';
-import { type CreateStoreOptions, createStore } from './store';
+import { isEmptyObject } from '../utils/util';
+import { type CreateStoreOptions, createStore, PushObservables } from './store';
 
 type CreateErrorHandledStoreOptions = CreateStoreOptions & {
     onError?: (error: Error) => void;
@@ -354,14 +355,20 @@ export const createErrorHandledStore = (
         }
     };
 
-    const push = async (graphName: string, toGraphName: string = 'main') => {
+    const push = async (graphName: string, toGraphName: string = 'main'): Promise<PushObservables> => {
         if (
             validateError('GOT_PUSH', 'api', 'api', api) &&
             validateError('GOT_PUSH', 'function', 'dispatch', dispatch) &&
             validateError('GOT_PUSH', 'string', 'graphName', graphName) &&
             validateError('GOT_PUSH', 'string', 'toGraphName', toGraphName)
         ) {
-            return store.push(graphName, toGraphName);
+            try {
+                const res = await store.push(graphName, toGraphName);
+                return res;
+            } catch (error) {
+                onError && onError(error);
+                return { uploads: { subscribe: () => {}, start: async () => {} } };
+            }
         }
     };
 
@@ -372,7 +379,18 @@ export const createErrorHandledStore = (
             validateError('GOT_PULL', 'view', 'view', view) &&
             validateError('GOT_PULL', 'string', 'toGraphName', toGraphName)
         ) {
-            return store.pull(view, toGraphName);
+            if (isEmptyObject(view)) {
+                onWarn && onWarn('Pull view is empty');
+                return {};
+            }
+
+            try {
+                const res = await store.pull(view, toGraphName);
+                return res;
+            } catch (error) {
+                onError && onError(error);
+                return {};
+            }
         }
     };
 
