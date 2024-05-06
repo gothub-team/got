@@ -145,11 +145,11 @@ export const gotReducer = (state: State, action: GOT_ACTION): State => {
 
         // remove file in graph
         const graphPath = [graphName, 'graph', 'files', nodeId, prop];
-        dissocPathMutate(graphPath, state);
+        assocPathMutate(graphPath, false, state);
 
         // remove file in files
         const filesPath = [graphName, 'files', nodeId, prop];
-        assocPathMutate(filesPath, false, state);
+        dissocPathMutate(filesPath, state);
 
         return state;
     }

@@ -529,7 +529,7 @@ describe('store:files', () => {
         });
     });
 
-    describe.skip('removeFile', () => {
+    describe('removeFile', () => {
         test('should call `dispatch` with correct parameters', () => {
             /* #region Test Bed Creation */
             const nodeId = 'node1';
