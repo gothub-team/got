@@ -301,6 +301,10 @@ describe('store:pull', () => {
                     {
                         main: {
                             graph: {
+                                nodes: {
+                                    [toNode1Id]: { id: toNode1Id },
+                                    [fromId]: { id: fromId },
+                                },
                                 edges: {
                                     [fromType]: { [fromId]: { [toType]: { [toNode1Id]: metadata } } },
                                 },
@@ -318,6 +322,17 @@ describe('store:pull', () => {
                 const expectedFromGraph = {
                     edges: {
                         [fromType]: { [fromId]: { [toType]: { [toNode1Id]: undefined } } },
+                    },
+                    index: {
+                        reverseEdges: {
+                            [toType]: {
+                                [toNode1Id]: {
+                                    [fromType]: {
+                                        [fromId]: undefined,
+                                    },
+                                },
+                            },
+                        },
                     },
                 };
                 expect(onError).not.toBeCalled();
@@ -446,6 +461,10 @@ describe('store:pull', () => {
                     {
                         main: {
                             graph: {
+                                nodes: {
+                                    [toNode1Id]: { id: toNode1Id },
+                                    [fromId]: { id: fromId },
+                                },
                                 edges: {
                                     [fromType]: { [fromId]: { [toType]: { [toNode1Id]: metadata } } },
                                 },
@@ -590,6 +609,9 @@ describe('store:pull', () => {
                     {
                         main: {
                             graph: {
+                                nodes: {
+                                    [node1Id]: { id: node1Id },
+                                },
                                 rights: {
                                     [node1Id]: node1Rights,
                                 },
@@ -705,6 +727,9 @@ describe('store:pull', () => {
                     {
                         main: {
                             graph: {
+                                nodes: {
+                                    [node1Id]: { id: node1Id },
+                                },
                                 files: {
                                     [node1Id]: node1Files,
                                 },
