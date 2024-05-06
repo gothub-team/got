@@ -644,7 +644,7 @@ describe('store:push', () => {
             const graphName = 'graph';
             const prop = 'file1';
             const filename = 'file1.txt';
-            const contentType = 'text/plain';
+            const contentType = 'text/plain;charset=utf-8';
             const file = new Blob(['hello there'], { type: contentType });
 
             const graph = {
@@ -695,7 +695,7 @@ describe('store:push', () => {
             const graphName = 'graph';
             const prop = 'file1';
             const filename = 'file1.txt';
-            const contentType = 'text/plain';
+            const contentType = 'text/plain;charset=utf-8';
             const file = new Blob(['hello there'], { type: contentType });
 
             const uploadUrls = ['https://someurl.com'];
@@ -771,7 +771,7 @@ describe('store:push', () => {
             const graphName = 'graph';
             const prop = 'file1';
             const filename = 'file1.txt';
-            const contentType = 'text/plain';
+            const contentType = 'text/plain;charset=utf-8';
             const uploadId = 'someUploadId';
             const file = new Blob(['hello there'], { type: contentType });
 
@@ -850,7 +850,7 @@ describe('store:push', () => {
             const prop1 = 'file1';
             const prop2 = 'file2';
             const filename = 'file1.txt';
-            const contentType = 'text/plain';
+            const contentType = 'text/plain;charset=utf-8';
             const file = new Blob(['hello there'], { type: contentType });
             const uploadUrls = ['https://someurl.com'];
             const graphData = {
@@ -965,7 +965,7 @@ describe('store:push', () => {
             const nodeId1 = 'node1';
             const prop1 = 'file1';
             const filename1 = 'file1.txt';
-            const contentType1 = 'text/plain';
+            const contentType1 = 'text/plain;charset=utf-8';
             const uploadId1 = 'someUploadId1';
             const file1 = new Blob(['hello there1'], { type: contentType1 });
             const uploadUrls1 = ['https://someurl1.com', 'https://someurl2.com'];
@@ -974,7 +974,7 @@ describe('store:push', () => {
             const nodeId2 = 'node2';
             const prop2 = 'file2';
             const filename2 = 'file2.txt';
-            const contentType2 = 'text/plain';
+            const contentType2 = 'text/plain;charset=utf-8';
             const uploadId2 = 'someUploadId2';
             const file2 = new Blob(['hello there2'], { type: contentType2 });
             const uploadUrls2 = [
@@ -1241,7 +1241,11 @@ describe('store:push', () => {
             } = createTestStore(
                 {
                     [graphName]: {
-                        graph: {}, // graph needs to exist, otherwise push will not push
+                        graph: {
+                            nodes: {
+                                node1: { id: 'node1' },
+                            },
+                        }, // graph needs to exist, otherwise push will not push
                     },
                 },
                 {
@@ -1270,7 +1274,7 @@ describe('store:push', () => {
             const nodeId = 'node1';
             const prop = 'file1';
             const filename = 'file1.txt';
-            const contentType = 'text/plain';
+            const contentType = 'text/plain;charset=utf-8';
             const file = new Blob(['hello there'], { type: contentType });
             const uploadUrls = ['https://someurl.com'];
 
@@ -1326,7 +1330,7 @@ describe('store:push', () => {
             expect(events[0]).toEqual({
                 type: 'GOT/UPLOAD_ERROR',
                 payload: {
-                    graphName: 'main',
+                    graphName,
                     nodeId,
                     prop,
                     error: apiError,
