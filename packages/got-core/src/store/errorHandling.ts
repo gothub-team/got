@@ -33,7 +33,7 @@ export const createErrorHandledStore = (
             return store.merge(fromGraphName, toGraphName);
         }
     };
-    const mergeGraph = (fromGraph: Graph = {}, toGraphName: string) => {
+    const mergeGraph = (fromGraph: Graph, toGraphName: string) => {
         if (
             validateError('GOT_MERGE_GRAPH', 'function', 'dispatch', dispatch) &&
             validateError('GOT_MERGE_GRAPH', 'graph', 'fromGraph', fromGraph) &&
@@ -42,7 +42,7 @@ export const createErrorHandledStore = (
             return store.mergeGraph(fromGraph, toGraphName);
         }
     };
-    const mergeOverwriteGraph = (fromGraph: Graph = {}, toGraphName: string) => {
+    const mergeOverwriteGraph = (fromGraph: Graph, toGraphName: string) => {
         if (
             validateError('GOT_MERGE_OVERWRITE_GRAPH', 'function', 'dispatch', dispatch) &&
             validateError('GOT_MERGE_OVERWRITE_GRAPH', 'graph', 'fromGraph', fromGraph) &&

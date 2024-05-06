@@ -1,5 +1,7 @@
 import { GOT_ACTION } from '../types/actions';
+import { Graph } from '../types/graph';
 import { State } from '../types/state';
+import { mergeGraphsRight, mergeOverwriteGraphsRight } from '../utils/mergeGraph';
 import { assocPathMutate, dissocPathMutate, getPathOr, mergeGraphObjRight } from '../utils/util';
 
 const getEmptyStack = () => ({
@@ -17,7 +19,30 @@ export const gotReducer = (state: State, action: GOT_ACTION): State => {
         return getEmptyStore();
     }
 
-    if (action.type === 'GOT/CLEAR') {
+    if (action.type === 'GOT/MERGE') {
+        const { toGraphName, fromGraph } = action.payload;
+
+        const path = [toGraphName, 'graph'];
+        const oldGraph = getPathOr(undefined, path, state) as Graph;
+        const newGraph = mergeGraphsRight(oldGraph, fromGraph);
+        assocPathMutate(path, newGraph, state);
+
+        return state;
+    } else if (action.type === 'GOT/MERGE_ERROR') {
+        const { toGraphName, fromGraph } = action.payload;
+
+        const path = [toGraphName, 'errors'];
+        const oldGraph = getPathOr(undefined, path, state);
+        const newGraph = mergeGraphsRight(oldGraph, fromGraph);
+        assocPathMutate(path, newGraph, state);
+    } else if (action.type === 'GOT/MERGE_OVERWRITE') {
+        const { toGraphName, fromGraph } = action.payload;
+
+        const path = [toGraphName, 'graph'];
+        const oldGraph = getPathOr(undefined, path, state);
+        const newGraph = mergeOverwriteGraphsRight(oldGraph, fromGraph);
+        assocPathMutate(path, newGraph, state);
+    } else if (action.type === 'GOT/CLEAR') {
         const { graphName } = action.payload;
 
         if (graphName in state) {

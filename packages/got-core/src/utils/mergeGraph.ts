@@ -17,8 +17,7 @@ const mergeObjRight =
         forEachObjDepth(
             right,
             (valRight: TMerge, path: string[]) => {
-                // console.log(valRight, path);
-                if (typeof valRight === 'undefined') {
+                if (valRight === undefined) {
                     assocPathMutate(path, undefined, result);
                 } else {
                     const valLeft = getPathOr(undefined, path, left);
@@ -82,7 +81,7 @@ const overwriteObjRight =
         forEachObjDepth(
             right,
             (valRight, path) => {
-                if (typeof valRight === 'undefined') {
+                if (valRight === undefined) {
                     dissocPathMutate(path, result);
                     return;
                 }
