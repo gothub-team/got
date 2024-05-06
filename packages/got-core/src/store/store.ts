@@ -1,9 +1,12 @@
 import { ViewResult } from '../types/ViewResult';
 import { GOT_ACTION } from '../types/actions';
-import { Graph, PushResult } from '../types/graph';
+import { StoreAPI } from '../types/api';
+import { ErrorGraph, Graph } from '../types/graph';
 import { Metadata, Node, RightTypes } from '../types/graphObjects';
 import { State } from '../types/state';
 import { View } from '../types/view';
+import { isEmptyGraph, selectDeleteGraph, selectSuccessAndErrorGraphs } from '../utils/graph';
+import { mergeGraphsRight } from '../utils/mergeGraph';
 import {
     edgeFromStack,
     filesFromStack,
@@ -13,18 +16,16 @@ import {
     rightFromStack,
     selectGraphStack,
 } from '../utils/stack';
+import { createFileUploader } from '../utils/uploads';
 import { subgraphFromStack, viewResFromStack } from '../utils/view';
 
 export type CreateStoreOptions = {
-    api: {
-        push: (graph: Graph) => Promise<PushResult>;
-        pull: (view: View) => Promise<Graph>;
-    };
+    api: StoreAPI;
     dispatch: (action: GOT_ACTION) => void;
     select: <TRes>(fnSelect: (state: State) => TRes) => TRes;
 };
 
-export const createStore = ({ dispatch, select }: CreateStoreOptions) => {
+export const createStore = ({ api, dispatch, select }: CreateStoreOptions) => {
     const merge = (fromGraph: Graph | string, toGraphName: string) => {
         const _graph = typeof fromGraph === 'string' ? select((state) => state[fromGraph]?.graph) : fromGraph;
         dispatch({
@@ -38,6 +39,15 @@ export const createStore = ({ dispatch, select }: CreateStoreOptions) => {
     const mergeGraph = (fromGraph: Graph = {}, toGraphName: string) => {
         dispatch({
             type: 'GOT/MERGE',
+            payload: {
+                fromGraph,
+                toGraphName,
+            },
+        });
+    };
+    const mergeErrorGraph = (fromGraph: ErrorGraph = {}, toGraphName: string) => {
+        dispatch({
+            type: 'GOT/MERGE_ERROR',
             payload: {
                 fromGraph,
                 toGraphName,
@@ -306,6 +316,42 @@ export const createStore = ({ dispatch, select }: CreateStoreOptions) => {
     };
     const getSubgraph = (stack: string[], view: View): Graph => select((state) => selectSubgraph(stack, view, state));
 
+    const push = async (graphName: string, toGraphName: string = 'main') => {
+        const graph = select((state) => state[graphName]?.graph);
+        const pushBody = { ...graph, index: undefined };
+        if (isEmptyGraph(pushBody)) return;
+
+        const fileStore = select((state) => state[graphName]?.files);
+
+        const apiResult = await api.push(pushBody);
+        const [successGraph, errorGraph] = selectSuccessAndErrorGraphs(graph, apiResult);
+
+        if (!isEmptyGraph(successGraph)) {
+            mergeGraph(successGraph, toGraphName);
+        }
+
+        clear(graphName);
+
+        if (!isEmptyGraph(errorGraph)) {
+            mergeErrorGraph(errorGraph, toGraphName);
+        }
+
+        return createFileUploader(api, graphName, graph, apiResult, successGraph, fileStore);
+    };
+
+    const pull = async (view: View, toGraphName = 'main'): Promise<Graph> => {
+        const apiResult = api.pull(view);
+
+        const localGraph = getSubgraph([toGraphName], view);
+        const deleteGraph = selectDeleteGraph(localGraph);
+
+        const fromGraph = mergeGraphsRight(deleteGraph, await apiResult);
+
+        mergeOverwriteGraph(fromGraph, toGraphName);
+
+        return apiResult;
+    };
+
     return {
         merge,
         mergeGraph,
@@ -339,5 +385,7 @@ export const createStore = ({ dispatch, select }: CreateStoreOptions) => {
         getView,
         selectSubgraph,
         getSubgraph,
+        push,
+        pull,
     };
 };

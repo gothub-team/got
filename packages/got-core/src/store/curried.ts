@@ -167,6 +167,8 @@ export const createCurriedStore = (store: ReturnType<typeof createStore>) => {
         (view: View) => {
             return store.getSubgraph(decideStack(stack), view);
         };
+    const push = store.push;
+    const pull = store.pull;
 
     return {
         merge,
@@ -201,5 +203,7 @@ export const createCurriedStore = (store: ReturnType<typeof createStore>) => {
         getView,
         selectSubgraph,
         getSubgraph,
+        push,
+        pull,
     };
 };

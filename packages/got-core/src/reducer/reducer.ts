@@ -1,5 +1,5 @@
 import { GOT_ACTION } from '../types/actions';
-import { Graph } from '../types/graph';
+import { ErrorGraph, Graph } from '../types/graph';
 import { State } from '../types/state';
 import { mergeGraphsRight, mergeOverwriteGraphsRight } from '../utils/mergeGraph';
 import { assocPathMutate, dissocPathMutate, getPathOr, mergeGraphObjRight } from '../utils/util';
@@ -32,7 +32,7 @@ export const gotReducer = (state: State, action: GOT_ACTION): State => {
         const { toGraphName, fromGraph } = action.payload;
 
         const path = [toGraphName, 'errors'];
-        const oldGraph = getPathOr(undefined, path, state);
+        const oldGraph = getPathOr(undefined, path, state) as ErrorGraph;
         const newGraph = mergeGraphsRight(oldGraph, fromGraph);
         assocPathMutate(path, newGraph, state);
     } else if (action.type === 'GOT/MERGE_OVERWRITE') {

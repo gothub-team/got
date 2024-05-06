@@ -354,6 +354,28 @@ export const createErrorHandledStore = (
         }
     };
 
+    const push = async (graphName: string, toGraphName: string = 'main') => {
+        if (
+            validateError('GOT_PUSH', 'api', 'api', api) &&
+            validateError('GOT_PUSH', 'function', 'dispatch', dispatch) &&
+            validateError('GOT_PUSH', 'string', 'graphName', graphName) &&
+            validateError('GOT_PUSH', 'string', 'toGraphName', toGraphName)
+        ) {
+            return store.push(graphName, toGraphName);
+        }
+    };
+
+    const pull = async (view: View, toGraphName = 'main'): Promise<Graph> => {
+        if (
+            validateError('GOT_PUSH', 'api', 'api', api) &&
+            validateError('GOT_PULL', 'function', 'dispatch', dispatch) &&
+            validateError('GOT_PULL', 'view', 'view', view) &&
+            validateError('GOT_PULL', 'string', 'toGraphName', toGraphName)
+        ) {
+            return store.pull(view, toGraphName);
+        }
+    };
+
     return {
         merge,
         mergeGraph,
@@ -387,5 +409,7 @@ export const createErrorHandledStore = (
         getView,
         selectSubgraph,
         getSubgraph,
+        push,
+        pull,
     };
 };

@@ -1,16 +1,18 @@
 import { ErrorGraph, Graph } from './graph';
 
+export type FileStore = {
+    [nodeId: string]: {
+        [name: string]: {
+            status: string;
+            file: Blob;
+        };
+    };
+};
+
 export declare interface GraphState {
     graph: Graph;
     errors: ErrorGraph;
-    files: {
-        [nodeId: string]: {
-            [name: string]: {
-                status: string;
-                file: Blob;
-            };
-        };
-    };
+    files: FileStore;
 }
 
 export declare type State<T extends Record<string, GraphState> = Record<string, GraphState>> = {

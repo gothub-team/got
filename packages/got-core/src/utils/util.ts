@@ -233,3 +233,7 @@ export const isEdgeTypeString = (edgeTypes: string) => {
     const [fromType, toType] = edgeTypes.split('/');
     return fromType && toType;
 };
+
+export const isEmptyObject = (obj: object | undefined): boolean => {
+    return obj === undefined || Object.keys(obj).length === 0;
+};
