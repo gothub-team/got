@@ -4,6 +4,7 @@ import {
     dissocPathMutate,
     forEachObjDepth,
     getPathOr,
+    isEmptyObject,
     mergeDeepRight,
     mergeGraphObjRight,
 } from './util';
@@ -45,27 +46,27 @@ export const mergeGraphsRight = (left: Graph, right: Graph): Graph => {
     const result = left;
 
     const nodes = mergeNodesRight(left?.nodes, right?.nodes);
-    if (nodes) {
+    if (!isEmptyObject(nodes)) {
         result.nodes = nodes;
     }
 
     const edges = mergeEdgesRight(left?.edges, right?.edges);
-    if (edges) {
+    if (!isEmptyObject(edges)) {
         result.edges = edges;
     }
 
     const rights = mergeRightsRight(left?.rights, right?.rights);
-    if (rights) {
+    if (!isEmptyObject(rights)) {
         result.rights = rights;
     }
 
     const files = mergeFilesRight(left?.files, right?.files);
-    if (files) {
+    if (!isEmptyObject(files)) {
         result.files = files;
     }
 
     const index = mergeIndexRight(left?.index, right?.index);
-    if (index) {
+    if (!isEmptyObject(index)) {
         result.index = index;
     }
 
@@ -118,27 +119,27 @@ export const mergeOverwriteGraphsRight = (left: Graph, right: Graph) => {
     const result = left;
 
     const nodes = overwriteNodesRight(left?.nodes, right?.nodes);
-    if (nodes) {
+    if (!isEmptyObject(nodes)) {
         result.nodes = nodes;
     }
 
     const edges = overwriteEdgesRight(left?.edges, right?.edges);
-    if (edges) {
+    if (!isEmptyObject(edges)) {
         result.edges = edges;
     }
 
     const rights = overwriteRightsRight(left?.rights, right?.rights);
-    if (rights) {
+    if (!isEmptyObject(rights)) {
         result.rights = rights;
     }
 
     const files = overwriteFilesRight(left?.files, right?.files);
-    if (files) {
+    if (!isEmptyObject(files)) {
         result.files = files;
     }
 
     const index = overwriteIndexRight(left?.index, right?.index);
-    if (index) {
+    if (!isEmptyObject(index)) {
         result.index = index;
     }
     return result;

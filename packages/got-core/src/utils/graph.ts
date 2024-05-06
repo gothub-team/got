@@ -74,19 +74,39 @@ export const selectSuccessAndErrorGraphs = (pushGraph: Graph, pushResult: PushRe
         2,
     );
 
-    const successGraph = {
-        nodes: successNodes,
-        edges: successEdges,
-        rights: successRights,
-        files: successFiles,
-    };
+    const successGraph = {} as Graph;
+    if (!isEmptyObject(successNodes)) {
+        successGraph.nodes = successNodes;
+    }
 
-    const errorGraph = {
-        nodes: errorNodes,
-        edges: errorEdges,
-        rights: errorRights,
-        files: errorFiles,
-    };
+    if (!isEmptyObject(successEdges)) {
+        successGraph.edges = successEdges;
+    }
+
+    if (!isEmptyObject(successRights)) {
+        successGraph.rights = successRights;
+    }
+
+    if (!isEmptyObject(successFiles)) {
+        successGraph.files = successFiles;
+    }
+
+    const errorGraph = {} as ErrorGraph;
+    if (!isEmptyObject(errorNodes)) {
+        errorGraph.nodes = errorNodes;
+    }
+
+    if (!isEmptyObject(errorEdges)) {
+        errorGraph.edges = errorEdges;
+    }
+
+    if (!isEmptyObject(errorRights)) {
+        errorGraph.rights = errorRights;
+    }
+
+    if (!isEmptyObject(errorFiles)) {
+        errorGraph.files = errorFiles;
+    }
 
     return [successGraph, errorGraph];
 };
