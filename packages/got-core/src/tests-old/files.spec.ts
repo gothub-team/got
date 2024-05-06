@@ -12,7 +12,7 @@ describe('store:files', () => {
             const name2 = 'file2';
             const nodeFileView = {
                 [name1]: {
-                    type: 'text/plain',
+                    type: 'text/plain;charset=utf-8',
                     size: 11,
                     url: 'https://someurl.com',
                 },
@@ -52,7 +52,7 @@ describe('store:files', () => {
             const graphName1 = 'graph1';
             const nodeFileView1 = {
                 [name1]: {
-                    type: 'text/plain',
+                    type: 'text/plain;charset=utf-8',
                     size: 11,
                     url: 'https://someurl.com',
                 },
@@ -60,7 +60,7 @@ describe('store:files', () => {
 
             const nodeFileView2 = {
                 [name1]: {
-                    type: 'text/plain',
+                    type: 'text/plain;charset=utf-8',
                     size: 1024,
                     url: 'https://someotherurl.com',
                 },
@@ -102,7 +102,7 @@ describe('store:files', () => {
             const graphName1 = 'graph1';
             const nodeFileView1 = {
                 [name1]: {
-                    type: 'text/plain',
+                    type: 'text/plain;charset=utf-8',
                     size: 11,
                     url: 'https://someurl.com',
                 },
@@ -142,7 +142,7 @@ describe('store:files', () => {
             const graphName1 = 'graph1';
             const nodeFileView1 = {
                 [name1]: {
-                    type: 'text/plain',
+                    type: 'text/plain;charset=utf-8',
                     size: 11,
                     url: 'https://someurl.com',
                 },
@@ -188,7 +188,7 @@ describe('store:files', () => {
             const graphName1 = 'graph1';
             const nodeFileView1 = {
                 [name1]: {
-                    type: 'text/plain',
+                    type: 'text/plain;charset=utf-8',
                     size: 11,
                     url: 'https://someurl.com',
                 },
@@ -233,7 +233,7 @@ describe('store:files', () => {
             const graphName1 = 'graph1';
             const nodeFileView1 = {
                 [name1]: {
-                    type: 'text/plain',
+                    type: 'text/plain;charset=utf-8',
                     size: 11,
                     url: 'https://someurl.com',
                 },
@@ -241,7 +241,7 @@ describe('store:files', () => {
 
             const nodeFileView2 = {
                 [name2]: {
-                    type: 'text/plain',
+                    type: 'text/plain;charset=utf-8',
                     size: 1024,
                     url: 'https://someotherurl.com',
                 },
@@ -274,12 +274,12 @@ describe('store:files', () => {
 
             const expectedResult = {
                 [name1]: {
-                    type: 'text/plain',
+                    type: 'text/plain;charset=utf-8',
                     size: 11,
                     url: 'https://someurl.com',
                 },
                 [name2]: {
-                    type: 'text/plain',
+                    type: 'text/plain;charset=utf-8',
                     size: 1024,
                     url: 'https://someotherurl.com',
                 },
@@ -333,7 +333,7 @@ describe('store:files', () => {
             const name2 = 'file1';
             const nodeFileView = {
                 [name1]: {
-                    type: 'text/plain',
+                    type: 'text/plain;charset=utf-8',
                     size: 11,
                     url: 'https://someurl.com',
                 },
@@ -375,7 +375,7 @@ describe('store:files', () => {
             const nodeId = 'node1';
             const prop = 'file1';
             const filename = 'file1.txt';
-            const file = new Blob(['hello there'], { type: 'text/plain' });
+            const file = new Blob(['hello there'], { type: 'text/plain;charset=utf-8' });
             const graphName = 'graph1';
 
             const {
@@ -433,7 +433,7 @@ describe('store:files', () => {
             const nodeId = 'node1';
             const prop = 'file1';
             const filename = 'file1.txt';
-            const file = new Blob(['hello there'], { type: 'text/plain' });
+            const file = new Blob(['hello there'], { type: 'text/plain;charset=utf-8' });
             const graphName = 'graph1';
 
             const {
@@ -455,7 +455,7 @@ describe('store:files', () => {
             const nodeId = 'node1';
             const prop = 'file1';
             const filename = 'file1.txt';
-            const file = new Blob(['hello there'], { type: 'text/plain' });
+            const file = new Blob(['hello there'], { type: 'text/plain;charset=utf-8' });
             const graphName = 'graph1';
 
             const {
@@ -507,7 +507,7 @@ describe('store:files', () => {
                 }),
             );
 
-            setFile(graphName)(nodeId)(prop, filename, { type: 'text/plain' });
+            setFile(graphName)(nodeId)(prop, filename, { type: 'text/plain;charset=utf-8' });
             expect(onError).toBeCalledWith(
                 expect.objectContaining({
                     name: INVALID_PARAM_ERROR,
@@ -562,7 +562,7 @@ describe('store:files', () => {
             const nodeId = 'node1';
             const prop = 'file1';
             const graphName = 'graph1';
-            const type = 'text/plain';
+            const type = 'text/plain;charset=utf-8';
 
             const {
                 store: { removeFile },
@@ -596,7 +596,7 @@ describe('store:files', () => {
             const nodeId = 'node1';
             const prop = 'file1';
             const graphName = 'graph1';
-            const type = 'text/plain';
+            const type = 'text/plain;charset=utf-8';
             const file = new Blob(['hello there'], { type });
 
             const {
