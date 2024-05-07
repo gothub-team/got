@@ -200,3 +200,5 @@ export const createCurriedStore = (store: Store) => {
         pull,
     };
 };
+
+export type CurriedStore = ReturnType<typeof createCurriedStore>;
