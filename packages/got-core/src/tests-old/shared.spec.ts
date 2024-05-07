@@ -3,11 +3,11 @@ import { test, expect, mock } from 'bun:test';
 import { assocPathMutate } from '@gothub-team/got-util';
 import * as R from 'ramda';
 import { createCurriedStore } from '../store/curried';
-import { createErrorHandledStore } from '../store/errorHandling';
-import { createStore as _createStore } from '../store/store';
+import { CreateErrorHandledStoreOptions, createErrorHandledStore } from '../store/errorHandling';
 import { gotReducer } from '../reducer/reducer';
 
-export const createStore = (options) => createCurriedStore(createErrorHandledStore(options, _createStore(options)));
+export const createStore = (options: CreateErrorHandledStoreOptions) =>
+    createCurriedStore(createErrorHandledStore(options));
 
 test('dummy test', () => {
     expect(true).toBe(true);

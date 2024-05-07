@@ -10,7 +10,7 @@ const getEmptyStack = () => ({
     files: {},
 });
 
-const getEmptyStore = () => ({
+export const getEmptyStore = (): State => ({
     main: getEmptyStack(),
 });
 

@@ -5,14 +5,16 @@ import { State } from '../types/state';
 import { View } from '../types/view';
 import { createInputValidator } from '../utils/errors';
 import { isEmptyObject } from '../utils/util';
-import { type CreateStoreOptions, type PushObservables, type Store } from './store';
+import { createStore, type CreateStoreOptions, type PushObservables, type Store } from './store';
 
-type CreateErrorHandledStoreOptions = CreateStoreOptions & {
+export type ErrorHandlers = {
     onError?: (error: Error) => void;
     onWarn?: (error: Error) => void;
 };
 
-export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions, store: Store): Store => {
+export type CreateErrorHandledStoreOptions = CreateStoreOptions & ErrorHandlers;
+
+export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions): Store => {
     const { api, dispatch, select, onError = console.error, onWarn = console.warn } = options || {};
 
     const validateError = createInputValidator(onError);
@@ -21,6 +23,12 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions,
     validateWarn('GOT_STORE_CONFIG', 'api', 'api', api);
     validateWarn('GOT_STORE_CONFIG', 'function', 'dispatch', dispatch);
     validateWarn('GOT_STORE_CONFIG', 'function', 'select', select);
+
+    const store = createStore({
+        api,
+        dispatch,
+        select,
+    });
 
     const merge = (fromGraphName: string, toGraphName: string) => {
         if (

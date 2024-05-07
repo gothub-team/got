@@ -3,7 +3,7 @@ import { View } from '../types/view';
 import { createInputValidator } from '../utils/errors';
 import { CurriedStore } from './curried';
 
-export const configureCreateGraph = (store: CurriedStore, onError: (e: Error) => void) => {
+export const configureCreateCurriedGraph = (store: CurriedStore, onError: (e: Error) => void) => {
     const validateError = createInputValidator(onError);
     const createGraph = (...stack: string[]) => {
         validateError('GOT_CREATE_CURRIED_GRAPH', 'stack', 'stack', stack);
