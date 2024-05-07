@@ -1,7 +1,7 @@
-import { Metadata, Node, RightTypes } from '../types/graphObjects';
-import { State } from '../types/state';
-import { View } from '../types/view';
-import { createStore } from './store';
+import { type Metadata, type Node, type RightTypes } from '../types/graphObjects';
+import { type State } from '../types/state';
+import { type View } from '../types/view';
+import { type Store } from './store';
 
 const decideStack = (stack: string[] | string[1][]): string[] => {
     if (stack.length === 0) return undefined;
@@ -11,7 +11,7 @@ const decideStack = (stack: string[] | string[1][]): string[] => {
     return stack;
 };
 
-export const createCurriedStore = (store: ReturnType<typeof createStore>) => {
+export const createCurriedStore = (store: Store) => {
     const merge = store.merge;
     const mergeGraph = store.mergeGraph;
     const mergeOverwriteGraph = store.mergeOverwriteGraph;

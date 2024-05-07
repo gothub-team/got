@@ -405,3 +405,5 @@ export const createStore = ({ api, dispatch, select }: CreateStoreOptions) => {
         pull,
     };
 };
+
+export type Store = ReturnType<typeof createStore>;

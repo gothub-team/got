@@ -5,17 +5,14 @@ import { State } from '../types/state';
 import { View } from '../types/view';
 import { createInputValidator } from '../utils/errors';
 import { isEmptyObject } from '../utils/util';
-import { type CreateStoreOptions, createStore, PushObservables } from './store';
+import { type CreateStoreOptions, type PushObservables, type Store } from './store';
 
 type CreateErrorHandledStoreOptions = CreateStoreOptions & {
     onError?: (error: Error) => void;
     onWarn?: (error: Error) => void;
 };
 
-export const createErrorHandledStore = (
-    options: CreateErrorHandledStoreOptions,
-    store: ReturnType<typeof createStore>,
-): ReturnType<typeof createStore> => {
+export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions, store: Store): Store => {
     const { api, dispatch, select, onError = console.error, onWarn = console.warn } = options || {};
 
     const validateError = createInputValidator(onError);
