@@ -1,15 +1,8 @@
 import { type Metadata, type Node, type RightTypes } from '../types/graphObjects';
 import { type State } from '../types/state';
 import { type View } from '../types/view';
+import { decideStack } from '../utils/util';
 import { type Store } from './store';
-
-const decideStack = (stack: string[] | string[1][]): string[] => {
-    if (stack.length === 0) return undefined;
-    if (stack.length === 1 && Array.isArray(stack[0])) {
-        return stack[0];
-    }
-    return stack;
-};
 
 export const createCurriedStore = (store: Store) => {
     const merge = store.merge;

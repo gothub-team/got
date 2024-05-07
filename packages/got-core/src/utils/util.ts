@@ -237,3 +237,11 @@ export const isEdgeTypeString = (edgeTypes: string) => {
 export const isEmptyObject = (obj: object | undefined): boolean => {
     return obj === undefined || Object.keys(obj).length === 0;
 };
+
+export const decideStack = (stack: string[] | string[1][]): string[] => {
+    if (stack.length === 0) return undefined;
+    if (stack.length === 1 && Array.isArray(stack[0])) {
+        return stack[0];
+    }
+    return stack;
+};
