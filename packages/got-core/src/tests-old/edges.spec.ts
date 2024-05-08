@@ -659,7 +659,7 @@ describe('store:Edges', () => {
                     missing: 'stack',
                 }),
             );
-            expect(output1).toEqual(undefined);
+            expect(output1).toEqual({});
 
             const output2 = select(selectEdge(graphName1)(undefined)(fromId));
             expect(onError).toBeCalledWith(
@@ -668,7 +668,7 @@ describe('store:Edges', () => {
                     missing: 'edgeTypes',
                 }),
             );
-            expect(output2).toEqual(undefined);
+            expect(output2).toEqual({});
 
             const output3 = select(selectEdge(graphName1)(`${fromType}`)(fromId));
             expect(onError).toBeCalledWith(
@@ -677,7 +677,7 @@ describe('store:Edges', () => {
                     invalid: 'edgeTypes',
                 }),
             );
-            expect(output3).toEqual(undefined);
+            expect(output3).toEqual({});
 
             const output4 = select(selectEdge(graphName1)(`${fromType}/${toType}`)(undefined));
             expect(onError).toBeCalledWith(
@@ -686,7 +686,7 @@ describe('store:Edges', () => {
                     missing: 'fromId',
                 }),
             );
-            expect(output4).toEqual(undefined);
+            expect(output4).toEqual({});
 
             expect(dispatch).not.toBeCalled();
             /* #endregion */
@@ -782,7 +782,7 @@ describe('store:Edges', () => {
                     missing: 'stack',
                 }),
             );
-            expect(output1).toEqual(undefined);
+            expect(output1).toEqual({});
 
             const output2 = getEdge(graphName1)(undefined)(fromId);
             expect(onError).toBeCalledWith(
@@ -791,7 +791,7 @@ describe('store:Edges', () => {
                     missing: 'edgeTypes',
                 }),
             );
-            expect(output2).toEqual(undefined);
+            expect(output2).toEqual({});
 
             const output3 = getEdge(graphName1)(`${fromType}`)(fromId);
             expect(onError).toBeCalledWith(
@@ -800,7 +800,7 @@ describe('store:Edges', () => {
                     invalid: 'edgeTypes',
                 }),
             );
-            expect(output3).toEqual(undefined);
+            expect(output3).toEqual({});
 
             const output4 = getEdge(graphName1)(`${fromType}/${toType}`)(undefined);
             expect(onError).toBeCalledWith(
@@ -809,7 +809,7 @@ describe('store:Edges', () => {
                     missing: 'fromId',
                 }),
             );
-            expect(output4).toEqual(undefined);
+            expect(output4).toEqual({});
 
             expect(dispatch).not.toBeCalled();
             /* #endregion */
@@ -1265,7 +1265,7 @@ describe('store:Edges', () => {
                     missing: 'stack',
                 }),
             );
-            expect(output1).toEqual(undefined);
+            expect(output1).toEqual({});
 
             const output2 = select(selectReverseEdge(graphName1)(undefined)(toId1));
             expect(onError).toBeCalledWith(
@@ -1274,7 +1274,7 @@ describe('store:Edges', () => {
                     missing: 'edgeTypes',
                 }),
             );
-            expect(output2).toEqual(undefined);
+            expect(output2).toEqual({});
 
             const output3 = select(selectReverseEdge(graphName1)(`${fromType}`)(toId1));
             expect(onError).toBeCalledWith(
@@ -1283,7 +1283,7 @@ describe('store:Edges', () => {
                     invalid: 'edgeTypes',
                 }),
             );
-            expect(output3).toEqual(undefined);
+            expect(output3).toEqual({});
 
             const output4 = select(selectReverseEdge(graphName1)(`${fromType}/${toType}`)(undefined));
             expect(onError).toBeCalledWith(
@@ -1292,7 +1292,7 @@ describe('store:Edges', () => {
                     missing: 'toId',
                 }),
             );
-            expect(output4).toEqual(undefined);
+            expect(output4).toEqual({});
 
             expect(dispatch).not.toBeCalled();
             /* #endregion */
@@ -1408,7 +1408,7 @@ describe('store:Edges', () => {
                     missing: 'stack',
                 }),
             );
-            expect(output1).toEqual(undefined);
+            expect(output1).toEqual({});
 
             const output2 = getReverseEdge(graphName1)(undefined)(toId1);
             expect(onError).toBeCalledWith(
@@ -1417,7 +1417,7 @@ describe('store:Edges', () => {
                     missing: 'edgeTypes',
                 }),
             );
-            expect(output2).toEqual(undefined);
+            expect(output2).toEqual({});
 
             const output3 = getReverseEdge(graphName1)(`${fromType}`)(toId1);
             expect(onError).toBeCalledWith(
@@ -1426,7 +1426,7 @@ describe('store:Edges', () => {
                     invalid: 'edgeTypes',
                 }),
             );
-            expect(output3).toEqual(undefined);
+            expect(output3).toEqual({});
 
             const output4 = getReverseEdge(graphName1)(`${fromType}/${toType}`)(undefined);
             expect(onError).toBeCalledWith(
@@ -1435,7 +1435,7 @@ describe('store:Edges', () => {
                     missing: 'toId',
                 }),
             );
-            expect(output4).toEqual(undefined);
+            expect(output4).toEqual({});
 
             expect(dispatch).not.toBeCalled();
             /* #endregion */

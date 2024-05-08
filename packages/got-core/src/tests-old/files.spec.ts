@@ -309,7 +309,7 @@ describe('store:files', () => {
                     missing: 'stack',
                 }),
             );
-            expect(output1).toBeUndefined();
+            expect(output1).toEqual({});
 
             const output2 = select(selectFiles('main')());
             expect(onError).toBeCalledWith(
@@ -318,7 +318,7 @@ describe('store:files', () => {
                     missing: 'nodeId',
                 }),
             );
-            expect(output2).toBeUndefined();
+            expect(output2).toEqual({});
 
             expect(dispatch).not.toBeCalled();
             /* #endregion */

@@ -455,7 +455,7 @@ describe('store:Rights', () => {
                     missing: 'stack',
                 }),
             );
-            expect(output1).toBeUndefined();
+            expect(output1).toEqual({});
 
             const output2 = select(selectRights(graphName1)(undefined));
             expect(onError).toBeCalledWith(
@@ -464,7 +464,7 @@ describe('store:Rights', () => {
                     missing: 'nodeId',
                 }),
             );
-            expect(output2).toBeUndefined();
+            expect(output2).toEqual({});
 
             expect(dispatch).not.toBeCalled();
             /* #endregion */

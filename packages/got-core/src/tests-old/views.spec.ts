@@ -875,7 +875,7 @@ describe('store:Views', () => {
                     missing: 'stack',
                 }),
             );
-            expect(output1).toBeUndefined();
+            expect(output1).toEqual({});
 
             const output2 = select(selectView('main')());
             expect(onError).toBeCalledWith(
@@ -884,7 +884,7 @@ describe('store:Views', () => {
                     missing: 'view',
                 }),
             );
-            expect(output2).toBeUndefined();
+            expect(output2).toEqual({});
 
             expect(dispatch).not.toBeCalled();
             /* #endregion */
