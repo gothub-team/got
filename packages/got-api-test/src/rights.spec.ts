@@ -176,4 +176,76 @@ describe('rights', () => {
             expect(graph).toHaveProperty(['rights', `${testId}-2`, 'user', user1Email, 'read'], true);
         });
     });
+
+    describe('inherit rights', () => {
+        beforeEach(async () => {
+            await user1Api.push({
+                nodes: {
+                    [`${testId}-3`]: {
+                        id: `${testId}-3`,
+                    },
+                },
+                rights: {
+                    [`${testId}-2`]: {
+                        user: {
+                            otherUser: {
+                                read: true,
+                                write: true,
+                            },
+                        },
+                    },
+                },
+            });
+            pushResult = await user2Api.push({
+                rights: {
+                    [`${testId}-1`]: {
+                        inherit: {
+                            from: `${testId}-2`,
+                        },
+                    },
+                    [`${testId}-3`]: {
+                        inherit: {
+                            from: `${testId}-2`,
+                        },
+                    },
+                },
+            });
+            graph = await user1Api.pull({
+                [`${testId}-1`]: {
+                    include: {
+                        rights: true,
+                    },
+                },
+                [`${testId}-3`]: {
+                    include: {
+                        rights: true,
+                    },
+                },
+            });
+        });
+
+        it('pushes inherit rights only for node 1', async () => {
+            expect(pushResult).toHaveProperty(['rights', `${testId}-1`, 'inherit', 'statusCode'], 200);
+            expect(pushResult).toHaveProperty(['rights', `${testId}-3`, 'inherit', 'statusCode'], 403);
+        });
+        it('pulls the same rights as on node 2 for user 1', async () => {
+            expect(graph).toHaveProperty(['rights', `${testId}-1`, 'user', user1Email, 'read'], true);
+            expect(graph).toHaveProperty(['rights', `${testId}-1`, 'user', user1Email, 'write'], true);
+            expect(graph).toHaveProperty(['rights', `${testId}-1`, 'user', user1Email, 'admin'], true);
+        });
+        it('pulls the additional rights for otherUser same as on node 2', async () => {
+            expect(graph).toHaveProperty(['rights', `${testId}-1`, 'user', 'otherUser', 'read'], true);
+            expect(graph).toHaveProperty(['rights', `${testId}-1`, 'user', 'otherUser', 'write'], true);
+        });
+        it('has removed all rights for user 2', async () => {
+            expect(graph).not.toHaveProperty(['rights', `${testId}-1`, 'user', user2Email]);
+        });
+        it('keeps only the rights for user 1 on node 3', async () => {
+            expect(graph).not.toHaveProperty(['rights', `${testId}-3`, 'user', user2Email]);
+            expect(graph).not.toHaveProperty(['rights', `${testId}-3`, 'user', 'otherUser']);
+            expect(graph).toHaveProperty(['rights', `${testId}-3`, 'user', user1Email, 'read'], true);
+            expect(graph).toHaveProperty(['rights', `${testId}-3`, 'user', user1Email, 'write'], true);
+            expect(graph).toHaveProperty(['rights', `${testId}-3`, 'user', user1Email, 'admin'], true);
+        });
+    });
 });
