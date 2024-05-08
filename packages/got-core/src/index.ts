@@ -6,6 +6,8 @@ import { type GotApi } from '@gothub-team/got-api';
 import { type StoreAPI } from './types/api';
 import { type State } from './types/state';
 import { type GOT_ACTION } from './types/actions';
+import { configureCreateLocalGraph } from './local-store/createLocalGraph';
+import { configureCreateLocalCurriedGraph } from './local-store/createLocalCurriedGraph';
 
 type SetupOption = {
     api: GotApi;
@@ -27,15 +29,22 @@ export const setup = ({ api, dispatch, select, onError, onWarn }: SetupOption) =
     });
 
     const createGraph = configureCreateGraph(store, onError);
+    const createLocalGraph = configureCreateLocalGraph(api as unknown as StoreAPI, { onError, onWarn });
 
     const curriedStore = createCurriedStore(store);
     const createCurriedGraph = configureCreateCurriedGraph(curriedStore, onError);
+    const createLocalCurriedGraph = configureCreateLocalCurriedGraph(api as unknown as StoreAPI, { onError, onWarn });
 
     return {
         createGraph,
+        createLocalGraph,
         store,
+        /**
+         * @deprecated
+         */
         curried: {
             createGraph: createCurriedGraph,
+            createLocalGraph: createLocalCurriedGraph,
             store: curriedStore,
         },
     };

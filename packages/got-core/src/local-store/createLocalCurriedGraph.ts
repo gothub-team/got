@@ -7,7 +7,7 @@ import { type GOT_ACTION } from '../types/actions';
 import { type StoreAPI } from '../types/api';
 import { type State } from '../types/state';
 
-export const configureCreateLocalGraph = (api: StoreAPI, options: ErrorHandlers) => {
+export const configureCreateLocalCurriedGraph = (api: StoreAPI, options: ErrorHandlers) => {
     /**
      * Factory function for creating a local got state and graph functions.
      *
