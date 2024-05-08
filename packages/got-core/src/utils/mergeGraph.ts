@@ -10,11 +10,11 @@ import {
 } from './util';
 
 const mergeObjRight =
-    <TMerge>(depth: number, fnMergeRight: (l: TMerge, r: TMerge) => TMerge) =>
-    <TInput extends object>(left?: TInput, right?: TInput): TInput | undefined => {
+    <TMerge>(depth: number, fnMergeRight: (l: TMerge | undefined, r: TMerge | undefined) => TMerge) =>
+    <TInput extends Record<string, unknown>>(left?: TInput, right?: TInput): TInput | undefined => {
         if (!right) return left;
 
-        const result: TInput = left ?? ({} as TInput);
+        const result: Record<string, unknown> = left ?? {};
         forEachObjDepth(
             right,
             (valRight: TMerge, path: string[]) => {
@@ -30,7 +30,7 @@ const mergeObjRight =
             depth,
         );
 
-        return result;
+        return result as TInput;
     };
 
 const mergeNodesRight = mergeObjRight(1, mergeGraphObjRight);
@@ -75,10 +75,10 @@ export const mergeGraphsRight = (left: Graph, right: Graph): Graph => {
 
 const overwriteObjRight =
     (depth: number) =>
-    <TInput extends object>(left?: TInput, right?: TInput): TInput | undefined => {
+    <TInput extends Record<string, unknown>>(left?: TInput, right?: TInput): TInput | undefined => {
         if (!right) return left;
 
-        const result: TInput = left ?? ({} as TInput);
+        const result: Record<string, unknown> = left ?? {};
         forEachObjDepth(
             right,
             (valRight, path) => {
@@ -103,7 +103,7 @@ const overwriteObjRight =
             depth,
         );
 
-        return result;
+        return result as TInput;
     };
 
 const overwriteNodesRight = overwriteObjRight(1);
