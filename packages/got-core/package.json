@@ -1,10 +1,12 @@
 {
     "name": "@gothub/got-core",
     "type": "module",
-    "module": "src/index.ts",
-    "types": "src/index.ts",
+    "main": "dist/cjs/index.js",
+    "module": "dist/module/index.js",
+    "types": "dist/module/index.d.ts",
     "scripts": {
         "lint": "eslint ./src",
+        "typecheck": "tsc --noEmit",
         "build": "bun run esbuild.js"
     },
     "devDependencies": {

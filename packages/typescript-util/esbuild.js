@@ -28,7 +28,8 @@ const buildTs = async () => {
     clean();
 
     const entryFiles = getAllFiles('./src');
-    // compiled code
+
+    // compile CJS
     await build({
         logLevel: 'info',
         bundle: false,
@@ -38,6 +39,8 @@ const buildTs = async () => {
         entryPoints: entryFiles,
         outdir: './dist/cjs',
     });
+
+    // compile minified CJS
     await build({
         logLevel: 'info',
         bundle: true,
@@ -49,6 +52,8 @@ const buildTs = async () => {
         entryPoints: ['./src/index.ts'],
         outfile: './dist/min/index.js',
     });
+
+    // compile ESM with types
     await build({
         logLevel: 'info',
         bundle: false,
