@@ -15,6 +15,7 @@ export const createFileUploader = (
     fileStore: FileStore,
 ): PushObservables => {
     const { subscribe, subscriber } = createSubscribable<GOT_UPLOAD_ACTION>();
+    const { complete, next } = subscriber;
 
     const uploadFile = async (nodeId: string, prop: string) => {
         try {
@@ -22,22 +23,24 @@ export const createFileUploader = (
             const { uploadUrls, uploadId } = (apiResult.files?.[nodeId]?.[prop] as OK_UPLOAD) || {};
             const file = fileStore[nodeId]?.[prop]?.file;
 
-            subscriber.next({
-                type: 'GOT/UPLOAD_PROGRESS',
-                payload: {
-                    graphName,
-                    nodeId,
-                    prop,
-                    progress: 0,
-                },
-            });
+            next &&
+                next({
+                    type: 'GOT/UPLOAD_PROGRESS',
+                    payload: {
+                        graphName,
+                        nodeId,
+                        prop,
+                        progress: 0,
+                    },
+                });
 
             await api.upload(uploadUrls, file, {
                 contentType,
                 uploadId,
                 partSize,
                 onProgress: (progress) =>
-                    subscriber.next({
+                    next &&
+                    next({
                         type: 'GOT/UPLOAD_PROGRESS',
                         payload: {
                             graphName,
@@ -48,24 +51,26 @@ export const createFileUploader = (
                     }),
             });
 
-            subscriber.next({
-                type: 'GOT/UPLOAD_COMPLETE',
-                payload: {
-                    graphName,
-                    nodeId,
-                    prop,
-                },
-            });
+            next &&
+                next({
+                    type: 'GOT/UPLOAD_COMPLETE',
+                    payload: {
+                        graphName,
+                        nodeId,
+                        prop,
+                    },
+                });
         } catch (error) {
-            subscriber.next({
-                type: 'GOT/UPLOAD_ERROR',
-                payload: {
-                    graphName,
-                    nodeId,
-                    prop,
-                    error: (error as Error).message,
-                },
-            });
+            next &&
+                next({
+                    type: 'GOT/UPLOAD_ERROR',
+                    payload: {
+                        graphName,
+                        nodeId,
+                        prop,
+                        error: (error as Error).message,
+                    },
+                });
         }
     };
 
@@ -84,7 +89,7 @@ export const createFileUploader = (
         );
 
         await Promise.all(uploads);
-        subscriber.complete(undefined);
+        complete && complete(undefined);
     };
 
     return { uploads: { subscribe, start: uploadFiles } };
