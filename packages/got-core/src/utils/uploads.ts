@@ -62,7 +62,7 @@ export const createFileUploader = (
                     graphName,
                     nodeId,
                     prop,
-                    error,
+                    error: (error as Error).message,
                 },
             });
         }

@@ -7,6 +7,6 @@ export type StoreAPI = {
     upload: (
         uploadUrls: string[],
         file: Blob,
-        options: { contentType: string; uploadId: string; partSize: number; onProgress: (progress: number) => void },
+        options: { contentType: string; uploadId?: string; partSize?: number; onProgress: (progress: number) => void },
     ) => Promise<void>;
 };
