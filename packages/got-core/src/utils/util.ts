@@ -114,15 +114,15 @@ export const mergeGraphObjRight = <TGraphObj>(left: TGraphObj, right: TGraphObj)
  * Deep merges two objects with data of the right input taking priority over those of the left.
  */
 export const mergeDeepRight = (l: unknown, r: unknown) => {
-    if (typeof l !== 'object' || typeof r !== 'object') return r;
+    if (typeof l !== 'object' || typeof r !== 'object' || l === null || r === null) return r;
 
-    const result = {};
+    const result: Record<string, unknown> = {};
 
     const lKeys = Object.keys(l);
     for (let i = 0; i < lKeys.length; i += 1) {
         const key = lKeys[i];
-        const lVal = l[key];
-        const rVal = r[key];
+        const lVal = (l as Record<string, unknown>)[key];
+        const rVal = (r as Record<string, unknown>)[key];
         result[key] = key in r ? mergeDeepRight(lVal, rVal) : lVal;
     }
 
@@ -130,7 +130,7 @@ export const mergeDeepRight = (l: unknown, r: unknown) => {
     for (let i = 0; i < rKeys.length; i += 1) {
         const key = rKeys[i];
         if (!(key in result)) {
-            result[key] = r[key];
+            result[key] = (r as Record<string, unknown>)[key];
         }
     }
 
@@ -141,14 +141,12 @@ export const mergeDeepRight = (l: unknown, r: unknown) => {
  * Traverses an object to the given depth and calls fnMap with every value and path found.
  */
 export const forEachObjDepth = (
-    obj: unknown,
+    obj: Record<string, unknown> | undefined,
     fnMap: (val: unknown, path: string[]) => void,
     depth: number = 1,
     path: string[] = [],
 ) => {
-    if (!obj || typeof obj !== 'object') {
-        return;
-    }
+    if (!obj) return;
 
     const keys = Object.keys(obj);
     for (let i = 0; i < keys.length; i += 1) {
@@ -156,23 +154,23 @@ export const forEachObjDepth = (
         const val = obj[key];
         if (depth === 1) {
             fnMap(val, [...path, key]);
-        } else {
-            forEachObjDepth(val, fnMap, depth - 1, [...path, key]);
+        } else if (val && typeof val === 'object') {
+            forEachObjDepth(val as Record<string, unknown>, fnMap, depth - 1, [...path, key]);
         }
     }
 };
 
-export const getPathOr = <TInput extends object, TRes>(
+export const getPathOr = <TInput extends Record<string, unknown>, TRes>(
     or: TRes | undefined,
     path: string[],
     input: TInput,
 ): TRes | undefined => {
     try {
-        let obj = input;
+        let obj: Record<string, unknown> = input;
         for (let i = 0; i < path.length; i += 1) {
             const key = path[i];
             if (key in obj) {
-                obj = obj[key];
+                obj = obj[key] as Record<string, unknown>;
             } else {
                 return or;
             }
@@ -188,15 +186,19 @@ export const getPathOr = <TInput extends object, TRes>(
  *
  * @returns the mutated object
  */
-export const assocPathMutate = <TInput extends object>(path: string[], val: unknown, input: TInput): TInput => {
-    let obj = input;
+export const assocPathMutate = <TInput extends Record<string, unknown>>(
+    path: string[],
+    val: unknown,
+    input: TInput,
+): TInput => {
+    let obj: Record<string, unknown> = input;
     for (let i = 0; i < path.length - 1; i += 1) {
         const prop = path[i];
         if (prop in obj) {
-            obj = obj[prop];
+            obj = obj[prop] as Record<string, unknown>;
         } else {
             obj[prop] = {};
-            obj = obj[prop];
+            obj = obj[prop] as Record<string, unknown>;
         }
     }
 
@@ -211,15 +213,15 @@ export const assocPathMutate = <TInput extends object>(path: string[], val: unkn
  *
  * @returns the mutated object
  */
-export const dissocPathMutate = <TInput extends object>(path: string[], input: TInput) => {
-    let obj = input;
+export const dissocPathMutate = <TInput extends Record<string, unknown>>(path: string[], input: TInput) => {
+    let obj: Record<string, unknown> = input;
     for (let i = 0; i < path.length - 1; i += 1) {
         const prop = path[i];
         if (prop in obj) {
-            obj = obj[prop];
+            obj = obj[prop] as Record<string, unknown>;
         } else {
             obj[prop] = {};
-            obj = obj[prop];
+            obj = obj[prop] as Record<string, unknown>;
         }
     }
 
@@ -238,7 +240,7 @@ export const isEmptyObject = (obj: object | undefined): boolean => {
     return obj === undefined || Object.keys(obj).length === 0;
 };
 
-export const decideStack = (stack: string[] | string[1][]): string[] => {
+export const decideStack = (stack: string[] | string[1][]): string[] | undefined => {
     if (stack.length === 0) return undefined;
     if (stack.length === 1 && Array.isArray(stack[0])) {
         return stack[0];
