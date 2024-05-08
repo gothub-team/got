@@ -1,6 +1,6 @@
 export type Subscriber<TEvent> = {
     next?: (e: TEvent) => void;
-    complete?: (e: TEvent) => void;
+    complete?: (e?: TEvent) => void;
     error?: (e: TEvent) => void;
 };
 
@@ -15,7 +15,7 @@ type Observable<TEvent> = {
 export const createSubscribable = <TEvent>() => {
     let subscribers: Subscriber<TEvent>[] = [];
     const subscribe = (sub: Subscriber<TEvent> | ((e: TEvent) => void)) => {
-        const _sub = typeof sub === 'function' ? { next: sub, complete: sub } : sub;
+        const _sub = typeof sub === 'function' ? ({ next: sub, complete: sub } as Subscriber<TEvent>) : sub;
         subscribers.push(_sub);
         return () => unsubscribe(_sub);
     };
@@ -34,7 +34,7 @@ export const createSubscribable = <TEvent>() => {
             }
         }
     };
-    const complete = (e: TEvent) => {
+    const complete = (e?: TEvent) => {
         for (let i = 0; i < subscribers.length; i += 1) {
             const fn = subscribers[i]?.complete;
             try {
@@ -55,7 +55,9 @@ export const createSubscribable = <TEvent>() => {
         }
     };
 
-    return { subscribe, unsubscribe, subscriber: { next, complete, error } };
+    const subscriber: Subscriber<TEvent> = { next, complete, error };
+
+    return { subscribe, unsubscribe, subscriber };
 };
 
 /**
@@ -69,8 +71,8 @@ export const toPromise = <TEvent>(observable: Observable<TEvent>) =>
         const results: TEvent[] = [];
         observable.subscribe({
             next: results.push,
-            complete: (e: TEvent) => {
-                results.push(e);
+            complete: (e?: TEvent) => {
+                e && results.push(e);
                 resolve(results);
             },
             error: (e: TEvent) => {

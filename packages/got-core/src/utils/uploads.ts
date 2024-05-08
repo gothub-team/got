@@ -1,3 +1,4 @@
+import type { PushObservables } from '../store/store';
 import { type GOT_UPLOAD_ACTION } from '../types/actions';
 import { type StoreAPI } from '../types/api';
 import { type Graph, type PushResult } from '../types/graph';
@@ -12,8 +13,8 @@ export const createFileUploader = (
     apiResult: PushResult,
     successGraph: Graph,
     fileStore: FileStore,
-) => {
-    const { subscribe, subscriber } = createSubscribable<GOT_UPLOAD_ACTION | undefined>();
+): PushObservables => {
+    const { subscribe, subscriber } = createSubscribable<GOT_UPLOAD_ACTION>();
 
     const uploadFile = async (nodeId: string, prop: string) => {
         try {

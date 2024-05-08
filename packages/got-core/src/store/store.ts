@@ -138,7 +138,7 @@ export const createStore = ({ api, dispatch, select }: CreateStoreOptions) => {
         const toEdges = edgeFromStack(graphStack, fromType, fromId, toType);
         const toIds = Object.keys(toEdges);
 
-        const edge = {};
+        const edge: Record<string, Metadata> = {};
         for (let i = 0; i < toIds.length; i += 1) {
             const toId = toIds[i];
 
@@ -170,7 +170,7 @@ export const createStore = ({ api, dispatch, select }: CreateStoreOptions) => {
 
         const fromIds = Object.keys(reverseEdgeFromStack(graphStack, toType, toId, fromType));
 
-        const edge = {};
+        const edge: Record<string, Metadata> = {};
         for (let i = 0; i < fromIds.length; i += 1) {
             const fromId = fromIds[i];
 
@@ -335,7 +335,7 @@ export const createStore = ({ api, dispatch, select }: CreateStoreOptions) => {
     const push = async (graphName: string, toGraphName: string = 'main'): Promise<PushObservables> => {
         const graph = select((state) => state[graphName]?.graph);
         const pushBody = { ...graph, index: undefined };
-        if (isEmptyGraph(pushBody)) return;
+        if (isEmptyGraph(pushBody)) return { uploads: { subscribe: () => {}, start: async () => {} } };
 
         const fileStore = select((state) => state[graphName]?.files);
 
