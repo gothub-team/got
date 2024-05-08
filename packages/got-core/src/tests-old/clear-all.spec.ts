@@ -74,7 +74,6 @@ describe('store:clear-all', () => {
     test('should do nothing if the store is empty', () => {
         /* #region Test Bed Creation */
         const {
-            initialState,
             store: { clearAll },
             getState,
             onError,
