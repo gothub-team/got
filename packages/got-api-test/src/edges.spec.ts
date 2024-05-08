@@ -159,6 +159,50 @@ describe('edges', () => {
                 expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-4`]);
             });
         });
+
+        describe('reverse edges', () => {
+            beforeEach(async () => {
+                await user1Api.push({
+                    edges: {
+                        from: {
+                            [`${testId}-2`]: {
+                                to: {
+                                    [`${testId}-3`]: true,
+                                },
+                            },
+                        },
+                    },
+                });
+                graph = await user1Api.pull({
+                    [`${testId}-3`]: {
+                        edges: {
+                            'from/to': {
+                                reverse: true,
+                                include: {
+                                    edges: true,
+                                },
+                            },
+                        },
+                    },
+                });
+                graph.index?.reverseEdges;
+            });
+
+            it('pulls all edges to node 3', () => {
+                expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-3`], true);
+                expect(graph).toHaveProperty(['edges', 'from', `${testId}-2`, 'to', `${testId}-3`], true);
+            });
+            it('sends the reverse index', () => {
+                expect(graph).toHaveProperty(
+                    ['index', 'reverseEdges', 'to', `${testId}-3`, 'from', `${testId}-1`],
+                    true,
+                );
+                expect(graph).toHaveProperty(
+                    ['index', 'reverseEdges', 'to', `${testId}-3`, 'from', `${testId}-2`],
+                    true,
+                );
+            });
+        });
     });
 
     describe('nested edges', () => {
