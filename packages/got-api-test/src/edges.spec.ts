@@ -251,14 +251,22 @@ describe('edges', () => {
             });
         });
 
-        it('pushes the edges', () => {
-            expect(pushResult).toHaveProperty(['edges', 'from', `${testId}-2`, 'to', `${testId}-3`, 'statusCode'], 200);
-            expect(pushResult).toHaveProperty(['edges', 'from', `${testId}-3`, 'to', `${testId}-4`, 'statusCode'], 200);
-        });
-        it('pulls the edge 1 level nested and the old edge', () => {
-            expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
-            expect(graph).toHaveProperty(['edges', 'from', `${testId}-2`, 'to', `${testId}-3`], true);
-            expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-3`, 'to', `${testId}-4`]);
+        describe('push and pull', () => {
+            it('pushes the edges', () => {
+                expect(pushResult).toHaveProperty(
+                    ['edges', 'from', `${testId}-2`, 'to', `${testId}-3`, 'statusCode'],
+                    200,
+                );
+                expect(pushResult).toHaveProperty(
+                    ['edges', 'from', `${testId}-3`, 'to', `${testId}-4`, 'statusCode'],
+                    200,
+                );
+            });
+            it('pulls the edge 1 level nested and the old edge', () => {
+                expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
+                expect(graph).toHaveProperty(['edges', 'from', `${testId}-2`, 'to', `${testId}-3`], true);
+                expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-3`, 'to', `${testId}-4`]);
+            });
         });
     });
 
