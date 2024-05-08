@@ -268,6 +268,36 @@ describe('edges', () => {
                 expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-3`, 'to', `${testId}-4`]);
             });
         });
+
+        describe('reverse edges', () => {
+            beforeEach(async () => {
+                graph = await user1Api.pull({
+                    [`${testId}-4`]: {
+                        edges: {
+                            'from/to': {
+                                reverse: true,
+                                include: {
+                                    edges: true,
+                                },
+                                edges: {
+                                    'from/to': {
+                                        reverse: true,
+                                        include: {
+                                            edges: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                });
+            });
+
+            it('follows edges back two levels', () => {
+                expect(graph).toHaveProperty(['edges', 'from', `${testId}-3`, 'to', `${testId}-4`], true);
+                expect(graph).toHaveProperty(['edges', 'from', `${testId}-2`, 'to', `${testId}-3`], true);
+            });
+        });
     });
 
     describe('read rights', () => {
