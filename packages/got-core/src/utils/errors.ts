@@ -92,6 +92,15 @@ const examples: Partial<Record<ParameterType, string>> = {
     ),
 };
 
+const exists = (type: ParameterType, value: unknown) => {
+    switch (type) {
+        case 'stack':
+            return value && Array.isArray(value) && value.length > 0;
+        default:
+            return value !== undefined;
+    }
+};
+
 const validate = (type: ParameterType, value: unknown) => {
     switch (type) {
         case 'api':
@@ -104,7 +113,11 @@ const validate = (type: ParameterType, value: unknown) => {
         case 'function':
             return value && typeof value === 'function';
         case 'stack':
-            return value && Array.isArray(value) && value.length > 0;
+            if (!Array.isArray(value)) return false;
+            for (let i = 0; i < value.length; i++) {
+                if (typeof value[i] !== 'string') return false;
+            }
+            return true;
         case 'string':
             return value && typeof value === 'string' && value.length > 0;
         case 'node':
@@ -115,13 +128,15 @@ const validate = (type: ParameterType, value: unknown) => {
         case 'graph':
         case 'rights':
         case 'metadata':
-            return value && typeof value === 'object';
+            return (value && value === true) || typeof value === 'object';
+        case 'blob':
+            return value && typeof value === 'object' && (value as Blob).type && (value as Blob).size;
     }
 };
 
 export const createInputValidator =
     (onError: (error: Error) => void) => (fnName: string, type: ParameterType, key: string, value: unknown) => {
-        if (value === undefined) {
+        if (!exists(type, value)) {
             onError(new MissingParamError(fnName, key, examples[type] || ''));
             return false;
         }

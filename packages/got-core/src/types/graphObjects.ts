@@ -5,14 +5,13 @@ export declare type FORBIDDEN = {
     statusCode: 403;
     name: 'NoWriteRightError' | 'NoAdminRightError';
 };
+export declare type OK_UPLOAD = {
+    statusCode: 200;
+    uploadUrls: Array<string>;
+    uploadId?: string;
+};
 export declare type GraphElementResult = OK | FORBIDDEN;
-export declare type UploadElementResult =
-    | {
-          statusCode: 200;
-          uploadUrls: Array<string>;
-          uploadId?: string;
-      }
-    | FORBIDDEN;
+export declare type UploadElementResult = OK_UPLOAD | FORBIDDEN;
 
 export declare interface GraphError<TElement> extends FORBIDDEN {
     element: TElement;

@@ -1,20 +1,20 @@
-import { ViewResult } from '../types/ViewResult';
-import { Graph } from '../types/graph';
-import { Metadata, Node, RightTypes } from '../types/graphObjects';
-import { State } from '../types/state';
-import { View } from '../types/view';
+import { type ViewResult } from '../types/ViewResult';
+import { type Graph } from '../types/graph';
+import { type Metadata, type Node, type RightTypes } from '../types/graphObjects';
+import { type State } from '../types/state';
+import { type View } from '../types/view';
 import { createInputValidator } from '../utils/errors';
-import { type CreateStoreOptions, createStore } from './store';
+import { isEmptyObject } from '../utils/util';
+import { createStore, type CreateStoreOptions, type PushObservables, type Store } from './store';
 
-type CreateErrorHandledStoreOptions = CreateStoreOptions & {
+export type ErrorHandlers = {
     onError?: (error: Error) => void;
     onWarn?: (error: Error) => void;
 };
 
-export const createErrorHandledStore = (
-    options: CreateErrorHandledStoreOptions,
-    store: ReturnType<typeof createStore>,
-): ReturnType<typeof createStore> => {
+export type CreateErrorHandledStoreOptions = CreateStoreOptions & ErrorHandlers;
+
+export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions): Store => {
     const { api, dispatch, select, onError = console.error, onWarn = console.warn } = options || {};
 
     const validateError = createInputValidator(onError);
@@ -24,31 +24,37 @@ export const createErrorHandledStore = (
     validateWarn('GOT_STORE_CONFIG', 'function', 'dispatch', dispatch);
     validateWarn('GOT_STORE_CONFIG', 'function', 'select', select);
 
+    const store = createStore({
+        api,
+        dispatch,
+        select,
+    });
+
     const merge = (fromGraphName: string, toGraphName: string) => {
         if (
             validateError('GOT_MERGE', 'function', 'dispatch', dispatch) &&
             validateError('GOT_MERGE', 'string', 'fromGraphName', fromGraphName) &&
             validateError('GOT_MERGE', 'string', 'toGraphName', toGraphName)
         ) {
-            return store.merge(fromGraphName, toGraphName);
+            store.merge(fromGraphName, toGraphName);
         }
     };
-    const mergeGraph = (fromGraph: Graph = {}, toGraphName: string) => {
+    const mergeGraph = (fromGraph: Graph, toGraphName: string) => {
         if (
             validateError('GOT_MERGE_GRAPH', 'function', 'dispatch', dispatch) &&
             validateError('GOT_MERGE_GRAPH', 'graph', 'fromGraph', fromGraph) &&
             validateError('GOT_MERGE_GRAPH', 'string', 'toGraphName', toGraphName)
         ) {
-            return store.mergeGraph(fromGraph, toGraphName);
+            store.mergeGraph(fromGraph, toGraphName);
         }
     };
-    const mergeOverwriteGraph = (fromGraph: Graph = {}, toGraphName: string) => {
+    const mergeOverwriteGraph = (fromGraph: Graph, toGraphName: string) => {
         if (
             validateError('GOT_MERGE_OVERWRITE_GRAPH', 'function', 'dispatch', dispatch) &&
             validateError('GOT_MERGE_OVERWRITE_GRAPH', 'graph', 'fromGraph', fromGraph) &&
             validateError('GOT_MERGE_OVERWRITE_GRAPH', 'string', 'toGraphName', toGraphName)
         ) {
-            return store.mergeOverwriteGraph(fromGraph, toGraphName);
+            store.mergeOverwriteGraph(fromGraph, toGraphName);
         }
     };
     const clear = (graphName: string) => {
@@ -133,6 +139,7 @@ export const createErrorHandledStore = (
         ) {
             return store.selectEdge(stack, edgeTypes, fromId, state);
         }
+        return {};
     };
     const getEdge = (stack: string[], edgeTypes: string, fromId: string): Record<string, Metadata> => {
         if (
@@ -143,6 +150,7 @@ export const createErrorHandledStore = (
         ) {
             return store.getEdge(stack, edgeTypes, fromId);
         }
+        return {};
     };
     const selectReverseEdge = (
         stack: string[],
@@ -158,6 +166,7 @@ export const createErrorHandledStore = (
         ) {
             return store.selectReverseEdge(stack, edgeTypes, toId, state);
         }
+        return {};
     };
     const getReverseEdge = (stack: string[], edgeTypes: string, toId: string): Record<string, Metadata> => {
         if (
@@ -168,6 +177,7 @@ export const createErrorHandledStore = (
         ) {
             return store.getReverseEdge(stack, edgeTypes, toId);
         }
+        return {};
     };
 
     const add = (graphName: string, edgeTypes: string, fromId: string, toNode: Node, metadata: Metadata = true) => {
@@ -203,7 +213,7 @@ export const createErrorHandledStore = (
         if (
             validateError('GOT_ASSOC', 'function', 'dispatch', dispatch) &&
             validateError('GOT_ASSOC', 'string', 'graphName', graphName) &&
-            validateError('GOT_ASSOC', 'string', 'edgeTypes', edgeTypes) &&
+            validateError('GOT_ASSOC', 'edgeTypes', 'edgeTypes', edgeTypes) &&
             validateError('GOT_ASSOC', 'string', 'fromId', fromId) &&
             validateError('GOT_ASSOC', 'node', 'toNode', toNode) &&
             validateError('GOT_ASSOC', 'metadata', 'metadata', metadata)
@@ -215,7 +225,7 @@ export const createErrorHandledStore = (
         if (
             validateError('GOT_DISSOC', 'function', 'dispatch', dispatch) &&
             validateError('GOT_DISSOC', 'string', 'graphName', graphName) &&
-            validateError('GOT_DISSOC', 'string', 'edgeTypes', edgeTypes) &&
+            validateError('GOT_DISSOC', 'edgeTypes', 'edgeTypes', edgeTypes) &&
             validateError('GOT_DISSOC', 'string', 'fromId', fromId) &&
             validateError('GOT_DISSOC', 'node', 'toNode', toNode)
         ) {
@@ -231,6 +241,7 @@ export const createErrorHandledStore = (
         ) {
             return store.selectRights(stack, nodeId, state);
         }
+        return {};
     };
     const getRights = (stack: string[], nodeId: string) => {
         if (
@@ -240,6 +251,7 @@ export const createErrorHandledStore = (
         ) {
             return store.getRights(stack, nodeId);
         }
+        return {};
     };
     const setRights = (graphName: string, nodeId: string, email: string, rights: RightTypes) => {
         if (
@@ -270,7 +282,7 @@ export const createErrorHandledStore = (
             validateError('GOT_INHERIT_RIGHTS', 'string', 'nodeId', nodeId) &&
             validateError('GOT_INHERIT_RIGHTS', 'string', 'fromId', fromId)
         ) {
-            return store.inheritRights(graphName, nodeId, fromId);
+            return store.inheritRights(graphName, fromId, nodeId);
         }
     };
 
@@ -282,6 +294,7 @@ export const createErrorHandledStore = (
         ) {
             return store.selectFiles(stack, nodeId, state);
         }
+        return {};
     };
     const getFiles = (stack: string[], nodeId: string) => {
         if (
@@ -291,6 +304,7 @@ export const createErrorHandledStore = (
         ) {
             return store.getFiles(stack, nodeId);
         }
+        return {};
     };
     const setFile = (graphName: string, nodeId: string, prop: string, filename: string, file: Blob) => {
         if (
@@ -323,6 +337,7 @@ export const createErrorHandledStore = (
         ) {
             return store.selectView(stack, view, state);
         }
+        return {} as ViewResult<TView>;
     };
     const getView = <TView extends View>(stack: string[], view: TView): ViewResult<TView> => {
         if (
@@ -332,6 +347,7 @@ export const createErrorHandledStore = (
         ) {
             return store.getView(stack, view);
         }
+        return {} as ViewResult<TView>;
     };
 
     const selectSubgraph = (stack: string[], view: View, state: State): Graph => {
@@ -342,6 +358,7 @@ export const createErrorHandledStore = (
         ) {
             return store.selectSubgraph(stack, view, state);
         }
+        return {};
     };
     const getSubgraph = (stack: string[], view: View): Graph => {
         if (
@@ -351,6 +368,46 @@ export const createErrorHandledStore = (
         ) {
             return store.getSubgraph(stack, view);
         }
+        return {};
+    };
+
+    const push = async (graphName: string, toGraphName: string = 'main'): Promise<PushObservables> => {
+        if (
+            validateError('GOT_PUSH', 'api', 'api', api) &&
+            validateError('GOT_PUSH', 'function', 'dispatch', dispatch) &&
+            validateError('GOT_PUSH', 'string', 'graphName', graphName) &&
+            validateError('GOT_PUSH', 'string', 'toGraphName', toGraphName)
+        ) {
+            try {
+                const res = await store.push(graphName, toGraphName);
+                return res;
+            } catch (error) {
+                onError && onError(error);
+            }
+        }
+        return { uploads: { subscribe: () => {}, start: async () => {} } };
+    };
+
+    const pull = async (view: View, toGraphName = 'main'): Promise<Graph> => {
+        if (
+            validateError('GOT_PUSH', 'api', 'api', api) &&
+            validateError('GOT_PULL', 'function', 'dispatch', dispatch) &&
+            validateError('GOT_PULL', 'view', 'view', view) &&
+            validateError('GOT_PULL', 'string', 'toGraphName', toGraphName)
+        ) {
+            if (isEmptyObject(view)) {
+                onWarn && onWarn('Pull view is empty');
+                return {};
+            }
+
+            try {
+                const res = await store.pull(view, toGraphName);
+                return res;
+            } catch (error) {
+                onError && onError(error);
+            }
+        }
+        return {};
     };
 
     return {
@@ -386,5 +443,7 @@ export const createErrorHandledStore = (
         getView,
         selectSubgraph,
         getSubgraph,
+        push,
+        pull,
     };
 };

@@ -8,5 +8,13 @@ export default tseslint.config(eslint.configs.recommended, ...tseslint.configs.r
     rules: {
         'prefer-template': 'error',
         '@typescript-eslint/triple-slash-reference': 'off',
+        '@typescript-eslint/consistent-type-imports': [
+            'error',
+            {
+                prefer: 'type-imports',
+                disallowTypeAnnotations: true,
+                fixStyle: 'inline-type-imports',
+            },
+        ],
     },
 });

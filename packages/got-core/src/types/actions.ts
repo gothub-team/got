@@ -1,5 +1,5 @@
-import { Graph } from './graph';
-import { Metadata, Node, RightTypes } from './graphObjects';
+import { type ErrorGraph, type Graph } from './graph';
+import { type Metadata, type Node, type RightTypes } from './graphObjects';
 
 export type ACTION_TYPE =
     | 'GOT/MERGE'
@@ -16,10 +16,9 @@ export type ACTION_TYPE =
     | 'GOT/SET_ROLE_RIGHTS'
     | 'GOT/INHERIT_RIGHTS'
     | 'GOT/SET_FILE'
-    | 'GOT/REMOVE_FILE'
-    | 'GOT/UPLOAD_PROGRESS'
-    | 'GOT/UPLOAD_COMPLETE'
-    | 'GOT/UPLOAD_ERROR';
+    | 'GOT/REMOVE_FILE';
+
+export type UPLOAD_TYPE = 'GOT/UPLOAD_PROGRESS' | 'GOT/UPLOAD_COMPLETE' | 'GOT/UPLOAD_ERROR';
 
 export type GOT_ACTION =
     | GOT_ACTION_MERGE
@@ -37,6 +36,8 @@ export type GOT_ACTION =
     | GOT_ACTION_INHERIT_RIGHTS
     | GOT_ACTION_SET_FILE
     | GOT_ACTION_REMOVE_FILE;
+
+export type GOT_UPLOAD_ACTION = GOT_ACTION_UPLOAD_PROGRESS | GOT_ACTION_UPLOAD_COMPLETE | GOT_ACTION_UPLOAD_ERROR;
 
 type GOT_ACTION_MERGE = {
     type: 'GOT/MERGE';
@@ -57,7 +58,7 @@ type GOT_ACTION_MERGE_OVERWRITE = {
 type GOT_ACTION_MERGE_ERROR = {
     type: 'GOT/MERGE_ERROR';
     payload: {
-        fromGraph: Graph;
+        fromGraph: ErrorGraph;
         toGraphName: string;
     };
 };
@@ -174,5 +175,34 @@ type GOT_ACTION_REMOVE_FILE = {
         graphName: string;
         nodeId: string;
         prop: string;
+    };
+};
+
+type GOT_ACTION_UPLOAD_PROGRESS = {
+    type: 'GOT/UPLOAD_PROGRESS';
+    payload: {
+        graphName: string;
+        nodeId: string;
+        prop: string;
+        progress: number;
+    };
+};
+
+type GOT_ACTION_UPLOAD_COMPLETE = {
+    type: 'GOT/UPLOAD_COMPLETE';
+    payload: {
+        graphName: string;
+        nodeId: string;
+        prop: string;
+    };
+};
+
+type GOT_ACTION_UPLOAD_ERROR = {
+    type: 'GOT/UPLOAD_ERROR';
+    payload: {
+        graphName: string;
+        nodeId: string;
+        prop: string;
+        error: string;
     };
 };

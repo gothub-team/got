@@ -1,10 +1,10 @@
 import {
-    GraphElementResult,
-    GraphError,
-    Metadata,
-    NodeFileView,
-    UploadElementResult,
-    UploadNodeFileView,
+    type GraphElementResult,
+    type GraphError,
+    type Metadata,
+    type NodeFileView,
+    type UploadElementResult,
+    type UploadNodeFileView,
 } from './graphObjects';
 
 export declare type Nodes<TNode> = {
@@ -86,3 +86,5 @@ export declare type ErrorGraph = GraphLayer<
 >;
 
 export declare type Graph = GraphLayer<Node | boolean, Metadata, boolean, boolean, string, NodeFileView>;
+
+export type AnyGraph = Graph | ErrorGraph;
