@@ -36,7 +36,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
             validateError('GOT_MERGE', 'string', 'fromGraphName', fromGraphName) &&
             validateError('GOT_MERGE', 'string', 'toGraphName', toGraphName)
         ) {
-            return store.merge(fromGraphName, toGraphName);
+            store.merge(fromGraphName, toGraphName);
         }
     };
     const mergeGraph = (fromGraph: Graph, toGraphName: string) => {
@@ -45,7 +45,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
             validateError('GOT_MERGE_GRAPH', 'graph', 'fromGraph', fromGraph) &&
             validateError('GOT_MERGE_GRAPH', 'string', 'toGraphName', toGraphName)
         ) {
-            return store.mergeGraph(fromGraph, toGraphName);
+            store.mergeGraph(fromGraph, toGraphName);
         }
     };
     const mergeOverwriteGraph = (fromGraph: Graph, toGraphName: string) => {
@@ -54,7 +54,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
             validateError('GOT_MERGE_OVERWRITE_GRAPH', 'graph', 'fromGraph', fromGraph) &&
             validateError('GOT_MERGE_OVERWRITE_GRAPH', 'string', 'toGraphName', toGraphName)
         ) {
-            return store.mergeOverwriteGraph(fromGraph, toGraphName);
+            store.mergeOverwriteGraph(fromGraph, toGraphName);
         }
     };
     const clear = (graphName: string) => {
@@ -139,6 +139,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
         ) {
             return store.selectEdge(stack, edgeTypes, fromId, state);
         }
+        return {};
     };
     const getEdge = (stack: string[], edgeTypes: string, fromId: string): Record<string, Metadata> => {
         if (
@@ -149,6 +150,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
         ) {
             return store.getEdge(stack, edgeTypes, fromId);
         }
+        return {};
     };
     const selectReverseEdge = (
         stack: string[],
@@ -164,6 +166,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
         ) {
             return store.selectReverseEdge(stack, edgeTypes, toId, state);
         }
+        return {};
     };
     const getReverseEdge = (stack: string[], edgeTypes: string, toId: string): Record<string, Metadata> => {
         if (
@@ -174,6 +177,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
         ) {
             return store.getReverseEdge(stack, edgeTypes, toId);
         }
+        return {};
     };
 
     const add = (graphName: string, edgeTypes: string, fromId: string, toNode: Node, metadata: Metadata = true) => {
@@ -237,6 +241,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
         ) {
             return store.selectRights(stack, nodeId, state);
         }
+        return {};
     };
     const getRights = (stack: string[], nodeId: string) => {
         if (
@@ -246,6 +251,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
         ) {
             return store.getRights(stack, nodeId);
         }
+        return {};
     };
     const setRights = (graphName: string, nodeId: string, email: string, rights: RightTypes) => {
         if (
@@ -288,6 +294,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
         ) {
             return store.selectFiles(stack, nodeId, state);
         }
+        return {};
     };
     const getFiles = (stack: string[], nodeId: string) => {
         if (
@@ -297,6 +304,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
         ) {
             return store.getFiles(stack, nodeId);
         }
+        return {};
     };
     const setFile = (graphName: string, nodeId: string, prop: string, filename: string, file: Blob) => {
         if (
@@ -329,6 +337,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
         ) {
             return store.selectView(stack, view, state);
         }
+        return {} as ViewResult<TView>;
     };
     const getView = <TView extends View>(stack: string[], view: TView): ViewResult<TView> => {
         if (
@@ -338,6 +347,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
         ) {
             return store.getView(stack, view);
         }
+        return {} as ViewResult<TView>;
     };
 
     const selectSubgraph = (stack: string[], view: View, state: State): Graph => {
@@ -348,6 +358,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
         ) {
             return store.selectSubgraph(stack, view, state);
         }
+        return {};
     };
     const getSubgraph = (stack: string[], view: View): Graph => {
         if (
@@ -357,6 +368,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
         ) {
             return store.getSubgraph(stack, view);
         }
+        return {};
     };
 
     const push = async (graphName: string, toGraphName: string = 'main'): Promise<PushObservables> => {
@@ -371,9 +383,9 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
                 return res;
             } catch (error) {
                 onError && onError(error);
-                return { uploads: { subscribe: () => {}, start: async () => {} } };
             }
         }
+        return { uploads: { subscribe: () => {}, start: async () => {} } };
     };
 
     const pull = async (view: View, toGraphName = 'main'): Promise<Graph> => {
@@ -393,9 +405,9 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
                 return res;
             } catch (error) {
                 onError && onError(error);
-                return {};
             }
         }
+        return {};
     };
 
     return {

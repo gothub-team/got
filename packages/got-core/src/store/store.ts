@@ -42,17 +42,17 @@ export type PushObservables = {
 };
 
 export const createStore = ({ api, dispatch, select }: CreateStoreOptions) => {
-    const merge = (fromGraph: Graph | string, toGraphName: string) => {
-        const _graph = typeof fromGraph === 'string' ? select((state) => state[fromGraph]?.graph) : fromGraph;
+    const merge = (fromGraphName: string, toGraphName: string) => {
+        const fromGraph = select((state) => state[fromGraphName]?.graph);
         dispatch({
             type: 'GOT/MERGE',
             payload: {
-                fromGraph: _graph,
+                fromGraph: fromGraph,
                 toGraphName,
             },
         });
     };
-    const mergeGraph = (fromGraph: Graph = {}, toGraphName: string) => {
+    const mergeGraph = (fromGraph: Graph, toGraphName: string) => {
         dispatch({
             type: 'GOT/MERGE',
             payload: {
@@ -61,7 +61,7 @@ export const createStore = ({ api, dispatch, select }: CreateStoreOptions) => {
             },
         });
     };
-    const mergeErrorGraph = (fromGraph: ErrorGraph = {}, toGraphName: string) => {
+    const mergeErrorGraph = (fromGraph: ErrorGraph, toGraphName: string) => {
         dispatch({
             type: 'GOT/MERGE_ERROR',
             payload: {
@@ -70,7 +70,7 @@ export const createStore = ({ api, dispatch, select }: CreateStoreOptions) => {
             },
         });
     };
-    const mergeOverwriteGraph = (fromGraph: Graph = {}, toGraphName: string) => {
+    const mergeOverwriteGraph = (fromGraph: Graph, toGraphName: string) => {
         dispatch({
             type: 'GOT/MERGE_OVERWRITE',
             payload: {
