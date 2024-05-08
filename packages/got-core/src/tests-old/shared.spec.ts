@@ -5,6 +5,7 @@ import * as R from 'ramda';
 import { createCurriedStore } from '../store/curried';
 import { type CreateErrorHandledStoreOptions, createErrorHandledStore } from '../store/errorHandling';
 import { gotReducer } from '../reducer/reducer';
+import type { StoreAPI } from '../types/api';
 
 export const createStore = (options: CreateErrorHandledStoreOptions) =>
     createCurriedStore(createErrorHandledStore(options));
@@ -13,7 +14,7 @@ test('dummy test', () => {
     expect(true).toBe(true);
 });
 
-export const createTestStore = (initialState = {}, api = undefined, clone = true) => {
+export const createTestStore = (initialState = {}, api: Partial<StoreAPI> | undefined = undefined, clone = true) => {
     let state = clone ? R.clone(initialState) : initialState;
 
     const getState = () => state;

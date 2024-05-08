@@ -1370,7 +1370,7 @@ describe('store:push', () => {
                     graphName: 'main',
                     nodeId,
                     prop,
-                    error: apiError,
+                    error: 'SomeError',
                 },
             });
             expect(onError).not.toBeCalled();

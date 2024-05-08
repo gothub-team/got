@@ -8,9 +8,9 @@ export const configureCreateCurriedGraph = (store: CurriedStore, onError: (e: Er
     const createGraph = (...stack: string[]) => {
         validateError('GOT_CREATE_CURRIED_GRAPH', 'stack', 'stack', stack);
 
-        const currentGraphName = stack.at(-1);
-        const nextBelowGraphName = stack.at(-2);
-        const bottomGraphName = stack.at(0);
+        const currentGraphName = stack.at(-1) as string;
+        const nextBelowGraphName = stack.at(-2) as string;
+        const bottomGraphName = stack.at(0) as string;
 
         const push = () => store.push(currentGraphName, bottomGraphName);
         const pull = (view: View) => store.pull(view, bottomGraphName);

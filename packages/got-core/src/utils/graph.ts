@@ -1,5 +1,19 @@
-import { type Edges, type ErrorGraph, type Files, type Graph, type Nodes, type PushResult, type Rights } from '../types/graph';
-import { type GraphElementResult, type GraphError, type Metadata, type NodeFileView, type UploadNodeFileView } from '../types/graphObjects';
+import {
+    type Edges,
+    type ErrorGraph,
+    type Files,
+    type Graph,
+    type Nodes,
+    type PushResult,
+    type Rights,
+} from '../types/graph';
+import {
+    type GraphElementResult,
+    type GraphError,
+    type Metadata,
+    type NodeFileView,
+    type UploadNodeFileView,
+} from '../types/graphObjects';
 import { assocPathMutate, forEachObjDepth, getPathOr, isEmptyObject } from './util';
 
 export const isEmptyGraph = (graph: Graph | ErrorGraph): boolean => {
@@ -15,17 +29,17 @@ export const isEmptyGraph = (graph: Graph | ErrorGraph): boolean => {
 };
 
 export const selectSuccessAndErrorGraphs = (pushGraph: Graph, pushResult: PushResult): [Graph, ErrorGraph] => {
-    const successNodes = {} as Nodes<Node | boolean>;
-    const successEdges = {} as Edges<Metadata>;
-    const successReverseEdges = {} as Edges<boolean>;
-    const successRights = {} as Rights<boolean, string>;
-    const successFiles = {} as Files<NodeFileView>;
+    const successNodes: Nodes<Node | boolean> = {};
+    const successEdges: Edges<Metadata> = {};
+    const successReverseEdges: Edges<boolean> = {};
+    const successRights: Rights<boolean, string> = {};
+    const successFiles: Files<NodeFileView> = {};
 
-    const errorNodes = {} as Nodes<GraphError<Node | boolean>>;
-    const errorEdges = {} as Edges<GraphError<Metadata>>;
-    const errorReverseEdges = {} as Edges<GraphError<boolean>>;
-    const errorRights = {} as Rights<GraphError<boolean>, GraphError<string>>;
-    const errorFiles = {} as Files<GraphError<UploadNodeFileView>>;
+    const errorNodes: Nodes<GraphError<Node | boolean>> = {};
+    const errorEdges: Edges<GraphError<Metadata>> = {};
+    const errorReverseEdges: Edges<GraphError<boolean>> = {};
+    const errorRights: Rights<GraphError<boolean>, GraphError<string>> = {};
+    const errorFiles: Files<GraphError<UploadNodeFileView>> = {};
 
     forEachObjDepth(
         pushResult.nodes,
@@ -60,12 +74,14 @@ export const selectSuccessAndErrorGraphs = (pushGraph: Graph, pushResult: PushRe
         (res: GraphElementResult, path: string[]) => {
             const obj = getPathOr(undefined, path, pushGraph.rights);
             if (path[1] === 'inherit') {
+                // handle right inherits
                 if (res.statusCode === 200) {
                     assocPathMutate(path, obj, successRights);
                 } else {
                     assocPathMutate(path, { ...res, element: obj }, errorRights);
                 }
             } else {
+                // go deeper and handle right values
                 forEachObjDepth(
                     res,
                     (rightRes: GraphElementResult, p: string[]) => {
@@ -143,11 +159,11 @@ export const selectSuccessAndErrorGraphs = (pushGraph: Graph, pushResult: PushRe
 };
 
 export const selectDeleteGraph = (graph: Graph): Graph => {
-    const nodes = {} as { [nodeId: string]: undefined };
-    const edges = {} as Edges<undefined>;
-    const rights = {} as { [nodeId: string]: undefined };
-    const files = {} as { [nodeId: string]: undefined };
-    const reverseEdges = {} as Edges<undefined>;
+    const nodes: Nodes<Node | boolean> = {};
+    const edges: Edges<Metadata> = {};
+    const reverseEdges: Edges<boolean> = {};
+    const rights: Rights<boolean, string> = {};
+    const files: Files<NodeFileView> = {};
 
     forEachObjDepth(
         graph.nodes,

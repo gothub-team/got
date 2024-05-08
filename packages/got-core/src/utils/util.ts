@@ -140,9 +140,9 @@ export const mergeDeepRight = (l: unknown, r: unknown) => {
 /**
  * Traverses an object to the given depth and calls fnMap with every value and path found.
  */
-export const forEachObjDepth = (
+export const forEachObjDepth = <TForEach>(
     obj: Record<string, unknown> | undefined,
-    fnMap: (val: unknown, path: string[]) => void,
+    fnForEach: (val: TForEach, path: string[]) => void,
     depth: number = 1,
     path: string[] = [],
 ) => {
@@ -153,9 +153,9 @@ export const forEachObjDepth = (
         const key = keys[i];
         const val = obj[key];
         if (depth === 1) {
-            fnMap(val, [...path, key]);
+            fnForEach(val as TForEach, [...path, key]);
         } else if (val && typeof val === 'object') {
-            forEachObjDepth(val as Record<string, unknown>, fnMap, depth - 1, [...path, key]);
+            forEachObjDepth(val as Record<string, unknown>, fnForEach, depth - 1, [...path, key]);
         }
     }
 };
@@ -163,8 +163,10 @@ export const forEachObjDepth = (
 export const getPathOr = <TInput extends Record<string, unknown>, TRes>(
     or: TRes | undefined,
     path: string[],
-    input: TInput,
+    input: TInput | undefined,
 ): TRes | undefined => {
+    if (!input) return or;
+
     try {
         let obj: Record<string, unknown> = input;
         for (let i = 0; i < path.length; i += 1) {
@@ -240,8 +242,8 @@ export const isEmptyObject = (obj: object | undefined): boolean => {
     return obj === undefined || Object.keys(obj).length === 0;
 };
 
-export const decideStack = (stack: string[] | string[1][]): string[] | undefined => {
-    if (stack.length === 0) return undefined;
+export const decideStack = (stack: string[] | string[1][]): string[] => {
+    if (stack.length === 0) return [];
     if (stack.length === 1 && Array.isArray(stack[0])) {
         return stack[0];
     }
