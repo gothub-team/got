@@ -2,6 +2,7 @@ import { getEmptyStore, gotReducer } from '../reducer/reducer';
 import { configureCreateCurriedGraph } from '../store/createCurriedGraph';
 import { createCurriedStore } from '../store/curried';
 import { type ErrorHandlers, createErrorHandledStore } from '../store/errorHandling';
+import type { Selector } from '../store/store';
 import { type GOT_ACTION } from '../types/actions';
 import { type StoreAPI } from '../types/api';
 import { type State } from '../types/state';
@@ -24,7 +25,7 @@ export const configureCreateLocalGraph = (api: StoreAPI, options: ErrorHandlers)
 
         let state = initialState || getEmptyStore();
         const getState = () => state;
-        const select = (selector) => selector(state);
+        const select: Selector = (selector) => selector(state);
         const dispatch = (action: GOT_ACTION) => {
             try {
                 state = gotReducer(state, action);

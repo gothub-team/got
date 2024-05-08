@@ -20,10 +20,12 @@ import { createFileUploader } from '../utils/uploads';
 import { type Subscriber } from '../utils/util';
 import { subgraphFromStack, viewResFromStack } from '../utils/view';
 
+export type Selector = <TRes>(fnSelect: (state: State) => TRes) => TRes;
+
 export type CreateStoreOptions = {
     api: StoreAPI;
     dispatch: (action: GOT_ACTION) => void;
-    select: <TRes>(fnSelect: (state: State) => TRes) => TRes;
+    select: Selector;
 };
 
 export type PushObservables = {

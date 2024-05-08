@@ -1,4 +1,4 @@
-import { type Graph } from '../types/graph';
+import { type AnyGraph, type Graph } from '../types/graph';
 import {
     assocPathMutate,
     dissocPathMutate,
@@ -39,7 +39,7 @@ const mergeRightsRight = mergeObjRight(1, mergeDeepRight);
 const mergeFilesRight = mergeObjRight(1, mergeGraphObjRight);
 const mergeIndexRight = mergeObjRight(1, mergeDeepRight);
 
-export const mergeGraphsRight = (left: Graph, right: Graph): Graph => {
+export const mergeGraphsRight = <TGraph extends AnyGraph>(left: TGraph, right: TGraph): TGraph => {
     if (!right) return left;
     if (!left) return right;
 
@@ -112,7 +112,7 @@ const overwriteRightsRight = overwriteObjRight(1);
 const overwriteFilesRight = overwriteObjRight(1);
 const overwriteIndexRight = overwriteObjRight(5);
 
-export const mergeOverwriteGraphsRight = (left: Graph, right: Graph) => {
+export const mergeOverwriteGraphsRight = <TGraph extends AnyGraph>(left: TGraph, right: TGraph): TGraph => {
     if (!right) return left;
     if (!left) return right;
 

@@ -86,3 +86,5 @@ export declare type ErrorGraph = GraphLayer<
 >;
 
 export declare type Graph = GraphLayer<Node | boolean, Metadata, boolean, boolean, string, NodeFileView>;
+
+export type AnyGraph = Graph | ErrorGraph;

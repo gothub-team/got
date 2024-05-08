@@ -12,9 +12,9 @@ export const configureCreateGraph = (store: Store, onError: (e: Error) => void) 
         const _stack = decideStack(stack);
         validateError('GOT_CREATE_GRAPH', 'stack', 'stack', stack);
 
-        const currentGraphName = _stack.at(-1);
-        const nextBelowGraphName = _stack.at(-2);
-        const bottomGraphName = _stack.at(0);
+        const currentGraphName = stack.at(-1) as string;
+        const nextBelowGraphName = stack.at(-2) as string;
+        const bottomGraphName = stack.at(0) as string;
 
         const merge = (toGraphName?: string) => store.merge(currentGraphName, toGraphName || nextBelowGraphName);
         const mergeGraph = (fromGraph: Graph, toGraphName?: string) =>

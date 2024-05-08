@@ -21,7 +21,7 @@ export const setup = ({ api, dispatch, select, onError, onWarn }: SetupOption) =
     const store = createErrorHandledStore({
         dispatch,
         select,
-        api: api as StoreAPI,
+        api: api as unknown as StoreAPI, // TODO: Fix this
         onError,
         onWarn,
     });
