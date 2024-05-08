@@ -1,5 +1,5 @@
-import { Edges, ErrorGraph, Files, Graph, Nodes, PushResult, Rights } from '../types/graph';
-import { GraphElementResult, GraphError, Metadata, NodeFileView, UploadNodeFileView } from '../types/graphObjects';
+import { type Edges, type ErrorGraph, type Files, type Graph, type Nodes, type PushResult, type Rights } from '../types/graph';
+import { type GraphElementResult, type GraphError, type Metadata, type NodeFileView, type UploadNodeFileView } from '../types/graphObjects';
 import { assocPathMutate, forEachObjDepth, getPathOr, isEmptyObject } from './util';
 
 export const isEmptyGraph = (graph: Graph | ErrorGraph): boolean => {

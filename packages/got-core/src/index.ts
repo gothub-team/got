@@ -3,9 +3,9 @@ import { configureCreateGraph } from './store/createGraph';
 import { createCurriedStore } from './store/curried';
 import { createErrorHandledStore } from './store/errorHandling';
 import { type GotApi } from '@gothub-team/got-api';
-import { StoreAPI } from './types/api';
-import { State } from './types/state';
-import { GOT_ACTION } from './types/actions';
+import { type StoreAPI } from './types/api';
+import { type State } from './types/state';
+import { type GOT_ACTION } from './types/actions';
 
 type SetupOption = {
     api: GotApi;

@@ -1,4 +1,4 @@
-import { ErrorGraph, Graph } from './graph';
+import { type ErrorGraph, type Graph } from './graph';
 
 export type FileStore = {
     [nodeId: string]: {

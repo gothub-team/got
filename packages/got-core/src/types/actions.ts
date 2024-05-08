@@ -1,5 +1,5 @@
-import { ErrorGraph, Graph } from './graph';
-import { Metadata, Node, RightTypes } from './graphObjects';
+import { type ErrorGraph, type Graph } from './graph';
+import { type Metadata, type Node, type RightTypes } from './graphObjects';
 
 export type ACTION_TYPE =
     | 'GOT/MERGE'

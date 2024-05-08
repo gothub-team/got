@@ -1,8 +1,8 @@
-import { ViewResult } from '../types/ViewResult';
-import { Graph } from '../types/graph';
-import { Metadata, Node, RightTypes } from '../types/graphObjects';
-import { State } from '../types/state';
-import { View } from '../types/view';
+import { type ViewResult } from '../types/ViewResult';
+import { type Graph } from '../types/graph';
+import { type Metadata, type Node, type RightTypes } from '../types/graphObjects';
+import { type State } from '../types/state';
+import { type View } from '../types/view';
 import { createInputValidator } from '../utils/errors';
 import { isEmptyObject } from '../utils/util';
 import { createStore, type CreateStoreOptions, type PushObservables, type Store } from './store';

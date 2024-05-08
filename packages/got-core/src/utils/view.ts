@@ -1,8 +1,8 @@
-import { Graph } from '../types/graph';
-import { Metadata } from '../types/graphObjects';
+import { type Graph } from '../types/graph';
+import { type Metadata } from '../types/graphObjects';
 import { assocPathMutate, isEmptyObject } from './util';
-import { EdgeView, NodeView, View } from '../types/view';
-import { NodeBagInternal, ViewResult } from '../types/ViewResult';
+import { type EdgeView, type NodeView, type View } from '../types/view';
+import { type NodeBagInternal, type ViewResult } from '../types/ViewResult';
 import {
     edgeFromStack,
     filesFromStack,

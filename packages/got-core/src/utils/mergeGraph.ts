@@ -1,4 +1,4 @@
-import { Graph } from '../types/graph';
+import { type Graph } from '../types/graph';
 import {
     assocPathMutate,
     dissocPathMutate,

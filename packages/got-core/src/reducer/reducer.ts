@@ -1,6 +1,6 @@
-import { GOT_ACTION } from '../types/actions';
-import { ErrorGraph, Graph } from '../types/graph';
-import { State } from '../types/state';
+import { type GOT_ACTION } from '../types/actions';
+import { type ErrorGraph, type Graph } from '../types/graph';
+import { type State } from '../types/state';
 import { mergeGraphsRight, mergeOverwriteGraphsRight } from '../utils/mergeGraph';
 import { assocPathMutate, dissocPathMutate, getPathOr, mergeGraphObjRight } from '../utils/util';
 

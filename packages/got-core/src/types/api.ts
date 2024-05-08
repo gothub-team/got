@@ -1,5 +1,5 @@
-import { Graph, PushResult } from './graph';
-import { View } from './view';
+import { type Graph, type PushResult } from './graph';
+import { type View } from './view';
 
 export type StoreAPI = {
     push: (graph: Graph) => Promise<PushResult>;

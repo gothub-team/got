@@ -1,6 +1,6 @@
-import { Metadata, NodeFileView, NodeRightsView } from './graphObjects';
-import { NodeFilesView } from './graph';
-import { EdgeInclude, EdgeView, EdgesView, NodeInclude, NodeView, View } from './view';
+import { type Metadata, type NodeFileView, type NodeRightsView } from './graphObjects';
+import { type NodeFilesView } from './graph';
+import { type EdgeInclude, type EdgeView, type EdgesView, type NodeInclude, type NodeView, type View } from './view';
 
 type AliasKey<TView extends View | EdgesView, K extends keyof TView> = TView[K]['as'] extends string
     ? TView[K]['as']

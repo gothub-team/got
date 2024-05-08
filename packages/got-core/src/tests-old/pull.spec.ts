@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { MISSING_PARAM_ERROR } from '../utils/errors';
 import { createTestStore } from './shared.spec';
-import { Graph } from '../types/graph';
+import { type Graph } from '../types/graph';
 
 describe('store:pull', () => {
     describe('API', () => {

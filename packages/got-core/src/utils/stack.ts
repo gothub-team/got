@@ -1,6 +1,6 @@
-import { Graph, NodeFilesView } from '../types/graph';
-import { Metadata, NodeFileView, NodeRightsView } from '../types/graphObjects';
-import { State } from '../types/state';
+import { type Graph, type NodeFilesView } from '../types/graph';
+import { type Metadata, type NodeFileView, type NodeRightsView } from '../types/graphObjects';
+import { type State } from '../types/state';
 import { mergeDeepRight, mergeGraphObjRight } from './util';
 
 export const selectGraphStack = (state: State, stack: string[]): Graph[] => {
