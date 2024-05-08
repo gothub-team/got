@@ -12,6 +12,8 @@ export type NodeBagInternal = {
     metadata?: Metadata;
     rights?: NodeRightsView;
     files?: NodeFilesView<NodeFileView>;
+} & {
+    [edgeAlias: string]: Record<string, NodeBagInternal>;
 };
 
 export type NodeBag<TSubView extends NodeView | EdgeView> = {

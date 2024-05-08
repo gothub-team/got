@@ -1,5 +1,5 @@
-import { type Graph } from '../types/graph';
-import { type Metadata } from '../types/graphObjects';
+import { type Edges, type Files, type Graph, type Nodes, type Rights } from '../types/graph';
+import { type Metadata, type NodeFileView } from '../types/graphObjects';
 import { assocPathMutate, isEmptyObject } from './util';
 import { type EdgeView, type NodeView, type View } from '../types/view';
 import { type NodeBagInternal, type ViewResult } from '../types/ViewResult';
@@ -46,14 +46,21 @@ export const viewResFromStack = <TView extends View>(graphStack: Graph[], view: 
                 if (!subQueryObj) continue;
                 const edgeAlias = subQueryObj.as ?? edgeTypes;
 
-                bag[edgeAlias] = queryEdge(subQueryObj, edgeTypes, nodeId);
+                const edgeBag = queryEdge(subQueryObj, edgeTypes, nodeId);
+                if (edgeBag) {
+                    bag[edgeAlias] = edgeBag;
+                }
             }
         }
 
         return bag;
     };
 
-    const queryEdge = (queryObj: EdgeView, edgeTypes: string, nodeId: string) => {
+    const queryEdge = (
+        queryObj: EdgeView,
+        edgeTypes: string,
+        nodeId: string,
+    ): Record<string, NodeBagInternal> | undefined => {
         const [fromType, toType] = edgeTypes.split('/');
         const edgeIds = queryObj.reverse
             ? reverseEdgeFromStack(graphStack, toType, nodeId, fromType)
@@ -61,7 +68,7 @@ export const viewResFromStack = <TView extends View>(graphStack: Graph[], view: 
 
         if (!edgeIds) return;
 
-        const edgeBag = {};
+        const edgeBag: Record<string, NodeBagInternal> = {};
         const keys = Object.keys(edgeIds);
         for (let i = 0; i < keys.length; i += 1) {
             const toId = keys[i];
@@ -73,13 +80,16 @@ export const viewResFromStack = <TView extends View>(graphStack: Graph[], view: 
             const toNode = nodeFromStack(graphStack, toId);
             if (!toNode) continue;
 
-            edgeBag[toId] = queryNode(queryObj, toId, toNode, metadata);
+            const nodeBag = queryNode(queryObj, toId, toNode, metadata);
+            if (nodeBag) {
+                edgeBag[toId] = nodeBag;
+            }
         }
 
         return edgeBag;
     };
 
-    const result = {} as ViewResult<TView>;
+    const result: Record<string, NodeBagInternal> = {};
     const rootIds = Object.keys(view);
     for (let i = 0; i < rootIds.length; i += 1) {
         const nodeId = rootIds[i];
@@ -90,18 +100,21 @@ export const viewResFromStack = <TView extends View>(graphStack: Graph[], view: 
         const node = nodeFromStack(graphStack, nodeId);
         if (!node) continue;
 
-        result[nodeAlias] = queryNode(queryObj, nodeId, node);
+        const nodeBag = queryNode(queryObj, nodeId, node);
+        if (nodeBag) {
+            result[nodeAlias] = nodeBag;
+        }
     }
 
-    return result;
+    return result as ViewResult<TView>;
 };
 
 export const subgraphFromStack = (graphStack: Graph[], view: View): Graph => {
-    const nodes = {};
-    const edges = {};
-    const reverseEdges = {};
-    const rights = {};
-    const files = {};
+    const nodes: Nodes<Node | boolean> = {};
+    const edges: Edges<Metadata> = {};
+    const reverseEdges: Edges<boolean> = {};
+    const rights: Rights<boolean, string> = {};
+    const files: Files<NodeFileView> = {};
 
     const queryNode = <TSubView extends NodeView | EdgeView>(
         queryObj: TSubView,
