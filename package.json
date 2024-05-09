@@ -3,7 +3,8 @@
     "private": true,
     "type": "module",
     "workspaces": [
-        "packages/*"
+        "packages/*",
+        "packages/pulumi-gotiac-aws/sdk/*"
     ],
     "devDependencies": {
         "prettier": "^3.2.5"
