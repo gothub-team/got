@@ -215,6 +215,22 @@ describe('files', () => {
         });
     });
 
+    describe('file not uploaded', () => {
+        beforeEach(async () => {
+            graph = await user1Api.pull({
+                [`${testId}-1`]: {
+                    include: {
+                        files: true,
+                    },
+                },
+            });
+        });
+
+        it('does not pull the file download url', async () => {
+            expect(graph).not.toHaveProperty(['files', `${testId}-1`, 'someFile']);
+        });
+    });
+
     describe('write rights', () => {
         beforeEach(async () => {
             await user1Api.push({
