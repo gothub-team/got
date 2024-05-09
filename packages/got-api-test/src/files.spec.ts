@@ -112,4 +112,52 @@ describe('files', () => {
             });
         });
     });
+
+    describe('write rights', () => {
+        beforeEach(async () => {
+            await user1Api.push({
+                nodes: {
+                    [`${testId}-2`]: {
+                        id: `${testId}-2`,
+                    },
+                },
+                rights: {
+                    [`${testId}-1`]: {
+                        user: {
+                            [user2Email]: {
+                                write: true,
+                            },
+                        },
+                    },
+                },
+            });
+            pushResult = await user2Api.push({
+                files: {
+                    [`${testId}-1`]: {
+                        someFile: {
+                            contentType: 'text/plain',
+                            filename: 'some-file.txt',
+                            fileSize: fileContent.length,
+                        },
+                    },
+                    [`${testId}-2`]: {
+                        someFile: {
+                            contentType: 'text/plain',
+                            filename: 'some-file.txt',
+                            fileSize: fileContent.length,
+                        },
+                    },
+                },
+            });
+        });
+
+        it('returns upload urls for node 1', async () => {
+            expect(pushResult).toHaveProperty(['files', `${testId}-1`, 'someFile', 'statusCode'], 200);
+            expect(pushResult).toHaveProperty(['files', `${testId}-1`, 'someFile', 'uploadUrls']);
+        });
+        it('does not return upload urls for node 2', async () => {
+            expect(pushResult).toHaveProperty(['files', `${testId}-2`, 'someFile', 'statusCode'], 403);
+            expect(pushResult).not.toHaveProperty(['files', `${testId}-2`, 'someFile', 'uploadUrls']);
+        });
+    });
 });
