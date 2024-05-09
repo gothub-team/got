@@ -1,31 +1,30 @@
-import { describe, beforeAll, beforeEach, afterEach, it, expect } from 'bun:test';
-import { createApi, type GotApi } from '@gothub/got-api';
+import { describe, beforeAll, beforeEach, it, expect } from 'bun:test';
+import { type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import type { Graph, Node, PushResult } from '@gothub-team/got-core';
-import { createAdminApi, createNewUserApi } from './shared';
-
-let adminApi: ReturnType<typeof createApi>;
-beforeAll(async () => {
-    adminApi = await createAdminApi();
-});
+import { createUserApi } from './shared';
+import { env } from '../env';
 
 let testId: string;
-let api: GotApi;
-let userEmail: string;
+let user1Api: GotApi;
+let user1Email: string;
+let user2Api: GotApi;
+let user2Email: string;
+beforeAll(async () => {
+    user1Email = env.TEST_USER_1_EMAIL;
+    user1Api = await createUserApi(user1Email, env.TEST_USER_1_PW);
+    user2Email = env.TEST_USER_2_EMAIL;
+    user2Api = await createUserApi(user2Email, env.TEST_USER_2_PW);
+});
 beforeEach(async () => {
     testId = `test-${crypto.randomBytes(8).toString('hex')}`;
-    userEmail = `aws+${testId}@gothub.io`;
-    api = await createNewUserApi(adminApi, userEmail);
-});
-afterEach(async () => {
-    await adminApi.deleteUser({ email: userEmail });
 });
 
 describe('nodes', () => {
     let pushResult: PushResult;
     let graph: Graph;
     beforeEach(async () => {
-        pushResult = await api.push({
+        pushResult = await user1Api.push({
             nodes: {
                 [testId]: {
                     id: testId,
@@ -34,14 +33,11 @@ describe('nodes', () => {
                 },
             },
         });
-        graph = await api.pull({
+        graph = await user1Api.pull({
             [testId]: {
                 include: { node: true },
             },
         });
-    });
-    afterEach(async () => {
-        await adminApi.push({ nodes: { [testId]: false } });
     });
 
     describe('one node', () => {
@@ -63,7 +59,7 @@ describe('nodes', () => {
 
     describe('two more nodes', () => {
         beforeEach(async () => {
-            pushResult = await api.push({
+            pushResult = await user1Api.push({
                 nodes: {
                     [`${testId}-1`]: {
                         id: `${testId}-1`,
@@ -77,7 +73,7 @@ describe('nodes', () => {
                     },
                 },
             });
-            graph = await api.pull({
+            graph = await user1Api.pull({
                 [testId]: {
                     include: { node: true },
                 },
@@ -86,14 +82,6 @@ describe('nodes', () => {
                 },
                 [`${testId}-2`]: {
                     include: { node: true },
-                },
-            });
-        });
-        afterEach(async () => {
-            await adminApi.push({
-                nodes: {
-                    [`${testId}-1`]: false,
-                    [`${testId}-2`]: false,
                 },
             });
         });
@@ -112,7 +100,7 @@ describe('nodes', () => {
     describe('update node', () => {
         describe('with old prop', () => {
             beforeEach(async () => {
-                pushResult = await api.push({
+                pushResult = await user1Api.push({
                     nodes: {
                         [testId]: {
                             id: testId,
@@ -121,7 +109,7 @@ describe('nodes', () => {
                         },
                     },
                 });
-                graph = await api.pull({
+                graph = await user1Api.pull({
                     [testId]: {
                         include: { node: true },
                     },
@@ -138,7 +126,7 @@ describe('nodes', () => {
 
         describe('with new prop', () => {
             beforeEach(async () => {
-                pushResult = await api.push({
+                pushResult = await user1Api.push({
                     nodes: {
                         [testId]: {
                             id: testId,
@@ -146,7 +134,7 @@ describe('nodes', () => {
                         },
                     },
                 });
-                graph = await api.pull({
+                graph = await user1Api.pull({
                     [testId]: {
                         include: { node: true },
                     },
@@ -167,7 +155,7 @@ describe('nodes', () => {
 
         describe('delete prop', () => {
             beforeEach(async () => {
-                pushResult = await api.push({
+                pushResult = await user1Api.push({
                     nodes: {
                         [testId]: {
                             id: testId,
@@ -175,7 +163,7 @@ describe('nodes', () => {
                         },
                     },
                 });
-                graph = await api.pull({
+                graph = await user1Api.pull({
                     [testId]: {
                         include: { node: true },
                     },
@@ -196,12 +184,12 @@ describe('nodes', () => {
 
     describe('delete node', () => {
         beforeEach(async () => {
-            pushResult = await api.push({
+            pushResult = await user1Api.push({
                 nodes: {
                     [testId]: false,
                 },
             });
-            graph = await api.pull({
+            graph = await user1Api.pull({
                 [testId]: {
                     include: { node: true },
                 },
@@ -217,12 +205,8 @@ describe('nodes', () => {
     });
 
     describe('read rights', () => {
-        let otherUserApi: GotApi;
-        let otherUserEmail: string;
         beforeEach(async () => {
-            otherUserEmail = `aws+${testId}-other@gothub.io`;
-            otherUserApi = await createNewUserApi(adminApi, otherUserEmail);
-            await api.push({
+            await user1Api.push({
                 nodes: {
                     [`${testId}-other`]: {
                         id: `${testId}-other`,
@@ -231,11 +215,11 @@ describe('nodes', () => {
                 },
                 rights: {
                     [testId]: {
-                        user: { [otherUserEmail]: { read: true } },
+                        user: { [user2Email]: { read: true } },
                     },
                 },
             });
-            graph = await otherUserApi.pull({
+            graph = await user2Api.pull({
                 [testId]: {
                     include: { node: true },
                 },
@@ -244,35 +228,41 @@ describe('nodes', () => {
                 },
             });
         });
-        afterEach(async () => {
-            await adminApi.push({
-                nodes: {
-                    [testId]: false,
-                    [`${testId}-other`]: false,
-                },
-                rights: {
-                    [testId]: {
-                        user: { [userEmail]: { read: false } },
-                    },
-                },
+
+        describe('push and pull', async () => {
+            it('can pull node with read right', async () => {
+                expect(graph).toHaveProperty(['nodes', testId, 'id'], testId);
+            });
+            it('cannot pull other node without read right', async () => {
+                expect(graph).not.toHaveProperty(['nodes', `${testId}-other`]);
             });
         });
 
-        it('can pull node with read right', async () => {
-            expect(graph).toHaveProperty(['nodes', testId, 'id'], testId);
-        });
-        it('cannot pull other node without read right', async () => {
-            expect(graph).not.toHaveProperty(['nodes', `${testId}-other`]);
+        describe('non-existing node but read right', () => {
+            beforeEach(async () => {
+                await user1Api.push({
+                    rights: {
+                        [testId]: {
+                            user: { [user2Email]: { read: true } },
+                        },
+                    },
+                });
+                graph = await user2Api.pull({
+                    [`${testId}-non-existing`]: {
+                        include: { node: true },
+                    },
+                });
+            });
+
+            it('returns no node', async () => {
+                expect(graph).toEqual({});
+            });
         });
     });
 
     describe('write rights', () => {
-        let otherUserApi: GotApi;
-        let otherUserEmail: string;
         beforeEach(async () => {
-            otherUserEmail = `aws+${testId}-other@gothub.io`;
-            otherUserApi = await createNewUserApi(adminApi, otherUserEmail);
-            await api.push({
+            await user1Api.push({
                 nodes: {
                     [`${testId}-other`]: {
                         id: `${testId}-other`,
@@ -281,11 +271,11 @@ describe('nodes', () => {
                 },
                 rights: {
                     [testId]: {
-                        user: { [otherUserEmail]: { write: true } },
+                        user: { [user2Email]: { write: true } },
                     },
                 },
             });
-            pushResult = await otherUserApi.push({
+            pushResult = await user2Api.push({
                 nodes: {
                     [testId]: {
                         id: testId,
@@ -297,7 +287,7 @@ describe('nodes', () => {
                     },
                 },
             });
-            graph = await api.pull({
+            graph = await user1Api.pull({
                 [testId]: {
                     include: { node: true },
                 },
@@ -306,31 +296,48 @@ describe('nodes', () => {
                 },
             });
         });
-        afterEach(async () => {
-            await adminApi.push({
-                nodes: {
-                    [testId]: false,
-                    [`${testId}-other`]: false,
-                },
-                rights: {
-                    [testId]: {
-                        user: { [userEmail]: { write: false } },
-                    },
-                },
+
+        describe('push and pull', () => {
+            it('can push node with write right for other user', async () => {
+                expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 200);
+            });
+            it('cannot push other node without write right for other user', async () => {
+                expect(pushResult).toHaveProperty(['nodes', `${testId}-other`, 'statusCode'], 403);
+            });
+            it('pulls updated node', async () => {
+                expect(graph).toHaveProperty(['nodes', testId, 'prop'], 'value2');
+            });
+            it('keeps the other node unchanged', async () => {
+                expect(graph).toHaveProperty(['nodes', `${testId}-other`, 'prop'], 'value1');
             });
         });
 
-        it('can push node with write right for other user', async () => {
-            expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 200);
-        });
-        it('cannot push other node without write right for other user', async () => {
-            expect(pushResult).toHaveProperty(['nodes', `${testId}-other`, 'statusCode'], 403);
-        });
-        it('pulls updated node', async () => {
-            expect(graph).toHaveProperty(['nodes', testId, 'prop'], 'value2');
-        });
-        it('keeps the other node unchanged', async () => {
-            expect(graph).toHaveProperty(['nodes', `${testId}-other`, 'prop'], 'value1');
+        describe('delete node', () => {
+            beforeEach(async () => {
+                pushResult = await user2Api.push({
+                    nodes: {
+                        [testId]: false,
+                        [`${testId}-other`]: false,
+                    },
+                });
+                graph = await user1Api.pull({
+                    [testId]: {
+                        include: { node: true },
+                    },
+                    [`${testId}-other`]: {
+                        include: { node: true },
+                    },
+                });
+            });
+
+            it('pushes node in delete mode', async () => {
+                expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 200);
+                expect(pushResult).toHaveProperty(['nodes', `${testId}-other`, 'statusCode'], 403);
+            });
+            it('returns only node without write rights', async () => {
+                expect(graph).not.toHaveProperty(['nodes', testId]);
+                expect(graph).toHaveProperty(['nodes', `${testId}-other`, 'id'], `${testId}-other`);
+            });
         });
     });
 });
@@ -394,19 +401,16 @@ describe('big node', () => {
                 gross: 'gjhjhhgffgh',
             },
         };
-        pushResult = await api.push({
+        pushResult = await user1Api.push({
             nodes: {
                 [testId]: node,
             },
         });
-        graph = await api.pull({
+        graph = await user1Api.pull({
             [testId]: {
                 include: { node: true },
             },
         });
-    });
-    afterEach(async () => {
-        await adminApi.push({ nodes: { [testId]: false } });
     });
 
     it('pushes a new big node', async () => {

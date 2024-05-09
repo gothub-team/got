@@ -4,34 +4,34 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as utilities from "./utilities";
 
-export class TestAdminUser extends pulumi.ComponentResource {
+export class TestUser extends pulumi.ComponentResource {
     /** @internal */
-    public static readonly __pulumiType = 'gotiac:index:TestAdminUser';
+    public static readonly __pulumiType = 'gotiac:index:TestUser';
 
     /**
-     * Returns true if the given object is an instance of TestAdminUser.  This is designed to work even
+     * Returns true if the given object is an instance of TestUser.  This is designed to work even
      * when multiple copies of the Pulumi SDK have been loaded into the same process.
      */
-    public static isInstance(obj: any): obj is TestAdminUser {
+    public static isInstance(obj: any): obj is TestUser {
         if (obj === undefined || obj === null) {
             return false;
         }
-        return obj['__pulumiType'] === TestAdminUser.__pulumiType;
+        return obj['__pulumiType'] === TestUser.__pulumiType;
     }
 
     /**
-     * The temporary password of the test admin user. Make sure to destroy the test admin user after each test run.
+     * The temporary password of the test user. Make sure to destroy the test user after each test run.
      */
     public /*out*/ readonly password!: pulumi.Output<string>;
 
     /**
-     * Create a TestAdminUser resource with the given unique name, arguments, and options.
+     * Create a TestUser resource with the given unique name, arguments, and options.
      *
      * @param name The _unique_ name of the resource.
      * @param args The arguments to use to populate this resource's properties.
      * @param opts A bag of options that control this resource's behavior.
      */
-    constructor(name: string, args: TestAdminUserArgs, opts?: pulumi.ComponentResourceOptions) {
+    constructor(name: string, args: TestUserArgs, opts?: pulumi.ComponentResourceOptions) {
         let resourceInputs: pulumi.Inputs = {};
         opts = opts || {};
         if (!opts.id) {
@@ -48,20 +48,20 @@ export class TestAdminUser extends pulumi.ComponentResource {
             resourceInputs["password"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
-        super(TestAdminUser.__pulumiType, name, resourceInputs, opts, true /*remote*/);
+        super(TestUser.__pulumiType, name, resourceInputs, opts, true /*remote*/);
     }
 }
 
 /**
- * The set of arguments for constructing a TestAdminUser resource.
+ * The set of arguments for constructing a TestUser resource.
  */
-export interface TestAdminUserArgs {
+export interface TestUserArgs {
     /**
-     * The email of the test admin user. Throws an error if the user already exists.
+     * The email of the test user. Throws an error if the user already exists.
      */
     email: pulumi.Input<string>;
     /**
-     * The ID of the user pool where the test admin user is created. UserPool must exist.
+     * The ID of the user pool where the test user is created. UserPool must exist.
      */
     userPoolId: pulumi.Input<string>;
 }
