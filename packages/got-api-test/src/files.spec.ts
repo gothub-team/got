@@ -107,7 +107,7 @@ describe('files', () => {
                 });
             });
 
-            describe('pull', () => {
+            describe('url', () => {
                 it('pulls the file download url', async () => {
                     expect(graph).toHaveProperty(['files', `${testId}-1`, 'someFile', 'contentType'], 'text/plain');
                     expect(graph).toHaveProperty(
