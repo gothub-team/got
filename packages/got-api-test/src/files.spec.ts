@@ -174,6 +174,45 @@ describe('files', () => {
                 expect(graph).not.toHaveProperty(['files', `${testId}-2`, 'someFile']);
             });
         });
+
+        describe('multiple files', () => {
+            beforeEach(async () => {
+                pushResult = await user1Api.push({
+                    files: {
+                        [`${testId}-1`]: {
+                            someOtherFile: {
+                                contentType: 'text/plain',
+                                filename: 'some-file.txt',
+                                fileSize: fileContent.length,
+                            },
+                        },
+                    },
+                });
+                const uploadElement1Result = pushResult.files?.[`${testId}-1`].someOtherFile;
+                if (!uploadElement1Result || uploadElement1Result.statusCode !== 200) {
+                    return;
+                }
+                await fetch(uploadElement1Result.uploadUrls[0], {
+                    method: 'PUT',
+                    body: fileContent,
+                    headers: {
+                        'Content-Type': 'text/plain',
+                    },
+                });
+                graph = await user1Api.pull({
+                    [`${testId}-1`]: {
+                        include: {
+                            files: true,
+                        },
+                    },
+                });
+            });
+
+            it('pulls all two files attached to node 1', async () => {
+                expect(graph).toHaveProperty(['files', `${testId}-1`, 'someFile', 'url']);
+                expect(graph).toHaveProperty(['files', `${testId}-1`, 'someOtherFile', 'url']);
+            });
+        });
     });
 
     describe('write rights', () => {
