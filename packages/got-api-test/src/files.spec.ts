@@ -1,4 +1,4 @@
-import { describe, beforeAll, beforeEach, it, expect } from 'bun:test';
+import { describe, beforeAll, beforeEach, it, expect, mock } from 'bun:test';
 import { type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import { env } from '../env';
@@ -271,6 +271,81 @@ describe('files', () => {
         it('does not return upload urls for node 2', async () => {
             expect(pushResult).toHaveProperty(['files', `${testId}-2`, 'someOtherFile', 'statusCode'], 403);
             expect(pushResult).not.toHaveProperty(['files', `${testId}-2`, 'someOtherFile', 'uploadUrls']);
+        });
+    });
+});
+
+describe('multipart upload', () => {
+    let pushResult: PushResult;
+    let graph: Graph;
+    let fileContent: string;
+    beforeEach(async () => {
+        fileContent = '';
+        const chunk = 'FILE CONTENT';
+        for (let i = 0; i < 1024 * 1024 * 6; i += chunk.length) {
+            fileContent += chunk;
+        }
+        pushResult = await user1Api.push({
+            nodes: {
+                [`${testId}-1`]: {
+                    id: `${testId}-1`,
+                },
+            },
+            files: {
+                [`${testId}-1`]: {
+                    someFile: {
+                        contentType: 'text/plain',
+                        filename: 'some-file.txt',
+                        fileSize: fileContent.length,
+                    },
+                },
+            },
+        });
+    });
+
+    describe('push', () => {
+        it('initiates the upload', async () => {
+            expect(pushResult).toHaveProperty(['files', `${testId}-1`, 'someFile', 'statusCode'], 200);
+            expect(pushResult).toHaveProperty(['files', `${testId}-1`, 'someFile', 'uploadUrls', 'length'], 2);
+            expect(pushResult).toHaveProperty(['files', `${testId}-1`, 'someFile', 'uploadId']);
+        });
+    });
+
+    describe('upload file', () => {
+        let fnProgress: ReturnType<typeof mock>;
+        beforeEach(async () => {
+            fnProgress = mock();
+            const uploadElement1Result = pushResult.files?.[`${testId}-1`].someFile;
+            if (!uploadElement1Result || uploadElement1Result.statusCode !== 200 || !uploadElement1Result.uploadId) {
+                return;
+            }
+            await user1Api.upload(uploadElement1Result.uploadUrls, new Blob([fileContent], { type: 'text/plain' }), {
+                contentType: 'text/plain',
+                uploadId: uploadElement1Result.uploadId,
+                onProgress: fnProgress,
+            });
+            graph = await user1Api.pull({
+                [`${testId}-1`]: {
+                    include: {
+                        files: true,
+                    },
+                },
+            });
+        });
+
+        describe('upload', () => {
+            it('logs the progress', async () => {
+                expect(fnProgress.mock.calls[0]).toEqual([0.5]);
+                expect(fnProgress.mock.calls[1]).toEqual([1]);
+            });
+            it('pulls the download url after upload', async () => {
+                expect(graph).toHaveProperty(['files', `${testId}-1`, 'someFile', 'contentType'], 'text/plain');
+                expect(graph).toHaveProperty(
+                    ['files', `${testId}-1`, 'someFile', 'etag'],
+                    '"432625e3dbe0b09670bf3966198a630a-2"',
+                );
+                expect(graph).toHaveProperty(['files', `${testId}-1`, 'someFile', 'url']);
+            });
         });
     });
 });
