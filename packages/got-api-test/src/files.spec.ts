@@ -31,9 +31,19 @@ describe('files', () => {
                 [`${testId}-1`]: {
                     id: `${testId}-1`,
                 },
+                [`${testId}-2`]: {
+                    id: `${testId}-2`,
+                },
             },
             files: {
                 [`${testId}-1`]: {
+                    someFile: {
+                        contentType: 'text/plain',
+                        filename: 'some-file.txt',
+                        fileSize: fileContent.length,
+                    },
+                },
+                [`${testId}-2`]: {
                     someFile: {
                         contentType: 'text/plain',
                         filename: 'some-file.txt',
@@ -85,7 +95,7 @@ describe('files', () => {
             });
 
             describe('pull', () => {
-                it('pulls the file', async () => {
+                it('pulls the file download url', async () => {
                     expect(graph).toHaveProperty(['files', `${testId}-1`, 'someFile', 'contentType'], 'text/plain');
                     expect(graph).toHaveProperty(
                         ['files', `${testId}-1`, 'someFile', 'etag'],
@@ -111,16 +121,51 @@ describe('files', () => {
                 });
             });
         });
+
+        describe('read rights', () => {
+            beforeEach(async () => {
+                await user1Api.push({
+                    rights: {
+                        [`${testId}-1`]: {
+                            user: {
+                                [user2Email]: {
+                                    read: true,
+                                },
+                            },
+                        },
+                    },
+                });
+                graph = await user2Api.pull({
+                    [`${testId}-1`]: {
+                        include: {
+                            files: true,
+                        },
+                    },
+                    [`${testId}-2`]: {
+                        include: {
+                            files: true,
+                        },
+                    },
+                });
+            });
+
+            it('pulls the download url and metadata for node 1', async () => {
+                expect(graph).toHaveProperty(['files', `${testId}-1`, 'someFile', 'contentType'], 'text/plain');
+                expect(graph).toHaveProperty(
+                    ['files', `${testId}-1`, 'someFile', 'etag'],
+                    '"9b5d8c336958531a6fd6a917e9a362a1"',
+                );
+                expect(graph).toHaveProperty(['files', `${testId}-1`, 'someFile', 'url']);
+            });
+            it('does not pull the download url and metadata for node 2', async () => {
+                expect(graph).not.toHaveProperty(['files', `${testId}-2`, 'someFile']);
+            });
+        });
     });
 
     describe('write rights', () => {
         beforeEach(async () => {
             await user1Api.push({
-                nodes: {
-                    [`${testId}-2`]: {
-                        id: `${testId}-2`,
-                    },
-                },
                 rights: {
                     [`${testId}-1`]: {
                         user: {
@@ -134,14 +179,14 @@ describe('files', () => {
             pushResult = await user2Api.push({
                 files: {
                     [`${testId}-1`]: {
-                        someFile: {
+                        someOtherFile: {
                             contentType: 'text/plain',
                             filename: 'some-file.txt',
                             fileSize: fileContent.length,
                         },
                     },
                     [`${testId}-2`]: {
-                        someFile: {
+                        someOtherFile: {
                             contentType: 'text/plain',
                             filename: 'some-file.txt',
                             fileSize: fileContent.length,
@@ -152,12 +197,12 @@ describe('files', () => {
         });
 
         it('returns upload urls for node 1', async () => {
-            expect(pushResult).toHaveProperty(['files', `${testId}-1`, 'someFile', 'statusCode'], 200);
-            expect(pushResult).toHaveProperty(['files', `${testId}-1`, 'someFile', 'uploadUrls']);
+            expect(pushResult).toHaveProperty(['files', `${testId}-1`, 'someOtherFile', 'statusCode'], 200);
+            expect(pushResult).toHaveProperty(['files', `${testId}-1`, 'someOtherFile', 'uploadUrls']);
         });
         it('does not return upload urls for node 2', async () => {
-            expect(pushResult).toHaveProperty(['files', `${testId}-2`, 'someFile', 'statusCode'], 403);
-            expect(pushResult).not.toHaveProperty(['files', `${testId}-2`, 'someFile', 'uploadUrls']);
+            expect(pushResult).toHaveProperty(['files', `${testId}-2`, 'someOtherFile', 'statusCode'], 403);
+            expect(pushResult).not.toHaveProperty(['files', `${testId}-2`, 'someOtherFile', 'uploadUrls']);
         });
     });
 });
