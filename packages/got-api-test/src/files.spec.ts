@@ -64,11 +64,24 @@ describe('files', () => {
     describe('upload file', () => {
         let uploadResult: Response;
         beforeEach(async () => {
-            const uploadElementResult = pushResult.files?.[`${testId}-1`].someFile;
-            if (!uploadElementResult || uploadElementResult.statusCode !== 200) {
+            const uploadElement1Result = pushResult.files?.[`${testId}-1`].someFile;
+            const uploadElement2Result = pushResult.files?.[`${testId}-2`].someFile;
+            if (
+                !uploadElement1Result ||
+                uploadElement1Result.statusCode !== 200 ||
+                !uploadElement2Result ||
+                uploadElement2Result.statusCode !== 200
+            ) {
                 return;
             }
-            uploadResult = await fetch(uploadElementResult.uploadUrls[0], {
+            uploadResult = await fetch(uploadElement1Result.uploadUrls[0], {
+                method: 'PUT',
+                body: fileContent,
+                headers: {
+                    'Content-Type': 'text/plain',
+                },
+            });
+            await fetch(uploadElement2Result.uploadUrls[0], {
                 method: 'PUT',
                 body: fileContent,
                 headers: {
