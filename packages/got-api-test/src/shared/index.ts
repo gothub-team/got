@@ -1,5 +1,5 @@
 import { createApi } from '@gothub/got-api';
-import { env } from '../env';
+import { env } from '../../env';
 
 export const createUserApi = async (email: string, password: string) => {
     const api = createApi({
