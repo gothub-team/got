@@ -34,9 +34,7 @@ describe('nodes', () => {
             },
         });
         graph = await user1Api.pull({
-            [testId]: {
-                include: { node: true },
-            },
+            [testId]: { include: { node: true } },
         });
     });
 
@@ -74,15 +72,9 @@ describe('nodes', () => {
                 },
             });
             graph = await user1Api.pull({
-                [testId]: {
-                    include: { node: true },
-                },
-                [`${testId}-1`]: {
-                    include: { node: true },
-                },
-                [`${testId}-2`]: {
-                    include: { node: true },
-                },
+                [testId]: { include: { node: true } },
+                [`${testId}-1`]: { include: { node: true } },
+                [`${testId}-2`]: { include: { node: true } },
             });
         });
 
@@ -110,9 +102,7 @@ describe('nodes', () => {
                     },
                 });
                 graph = await user1Api.pull({
-                    [testId]: {
-                        include: { node: true },
-                    },
+                    [testId]: { include: { node: true } },
                 });
             });
 
@@ -135,9 +125,7 @@ describe('nodes', () => {
                     },
                 });
                 graph = await user1Api.pull({
-                    [testId]: {
-                        include: { node: true },
-                    },
+                    [testId]: { include: { node: true } },
                 });
             });
 
@@ -164,9 +152,7 @@ describe('nodes', () => {
                     },
                 });
                 graph = await user1Api.pull({
-                    [testId]: {
-                        include: { node: true },
-                    },
+                    [testId]: { include: { node: true } },
                 });
             });
 
@@ -185,14 +171,10 @@ describe('nodes', () => {
     describe('delete node', () => {
         beforeEach(async () => {
             pushResult = await user1Api.push({
-                nodes: {
-                    [testId]: false,
-                },
+                nodes: { [testId]: false },
             });
             graph = await user1Api.pull({
-                [testId]: {
-                    include: { node: true },
-                },
+                [testId]: { include: { node: true } },
             });
         });
 
@@ -214,18 +196,12 @@ describe('nodes', () => {
                     },
                 },
                 rights: {
-                    [testId]: {
-                        user: { [user2Email]: { read: true } },
-                    },
+                    [testId]: { user: { [user2Email]: { read: true } } },
                 },
             });
             graph = await user2Api.pull({
-                [testId]: {
-                    include: { node: true },
-                },
-                [`${testId}-other`]: {
-                    include: { node: true },
-                },
+                [testId]: { include: { node: true } },
+                [`${testId}-other`]: { include: { node: true } },
             });
         });
 
@@ -242,15 +218,11 @@ describe('nodes', () => {
             beforeEach(async () => {
                 await user1Api.push({
                     rights: {
-                        [testId]: {
-                            user: { [user2Email]: { read: true } },
-                        },
+                        [testId]: { user: { [user2Email]: { read: true } } },
                     },
                 });
                 graph = await user2Api.pull({
-                    [`${testId}-non-existing`]: {
-                        include: { node: true },
-                    },
+                    [`${testId}-non-existing`]: { include: { node: true } },
                 });
             });
 
@@ -270,9 +242,7 @@ describe('nodes', () => {
                     },
                 },
                 rights: {
-                    [testId]: {
-                        user: { [user2Email]: { write: true } },
-                    },
+                    [testId]: { user: { [user2Email]: { write: true } } },
                 },
             });
             pushResult = await user2Api.push({
@@ -288,12 +258,8 @@ describe('nodes', () => {
                 },
             });
             graph = await user1Api.pull({
-                [testId]: {
-                    include: { node: true },
-                },
-                [`${testId}-other`]: {
-                    include: { node: true },
-                },
+                [testId]: { include: { node: true } },
+                [`${testId}-other`]: { include: { node: true } },
             });
         });
 
@@ -321,12 +287,8 @@ describe('nodes', () => {
                     },
                 });
                 graph = await user1Api.pull({
-                    [testId]: {
-                        include: { node: true },
-                    },
-                    [`${testId}-other`]: {
-                        include: { node: true },
-                    },
+                    [testId]: { include: { node: true } },
+                    [`${testId}-other`]: { include: { node: true } },
                 });
             });
 
@@ -402,14 +364,10 @@ describe('big node', () => {
             },
         };
         pushResult = await user1Api.push({
-            nodes: {
-                [testId]: node,
-            },
+            nodes: { [testId]: node },
         });
         graph = await user1Api.pull({
-            [testId]: {
-                include: { node: true },
-            },
+            [testId]: { include: { node: true } },
         });
     });
 

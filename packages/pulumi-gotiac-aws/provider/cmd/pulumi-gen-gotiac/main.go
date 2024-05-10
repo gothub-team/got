@@ -104,6 +104,7 @@ func readSchema(schemaPath string) (*schema.Package, error) {
 	if err = json.Unmarshal(schemaBytes, &spec); err != nil {
 		return nil, errors.Wrap(err, "unmarshalling schema")
 	}
+	fmt.Println(spec.PluginDownloadURL)
 
 	pkg, err := schema.ImportSpec(spec, nil)
 	if err != nil {
