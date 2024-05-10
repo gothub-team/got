@@ -30,12 +30,8 @@ describe('node wildcards', () => {
         });
         await user1Api.push({
             nodes: {
-                [`${scopeId}node-1`]: {
-                    id: `${scopeId}node-1`,
-                },
-                [`${scopeId}node-2`]: {
-                    id: `${scopeId}node-2`,
-                },
+                [`${scopeId}node-1`]: { id: `${scopeId}node-1` },
+                [`${scopeId}node-2`]: { id: `${scopeId}node-2` },
             },
         });
     });
