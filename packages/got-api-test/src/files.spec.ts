@@ -29,12 +29,8 @@ describe('files', () => {
         fileContent = 'FILE CONTENT';
         pushResult = await user1Api.push({
             nodes: {
-                [`${testId}-1`]: {
-                    id: `${testId}-1`,
-                },
-                [`${testId}-2`]: {
-                    id: `${testId}-2`,
-                },
+                [`${testId}-1`]: { id: `${testId}-1` },
+                [`${testId}-2`]: { id: `${testId}-2` },
             },
             files: {
                 [`${testId}-1`]: {
@@ -210,26 +206,12 @@ describe('files', () => {
             beforeEach(async () => {
                 await user1Api.push({
                     rights: {
-                        [`${testId}-1`]: {
-                            user: {
-                                [user2Email]: {
-                                    read: true,
-                                },
-                            },
-                        },
+                        [`${testId}-1`]: { user: { [user2Email]: { read: true } } },
                     },
                 });
                 graph = await user2Api.pull({
-                    [`${testId}-1`]: {
-                        include: {
-                            files: true,
-                        },
-                    },
-                    [`${testId}-2`]: {
-                        include: {
-                            files: true,
-                        },
-                    },
+                    [`${testId}-1`]: { include: { files: true } },
+                    [`${testId}-2`]: { include: { files: true } },
                 });
             });
 
@@ -271,11 +253,7 @@ describe('files', () => {
                     },
                 });
                 graph = await user1Api.pull({
-                    [`${testId}-1`]: {
-                        include: {
-                            files: true,
-                        },
-                    },
+                    [`${testId}-1`]: { include: { files: true } },
                 });
             });
 
@@ -289,11 +267,7 @@ describe('files', () => {
     describe('file not uploaded', () => {
         beforeEach(async () => {
             graph = await user1Api.pull({
-                [`${testId}-1`]: {
-                    include: {
-                        files: true,
-                    },
-                },
+                [`${testId}-1`]: { include: { files: true } },
             });
         });
 
@@ -306,13 +280,7 @@ describe('files', () => {
         beforeEach(async () => {
             await user1Api.push({
                 rights: {
-                    [`${testId}-1`]: {
-                        user: {
-                            [user2Email]: {
-                                write: true,
-                            },
-                        },
-                    },
+                    [`${testId}-1`]: { user: { [user2Email]: { write: true } } },
                 },
             });
             pushResult = await user2Api.push({
@@ -358,9 +326,7 @@ describe('multipart upload', () => {
         }
         pushResult = await user1Api.push({
             nodes: {
-                [`${testId}-1`]: {
-                    id: `${testId}-1`,
-                },
+                [`${testId}-1`]: { id: `${testId}-1` },
             },
             files: {
                 [`${testId}-1`]: {
@@ -396,11 +362,7 @@ describe('multipart upload', () => {
                 onProgress: fnProgress,
             });
             graph = await user1Api.pull({
-                [`${testId}-1`]: {
-                    include: {
-                        files: true,
-                    },
-                },
+                [`${testId}-1`]: { include: { files: true } },
             });
         });
 
