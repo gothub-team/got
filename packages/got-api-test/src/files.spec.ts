@@ -159,10 +159,10 @@ describe('files', () => {
                         if (!downloadElementResult || !downloadElementResult.url) {
                             return;
                         }
-                        const unsignedUrl = new URL(downloadElementResult.url);
-                        unsignedUrl.pathname = '';
-                        unsignedUrl.search = '';
-                        downloadResult = await fetch(unsignedUrl.toString());
+                        const badUrl = new URL(downloadElementResult.url);
+                        badUrl.pathname = '';
+                        badUrl.search = '';
+                        downloadResult = await fetch(badUrl.toString());
                     });
 
                     it('responds with forbidden', async () => {
@@ -176,10 +176,10 @@ describe('files', () => {
                         if (!downloadElementResult || !downloadElementResult.url) {
                             return;
                         }
-                        const unsignedUrl = new URL(downloadElementResult.url);
-                        unsignedUrl.pathname = 'file';
-                        unsignedUrl.search = '';
-                        downloadResult = await fetch(unsignedUrl.toString());
+                        const badUrl = new URL(downloadElementResult.url);
+                        badUrl.pathname = 'file';
+                        badUrl.search = '';
+                        downloadResult = await fetch(badUrl.toString());
                     });
 
                     it('responds with forbidden', async () => {
@@ -193,10 +193,10 @@ describe('files', () => {
                         if (!downloadElementResult || !downloadElementResult.url) {
                             return;
                         }
-                        const unsignedUrl = new URL(downloadElementResult.url);
-                        unsignedUrl.pathname = 'ref';
-                        unsignedUrl.search = '';
-                        downloadResult = await fetch(unsignedUrl.toString());
+                        const badUrl = new URL(downloadElementResult.url);
+                        badUrl.pathname = 'ref';
+                        badUrl.search = '';
+                        downloadResult = await fetch(badUrl.toString());
                     });
 
                     it('responds with forbidden', async () => {
