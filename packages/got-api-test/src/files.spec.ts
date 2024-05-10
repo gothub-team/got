@@ -1,6 +1,7 @@
 import { describe, beforeAll, beforeEach, it, expect, mock } from 'bun:test';
 import { type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
+import { URL } from 'url';
 import { env } from '../env';
 import { createUserApi } from './shared';
 import type { DownloadNodeFileView, Graph, PushResult } from '@gothub-team/got-core';
@@ -97,6 +98,7 @@ describe('files', () => {
         });
 
         describe('pull', () => {
+            let downloadElementResult: DownloadNodeFileView;
             beforeEach(async () => {
                 graph = await user1Api.pull({
                     [`${testId}-1`]: {
@@ -105,6 +107,7 @@ describe('files', () => {
                         },
                     },
                 });
+                downloadElementResult = graph.files?.[`${testId}-1`].someFile as DownloadNodeFileView;
             });
 
             describe('url', () => {
@@ -121,7 +124,6 @@ describe('files', () => {
             describe('download', () => {
                 let downloadResult: Response;
                 beforeEach(async () => {
-                    const downloadElementResult = graph.files?.[`${testId}-1`].someFile as DownloadNodeFileView;
                     if (!downloadElementResult || !downloadElementResult.url) {
                         return;
                     }
@@ -131,6 +133,75 @@ describe('files', () => {
                 it('downloads the file', async () => {
                     expect(downloadResult).toHaveProperty('status', 200);
                     expect(await downloadResult.text()).toBe(fileContent);
+                });
+            });
+
+            describe('security', () => {
+                describe('download without signature', () => {
+                    let downloadResult: Response;
+                    beforeEach(async () => {
+                        if (!downloadElementResult || !downloadElementResult.url) {
+                            return;
+                        }
+                        const unsignedUrl = new URL(downloadElementResult.url);
+                        unsignedUrl.search = '';
+                        downloadResult = await fetch(unsignedUrl.toString());
+                    });
+
+                    it('responds with forbidden', async () => {
+                        expect(downloadResult).toHaveProperty('status', 403);
+                    });
+                });
+
+                describe('try to access root', () => {
+                    let downloadResult: Response;
+                    beforeEach(async () => {
+                        if (!downloadElementResult || !downloadElementResult.url) {
+                            return;
+                        }
+                        const unsignedUrl = new URL(downloadElementResult.url);
+                        unsignedUrl.pathname = '';
+                        unsignedUrl.search = '';
+                        downloadResult = await fetch(unsignedUrl.toString());
+                    });
+
+                    it('responds with forbidden', async () => {
+                        expect(downloadResult).toHaveProperty('status', 403);
+                    });
+                });
+
+                describe('try to access file folder', () => {
+                    let downloadResult: Response;
+                    beforeEach(async () => {
+                        if (!downloadElementResult || !downloadElementResult.url) {
+                            return;
+                        }
+                        const unsignedUrl = new URL(downloadElementResult.url);
+                        unsignedUrl.pathname = 'file';
+                        unsignedUrl.search = '';
+                        downloadResult = await fetch(unsignedUrl.toString());
+                    });
+
+                    it('responds with forbidden', async () => {
+                        expect(downloadResult).toHaveProperty('status', 403);
+                    });
+                });
+
+                describe('try to access ref folder', () => {
+                    let downloadResult: Response;
+                    beforeEach(async () => {
+                        if (!downloadElementResult || !downloadElementResult.url) {
+                            return;
+                        }
+                        const unsignedUrl = new URL(downloadElementResult.url);
+                        unsignedUrl.pathname = 'ref';
+                        unsignedUrl.search = '';
+                        downloadResult = await fetch(unsignedUrl.toString());
+                    });
+
+                    it('responds with forbidden', async () => {
+                        expect(downloadResult).toHaveProperty('status', 403);
+                    });
                 });
             });
         });
