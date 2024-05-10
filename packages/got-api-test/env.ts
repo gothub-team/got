@@ -41,8 +41,6 @@ export const envSchema = z.object({
 
     GOT_API_URL: z.string().endsWith('/'),
     USER_POOL_ID: z.string(),
-    TEST_ADMIN_EMAIL: z.string(),
-    TEST_ADMIN_PW: z.string(),
     TEST_USER_1_EMAIL: z.string(),
     TEST_USER_1_PW: z.string(),
     TEST_USER_2_EMAIL: z.string(),

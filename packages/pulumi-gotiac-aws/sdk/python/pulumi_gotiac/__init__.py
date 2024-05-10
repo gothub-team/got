@@ -7,6 +7,7 @@ import typing
 # Export this package's modules as members:
 from .file_hosting import *
 from .provider import *
+from .test_user import *
 _utilities.register(
     resource_modules="""
 [
@@ -15,7 +16,8 @@ _utilities.register(
   "mod": "index",
   "fqn": "pulumi_gotiac",
   "classes": {
-   "gotiac:index:FileHosting": "FileHosting"
+   "gotiac:index:FileHosting": "FileHosting",
+   "gotiac:index:TestUser": "TestUser"
   }
  }
 ]

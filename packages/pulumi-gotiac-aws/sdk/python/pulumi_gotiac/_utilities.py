@@ -288,4 +288,4 @@ async def _await_output(o: pulumi.Output[typing.Any]) -> typing.Tuple[object, bo
     )
 
 def get_plugin_download_url():
-	return None
+	return "https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.0.49"

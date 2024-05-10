@@ -53,6 +53,7 @@ namespace Pulumi.Gotiac
         {
             var dst = src ?? new global::Pulumi.InvokeOptions{};
             dst.Version = src?.Version ?? Version;
+            dst.PluginDownloadURL = src?.PluginDownloadURL ?? "https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.0.49";
             return dst;
         }
 
