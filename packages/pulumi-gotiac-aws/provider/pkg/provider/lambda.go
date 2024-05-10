@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/cloudwatch"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/iam"
@@ -18,7 +19,7 @@ type LambdaArgs struct {
 	// The memory size for the lambda function
 	MemorySize *pulumi.Int `pulumi:"memorySize"`
 	// The lambda runtime
-	Runtime lambda.Runtime `pulumi:"runtime"`
+	Runtime pulumi.StringInput `pulumi:"runtime"`
 	// The array of policy arns that should be attachen to the lambda function role
 	PolicyArns pulumi.StringArrayInput `pulumi:"policyArns"`
 }
@@ -49,6 +50,13 @@ func NewLambda(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	wd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println(wd)
+
 	// Create a log group for the lambda function
 	logGroup, err := cloudwatch.NewLogGroup(ctx, name, &cloudwatch.LogGroupArgs{
 		Name:            pulumi.String("/aws/lambda/" + name),
@@ -59,17 +67,80 @@ func NewLambda(ctx *pulumi.Context,
 	}
 
 	// Create the cloudwatch  document
-	loggingPolicyDocument, err := iam.GetPolicyDocument(ctx, &iam.GetPolicyDocumentArgs{
+	// loggingPolicyDocument, err := iam.GetPolicyDocument(ctx, &iam.GetPolicyDocumentArgs{
+	// 	Statements: []iam.GetPolicyDocumentStatement{
+	// 		{
+	// 			Effect: pulumi.StringRef("Allow"),
+	// 			Actions: []string{
+	// 				// TODO: There was a create log goup action here, but I dont think it is needed
+	// 				"logs:CreateLogGroup",
+	// 				"logs:CreateLogStream",
+	// 			},
+	// 			Resources: []string{
+	// 				fmt.Sprintf("%v", logGroup.Arn),
+	// 			},
+	// 		},
+	// 		{
+	// 			Effect: pulumi.StringRef("Allow"),
+	// 			Actions: []string{
+	// 				"logs:PutLogEvents",
+	// 			},
+	// 			Resources: []string{
+	// 				fmt.Sprintf("%v", logGroup.Arn),
+	// 			},
+	// 		},
+	// 	},
+	// }, nil)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+
+	loggingPolicy, err := iam.NewPolicy(ctx, name + "-logging", &iam.PolicyArgs{
+		Name:        pulumi.String(name + "-logging"),
+		Path:        pulumi.String("/"),
+		Description: pulumi.String("IAM policy for logging from a lambda"),
+		Policy:      pulumi.Any(map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				{
+					"Effect": "Allow",
+					"Action": []interface{}{
+						"logs:CreateLogStream",
+					},
+					"Resource": []interface{}{
+						pulumi.Sprintf("%v*:*", logGroup.Arn),
+					},
+				},
+				{
+					"Effect": "Allow",
+					"Action": []interface{}{
+						"logs:PutLogEvents",
+					},
+					"Resource": []interface{}{
+						pulumi.Sprintf("%v*:*:*", logGroup.Arn),
+					},
+				},
+			},
+		}),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	assumeRolePolicy, err := iam.GetPolicyDocument(ctx, &iam.GetPolicyDocumentArgs{
 		Statements: []iam.GetPolicyDocumentStatement{
 			{
-				Effect: pulumi.StringRef("Allow"),
 				Actions: []string{
-					// TODO: There was a create log goup action here, but I dont think it is needed
-					"logs:CreateLogStream",
-					"logs:PutLogEvents",
+					"sts:AssumeRole",
 				},
-				Resources: []string{
-					fmt.Sprintf("%s", logGroup.Arn),
+				Principals: []iam.GetPolicyDocumentStatementPrincipal{
+					{
+						Type: "Service",
+						Identifiers: []string{
+							"lambda.amazonaws.com",
+						},
+					},
 				},
 			},
 		},
@@ -78,19 +149,9 @@ func NewLambda(ctx *pulumi.Context,
 		return nil, err
 	}
 
-
-	loggingPolicy, err := iam.NewPolicy(ctx, name + "-logging", &iam.PolicyArgs{
-		Name:        pulumi.String(name + "-logging"),
-		Path:        pulumi.String("/"),
-		Description: pulumi.String("IAM policy for logging from a lambda"),
-		Policy:      pulumi.String(loggingPolicyDocument.Json),
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	iamRole, err := iam.NewRole(ctx, name + "-role", &iam.RoleArgs{
 		Name:             pulumi.String(name + "-role"),
+		AssumeRolePolicy: pulumi.String(assumeRolePolicy.Json),
 		ManagedPolicyArns: pulumi.All(args.PolicyArns, loggingPolicy.Arn).ApplyT(func(args []interface{}) []string {
 			return append(args[0].([]string), args[1].(string))
 		}).(pulumi.StringArrayOutput),
@@ -106,12 +167,13 @@ func NewLambda(ctx *pulumi.Context,
 		memorySize = pulumi.Int(512)
 	}
 
+
 	lambdaFunction, err := lambda.NewFunction(ctx, "test_lambda", &lambda.FunctionArgs{
 		Code:    args.CodePath.ToStringOutput().ApplyT(func(s string) pulumi.Archive { return pulumi.NewFileArchive(s) }).(pulumi.ArchiveOutput),
-		Name:    pulumi.String(name).ToStringPtrOutput(),
+		Name:    pulumi.String(name),
 		Role:    iamRole.Arn,
-		Handler: args.HandlerPath.ToStringPtrOutput(),
-		Runtime: pulumi.String(args.Runtime).ToStringPtrOutput(),
+		Handler: args.HandlerPath,
+		Runtime: args.Runtime,
 		MemorySize: memorySize,
 	})
 	if err != nil {

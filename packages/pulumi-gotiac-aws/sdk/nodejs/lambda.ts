@@ -42,8 +42,8 @@ export class Lambda extends pulumi.ComponentResource {
             if ((!args || args.codePath === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'codePath'");
             }
-            if ((!args || args.handler === undefined) && !opts.urn) {
-                throw new Error("Missing required property 'handler'");
+            if ((!args || args.handlerPath === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'handlerPath'");
             }
             if ((!args || args.policyArns === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'policyArns'");
@@ -52,7 +52,7 @@ export class Lambda extends pulumi.ComponentResource {
                 throw new Error("Missing required property 'runtime'");
             }
             resourceInputs["codePath"] = args ? args.codePath : undefined;
-            resourceInputs["handler"] = args ? args.handler : undefined;
+            resourceInputs["handlerPath"] = args ? args.handlerPath : undefined;
             resourceInputs["memorySize"] = args ? args.memorySize : undefined;
             resourceInputs["policyArns"] = args ? args.policyArns : undefined;
             resourceInputs["runtime"] = args ? args.runtime : undefined;
@@ -78,7 +78,7 @@ export interface LambdaArgs {
     /**
      * The path to the handler in the deployment package.
      */
-    handler: pulumi.Input<string>;
+    handlerPath: pulumi.Input<string>;
     /**
      * The amount of memory in MB your Lambda Function can use at runtime.
      */

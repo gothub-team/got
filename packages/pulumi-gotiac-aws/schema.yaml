@@ -54,7 +54,7 @@ resources:
             codePath:
                 type: string
                 description: The path to a .zip file containing your deployment package.
-            handler:
+            handlerPath:
                 type: string
                 description: The path to the handler in the deployment package.
             memorySize:
@@ -70,7 +70,7 @@ resources:
                 description: The ARNs of the policies that are attached to the Lambda function.
         requiredInputs:
             - codePath
-            - handler
+            - handlerPath
             - runtime
             - policyArns
         properties:
