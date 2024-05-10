@@ -26,19 +26,11 @@ describe('edges', () => {
     beforeEach(async () => {
         pushResult = await user1Api.push({
             nodes: {
-                [`${testId}-1`]: {
-                    id: `${testId}-1`,
-                },
-                [`${testId}-2`]: {
-                    id: `${testId}-2`,
-                },
+                [`${testId}-1`]: { id: `${testId}-1` },
+                [`${testId}-2`]: { id: `${testId}-2` },
             },
             edges: {
-                from: {
-                    [`${testId}-1`]: {
-                        to: { [`${testId}-2`]: true },
-                    },
-                },
+                from: { [`${testId}-1`]: { to: { [`${testId}-2`]: true } } },
             },
         });
         graph = await user1Api.pull({
@@ -67,12 +59,8 @@ describe('edges', () => {
         beforeEach(async () => {
             pushResult = await user1Api.push({
                 nodes: {
-                    [`${testId}-3`]: {
-                        id: `${testId}-3`,
-                    },
-                    [`${testId}-4`]: {
-                        id: `${testId}-4`,
-                    },
+                    [`${testId}-3`]: { id: `${testId}-3` },
+                    [`${testId}-4`]: { id: `${testId}-4` },
                 },
                 edges: {
                     from: {
@@ -86,15 +74,7 @@ describe('edges', () => {
                 },
             });
             graph = await user1Api.pull({
-                [`${testId}-1`]: {
-                    edges: {
-                        'from/to': {
-                            include: {
-                                edges: true,
-                            },
-                        },
-                    },
-                },
+                [`${testId}-1`]: { edges: { 'from/to': { include: { edges: true } } } },
             });
         });
 
@@ -131,15 +111,7 @@ describe('edges', () => {
                     },
                 });
                 graph = await user1Api.pull({
-                    [`${testId}-1`]: {
-                        edges: {
-                            'from/to': {
-                                include: {
-                                    edges: true,
-                                },
-                            },
-                        },
-                    },
+                    [`${testId}-1`]: { edges: { 'from/to': { include: { edges: true } } } },
                 });
             });
 
@@ -164,26 +136,11 @@ describe('edges', () => {
             beforeEach(async () => {
                 await user1Api.push({
                     edges: {
-                        from: {
-                            [`${testId}-2`]: {
-                                to: {
-                                    [`${testId}-3`]: true,
-                                },
-                            },
-                        },
+                        from: { [`${testId}-2`]: { to: { [`${testId}-3`]: true } } },
                     },
                 });
                 graph = await user1Api.pull({
-                    [`${testId}-3`]: {
-                        edges: {
-                            'from/to': {
-                                reverse: true,
-                                include: {
-                                    edges: true,
-                                },
-                            },
-                        },
-                    },
+                    [`${testId}-3`]: { edges: { 'from/to': { reverse: true, include: { edges: true } } } },
                 });
                 graph.index?.reverseEdges;
             });
@@ -209,25 +166,13 @@ describe('edges', () => {
         beforeEach(async () => {
             pushResult = await user1Api.push({
                 nodes: {
-                    [`${testId}-3`]: {
-                        id: `${testId}-3`,
-                    },
-                    [`${testId}-4`]: {
-                        id: `${testId}-4`,
-                    },
+                    [`${testId}-3`]: { id: `${testId}-3` },
+                    [`${testId}-4`]: { id: `${testId}-4` },
                 },
                 edges: {
                     from: {
-                        [`${testId}-2`]: {
-                            to: {
-                                [`${testId}-3`]: true,
-                            },
-                        },
-                        [`${testId}-3`]: {
-                            to: {
-                                [`${testId}-4`]: true,
-                            },
-                        },
+                        [`${testId}-2`]: { to: { [`${testId}-3`]: true } },
+                        [`${testId}-3`]: { to: { [`${testId}-4`]: true } },
                     },
                 },
             });
@@ -235,15 +180,9 @@ describe('edges', () => {
                 [`${testId}-1`]: {
                     edges: {
                         'from/to': {
-                            include: {
-                                edges: true,
-                            },
+                            include: { edges: true },
                             edges: {
-                                'from/to': {
-                                    include: {
-                                        edges: true,
-                                    },
-                                },
+                                'from/to': { include: { edges: true } },
                             },
                         },
                     },
@@ -276,15 +215,11 @@ describe('edges', () => {
                         edges: {
                             'from/to': {
                                 reverse: true,
-                                include: {
-                                    edges: true,
-                                },
+                                include: { edges: true },
                                 edges: {
                                     'from/to': {
                                         reverse: true,
-                                        include: {
-                                            edges: true,
-                                        },
+                                        include: { edges: true },
                                     },
                                 },
                             },
@@ -304,35 +239,14 @@ describe('edges', () => {
         beforeEach(async () => {
             await user1Api.push({
                 nodes: {
-                    [`${testId}-3`]: {
-                        id: `${testId}-3`,
-                    },
+                    [`${testId}-3`]: { id: `${testId}-3` },
                 },
                 edges: {
-                    from: {
-                        [`${testId}-1`]: {
-                            to: {
-                                [`${testId}-2`]: true,
-                                [`${testId}-3`]: true,
-                            },
-                        },
-                    },
+                    from: { [`${testId}-1`]: { to: { [`${testId}-2`]: true, [`${testId}-3`]: true } } },
                 },
                 rights: {
-                    [`${testId}-1`]: {
-                        user: {
-                            [user2Email]: {
-                                read: true,
-                            },
-                        },
-                    },
-                    [`${testId}-2`]: {
-                        user: {
-                            [user2Email]: {
-                                read: true,
-                            },
-                        },
-                    },
+                    [`${testId}-1`]: { user: { [user2Email]: { read: true } } },
+                    [`${testId}-2`]: { user: { [user2Email]: { read: true } } },
                 },
             });
             graph = await user2Api.pull({
@@ -364,25 +278,11 @@ describe('edges', () => {
                         [`${testId}-3`]: false,
                     },
                     rights: {
-                        [`${testId}-3`]: {
-                            user: {
-                                [user2Email]: {
-                                    read: true,
-                                },
-                            },
-                        },
+                        [`${testId}-3`]: { user: { [user2Email]: { read: true } } },
                     },
                 });
                 graph = await user2Api.pull({
-                    [`${testId}-1`]: {
-                        edges: {
-                            'from/to': {
-                                include: {
-                                    edges: true,
-                                },
-                            },
-                        },
-                    },
+                    [`${testId}-1`]: { edges: { 'from/to': { include: { edges: true } } } },
                 });
             });
 
@@ -399,25 +299,11 @@ describe('edges', () => {
                         [`${testId}-1`]: false,
                     },
                     rights: {
-                        [`${testId}-3`]: {
-                            user: {
-                                [user2Email]: {
-                                    read: true,
-                                },
-                            },
-                        },
+                        [`${testId}-3`]: { user: { [user2Email]: { read: true } } },
                     },
                 });
                 graph = await user2Api.pull({
-                    [`${testId}-1`]: {
-                        edges: {
-                            'from/to': {
-                                include: {
-                                    edges: true,
-                                },
-                            },
-                        },
-                    },
+                    [`${testId}-1`]: { edges: { 'from/to': { include: { edges: true } } } },
                 });
             });
 
@@ -432,25 +318,11 @@ describe('edges', () => {
         beforeEach(async () => {
             await user1Api.push({
                 nodes: {
-                    [`${testId}-3`]: {
-                        id: `${testId}-3`,
-                    },
+                    [`${testId}-3`]: { id: `${testId}-3` },
                 },
                 rights: {
-                    [`${testId}-1`]: {
-                        user: {
-                            [user2Email]: {
-                                write: true,
-                            },
-                        },
-                    },
-                    [`${testId}-2`]: {
-                        user: {
-                            [user2Email]: {
-                                write: true,
-                            },
-                        },
-                    },
+                    [`${testId}-1`]: { user: { [user2Email]: { write: true } } },
+                    [`${testId}-2`]: { user: { [user2Email]: { write: true } } },
                 },
             });
             pushResult = await user2Api.push({
@@ -466,15 +338,7 @@ describe('edges', () => {
                 },
             });
             graph = await user1Api.pull({
-                [`${testId}-1`]: {
-                    edges: {
-                        'from/to': {
-                            include: {
-                                edges: true,
-                            },
-                        },
-                    },
-                },
+                [`${testId}-1`]: { edges: { 'from/to': { include: { edges: true } } } },
             });
         });
 
@@ -499,13 +363,7 @@ describe('edges', () => {
             beforeEach(async () => {
                 await user1Api.push({
                     edges: {
-                        from: {
-                            [`${testId}-1`]: {
-                                to: {
-                                    [`${testId}-3`]: true,
-                                },
-                            },
-                        },
+                        from: { [`${testId}-1`]: { to: { [`${testId}-3`]: true } } },
                     },
                 });
                 pushResult = await user2Api.push({
@@ -521,15 +379,7 @@ describe('edges', () => {
                     },
                 });
                 graph = await user1Api.pull({
-                    [`${testId}-1`]: {
-                        edges: {
-                            'from/to': {
-                                include: {
-                                    edges: true,
-                                },
-                            },
-                        },
-                    },
+                    [`${testId}-1`]: { edges: { 'from/to': { include: { edges: true } } } },
                 });
             });
 
