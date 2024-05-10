@@ -1,9 +1,6 @@
 package provider
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/cloudwatch"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/iam"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/lambda"
@@ -50,13 +47,6 @@ func NewLambda(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	wd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-
-	fmt.Println(wd)
-
 	// Create a log group for the lambda function
 	logGroup, err := cloudwatch.NewLogGroup(ctx, name, &cloudwatch.LogGroupArgs{
 		Name:            pulumi.String("/aws/lambda/" + name),
@@ -65,36 +55,6 @@ func NewLambda(ctx *pulumi.Context,
 	if err != nil {
 		return nil, err
 	}
-
-	// Create the cloudwatch  document
-	// loggingPolicyDocument, err := iam.GetPolicyDocument(ctx, &iam.GetPolicyDocumentArgs{
-	// 	Statements: []iam.GetPolicyDocumentStatement{
-	// 		{
-	// 			Effect: pulumi.StringRef("Allow"),
-	// 			Actions: []string{
-	// 				// TODO: There was a create log goup action here, but I dont think it is needed
-	// 				"logs:CreateLogGroup",
-	// 				"logs:CreateLogStream",
-	// 			},
-	// 			Resources: []string{
-	// 				fmt.Sprintf("%v", logGroup.Arn),
-	// 			},
-	// 		},
-	// 		{
-	// 			Effect: pulumi.StringRef("Allow"),
-	// 			Actions: []string{
-	// 				"logs:PutLogEvents",
-	// 			},
-	// 			Resources: []string{
-	// 				fmt.Sprintf("%v", logGroup.Arn),
-	// 			},
-	// 		},
-	// 	},
-	// }, nil)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 
 	loggingPolicy, err := iam.NewPolicy(ctx, name + "-logging", &iam.PolicyArgs{
 		Name:        pulumi.String(name + "-logging"),
