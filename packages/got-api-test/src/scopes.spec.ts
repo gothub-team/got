@@ -29,11 +29,7 @@ describe('scopes', () => {
     describe('scope does not exist', () => {
         beforeEach(async () => {
             pushResult = await user1Api.push({
-                nodes: {
-                    [`${scopeId}node-1`]: {
-                        id: `${scopeId}node-1`,
-                    },
-                },
+                nodes: { [`${scopeId}node-1`]: { id: `${scopeId}node-1` } },
             });
         });
 
@@ -46,12 +42,8 @@ describe('scopes', () => {
         beforeEach(async () => {
             pushResult = await user1Api.push({
                 nodes: {
-                    [scopeId]: {
-                        id: scopeId,
-                    },
-                    [`${scopeId}node-1`]: {
-                        id: `${scopeId}node-1`,
-                    },
+                    [scopeId]: { id: scopeId },
+                    [`${scopeId}node-1`]: { id: `${scopeId}node-1` },
                 },
             });
         });
@@ -67,18 +59,10 @@ describe('scopes', () => {
     describe('scope exists', () => {
         beforeEach(async () => {
             await user1Api.push({
-                nodes: {
-                    [scopeId]: {
-                        id: scopeId,
-                    },
-                },
+                nodes: { [scopeId]: { id: scopeId } },
             });
             pushResult = await user1Api.push({
-                nodes: {
-                    [`${scopeId}node-1`]: {
-                        id: `${scopeId}node-1`,
-                    },
-                },
+                nodes: { [`${scopeId}node-1`]: { id: `${scopeId}node-1` } },
             });
         });
 
@@ -91,11 +75,7 @@ describe('scopes', () => {
         describe('without write rights', async () => {
             beforeEach(async () => {
                 pushResult = await user2Api.push({
-                    nodes: {
-                        [`${scopeId}node-1`]: {
-                            id: `${scopeId}node-1`,
-                        },
-                    },
+                    nodes: { [`${scopeId}node-1`]: { id: `${scopeId}node-1` } },
                 });
             });
 
@@ -107,22 +87,10 @@ describe('scopes', () => {
         describe('with write rights', async () => {
             beforeEach(async () => {
                 await user1Api.push({
-                    rights: {
-                        [`${scopeId}node-1`]: {
-                            user: {
-                                [user2Email]: {
-                                    write: true,
-                                },
-                            },
-                        },
-                    },
+                    rights: { [`${scopeId}node-1`]: { user: { [user2Email]: { write: true } } } },
                 });
                 pushResult = await user2Api.push({
-                    nodes: {
-                        [`${scopeId}node-1`]: {
-                            id: `${scopeId}node-1`,
-                        },
-                    },
+                    nodes: { [`${scopeId}node-1`]: { id: `${scopeId}node-1` } },
                 });
             });
 
