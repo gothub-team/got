@@ -26,12 +26,8 @@ describe('rights', () => {
     beforeEach(async () => {
         await user1Api.push({
             nodes: {
-                [`${testId}-1`]: {
-                    id: `${testId}-1`,
-                },
-                [`${testId}-2`]: {
-                    id: `${testId}-2`,
-                },
+                [`${testId}-1`]: { id: `${testId}-1` },
+                [`${testId}-2`]: { id: `${testId}-2` },
             },
             rights: {
                 [`${testId}-1`]: {
@@ -49,16 +45,8 @@ describe('rights', () => {
     describe('pull', () => {
         beforeEach(async () => {
             graph = await user2Api.pull({
-                [`${testId}-1`]: {
-                    include: {
-                        rights: true,
-                    },
-                },
-                [`${testId}-2`]: {
-                    include: {
-                        rights: true,
-                    },
-                },
+                [`${testId}-1`]: { include: { rights: true } },
+                [`${testId}-2`]: { include: { rights: true } },
             });
         });
 
@@ -79,33 +67,13 @@ describe('rights', () => {
         beforeEach(async () => {
             pushResult = await user2Api.push({
                 rights: {
-                    [`${testId}-1`]: {
-                        user: {
-                            someEmail: {
-                                read: true,
-                            },
-                        },
-                    },
-                    [`${testId}-2`]: {
-                        user: {
-                            someEmail: {
-                                read: true,
-                            },
-                        },
-                    },
+                    [`${testId}-1`]: { user: { someEmail: { read: true } } },
+                    [`${testId}-2`]: { user: { someEmail: { read: true } } },
                 },
             });
             graph = await user1Api.pull({
-                [`${testId}-1`]: {
-                    include: {
-                        rights: true,
-                    },
-                },
-                [`${testId}-2`]: {
-                    include: {
-                        rights: true,
-                    },
-                },
+                [`${testId}-1`]: { include: { rights: true } },
+                [`${testId}-2`]: { include: { rights: true } },
             });
         });
 
@@ -133,33 +101,13 @@ describe('rights', () => {
         beforeEach(async () => {
             pushResult = await user2Api.push({
                 rights: {
-                    [`${testId}-1`]: {
-                        user: {
-                            [user1Email]: {
-                                read: false,
-                            },
-                        },
-                    },
-                    [`${testId}-2`]: {
-                        user: {
-                            [user1Email]: {
-                                read: false,
-                            },
-                        },
-                    },
+                    [`${testId}-1`]: { user: { [user1Email]: { read: false } } },
+                    [`${testId}-2`]: { user: { [user1Email]: { read: false } } },
                 },
             });
             graph = await user1Api.pull({
-                [`${testId}-1`]: {
-                    include: {
-                        rights: true,
-                    },
-                },
-                [`${testId}-2`]: {
-                    include: {
-                        rights: true,
-                    },
-                },
+                [`${testId}-1`]: { include: { rights: true } },
+                [`${testId}-2`]: { include: { rights: true } },
             });
         });
 
@@ -180,11 +128,7 @@ describe('rights', () => {
     describe('inherit rights', () => {
         beforeEach(async () => {
             await user1Api.push({
-                nodes: {
-                    [`${testId}-3`]: {
-                        id: `${testId}-3`,
-                    },
-                },
+                nodes: { [`${testId}-3`]: { id: `${testId}-3` } },
                 rights: {
                     [`${testId}-2`]: {
                         user: {
@@ -198,29 +142,13 @@ describe('rights', () => {
             });
             pushResult = await user2Api.push({
                 rights: {
-                    [`${testId}-1`]: {
-                        inherit: {
-                            from: `${testId}-2`,
-                        },
-                    },
-                    [`${testId}-3`]: {
-                        inherit: {
-                            from: `${testId}-2`,
-                        },
-                    },
+                    [`${testId}-1`]: { inherit: { from: `${testId}-2` } },
+                    [`${testId}-3`]: { inherit: { from: `${testId}-2` } },
                 },
             });
             graph = await user1Api.pull({
-                [`${testId}-1`]: {
-                    include: {
-                        rights: true,
-                    },
-                },
-                [`${testId}-3`]: {
-                    include: {
-                        rights: true,
-                    },
-                },
+                [`${testId}-1`]: { include: { rights: true } },
+                [`${testId}-3`]: { include: { rights: true } },
             });
         });
 
