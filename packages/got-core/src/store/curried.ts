@@ -1,0 +1,204 @@
+import { type Metadata, type Node, type RightTypes } from '../types/graphObjects';
+import { type State } from '../types/state';
+import { type View } from '../types/view';
+import { decideStack } from '../utils/util';
+import { type Store } from './store';
+
+export const createCurriedStore = (store: Store) => {
+    const merge = store.merge;
+    const mergeGraph = store.mergeGraph;
+    const mergeOverwriteGraph = store.mergeOverwriteGraph;
+    const clear = store.clear;
+    const clearAll = store.clearAll;
+
+    const selectNode =
+        (...stack: string[]) =>
+        (nodeId: string) =>
+        (state: State) => {
+            return store.selectNode(decideStack(stack), nodeId, state);
+        };
+    const getNode =
+        (...stack: string[]) =>
+        (nodeId: string) => {
+            return store.getNode(decideStack(stack), nodeId);
+        };
+    const setNode = (graphName: string) => (node: Node) => {
+        store.setNode(graphName, node);
+    };
+    const removeNode = (graphName: string) => (nodeId: string) => {
+        store.removeNode(graphName, nodeId);
+    };
+
+    const selectMetadata =
+        (...stack: string[]) =>
+        (edgeTypes: string) =>
+        (fromId: string) =>
+        (toId: string) =>
+        (state: State) => {
+            return store.selectMetadata(decideStack(stack), edgeTypes, fromId, toId, state);
+        };
+    const getMetadata =
+        (...stack: string[]) =>
+        (edgeTypes: string) =>
+        (fromId: string) =>
+        (toId: string) => {
+            return store.getMetadata(decideStack(stack), edgeTypes, fromId, toId);
+        };
+
+    const selectEdge =
+        (...stack: string[]) =>
+        (edgeTypes: string) =>
+        (fromId: string) =>
+        (state: State) => {
+            return store.selectEdge(decideStack(stack), edgeTypes, fromId, state);
+        };
+    const getEdge =
+        (...stack: string[]) =>
+        (edgeTypes: string) =>
+        (fromId: string) => {
+            return store.getEdge(decideStack(stack), edgeTypes, fromId);
+        };
+
+    const selectReverseEdge =
+        (...stack: string[]) =>
+        (edgeTypes: string) =>
+        (toId: string) =>
+        (state: State) => {
+            return store.selectReverseEdge(decideStack(stack), edgeTypes, toId, state);
+        };
+    const getReverseEdge =
+        (...stack: string[]) =>
+        (edgeTypes: string) =>
+        (toId: string) => {
+            return store.getReverseEdge(decideStack(stack), edgeTypes, toId);
+        };
+
+    const add =
+        (graphName: string) =>
+        (edgeTypes: string) =>
+        (fromId: string) =>
+        (toNode: Node, metadata: Metadata = true) => {
+            store.add(graphName, edgeTypes, fromId, toNode, metadata);
+        };
+    const remove = (graphName: string) => (edgeTypes: string) => (fromId: string) => (toNode: Node | string) => {
+        store.remove(graphName, edgeTypes, fromId, toNode);
+    };
+    const assoc =
+        (graphName: string) =>
+        (edgeTypes: string) =>
+        (fromId: string) =>
+        (toNode: Node | string, metadata: Metadata = true) => {
+            store.assoc(graphName, edgeTypes, fromId, toNode, metadata);
+        };
+    const dissoc = (graphName: string) => (edgeTypes: string) => (fromId: string) => (toNode: Node | string) => {
+        store.dissoc(graphName, edgeTypes, fromId, toNode);
+    };
+
+    const selectRights =
+        (...stack: string[]) =>
+        (nodeId: string) =>
+        (state: State) => {
+            return store.selectRights(decideStack(stack), nodeId, state);
+        };
+    const getRights =
+        (...stack: string[]) =>
+        (nodeId: string) => {
+            return store.getRights(decideStack(stack), nodeId);
+        };
+    const setRights = (graphName: string) => (nodeId: string) => (email: string, rights: RightTypes) => {
+        store.setRights(graphName, nodeId, email, rights);
+    };
+    const setRoleRights = (graphName: string) => (nodeId: string) => (role: string, rights: RightTypes) => {
+        store.setRoleRights(graphName, nodeId, role, rights);
+    };
+    /**
+     * @deprecated lower version of store have an inherit rights function with the signature (graphName, fromId, nodeId) => void
+     */
+    const inheritRights = (graphName: string) => (nodeId: string) => (fromId: string) => {
+        store.inheritRights(graphName, fromId, nodeId);
+    };
+
+    const selectFiles =
+        (...stack: string[]) =>
+        (nodeId: string) =>
+        (state: State) => {
+            return store.selectFiles(decideStack(stack), nodeId, state);
+        };
+    const getFiles =
+        (...stack: string[]) =>
+        (nodeId: string) => {
+            return store.getFiles(decideStack(stack), nodeId);
+        };
+    const setFile = (graphName: string) => (nodeId: string) => (prop: string, filename: string, file: Blob) => {
+        store.setFile(graphName, nodeId, prop, filename, file);
+    };
+    const removeFile = (graphName: string) => (nodeId: string) => (prop: string) => {
+        store.removeFile(graphName, nodeId, prop);
+    };
+
+    const selectView =
+        (...stack: string[]) =>
+        (view: View) =>
+        (state: State) => {
+            return store.selectView(decideStack(stack), view, state);
+        };
+    const getView =
+        (...stack: string[]) =>
+        (view: View) => {
+            return store.getView(decideStack(stack), view);
+        };
+
+    const selectSubgraph =
+        (...stack: string[]) =>
+        (view: View) =>
+        (state: State) => {
+            return store.selectSubgraph(decideStack(stack), view, state);
+        };
+
+    const getSubgraph =
+        (...stack: string[]) =>
+        (view: View) => {
+            return store.getSubgraph(decideStack(stack), view);
+        };
+    const push = store.push;
+    const pull = store.pull;
+
+    return {
+        merge,
+        mergeGraph,
+        mergeOverwriteGraph,
+        clear,
+        clearAll,
+        selectNode,
+        getNode,
+        setNode,
+        removeNode,
+        selectMetadata,
+        getMetadata,
+        selectEdge,
+        getEdge,
+        selectReverseEdge,
+        getReverseEdge,
+        add,
+        remove,
+        assoc,
+        dissoc,
+        selectRights,
+        getRights,
+        setRights,
+        setRoleRights,
+        inheritRights,
+        selectFiles,
+        getFiles,
+        setFile,
+        removeFile,
+        selectView,
+        getView,
+        selectSubgraph,
+        getSubgraph,
+        push,
+        pull,
+    };
+};
+
+export type CurriedStore = ReturnType<typeof createCurriedStore>;

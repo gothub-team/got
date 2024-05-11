@@ -1,0 +1,23 @@
+{
+    "name": "@gothub/got-core",
+    "type": "module",
+    "main": "dist/cjs/index.js",
+    "module": "dist/module/index.js",
+    "types": "dist/module/index.d.ts",
+    "scripts": {
+        "lint": "eslint ./src",
+        "typecheck": "tsc --noEmit",
+        "build": "bun run esbuild.js"
+    },
+    "devDependencies": {
+        "@gothub/typescript-util": "workspace:*",
+        "@types/bun": "latest",
+        "ramda": "^0.30.0",
+        "@gothub-team/got-util": "^0.24.2",
+        "@gothub-team/got-api": "^0.1.29"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {}
+}
