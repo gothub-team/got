@@ -2,7 +2,6 @@ import { configureCreateCurriedGraph } from './store/createCurriedGraph';
 import { configureCreateGraph } from './store/createGraph';
 import { createCurriedStore } from './store/curried';
 import { createErrorHandledStore } from './store/errorHandling';
-import { type GotApi } from '@gothub-team/got-api';
 import { type StoreAPI } from './types/api';
 import { type State } from './types/state';
 import { type GOT_ACTION } from './types/actions';
@@ -10,7 +9,7 @@ import { configureCreateLocalGraph } from './local-store/createLocalGraph';
 import { configureCreateLocalCurriedGraph } from './local-store/createLocalCurriedGraph';
 
 type SetupOption = {
-    api: GotApi;
+    api: StoreAPI;
     select: <TRes>(fnSelect: (state: State) => TRes) => TRes;
     dispatch: (action: GOT_ACTION) => void;
     onError: (e: Error) => void;
@@ -49,3 +48,5 @@ export const setup = ({ api, dispatch, select, onError, onWarn }: SetupOption) =
         },
     };
 };
+
+export type * from './types/graph';
