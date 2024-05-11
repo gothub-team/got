@@ -1,5 +1,5 @@
 import { post } from './fetch.js';
-import type { Graph, View, PushBody, PushResult } from '@gothub-team/got-core';
+import type { Graph, View, PushBody, PushResult } from '@gothub/got-core';
 
 export interface CreateLowApiOtions {
     /**
