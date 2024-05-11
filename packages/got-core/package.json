@@ -14,7 +14,7 @@
         "@types/bun": "latest",
         "ramda": "^0.30.0",
         "@gothub-team/got-util": "^0.24.2",
-        "@gothub-team/got-api": "^0.1.29"
+        "@gothub/got-api": "workspace:*"
     },
     "peerDependencies": {
         "typescript": "^5.0.0"
