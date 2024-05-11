@@ -1,4 +1,4 @@
-import { type Metadata, type NodeFileView, type NodeRightsView } from './graphObjects';
+import { type Metadata, type NodeFileView, type NodeRightsView, type Node } from './graphObjects';
 import { type NodeFilesView } from './graph';
 import { type EdgeInclude, type EdgeView, type EdgesView, type NodeInclude, type NodeView, type View } from './view';
 

@@ -13,6 +13,7 @@ import {
     type Metadata,
     type NodeFileView,
     type UploadNodeFileView,
+    type Node,
 } from '../types/graphObjects';
 import { assocPathMutate, forEachObjDepth, getPathOr, isEmptyObject } from './util';
 

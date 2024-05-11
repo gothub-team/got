@@ -5,6 +5,7 @@ import {
     type NodeFileView,
     type UploadElementResult,
     type UploadNodeFileView,
+    type Node,
 } from './graphObjects';
 
 export declare type Nodes<TNode> = {

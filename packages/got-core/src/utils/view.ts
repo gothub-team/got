@@ -1,5 +1,5 @@
 import { type Edges, type Files, type Graph, type Nodes, type Rights } from '../types/graph';
-import { type Metadata, type NodeFileView } from '../types/graphObjects';
+import { type Metadata, type NodeFileView, type Node } from '../types/graphObjects';
 import { assocPathMutate, isEmptyObject } from './util';
 import { type EdgeView, type NodeView, type View } from '../types/view';
 import { type NodeBagInternal, type ViewResult } from '../types/ViewResult';
