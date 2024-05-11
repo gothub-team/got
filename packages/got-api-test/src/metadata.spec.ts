@@ -67,19 +67,62 @@ describe('metadata', () => {
             });
         });
 
-        it('pushes edge metadata', () => {
-            expect(pushResult).toHaveProperty(
-                ['edges', 'from1', `${testId}-1`, 'to1', `${testId}-2`, 'statusCode'],
-                200,
-            );
+        describe('default', () => {
+            it('pushes edge metadata', () => {
+                expect(pushResult).toHaveProperty(
+                    ['edges', 'from1', `${testId}-1`, 'to1', `${testId}-2`, 'statusCode'],
+                    200,
+                );
+            });
+            it('pulls edge metadata', () => {
+                expect(graph).toHaveProperty(
+                    ['edges', 'from1', `${testId}-1`, 'to1', `${testId}-2`, 'strProp'],
+                    'some stuff',
+                );
+                expect(graph).toHaveProperty(['edges', 'from1', `${testId}-1`, 'to1', `${testId}-2`, 'numProp'], 42);
+                expect(graph).toHaveProperty(['edges', 'from1', `${testId}-1`, 'to1', `${testId}-2`, 'boolProp'], true);
+            });
         });
-        it('pulls edge metadata', () => {
-            expect(graph).toHaveProperty(
-                ['edges', 'from1', `${testId}-1`, 'to1', `${testId}-2`, 'strProp'],
-                'some stuff',
-            );
-            expect(graph).toHaveProperty(['edges', 'from1', `${testId}-1`, 'to1', `${testId}-2`, 'numProp'], 42);
-            expect(graph).toHaveProperty(['edges', 'from1', `${testId}-1`, 'to1', `${testId}-2`, 'boolProp'], true);
+
+        describe('merge metadata', () => {
+            beforeEach(async () => {
+                await user1Api.push({
+                    edges: {
+                        from1: {
+                            [`${testId}-1`]: {
+                                to1: {
+                                    [`${testId}-2`]: {
+                                        strProp: 'new stuff',
+                                        newProp: 'new prop',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                });
+                graph = await user1Api.pull({
+                    [`${testId}-1`]: { edges: { 'from1/to1': { include: { edges: true, metadata: true } } } },
+                });
+            });
+
+            it('pushes edge metadata', () => {
+                expect(pushResult).toHaveProperty(
+                    ['edges', 'from1', `${testId}-1`, 'to1', `${testId}-2`, 'statusCode'],
+                    200,
+                );
+            });
+            it('pulls edge metadata', () => {
+                expect(graph).toHaveProperty(
+                    ['edges', 'from1', `${testId}-1`, 'to1', `${testId}-2`, 'strProp'],
+                    'new stuff',
+                );
+                expect(graph).toHaveProperty(['edges', 'from1', `${testId}-1`, 'to1', `${testId}-2`, 'numProp'], 42);
+                expect(graph).toHaveProperty(['edges', 'from1', `${testId}-1`, 'to1', `${testId}-2`, 'boolProp'], true);
+                expect(graph).toHaveProperty(
+                    ['edges', 'from1', `${testId}-1`, 'to1', `${testId}-2`, 'newProp'],
+                    'new prop',
+                );
+            });
         });
     });
 });
