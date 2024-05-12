@@ -22,9 +22,7 @@ beforeEach(async () => {
 
 describe('roles', () => {
     let graph: Graph;
-    let scopeId: string;
     beforeEach(async () => {
-        scopeId = `${testId}-scope.`;
         await user1Api.push({
             nodes: { [testId]: { id: testId } },
         });
@@ -32,15 +30,25 @@ describe('roles', () => {
 
     describe('public role exists', () => {
         beforeEach(async () => {
-            await user1Api.push({
-                rights: {
-                    [testId]: {},
+            await user1Api
+                .push({
+                    rights: {
+                        [testId]: { role: { public: { read: true } } },
+                    },
+                })
+                .catch(async (err) => {
+                    console.error(await err);
+                });
+            graph = await user2Api.pull({
+                [testId]: {
+                    role: 'public',
+                    include: { node: true },
                 },
             });
         });
 
-        it('pulls public role', () => {
-            expect(graph).toHaveProperty(['roles', `${scopeId}public`, 'public'], true);
+        it('pulls node as public user', () => {
+            expect(graph).toHaveProperty(['nodes', testId]);
         });
     });
 });
