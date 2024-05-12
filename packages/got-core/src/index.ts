@@ -51,3 +51,4 @@ export const setup = ({ api, dispatch, select, onError, onWarn }: SetupOption) =
 
 export type * from './types/graph';
 export type * from './types/graphObjects';
+export type * from './types/view';

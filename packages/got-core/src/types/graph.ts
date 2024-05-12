@@ -31,7 +31,7 @@ export declare type Rights<TRight, TInheritRights> = {
                 admin?: TRight;
             };
         };
-        roles?: {
+        role?: {
             [name: string]: {
                 read?: TRight;
                 write?: TRight;
