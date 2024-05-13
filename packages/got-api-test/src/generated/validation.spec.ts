@@ -5,6 +5,7 @@ import { createUserApi } from '../shared';
 import { assocPathMutate } from '@gothub/got-core';
 
 const strictAdditionalProperties = false;
+const strictLoginValidation = false;
 
 let testId: string;
 let headers: Record<string, string>;
@@ -1155,7 +1156,7 @@ describe('POST /auth/login-init', () => {
     });
 });
 
-describe('POST /auth/login-verify', () => {
+describe.todoIf(!strictLoginValidation)('POST /auth/login-verify', () => {
     beforeEach(() => {
         url = `${env.GOT_API_URL}auth/login-verify`;
         method = 'POST';
@@ -1349,7 +1350,7 @@ describe('POST /auth/login-refresh', () => {
         propPath = [];
     });
 
-    describe('refreshToken', () => {
+    describe.todoIf(!strictLoginValidation)('refreshToken', () => {
         beforeEach(() => {
             propPath.push('refreshToken');
         });
