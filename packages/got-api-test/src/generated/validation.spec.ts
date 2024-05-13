@@ -142,6 +142,21 @@ describe('POST /push', () => {
                                 expect(resBody).toInclude('string');
                             });
                         });
+                        describe('required', () => {
+                            it('fails with bad request', async () => {
+                                const b = assocPathMutate(propPath, undefined, body as Record<string, unknown>);
+                                const res = await fetch(url, {
+                                    body: JSON.stringify(b),
+                                    method,
+                                    headers,
+                                });
+                                // console.log(propPath, b);
+                                const resBody = await res.text();
+                                expect(res).toHaveProperty('status', 400);
+                                expect(resBody).toInclude('required');
+                                expect(resBody).toInclude('id');
+                            });
+                        });
                     });
                     describe('additionalProperties', () => {
                         beforeEach(() => {
@@ -586,6 +601,21 @@ describe('POST /push', () => {
                             expect(resBody).toInclude('string');
                         });
                     });
+                    describe('required', () => {
+                        it('fails with bad request', async () => {
+                            const b = assocPathMutate(propPath, undefined, body as Record<string, unknown>);
+                            const res = await fetch(url, {
+                                body: JSON.stringify(b),
+                                method,
+                                headers,
+                            });
+                            // console.log(propPath, b);
+                            const resBody = await res.text();
+                            expect(res).toHaveProperty('status', 400);
+                            expect(resBody).toInclude('required');
+                            expect(resBody).toInclude('from');
+                        });
+                    });
                 });
                 describe.todoIf(!strictAdditionalProperties)('no additional property', () => {
                     it('fails with bad request', async () => {
@@ -735,6 +765,21 @@ describe('POST /push', () => {
                                     expect(resBody).toInclude('string');
                                 });
                             });
+                            describe('required', () => {
+                                it('fails with bad request', async () => {
+                                    const b = assocPathMutate(propPath, undefined, body as Record<string, unknown>);
+                                    const res = await fetch(url, {
+                                        body: JSON.stringify(b),
+                                        method,
+                                        headers,
+                                    });
+                                    // console.log(propPath, b);
+                                    const resBody = await res.text();
+                                    expect(res).toHaveProperty('status', 400);
+                                    expect(resBody).toInclude('required');
+                                    expect(resBody).toInclude('filename');
+                                });
+                            });
                         });
                         describe('contentType', () => {
                             beforeEach(() => {
@@ -762,6 +807,21 @@ describe('POST /push', () => {
                                     expect(resBody).toInclude('string');
                                 });
                             });
+                            describe('required', () => {
+                                it('fails with bad request', async () => {
+                                    const b = assocPathMutate(propPath, undefined, body as Record<string, unknown>);
+                                    const res = await fetch(url, {
+                                        body: JSON.stringify(b),
+                                        method,
+                                        headers,
+                                    });
+                                    // console.log(propPath, b);
+                                    const resBody = await res.text();
+                                    expect(res).toHaveProperty('status', 400);
+                                    expect(resBody).toInclude('required');
+                                    expect(resBody).toInclude('contentType');
+                                });
+                            });
                         });
                         describe('fileSize', () => {
                             beforeEach(() => {
@@ -783,6 +843,21 @@ describe('POST /push', () => {
                                     expect(res).toHaveProperty('status', 400);
                                     expect(resBody).toInclude('type');
                                     expect(resBody).toInclude('integer');
+                                });
+                            });
+                            describe('required', () => {
+                                it('fails with bad request', async () => {
+                                    const b = assocPathMutate(propPath, undefined, body as Record<string, unknown>);
+                                    const res = await fetch(url, {
+                                        body: JSON.stringify(b),
+                                        method,
+                                        headers,
+                                    });
+                                    // console.log(propPath, b);
+                                    const resBody = await res.text();
+                                    expect(res).toHaveProperty('status', 400);
+                                    expect(resBody).toInclude('required');
+                                    expect(resBody).toInclude('fileSize');
                                 });
                             });
                         });
