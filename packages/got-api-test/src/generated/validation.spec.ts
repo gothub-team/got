@@ -33,10 +33,7 @@ describe('POST /pull', () => {
 
     describe('additionalProperties', () => {
         beforeEach(() => {
-            propPath.push('additionalProperties');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['additionalProperties'];
         });
     });
 });
@@ -83,10 +80,7 @@ describe('POST /push', () => {
 
     describe('nodes', () => {
         beforeEach(() => {
-            propPath.push('nodes');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['nodes'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -105,10 +99,7 @@ describe('POST /push', () => {
         });
         describe('additionalProperties', () => {
             beforeEach(() => {
-                propPath.push('additionalProperties');
-            });
-            afterEach(() => {
-                propPath.pop();
+                propPath = ['nodes', 'additionalProperties'];
             });
             describe('oneOf', () => {
                 describe('wrong type', () => {
@@ -141,10 +132,7 @@ describe('POST /push', () => {
                     });
                     describe('id', () => {
                         beforeEach(() => {
-                            propPath.push('id');
-                        });
-                        afterEach(() => {
-                            propPath.pop();
+                            propPath = ['nodes', 'additionalProperties', 'id'];
                         });
                         describe('wrong type', () => {
                             it('fails with bad request', async () => {
@@ -179,10 +167,7 @@ describe('POST /push', () => {
                     });
                     describe('additionalProperties', () => {
                         beforeEach(() => {
-                            propPath.push('additionalProperties');
-                        });
-                        afterEach(() => {
-                            propPath.pop();
+                            propPath = ['nodes', 'additionalProperties', 'additionalProperties'];
                         });
                         describe('oneOf', () => {
                             describe('string', () => {
@@ -223,10 +208,7 @@ describe('POST /push', () => {
     });
     describe('edges', () => {
         beforeEach(() => {
-            propPath.push('edges');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['edges'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -245,10 +227,7 @@ describe('POST /push', () => {
         });
         describe('additionalProperties', () => {
             beforeEach(() => {
-                propPath.push('additionalProperties');
-            });
-            afterEach(() => {
-                propPath.pop();
+                propPath = ['edges', 'additionalProperties'];
             });
             describe('wrong type', () => {
                 it('fails with bad request', async () => {
@@ -267,10 +246,7 @@ describe('POST /push', () => {
             });
             describe('additionalProperties', () => {
                 beforeEach(() => {
-                    propPath.push('additionalProperties');
-                });
-                afterEach(() => {
-                    propPath.pop();
+                    propPath = ['edges', 'additionalProperties', 'additionalProperties'];
                 });
                 describe('wrong type', () => {
                     it('fails with bad request', async () => {
@@ -289,10 +265,7 @@ describe('POST /push', () => {
                 });
                 describe('additionalProperties', () => {
                     beforeEach(() => {
-                        propPath.push('additionalProperties');
-                    });
-                    afterEach(() => {
-                        propPath.pop();
+                        propPath = ['edges', 'additionalProperties', 'additionalProperties', 'additionalProperties'];
                     });
                     describe('wrong type', () => {
                         it('fails with bad request', async () => {
@@ -311,10 +284,13 @@ describe('POST /push', () => {
                     });
                     describe('additionalProperties', () => {
                         beforeEach(() => {
-                            propPath.push('additionalProperties');
-                        });
-                        afterEach(() => {
-                            propPath.pop();
+                            propPath = [
+                                'edges',
+                                'additionalProperties',
+                                'additionalProperties',
+                                'additionalProperties',
+                                'additionalProperties',
+                            ];
                         });
                         describe('oneOf', () => {
                             describe('wrong type', () => {
@@ -347,10 +323,14 @@ describe('POST /push', () => {
                                 });
                                 describe('additionalProperties', () => {
                                     beforeEach(() => {
-                                        propPath.push('additionalProperties');
-                                    });
-                                    afterEach(() => {
-                                        propPath.pop();
+                                        propPath = [
+                                            'edges',
+                                            'additionalProperties',
+                                            'additionalProperties',
+                                            'additionalProperties',
+                                            'additionalProperties',
+                                            'additionalProperties',
+                                        ];
                                     });
                                     describe('oneOf', () => {
                                         describe('string', () => {
@@ -402,10 +382,7 @@ describe('POST /push', () => {
     });
     describe('rights', () => {
         beforeEach(() => {
-            propPath.push('rights');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['rights'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -424,10 +401,7 @@ describe('POST /push', () => {
         });
         describe('additionalProperties', () => {
             beforeEach(() => {
-                propPath.push('additionalProperties');
-            });
-            afterEach(() => {
-                propPath.pop();
+                propPath = ['rights', 'additionalProperties'];
             });
             describe('wrong type', () => {
                 it('fails with bad request', async () => {
@@ -446,10 +420,7 @@ describe('POST /push', () => {
             });
             describe('user', () => {
                 beforeEach(() => {
-                    propPath.push('user');
-                });
-                afterEach(() => {
-                    propPath.pop();
+                    propPath = ['rights', 'additionalProperties', 'user'];
                 });
                 describe('wrong type', () => {
                     it('fails with bad request', async () => {
@@ -468,10 +439,7 @@ describe('POST /push', () => {
                 });
                 describe('additionalProperties', () => {
                     beforeEach(() => {
-                        propPath.push('additionalProperties');
-                    });
-                    afterEach(() => {
-                        propPath.pop();
+                        propPath = ['rights', 'additionalProperties', 'user', 'additionalProperties'];
                     });
                     describe('wrong type', () => {
                         it('fails with bad request', async () => {
@@ -490,10 +458,7 @@ describe('POST /push', () => {
                     });
                     describe('read', () => {
                         beforeEach(() => {
-                            propPath.push('read');
-                        });
-                        afterEach(() => {
-                            propPath.pop();
+                            propPath = ['rights', 'additionalProperties', 'user', 'additionalProperties', 'read'];
                         });
                         describe('wrong type', () => {
                             it('fails with bad request', async () => {
@@ -513,10 +478,7 @@ describe('POST /push', () => {
                     });
                     describe('write', () => {
                         beforeEach(() => {
-                            propPath.push('write');
-                        });
-                        afterEach(() => {
-                            propPath.pop();
+                            propPath = ['rights', 'additionalProperties', 'user', 'additionalProperties', 'write'];
                         });
                         describe('wrong type', () => {
                             it('fails with bad request', async () => {
@@ -536,10 +498,7 @@ describe('POST /push', () => {
                     });
                     describe('admin', () => {
                         beforeEach(() => {
-                            propPath.push('admin');
-                        });
-                        afterEach(() => {
-                            propPath.pop();
+                            propPath = ['rights', 'additionalProperties', 'user', 'additionalProperties', 'admin'];
                         });
                         describe('wrong type', () => {
                             it('fails with bad request', async () => {
@@ -578,10 +537,7 @@ describe('POST /push', () => {
             });
             describe('inherit', () => {
                 beforeEach(() => {
-                    propPath.push('inherit');
-                });
-                afterEach(() => {
-                    propPath.pop();
+                    propPath = ['rights', 'additionalProperties', 'inherit'];
                 });
                 describe('wrong type', () => {
                     it('fails with bad request', async () => {
@@ -600,10 +556,7 @@ describe('POST /push', () => {
                 });
                 describe('from', () => {
                     beforeEach(() => {
-                        propPath.push('from');
-                    });
-                    afterEach(() => {
-                        propPath.pop();
+                        propPath = ['rights', 'additionalProperties', 'inherit', 'from'];
                     });
                     describe('wrong type', () => {
                         it('fails with bad request', async () => {
@@ -675,10 +628,7 @@ describe('POST /push', () => {
     });
     describe('files', () => {
         beforeEach(() => {
-            propPath.push('files');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['files'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -697,10 +647,7 @@ describe('POST /push', () => {
         });
         describe('additionalProperties', () => {
             beforeEach(() => {
-                propPath.push('additionalProperties');
-            });
-            afterEach(() => {
-                propPath.pop();
+                propPath = ['files', 'additionalProperties'];
             });
             describe('wrong type', () => {
                 it('fails with bad request', async () => {
@@ -719,10 +666,7 @@ describe('POST /push', () => {
             });
             describe('additionalProperties', () => {
                 beforeEach(() => {
-                    propPath.push('additionalProperties');
-                });
-                afterEach(() => {
-                    propPath.pop();
+                    propPath = ['files', 'additionalProperties', 'additionalProperties'];
                 });
                 describe('oneOf', () => {
                     describe('wrong type', () => {
@@ -760,10 +704,7 @@ describe('POST /push', () => {
                         });
                         describe('filename', () => {
                             beforeEach(() => {
-                                propPath.push('filename');
-                            });
-                            afterEach(() => {
-                                propPath.pop();
+                                propPath = ['files', 'additionalProperties', 'additionalProperties', 'filename'];
                             });
                             describe('wrong type', () => {
                                 it('fails with bad request', async () => {
@@ -802,10 +743,7 @@ describe('POST /push', () => {
                         });
                         describe('contentType', () => {
                             beforeEach(() => {
-                                propPath.push('contentType');
-                            });
-                            afterEach(() => {
-                                propPath.pop();
+                                propPath = ['files', 'additionalProperties', 'additionalProperties', 'contentType'];
                             });
                             describe('wrong type', () => {
                                 it('fails with bad request', async () => {
@@ -844,10 +782,7 @@ describe('POST /push', () => {
                         });
                         describe('fileSize', () => {
                             beforeEach(() => {
-                                propPath.push('fileSize');
-                            });
-                            afterEach(() => {
-                                propPath.pop();
+                                propPath = ['files', 'additionalProperties', 'additionalProperties', 'fileSize'];
                             });
                             describe('wrong type', () => {
                                 it('fails with bad request', async () => {
@@ -882,10 +817,7 @@ describe('POST /push', () => {
                         });
                         describe('partSize', () => {
                             beforeEach(() => {
-                                propPath.push('partSize');
-                            });
-                            afterEach(() => {
-                                propPath.pop();
+                                propPath = ['files', 'additionalProperties', 'additionalProperties', 'partSize'];
                             });
                             describe('wrong type', () => {
                                 it('fails with bad request', async () => {
@@ -957,10 +889,7 @@ describe('POST /media/complete-upload', () => {
 
     describe('uploadId', () => {
         beforeEach(() => {
-            propPath.push('uploadId');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['uploadId'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -995,10 +924,7 @@ describe('POST /media/complete-upload', () => {
     });
     describe('partEtags', () => {
         beforeEach(() => {
-            propPath.push('partEtags');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['partEtags'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1063,10 +989,7 @@ describe('POST /auth/login-init', () => {
 
     describe('email', () => {
         beforeEach(() => {
-            propPath.push('email');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['email'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1101,10 +1024,7 @@ describe('POST /auth/login-init', () => {
     });
     describe('srpA', () => {
         beforeEach(() => {
-            propPath.push('srpA');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['srpA'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1171,10 +1091,7 @@ describe.todoIf(!strictLoginValidation)('POST /auth/login-verify', () => {
 
     describe('userId', () => {
         beforeEach(() => {
-            propPath.push('userId');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['userId'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1209,10 +1126,7 @@ describe.todoIf(!strictLoginValidation)('POST /auth/login-verify', () => {
     });
     describe('secretBlock', () => {
         beforeEach(() => {
-            propPath.push('secretBlock');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['secretBlock'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1247,10 +1161,7 @@ describe.todoIf(!strictLoginValidation)('POST /auth/login-verify', () => {
     });
     describe('signature', () => {
         beforeEach(() => {
-            propPath.push('signature');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['signature'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1285,10 +1196,7 @@ describe.todoIf(!strictLoginValidation)('POST /auth/login-verify', () => {
     });
     describe('timestamp', () => {
         beforeEach(() => {
-            propPath.push('timestamp');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['timestamp'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1352,10 +1260,7 @@ describe('POST /auth/login-refresh', () => {
 
     describe.todoIf(!strictLoginValidation)('refreshToken', () => {
         beforeEach(() => {
-            propPath.push('refreshToken');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['refreshToken'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1420,10 +1325,7 @@ describe('POST /auth/register-init', () => {
 
     describe('email', () => {
         beforeEach(() => {
-            propPath.push('email');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['email'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1458,10 +1360,7 @@ describe('POST /auth/register-init', () => {
     });
     describe('password', () => {
         beforeEach(() => {
-            propPath.push('password');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['password'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1526,10 +1425,7 @@ describe('POST /auth/register-verify', () => {
 
     describe('email', () => {
         beforeEach(() => {
-            propPath.push('email');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['email'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1564,10 +1460,7 @@ describe('POST /auth/register-verify', () => {
     });
     describe('verificationCode', () => {
         beforeEach(() => {
-            propPath.push('verificationCode');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['verificationCode'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1631,10 +1524,7 @@ describe('POST /auth/register-verify-resend', () => {
 
     describe('email', () => {
         beforeEach(() => {
-            propPath.push('email');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['email'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1698,10 +1588,7 @@ describe('POST /auth/reset-password-init', () => {
 
     describe('email', () => {
         beforeEach(() => {
-            propPath.push('email');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['email'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1768,10 +1655,7 @@ describe('POST /auth/reset-password-verify', () => {
 
     describe('email', () => {
         beforeEach(() => {
-            propPath.push('email');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['email'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1806,10 +1690,7 @@ describe('POST /auth/reset-password-verify', () => {
     });
     describe('password', () => {
         beforeEach(() => {
-            propPath.push('password');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['password'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1844,10 +1725,7 @@ describe('POST /auth/reset-password-verify', () => {
     });
     describe('oldPassword', () => {
         beforeEach(() => {
-            propPath.push('oldPassword');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['oldPassword'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1867,10 +1745,7 @@ describe('POST /auth/reset-password-verify', () => {
     });
     describe('verificationCode', () => {
         beforeEach(() => {
-            propPath.push('verificationCode');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['verificationCode'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1921,10 +1796,7 @@ describe('POST /auth/invite-user', () => {
 
     describe('email', () => {
         beforeEach(() => {
-            propPath.push('email');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['email'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1959,10 +1831,7 @@ describe('POST /auth/invite-user', () => {
     });
     describe('id', () => {
         beforeEach(() => {
-            propPath.push('id');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['id'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
@@ -1997,10 +1866,7 @@ describe('POST /auth/invite-user', () => {
     });
     describe('templateId', () => {
         beforeEach(() => {
-            propPath.push('templateId');
-        });
-        afterEach(() => {
-            propPath.pop();
+            propPath = ['templateId'];
         });
         describe('wrong type', () => {
             it('fails with bad request', async () => {
