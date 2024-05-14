@@ -1,4 +1,4 @@
-import { describe, beforeAll, beforeEach, afterEach, it, expect } from 'bun:test';
+import { describe, beforeAll, beforeEach, it, expect } from 'bun:test';
 import crypto from 'crypto';
 import { env } from '../../env';
 import { createUserApi } from '../shared';
