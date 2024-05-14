@@ -1365,7 +1365,7 @@ describe('POST /auth/login-refresh', () => {
                     method,
                     headers,
                 });
-                console.log(propPath, b);
+                // console.log(propPath, b);
                 const resBody = await res.text();
                 expect(res).toHaveProperty('status', 400);
                 expect(resBody).toInclude('type');
@@ -1380,7 +1380,7 @@ describe('POST /auth/login-refresh', () => {
                     method,
                     headers,
                 });
-                console.log(propPath, b);
+                // console.log(propPath, b);
                 const resBody = await res.text();
                 expect(res).toHaveProperty('status', 400);
                 expect(resBody).toInclude('required');
