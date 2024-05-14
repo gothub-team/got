@@ -35,6 +35,245 @@ describe('POST /pull', () => {
         beforeEach(() => {
             propPath = ['additionalProperties'];
         });
+        describe('as', () => {
+            beforeEach(() => {
+                propPath = ['additionalProperties', 'as'];
+            });
+            describe('wrong type', () => {
+                it('fails with bad request', async () => {
+                    const b = assocPathMutate(propPath, ['some array'], body as Record<string, unknown>);
+                    const res = await fetch(url, {
+                        body: JSON.stringify(b),
+                        method,
+                        headers,
+                    });
+                    // console.log(propPath, b);
+                    const resBody = await res.text();
+                    expect(res).toHaveProperty('status', 400);
+                    expect(resBody).toInclude('type');
+                    expect(resBody).toInclude('string');
+                });
+            });
+        });
+        describe('role', () => {
+            beforeEach(() => {
+                propPath = ['additionalProperties', 'role'];
+            });
+            describe('wrong type', () => {
+                it('fails with bad request', async () => {
+                    const b = assocPathMutate(propPath, ['some array'], body as Record<string, unknown>);
+                    const res = await fetch(url, {
+                        body: JSON.stringify(b),
+                        method,
+                        headers,
+                    });
+                    // console.log(propPath, b);
+                    const resBody = await res.text();
+                    expect(res).toHaveProperty('status', 400);
+                    expect(resBody).toInclude('type');
+                    expect(resBody).toInclude('string');
+                });
+            });
+        });
+        describe('reverse', () => {
+            beforeEach(() => {
+                propPath = ['additionalProperties', 'reverse'];
+            });
+            describe('wrong type', () => {
+                it('fails with bad request', async () => {
+                    const b = assocPathMutate(propPath, 'some string', body as Record<string, unknown>);
+                    const res = await fetch(url, {
+                        body: JSON.stringify(b),
+                        method,
+                        headers,
+                    });
+                    // console.log(propPath, b);
+                    const resBody = await res.text();
+                    expect(res).toHaveProperty('status', 400);
+                    expect(resBody).toInclude('type');
+                    expect(resBody).toInclude('boolean');
+                });
+            });
+        });
+        describe('edges', () => {
+            beforeEach(() => {
+                propPath = ['additionalProperties', 'edges'];
+            });
+            describe('wrong type', () => {
+                it('fails with bad request', async () => {
+                    const b = assocPathMutate(propPath, 'some string', body as Record<string, unknown>);
+                    const res = await fetch(url, {
+                        body: JSON.stringify(b),
+                        method,
+                        headers,
+                    });
+                    // console.log(propPath, b);
+                    const resBody = await res.text();
+                    expect(res).toHaveProperty('status', 400);
+                    expect(resBody).toInclude('type');
+                    expect(resBody).toInclude('object');
+                });
+            });
+            describe('additionalProperties', () => {
+                beforeEach(() => {
+                    propPath = ['additionalProperties', 'edges', 'additionalProperties'];
+                });
+            });
+        });
+        describe('include', () => {
+            beforeEach(() => {
+                propPath = ['additionalProperties', 'include'];
+            });
+            describe('wrong type', () => {
+                it('fails with bad request', async () => {
+                    const b = assocPathMutate(propPath, 'some string', body as Record<string, unknown>);
+                    const res = await fetch(url, {
+                        body: JSON.stringify(b),
+                        method,
+                        headers,
+                    });
+                    // console.log(propPath, b);
+                    const resBody = await res.text();
+                    expect(res).toHaveProperty('status', 400);
+                    expect(resBody).toInclude('type');
+                    expect(resBody).toInclude('object');
+                });
+            });
+            describe('node', () => {
+                beforeEach(() => {
+                    propPath = ['additionalProperties', 'include', 'node'];
+                });
+                describe('wrong type', () => {
+                    it('fails with bad request', async () => {
+                        const b = assocPathMutate(propPath, 'some string', body as Record<string, unknown>);
+                        const res = await fetch(url, {
+                            body: JSON.stringify(b),
+                            method,
+                            headers,
+                        });
+                        // console.log(propPath, b);
+                        const resBody = await res.text();
+                        expect(res).toHaveProperty('status', 400);
+                        expect(resBody).toInclude('type');
+                        expect(resBody).toInclude('boolean');
+                    });
+                });
+            });
+            describe('edges', () => {
+                beforeEach(() => {
+                    propPath = ['additionalProperties', 'include', 'edges'];
+                });
+                describe('wrong type', () => {
+                    it('fails with bad request', async () => {
+                        const b = assocPathMutate(propPath, 'some string', body as Record<string, unknown>);
+                        const res = await fetch(url, {
+                            body: JSON.stringify(b),
+                            method,
+                            headers,
+                        });
+                        // console.log(propPath, b);
+                        const resBody = await res.text();
+                        expect(res).toHaveProperty('status', 400);
+                        expect(resBody).toInclude('type');
+                        expect(resBody).toInclude('boolean');
+                    });
+                });
+            });
+            describe('metadata', () => {
+                beforeEach(() => {
+                    propPath = ['additionalProperties', 'include', 'metadata'];
+                });
+                describe('wrong type', () => {
+                    it('fails with bad request', async () => {
+                        const b = assocPathMutate(propPath, 'some string', body as Record<string, unknown>);
+                        const res = await fetch(url, {
+                            body: JSON.stringify(b),
+                            method,
+                            headers,
+                        });
+                        // console.log(propPath, b);
+                        const resBody = await res.text();
+                        expect(res).toHaveProperty('status', 400);
+                        expect(resBody).toInclude('type');
+                        expect(resBody).toInclude('boolean');
+                    });
+                });
+            });
+            describe('rights', () => {
+                beforeEach(() => {
+                    propPath = ['additionalProperties', 'include', 'rights'];
+                });
+                describe('wrong type', () => {
+                    it('fails with bad request', async () => {
+                        const b = assocPathMutate(propPath, 'some string', body as Record<string, unknown>);
+                        const res = await fetch(url, {
+                            body: JSON.stringify(b),
+                            method,
+                            headers,
+                        });
+                        // console.log(propPath, b);
+                        const resBody = await res.text();
+                        expect(res).toHaveProperty('status', 400);
+                        expect(resBody).toInclude('type');
+                        expect(resBody).toInclude('boolean');
+                    });
+                });
+            });
+            describe('files', () => {
+                beforeEach(() => {
+                    propPath = ['additionalProperties', 'include', 'files'];
+                });
+                describe('wrong type', () => {
+                    it('fails with bad request', async () => {
+                        const b = assocPathMutate(propPath, 'some string', body as Record<string, unknown>);
+                        const res = await fetch(url, {
+                            body: JSON.stringify(b),
+                            method,
+                            headers,
+                        });
+                        // console.log(propPath, b);
+                        const resBody = await res.text();
+                        expect(res).toHaveProperty('status', 400);
+                        expect(resBody).toInclude('type');
+                        expect(resBody).toInclude('boolean');
+                    });
+                });
+            });
+            describe.todoIf(!strictAdditionalProperties)('no additional property', () => {
+                it('fails with bad request', async () => {
+                    const b = assocPathMutate(
+                        [...propPath, 'additionalProperty'],
+                        { additional: 'property' },
+                        body as Record<string, unknown>,
+                    );
+                    const res = await fetch(url, {
+                        body: JSON.stringify(b),
+                        method,
+                        headers,
+                    });
+                    const resBody = await res.text();
+                    expect(res).toHaveProperty('status', 400);
+                    expect(resBody).toInclude('additionalProperties');
+                });
+            });
+        });
+        describe.todoIf(!strictAdditionalProperties)('no additional property', () => {
+            it('fails with bad request', async () => {
+                const b = assocPathMutate(
+                    [...propPath, 'additionalProperty'],
+                    { additional: 'property' },
+                    body as Record<string, unknown>,
+                );
+                const res = await fetch(url, {
+                    body: JSON.stringify(b),
+                    method,
+                    headers,
+                });
+                const resBody = await res.text();
+                expect(res).toHaveProperty('status', 400);
+                expect(resBody).toInclude('additionalProperties');
+            });
+        });
     });
 });
 
