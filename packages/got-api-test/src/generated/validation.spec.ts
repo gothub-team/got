@@ -5,7 +5,6 @@ import { createUserApi } from '../shared';
 import { assocPathMutate } from '@gothub/got-core';
 
 const strictAdditionalProperties = false;
-const strictLoginValidation = false;
 
 let testId: string;
 let headers: Record<string, string>;
@@ -448,6 +447,61 @@ describe('POST /push', () => {
                                 beforeEach(() => {
                                     assocPathMutate(propPath, ['some string'], body as Record<string, unknown>);
                                 });
+                                describe.only('item 0', () => {
+                                    beforeEach(() => {
+                                        propPath = ['nodes', 'additionalProperties', 'additionalProperties', '0'];
+                                    });
+                                    describe('oneOf', () => {
+                                        describe('wrong type', () => {
+                                            it('fails with bad request', async () => {
+                                                const b = assocPathMutate(
+                                                    propPath,
+                                                    ['some array'],
+                                                    body as Record<string, unknown>,
+                                                );
+                                                const res = await fetch(url, {
+                                                    body: JSON.stringify(b),
+                                                    method,
+                                                    headers,
+                                                });
+                                                console.log(propPath, b);
+                                                const resBody = await res.text();
+                                                expect(res).toHaveProperty('status', 400);
+                                                expect(resBody).toInclude('type');
+                                                expect(resBody).toInclude('oneOf');
+                                            });
+                                        });
+                                        describe('string', () => {
+                                            beforeEach(() => {
+                                                assocPathMutate(
+                                                    propPath,
+                                                    'some string',
+                                                    body as Record<string, unknown>,
+                                                );
+                                            });
+                                        });
+                                        describe('number', () => {
+                                            beforeEach(() => {
+                                                assocPathMutate(propPath, 3.14, body as Record<string, unknown>);
+                                            });
+                                        });
+                                        describe('boolean', () => {
+                                            beforeEach(() => {
+                                                assocPathMutate(propPath, true, body as Record<string, unknown>);
+                                            });
+                                        });
+                                        describe('null', () => {
+                                            beforeEach(() => {
+                                                assocPathMutate(propPath, null, body as Record<string, unknown>);
+                                            });
+                                        });
+                                        describe('object', () => {
+                                            beforeEach(() => {
+                                                assocPathMutate(propPath, {}, body as Record<string, unknown>);
+                                            });
+                                        });
+                                    });
+                                });
                             });
                         });
                     });
@@ -618,6 +672,85 @@ describe('POST /push', () => {
                                                     ['some string'],
                                                     body as Record<string, unknown>,
                                                 );
+                                            });
+                                            describe('item 0', () => {
+                                                beforeEach(() => {
+                                                    propPath = [
+                                                        'edges',
+                                                        'additionalProperties',
+                                                        'additionalProperties',
+                                                        'additionalProperties',
+                                                        'additionalProperties',
+                                                        'additionalProperties',
+                                                        '0',
+                                                    ];
+                                                });
+                                                describe('oneOf', () => {
+                                                    describe('wrong type', () => {
+                                                        it('fails with bad request', async () => {
+                                                            const b = assocPathMutate(
+                                                                propPath,
+                                                                ['some array'],
+                                                                body as Record<string, unknown>,
+                                                            );
+                                                            const res = await fetch(url, {
+                                                                body: JSON.stringify(b),
+                                                                method,
+                                                                headers,
+                                                            });
+                                                            // console.log(propPath, b);
+                                                            const resBody = await res.text();
+                                                            expect(res).toHaveProperty('status', 400);
+                                                            expect(resBody).toInclude('type');
+                                                            expect(resBody).toInclude('oneOf');
+                                                        });
+                                                    });
+                                                    describe('string', () => {
+                                                        beforeEach(() => {
+                                                            assocPathMutate(
+                                                                propPath,
+                                                                'some string',
+                                                                body as Record<string, unknown>,
+                                                            );
+                                                        });
+                                                    });
+                                                    describe('number', () => {
+                                                        beforeEach(() => {
+                                                            assocPathMutate(
+                                                                propPath,
+                                                                3.14,
+                                                                body as Record<string, unknown>,
+                                                            );
+                                                        });
+                                                    });
+                                                    describe('boolean', () => {
+                                                        beforeEach(() => {
+                                                            assocPathMutate(
+                                                                propPath,
+                                                                true,
+                                                                body as Record<string, unknown>,
+                                                            );
+                                                        });
+                                                    });
+                                                    describe('null', () => {
+                                                        beforeEach(() => {
+                                                            assocPathMutate(
+                                                                propPath,
+                                                                null,
+                                                                body as Record<string, unknown>,
+                                                            );
+                                                        });
+                                                    });
+                                                    describe('object', () => {
+                                                        beforeEach(() => {
+                                                            assocPathMutate(
+                                                                propPath,
+                                                                {},
+                                                                body as Record<string, unknown>,
+                                                            );
+                                                        });
+                                                    });
+                                                });
                                             });
                                         });
                                     });
@@ -1205,6 +1338,11 @@ describe('POST /media/complete-upload', () => {
                 expect(resBody).toInclude('partEtags');
             });
         });
+        describe('item 0', () => {
+            beforeEach(() => {
+                propPath = ['partEtags', '0'];
+            });
+        });
     });
     describe.todoIf(!strictAdditionalProperties)('no additional property', () => {
         it('fails with bad request', async () => {
@@ -1325,7 +1463,7 @@ describe('POST /auth/login-init', () => {
     });
 });
 
-describe.todoIf(!strictLoginValidation)('POST /auth/login-verify', () => {
+describe('POST /auth/login-verify', () => {
     beforeEach(() => {
         url = `${env.GOT_API_URL}auth/login-verify`;
         method = 'POST';
@@ -1507,7 +1645,7 @@ describe('POST /auth/login-refresh', () => {
         propPath = [];
     });
 
-    describe.todoIf(!strictLoginValidation)('refreshToken', () => {
+    describe('refreshToken', () => {
         beforeEach(() => {
             propPath = ['refreshToken'];
         });
