@@ -35,6 +35,21 @@ describe('POST /pull', () => {
         beforeEach(() => {
             propPath = ['additionalProperties'];
         });
+        describe('wrong type', () => {
+            it('fails with bad request', async () => {
+                const b = assocPathMutate(propPath, 'some string', body as Record<string, unknown>);
+                const res = await fetch(url, {
+                    body: JSON.stringify(b),
+                    method,
+                    headers,
+                });
+                // console.log(propPath, b);
+                const resBody = await res.text();
+                expect(res).toHaveProperty('status', 400);
+                expect(resBody).toInclude('type');
+                expect(resBody).toInclude('object');
+            });
+        });
         describe('as', () => {
             beforeEach(() => {
                 propPath = ['additionalProperties', 'as'];
@@ -112,11 +127,6 @@ describe('POST /pull', () => {
                     expect(res).toHaveProperty('status', 400);
                     expect(resBody).toInclude('type');
                     expect(resBody).toInclude('object');
-                });
-            });
-            describe('additionalProperties', () => {
-                beforeEach(() => {
-                    propPath = ['additionalProperties', 'edges', 'additionalProperties'];
                 });
             });
         });
