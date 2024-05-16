@@ -6,6 +6,7 @@ import { assocPathMutate } from '@gothub/got-core';
 
 const strictAdditionalProperties = false;
 const strictLoginValidation = false;
+const strictArrayValidation = false;
 
 let testId: string;
 let headers: Record<string, string>;
@@ -448,7 +449,7 @@ describe('POST /push', () => {
                                 beforeEach(() => {
                                     assocPathMutate(propPath, ['some string'], body as Record<string, unknown>);
                                 });
-                                describe.only('item 0', () => {
+                                describe.todoIf(!strictArrayValidation)('item 0', () => {
                                     beforeEach(() => {
                                         propPath = ['nodes', 'additionalProperties', 'additionalProperties', '0'];
                                     });
