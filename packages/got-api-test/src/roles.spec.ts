@@ -205,7 +205,7 @@ describe('roles', () => {
                 });
             });
 
-            describe('inherit rights', () => {
+            describe('inherit rights as role', () => {
                 beforeEach(async () => {
                     await user1Api.push({
                         nodes: {
@@ -253,6 +253,38 @@ describe('roles', () => {
             it('does not write node', async () => {
                 expect(pushResult).toHaveProperty(['rights', testId, 'user', 'otherUser', 'read', 'statusCode'], 403);
             });
+        });
+    });
+
+    describe('inherit role', () => {
+        beforeEach(async () => {
+            await user1Api.push({
+                nodes: {
+                    [`${testId}-2`]: { id: `${testId}-2` },
+                    [`${testId}-role`]: { id: `${testId}-role` },
+                },
+                rights: {
+                    [testId]: { role: { [`${testId}-role`]: { read: true } } },
+                },
+            });
+            pushResult = await user1Api.push({
+                rights: {
+                    [`${testId}-2`]: { inherit: { from: testId } },
+                },
+            });
+            graph = await user1Api.pull({
+                [`${testId}-2`]: {
+                    include: { rights: true },
+                },
+            });
+        });
+
+        it('pushes inherit', async () => {
+            expect(pushResult).toHaveProperty(['rights', `${testId}-2`, 'inherit', 'statusCode'], 200);
+        });
+
+        it('inherited role from node', async () => {
+            expect(graph).toHaveProperty(['rights', `${testId}-2`, 'role', `${testId}-role`, 'read'], true);
         });
     });
 });
