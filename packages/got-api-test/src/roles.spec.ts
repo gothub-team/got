@@ -149,5 +149,44 @@ describe('roles', () => {
                 expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 403);
             });
         });
+
+        describe('role can admin node 1', () => {
+            beforeEach(async () => {
+                await user1Api.push({
+                    rights: {
+                        [testId]: { role: { [`${testId}-role`]: { admin: true } } },
+                    },
+                });
+                pushResult = await user2Api.push(
+                    {
+                        rights: {
+                            [testId]: { user: { [`otherUser`]: { read: true } } },
+                        },
+                    },
+                    `${testId}-role`,
+                );
+            });
+
+            it('writes node 1', async () => {
+                expect(pushResult).toHaveProperty(['rights', testId, 'user', 'otherUser', 'read', 'statusCode'], 200);
+            });
+        });
+
+        describe('role cannot admin node 1', () => {
+            beforeEach(async () => {
+                pushResult = await user2Api.push(
+                    {
+                        rights: {
+                            [testId]: { user: { [`otherUser`]: { read: true } } },
+                        },
+                    },
+                    `${testId}-role`,
+                );
+            });
+
+            it('does not write node 1', async () => {
+                expect(pushResult).toHaveProperty(['rights', testId, 'user', 'otherUser', 'read', 'statusCode'], 403);
+            });
+        });
     });
 });
