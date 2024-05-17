@@ -68,28 +68,28 @@ describe('roles', () => {
         });
     });
 
-    describe('user 2 has role 1', () => {
+    describe('user 2 has role', () => {
         beforeEach(async () => {
             await user1Api.push({
                 nodes: {
-                    [`${testId}-role-1`]: { id: `${testId}-role-1` },
+                    [`${testId}-role`]: { id: `${testId}-role` },
                 },
                 rights: {
-                    [`${testId}-role-1`]: { user: { [user2Email]: { read: true } } },
+                    [`${testId}-role`]: { user: { [user2Email]: { read: true } } },
                 },
             });
         });
 
-        describe('role 1 can read node 1', () => {
+        describe('role can read node 1', () => {
             beforeEach(async () => {
                 await user1Api.push({
                     rights: {
-                        [testId]: { role: { [`${testId}-role-1`]: { read: true } } },
+                        [testId]: { role: { [`${testId}-role`]: { read: true } } },
                     },
                 });
                 graph = await user2Api.pull({
                     [testId]: {
-                        role: `${testId}-role-1`,
+                        role: `${testId}-role`,
                         include: { node: true },
                     },
                 });
@@ -100,11 +100,11 @@ describe('roles', () => {
             });
         });
 
-        describe('role 1 cannot read node 1', () => {
+        describe('role cannot read node 1', () => {
             beforeEach(async () => {
                 graph = await user2Api.pull({
                     [testId]: {
-                        role: `${testId}-role-1`,
+                        role: `${testId}-role`,
                         include: { node: true },
                     },
                 });
@@ -115,23 +115,38 @@ describe('roles', () => {
             });
         });
 
-        describe('role 1 can write node 1', () => {
+        describe('role can write node 1', () => {
             beforeEach(async () => {
                 await user1Api.push({
                     rights: {
-                        [testId]: { role: { [`${testId}-role-1`]: { write: true } } },
+                        [testId]: { role: { [`${testId}-role`]: { write: true } } },
                     },
                 });
                 pushResult = await user2Api.push(
                     {
                         nodes: { [testId]: { id: testId, prop: 'hallo' } },
                     },
-                    `${testId}-role-1`,
+                    `${testId}-role`,
                 );
             });
 
-            it('writes node 1 as user 2', async () => {
+            it('writes node 1', async () => {
                 expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 200);
+            });
+        });
+
+        describe('role cannot write node 1', () => {
+            beforeEach(async () => {
+                pushResult = await user2Api.push(
+                    {
+                        nodes: { [testId]: { id: testId, prop: 'hallo' } },
+                    },
+                    `${testId}-role`,
+                );
+            });
+
+            it('does not write node 1', async () => {
+                expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 403);
             });
         });
     });
