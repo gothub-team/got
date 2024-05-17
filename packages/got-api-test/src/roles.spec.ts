@@ -209,6 +209,29 @@ describe('roles', () => {
                     expect(graph).toHaveProperty(['rights', testId, 'user', 'otherUser', 'read'], true);
                 });
             });
+
+            describe.todo('inherit rights', () => {
+                beforeEach(async () => {
+                    await user1Api.push({
+                        nodes: {
+                            [`${testId}-2`]: { id: `${testId}-2` },
+                        },
+                    });
+                    pushResult = await user2Api.push({
+                        rights: {
+                            [testId]: { inherit: { from: `${testId}-2` } },
+                        },
+                    });
+                });
+
+                it('pushes inherit rights', async () => {
+                    expect(pushResult).toHaveProperty(['rights', testId, 'inherit'], 200);
+                });
+
+                it('inherited rights from node 2', async () => {
+                    expect(true).toBe(false);
+                });
+            });
         });
 
         describe('role cannot admin node', () => {
