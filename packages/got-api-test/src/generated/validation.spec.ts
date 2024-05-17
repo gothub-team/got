@@ -1,5 +1,4 @@
 import { describe, beforeAll, beforeEach, it, expect } from 'bun:test';
-import crypto from 'crypto';
 import { env } from '../../env';
 import { createUserApi } from '../shared';
 import { assocPathMutate } from '@gothub/got-core';
@@ -8,16 +7,12 @@ const strictAdditionalProperties = false;
 const strictLoginValidation = false;
 const strictArrayValidation = false;
 
-let testId: string;
 let headers: Record<string, string>;
 beforeAll(async () => {
     const user1Api = await createUserApi(env.TEST_USER_1_EMAIL, env.TEST_USER_1_PW);
     headers = {
         Authorization: `${user1Api.getCurrentSession()?.idToken}`,
     };
-});
-beforeEach(async () => {
-    testId = `test-${crypto.randomBytes(8).toString('hex')}`;
 });
 
 let body: unknown;
