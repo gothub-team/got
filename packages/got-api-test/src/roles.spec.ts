@@ -210,25 +210,35 @@ describe('roles', () => {
                 });
             });
 
-            describe.todo('inherit rights', () => {
+            describe.only('inherit rights', () => {
                 beforeEach(async () => {
                     await user1Api.push({
                         nodes: {
                             [`${testId}-2`]: { id: `${testId}-2` },
                         },
                     });
-                    pushResult = await user2Api.push({
-                        rights: {
-                            [testId]: { inherit: { from: `${testId}-2` } },
+                    pushResult = await user2Api.push(
+                        {
+                            rights: {
+                                [testId]: { inherit: { from: `${testId}-2` } },
+                            },
+                        },
+                        `${testId}-role`,
+                    );
+                    graph = await user2Api.pull({
+                        [testId]: {
+                            role: `${testId}-role`,
+                            include: { rights: true },
                         },
                     });
+                    console.log(graph);
                 });
 
                 it('pushes inherit rights', async () => {
-                    expect(pushResult).toHaveProperty(['rights', testId, 'inherit'], 200);
+                    expect(pushResult).toHaveProperty(['rights', testId, 'inherit', 'statusCode'], 200);
                 });
 
-                it('inherited rights from node 2', async () => {
+                it.todo('inherited rights from node 2', async () => {
                     expect(true).toBe(false);
                 });
             });
