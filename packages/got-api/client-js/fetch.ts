@@ -8,13 +8,20 @@
  *
  * @returns JSON parsed response. Returns `undefined` in case of 204 response.
  */
-export const post = async <D, R>(url: string, data: D, idToken?: string, asAdmin?: boolean): Promise<R> => {
+export const post = async <D, R>(
+    url: string,
+    data: D,
+    idToken?: string,
+    asAdmin?: boolean,
+    asRole?: string,
+): Promise<R> => {
     const response = await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             ...(idToken ? { Authorization: idToken } : {}),
             ...(asAdmin ? { 'x-as-admin': 'true' } : {}),
+            ...(asRole ? { 'x-as-role': asRole } : {}),
         },
         body: JSON.stringify(data),
     });
