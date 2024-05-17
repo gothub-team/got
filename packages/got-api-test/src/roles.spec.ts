@@ -80,7 +80,7 @@ describe('roles', () => {
             });
         });
 
-        describe('role can read node 1', () => {
+        describe('role can read node', () => {
             beforeEach(async () => {
                 await user1Api.push({
                     rights: {
@@ -112,13 +112,13 @@ describe('roles', () => {
                         },
                     });
                 });
-                it('pulls node 1 as user 2', () => {
+                it('pulls node as user 2', () => {
                     expect(graph).toHaveProperty(['nodes', testId]);
                 });
             });
         });
 
-        describe('role cannot read node 1', () => {
+        describe('role cannot read node', () => {
             beforeEach(async () => {
                 graph = await user2Api.pull({
                     [testId]: {
@@ -128,12 +128,12 @@ describe('roles', () => {
                 });
             });
 
-            it('does not pull node 1 as user 2', () => {
+            it('does not pull node as user 2', () => {
                 expect(graph).not.toHaveProperty(['nodes', testId]);
             });
         });
 
-        describe('role can write node 1', () => {
+        describe('role can write node', () => {
             beforeEach(async () => {
                 await user1Api.push({
                     rights: {
@@ -148,12 +148,12 @@ describe('roles', () => {
                 );
             });
 
-            it('writes node 1', async () => {
+            it('writes node', async () => {
                 expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 200);
             });
         });
 
-        describe('role cannot write node 1', () => {
+        describe('role cannot write node', () => {
             beforeEach(async () => {
                 pushResult = await user2Api.push(
                     {
@@ -163,12 +163,12 @@ describe('roles', () => {
                 );
             });
 
-            it('does not write node 1', async () => {
+            it('does not write node', async () => {
                 expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 403);
             });
         });
 
-        describe('role can admin node 1', () => {
+        describe('role can admin node', () => {
             beforeEach(async () => {
                 await user1Api.push({
                     rights: {
@@ -185,12 +185,12 @@ describe('roles', () => {
                 );
             });
 
-            it('writes node 1', async () => {
+            it('writes node', async () => {
                 expect(pushResult).toHaveProperty(['rights', testId, 'user', 'otherUser', 'read', 'statusCode'], 200);
             });
         });
 
-        describe('role cannot admin node 1', () => {
+        describe('role cannot admin node', () => {
             beforeEach(async () => {
                 pushResult = await user2Api.push(
                     {
@@ -202,7 +202,7 @@ describe('roles', () => {
                 );
             });
 
-            it('does not write node 1', async () => {
+            it('does not write node', async () => {
                 expect(pushResult).toHaveProperty(['rights', testId, 'user', 'otherUser', 'read', 'statusCode'], 403);
             });
         });
