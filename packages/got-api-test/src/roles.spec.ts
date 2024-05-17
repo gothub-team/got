@@ -177,7 +177,7 @@ describe('roles', () => {
                 });
             });
 
-            describe('push right', () => {
+            describe('push and pull right', () => {
                 beforeEach(async () => {
                     pushResult = await user2Api.push(
                         {
@@ -187,17 +187,6 @@ describe('roles', () => {
                         },
                         `${testId}-role`,
                     );
-                });
-                it('writes right', async () => {
-                    expect(pushResult).toHaveProperty(
-                        ['rights', testId, 'user', 'otherUser', 'read', 'statusCode'],
-                        200,
-                    );
-                });
-            });
-
-            describe.todo('pull rights', async () => {
-                beforeEach(async () => {
                     graph = await user2Api.pull({
                         [testId]: {
                             role: `${testId}-role`,
@@ -205,12 +194,18 @@ describe('roles', () => {
                         },
                     });
                 });
-                it('pulls rights', async () => {
+                it('writes right', async () => {
+                    expect(pushResult).toHaveProperty(
+                        ['rights', testId, 'user', 'otherUser', 'read', 'statusCode'],
+                        200,
+                    );
+                });
+                it.todo('pulls rights', async () => {
                     expect(graph).toHaveProperty(['rights', testId, 'user', 'otherUser', 'read'], true);
                 });
             });
 
-            describe.only('inherit rights', () => {
+            describe('inherit rights', () => {
                 beforeEach(async () => {
                     await user1Api.push({
                         nodes: {
@@ -231,7 +226,6 @@ describe('roles', () => {
                             include: { rights: true },
                         },
                     });
-                    console.log(graph);
                 });
 
                 it('pushes inherit rights', async () => {
