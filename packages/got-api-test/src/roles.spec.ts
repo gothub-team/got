@@ -168,35 +168,46 @@ describe('roles', () => {
             });
         });
 
-        describe.todo('role can admin node', () => {
+        describe('role can admin node', () => {
             beforeEach(async () => {
                 await user1Api.push({
                     rights: {
                         [testId]: { role: { [`${testId}-role`]: { admin: true } } },
                     },
                 });
-                pushResult = await user2Api.push(
-                    {
-                        rights: {
-                            [testId]: { user: { [`otherUser`]: { read: true } } },
-                        },
-                    },
-                    `${testId}-role`,
-                );
-                graph = await user2Api.pull({
-                    [testId]: {
-                        role: `${testId}-role`,
-                        include: { rights: true },
-                    },
-                });
-                console.log('graph', graph);
             });
 
-            it('writes right', async () => {
-                expect(pushResult).toHaveProperty(['rights', testId, 'user', 'otherUser', 'read', 'statusCode'], 200);
+            describe('push right', () => {
+                beforeEach(async () => {
+                    pushResult = await user2Api.push(
+                        {
+                            rights: {
+                                [testId]: { user: { otherUser: { read: true } } },
+                            },
+                        },
+                        `${testId}-role`,
+                    );
+                });
+                it('writes right', async () => {
+                    expect(pushResult).toHaveProperty(
+                        ['rights', testId, 'user', 'otherUser', 'read', 'statusCode'],
+                        200,
+                    );
+                });
             });
-            it('pulls rights', async () => {
-                expect(graph).toHaveProperty(['rights', testId, 'user', 'otherUser', 'read'], true);
+
+            describe.todo('pull rights', async () => {
+                beforeEach(async () => {
+                    graph = await user2Api.pull({
+                        [testId]: {
+                            role: `${testId}-role`,
+                            include: { rights: true },
+                        },
+                    });
+                });
+                it('pulls rights', async () => {
+                    expect(graph).toHaveProperty(['rights', testId, 'user', 'otherUser', 'read'], true);
+                });
             });
         });
 
