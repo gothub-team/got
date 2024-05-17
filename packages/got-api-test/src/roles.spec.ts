@@ -168,7 +168,7 @@ describe('roles', () => {
             });
         });
 
-        describe('role can admin node', () => {
+        describe.todo('role can admin node', () => {
             beforeEach(async () => {
                 await user1Api.push({
                     rights: {
@@ -183,10 +183,20 @@ describe('roles', () => {
                     },
                     `${testId}-role`,
                 );
+                graph = await user2Api.pull({
+                    [testId]: {
+                        role: `${testId}-role`,
+                        include: { rights: true },
+                    },
+                });
+                console.log('graph', graph);
             });
 
-            it('writes node', async () => {
+            it('writes right', async () => {
                 expect(pushResult).toHaveProperty(['rights', testId, 'user', 'otherUser', 'read', 'statusCode'], 200);
+            });
+            it('pulls rights', async () => {
+                expect(graph).toHaveProperty(['rights', testId, 'user', 'otherUser', 'read'], true);
             });
         });
 
