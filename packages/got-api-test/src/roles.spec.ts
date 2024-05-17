@@ -87,16 +87,34 @@ describe('roles', () => {
                         [testId]: { role: { [`${testId}-role`]: { read: true } } },
                     },
                 });
-                graph = await user2Api.pull({
-                    [testId]: {
-                        role: `${testId}-role`,
-                        include: { node: true },
-                    },
+            });
+
+            describe('user 1 can pull role rights', () => {
+                beforeEach(async () => {
+                    graph = await user1Api.pull({
+                        [testId]: {
+                            include: { rights: true },
+                        },
+                    });
+                });
+
+                it('pulls rights', () => {
+                    expect(graph).toHaveProperty(['rights', testId, 'role', `${testId}-role`, 'read'], true);
                 });
             });
 
-            it('pulls node 1 as user 2', () => {
-                expect(graph).toHaveProperty(['nodes', testId]);
+            describe('user 2 can pull', () => {
+                beforeEach(async () => {
+                    graph = await user2Api.pull({
+                        [testId]: {
+                            role: `${testId}-role`,
+                            include: { node: true },
+                        },
+                    });
+                });
+                it('pulls node 1 as user 2', () => {
+                    expect(graph).toHaveProperty(['nodes', testId]);
+                });
             });
         });
 
