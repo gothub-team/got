@@ -172,7 +172,7 @@ describe('roles', () => {
             beforeEach(async () => {
                 await user1Api.push({
                     rights: {
-                        [testId]: { role: { [`${testId}-role`]: { admin: true } } },
+                        [testId]: { role: { [`${testId}-role`]: { read: true, admin: true } } },
                     },
                 });
             });
@@ -200,7 +200,7 @@ describe('roles', () => {
                         200,
                     );
                 });
-                it.todo('pulls rights', async () => {
+                it('pulls rights', async () => {
                     expect(graph).toHaveProperty(['rights', testId, 'user', 'otherUser', 'read'], true);
                 });
             });
@@ -230,10 +230,6 @@ describe('roles', () => {
 
                 it('pushes inherit rights', async () => {
                     expect(pushResult).toHaveProperty(['rights', testId, 'inherit', 'statusCode'], 200);
-                });
-
-                it.todo('inherited rights from node 2', async () => {
-                    expect(true).toBe(false);
                 });
             });
         });
