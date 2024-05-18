@@ -8,7 +8,8 @@ import {
     type ResetPasswordVerifyInput,
     type User,
 } from './api.js';
-import { put } from './fetch.js';
+import { post, put } from './fetch.js';
+import type { PushBody, PushResult } from '@gothub/got-core';
 
 export { createLowApi } from './api.js';
 export { post, put } from './fetch.js';
@@ -51,6 +52,17 @@ export interface PasswordChallengeInput extends LoginInput {
 }
 
 export declare interface GotApi extends GotLowApi {
+    /**
+     * This operation pushes the graph from the request body into the database.
+     *
+     * @throws
+     * ```JS
+     * {
+     *     name: 'PushError',
+     *     message: 'The push operation failed.',
+     * }
+     */
+    push: (input: PushBody, asRole?: string) => Promise<PushResult>;
     /**
      * This operation is a convenience function that combines loginInit and loginVerify.
      * It establishes an SRP session using `@gothub-team/got-srp` and computes the signature
@@ -286,16 +298,18 @@ export const createApi = ({
     const [_getLocalSession, _setLocalSession] = useState<Session | undefined>(getSession());
     const [getAdminMode, setAdminMode] = useState(adminMode);
 
+    const getIdToken = async () => {
+        const { idToken } = _getLocalSession() || {};
+        if (idToken && isExpired(decodeJwt(idToken).exp)) {
+            await refreshSession();
+            return _getLocalSession()?.idToken;
+        }
+        return idToken;
+    };
+
     const api = createLowApi({
         host: _host,
-        getIdToken: async () => {
-            const { idToken } = _getLocalSession() || {};
-            if (idToken && isExpired(decodeJwt(idToken).exp)) {
-                await refreshSession();
-                return _getLocalSession()?.idToken;
-            }
-            return idToken;
-        },
+        getIdToken,
         getAdminMode,
     });
 
@@ -327,6 +341,8 @@ export const createApi = ({
 
     return {
         ...api,
+        push: async (body: PushBody, asRole?: string) =>
+            post(`${host}/push`, body, await getIdToken(), getAdminMode(), asRole),
         login: async ({ email, password }: LoginInput) => {
             const { srpA, getSignature } = await useSrp();
 

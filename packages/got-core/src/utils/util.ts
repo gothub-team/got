@@ -190,11 +190,14 @@ export const getPathOr = <TInput extends Record<string, unknown>, TRes>(
  *
  * @returns the mutated object
  */
-export const assocPathMutate = <TInput extends Record<string, unknown>>(
-    path: string[],
-    val: unknown,
+export const assocPathMutate = <TInput extends Record<string, unknown>, TVal, TPath extends string[]>(
+    path: TPath,
+    val: TVal,
     input: TInput,
-): TInput => {
+): TPath['length'] extends 0 ? TVal : TInput => {
+    if (path.length === 0) {
+        return val as TPath['length'] extends 0 ? TVal : TInput;
+    }
     let obj: Record<string, unknown> = input;
     for (let i = 0; i < path.length - 1; i += 1) {
         const prop = path[i];
@@ -209,7 +212,7 @@ export const assocPathMutate = <TInput extends Record<string, unknown>>(
     const lastProp = path[path.length - 1];
     obj[lastProp] = val;
 
-    return input;
+    return input as TPath['length'] extends 0 ? TVal : TInput;
 };
 
 /**

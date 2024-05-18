@@ -45,7 +45,7 @@ export declare type NodeRightsView = {
     user?: {
         [email: string]: RightTypes;
     };
-    roles?: {
+    role?: {
         [email: string]: RightTypes;
     };
 };
