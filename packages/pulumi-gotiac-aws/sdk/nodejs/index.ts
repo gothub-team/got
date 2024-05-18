@@ -10,6 +10,11 @@ export type FileHosting = import("./fileHosting").FileHosting;
 export const FileHosting: typeof import("./fileHosting").FileHosting = null as any;
 utilities.lazyLoad(exports, ["FileHosting"], () => require("./fileHosting"));
 
+export { LambdaArgs } from "./lambda";
+export type Lambda = import("./lambda").Lambda;
+export const Lambda: typeof import("./lambda").Lambda = null as any;
+utilities.lazyLoad(exports, ["Lambda"], () => require("./lambda"));
+
 export { ProviderArgs } from "./provider";
 export type Provider = import("./provider").Provider;
 export const Provider: typeof import("./provider").Provider = null as any;
@@ -27,6 +32,8 @@ const _module = {
         switch (type) {
             case "gotiac:index:FileHosting":
                 return new FileHosting(name, <any>undefined, { urn })
+            case "gotiac:index:Lambda":
+                return new Lambda(name, <any>undefined, { urn })
             case "gotiac:index:TestUser":
                 return new TestUser(name, <any>undefined, { urn })
             default:

@@ -23,6 +23,8 @@ func (m *module) Construct(ctx *pulumi.Context, name, typ, urn string) (r pulumi
 	switch typ {
 	case "gotiac:index:FileHosting":
 		r = &FileHosting{}
+	case "gotiac:index:Lambda":
+		r = &Lambda{}
 	case "gotiac:index:TestUser":
 		r = &TestUser{}
 	default:
