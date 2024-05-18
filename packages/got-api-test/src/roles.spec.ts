@@ -252,6 +252,43 @@ describe('roles', () => {
         });
     });
 
+    describe('user 2 does not have role', () => {
+        describe('role can read, write, admin node', () => {
+            beforeEach(async () => {
+                await user1Api.push({
+                    rights: {
+                        [testId]: { role: { [`${testId}-role`]: { read: true, write: true, admin: true } } },
+                    },
+                });
+                graph = await user2Api.pull({
+                    [testId]: {
+                        role: `${testId}-role`,
+                        include: { node: true },
+                    },
+                });
+                pushResult = await user2Api.push(
+                    {
+                        nodes: { [testId]: { id: testId, prop: 'hallo' } },
+                        rights: {
+                            [testId]: { user: { otherUser: { read: true } } },
+                        },
+                    },
+                    `${testId}-role`,
+                );
+            });
+
+            it('does not pull node', () => {
+                expect(graph).not.toHaveProperty(['nodes', testId]);
+            });
+            it('does not write node', async () => {
+                expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 403);
+            });
+            it('does not write rights', async () => {
+                expect(pushResult).toHaveProperty(['rights', testId, 'user', 'otherUser', 'read', 'statusCode'], 403);
+            });
+        });
+    });
+
     describe('inherit role', () => {
         beforeEach(async () => {
             await user1Api.push({
