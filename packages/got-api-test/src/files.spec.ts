@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import { URL } from 'url';
 import { env } from '../env';
 import { createUserApi } from './shared';
-import type { DownloadNodeFileView, Graph, PushResult } from '@gothub-team/got-core';
+import type { DownloadNodeFileView, Graph, PushResult } from '@gothub/got-core';
 
 let testId: string;
 let user1Api: GotApi;

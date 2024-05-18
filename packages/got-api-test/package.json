@@ -6,7 +6,7 @@
         "test": "bun test --timeout 100000"
     },
     "devDependencies": {
-        "@gothub-team/got-core": "^0.24.2",
+        "@gothub/got-core": "workspace:*",
         "@gothub/typescript-util": "workspace:*",
         "@gothub/got-api": "workspace:*",
         "@types/aws-lambda": "8.10.137",
