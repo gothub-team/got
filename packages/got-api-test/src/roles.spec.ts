@@ -25,7 +25,10 @@ describe('roles', () => {
     let pushResult: PushResult;
     beforeEach(async () => {
         await user1Api.push({
-            nodes: { [testId]: { id: testId } },
+            nodes: {
+                [testId]: { id: testId },
+                [`${testId}-role`]: { id: `${testId}-role` },
+            },
         });
     });
 
@@ -71,9 +74,6 @@ describe('roles', () => {
     describe('user 2 has role', () => {
         beforeEach(async () => {
             await user1Api.push({
-                nodes: {
-                    [`${testId}-role`]: { id: `${testId}-role` },
-                },
                 rights: {
                     [`${testId}-role`]: { user: { [user2Email]: { read: true } } },
                 },
