@@ -31,8 +31,8 @@ func NewLambda(ctx *pulumi.Context,
 	if args.CodePath == nil {
 		return nil, errors.New("invalid value for required argument 'CodePath'")
 	}
-	if args.Handler == nil {
-		return nil, errors.New("invalid value for required argument 'Handler'")
+	if args.HandlerPath == nil {
+		return nil, errors.New("invalid value for required argument 'HandlerPath'")
 	}
 	if args.PolicyArns == nil {
 		return nil, errors.New("invalid value for required argument 'PolicyArns'")
@@ -53,7 +53,7 @@ type lambdaArgs struct {
 	// The path to a .zip file containing your deployment package.
 	CodePath string `pulumi:"codePath"`
 	// The path to the handler in the deployment package.
-	Handler string `pulumi:"handler"`
+	HandlerPath string `pulumi:"handlerPath"`
 	// The amount of memory in MB your Lambda Function can use at runtime.
 	MemorySize *float64 `pulumi:"memorySize"`
 	// The ARNs of the policies that are attached to the Lambda function.
@@ -67,7 +67,7 @@ type LambdaArgs struct {
 	// The path to a .zip file containing your deployment package.
 	CodePath pulumi.StringInput
 	// The path to the handler in the deployment package.
-	Handler pulumi.StringInput
+	HandlerPath pulumi.StringInput
 	// The amount of memory in MB your Lambda Function can use at runtime.
 	MemorySize pulumi.Float64PtrInput
 	// The ARNs of the policies that are attached to the Lambda function.

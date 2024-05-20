@@ -3,6 +3,36 @@
 name: gotiac
 pluginDownloadURL: https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.0.49
 resources:
+    gotiac:index:MailDomain:
+        isComponent: true
+        # inputProperties:
+        #     domain:
+        #         type: string
+        #         description: The domain name of the mail domain.
+        #     certificateArn:
+        #         type: string
+        #         description: The ARN of the certificate.
+        #     hostedZoneId:
+        #         type: string
+        #         description: The ID of the hosted zone.
+        # requiredInputs:
+        #     - domain
+        #     - certificateArn
+        #     - hostedZoneId
+        properties:
+            random:
+                type: string
+                description: A random string to ensure uniqueness.
+            # domainName:
+            #     type: string
+            #     description: The domain name of the mail domain.
+            # arn:
+            #     type: string
+            #     description: The ARN of the mail domain.
+        required:
+            - random
+            # - domainName
+            # - arn
     gotiac:index:FileHosting:
         isComponent: true
         inputProperties:
