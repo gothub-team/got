@@ -25,6 +25,7 @@ export default $config({
 
         new gotiac.MailDomain('MailDomain', {
             domain: env.BASE_DOMAIN,
+            region: env.AWS_MAIL_REGION,
         });
 
         return {

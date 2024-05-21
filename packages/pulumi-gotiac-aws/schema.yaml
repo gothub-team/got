@@ -9,8 +9,12 @@ resources:
             domain:
                 type: string
                 description: The domain to be used for the mailboxes
+            region:
+                type: string
+                description: The aws region to create the domain in.
         requiredInputs:
             - domain
+            - region
         properties:
             organizationId:
                 type: string

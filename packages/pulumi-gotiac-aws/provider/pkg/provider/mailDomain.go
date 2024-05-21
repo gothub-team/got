@@ -16,6 +16,8 @@ import (
 type MailDomainArgs struct {
 	// The domain to be used for the mailboxes
 	Domain pulumi.StringInput `pulumi:"domain"`
+	// The region to create the mail domain in
+	Region pulumi.StringInput `pulumi:"region"`
 }
 
 // The MailDomain component resource.
@@ -40,8 +42,8 @@ func NewMailDomain(ctx *pulumi.Context,
 	}
 
 	// Create an ACM certificate for the domain
-	euWest1, err := aws.NewProvider(ctx, "eu-west-1", &aws.ProviderArgs{
-		Region: pulumi.String("eu-west-1"),
+	mailRegionProvider, err := aws.NewProvider(ctx, "MailRegionProvider", &aws.ProviderArgs{
+		Region: args.Region,
 	})
 	if err != nil {
 		return nil, err
@@ -50,7 +52,7 @@ func NewMailDomain(ctx *pulumi.Context,
 	hostedZoneId := util.LookUpHostedZone(ctx, args.Domain)
 
 	organization, err := awsworkmail.NewOrganization(ctx, "WorkMailOrganization", &awsworkmail.OrganizationArgs{
-		Region: pulumi.String("eu-west-1"),
+		Region: args.Region.ToStringOutput(),
 		Alias: args.Domain.ToStringOutput().ApplyT(func(domain string) string {
 			return strings.ReplaceAll(domain, ".", "") + "-" + name
 		}).(pulumi.StringOutput),
@@ -83,7 +85,7 @@ func NewMailDomain(ctx *pulumi.Context,
 			MailFromDomain: args.Domain.ToStringOutput().ApplyT(func(domain string) (string, error) {
 				return fmt.Sprintf("mail.%v", domain), nil
 			}).(pulumi.StringOutput),
-		}, pulumi.Provider(euWest1))
+		}, pulumi.Provider(mailRegionProvider))
 		if err != nil {
 			return err
 		}
@@ -94,7 +96,7 @@ func NewMailDomain(ctx *pulumi.Context,
 			Type:   pulumi.String(route53.RecordTypeMX),
 			Ttl:    pulumi.Int(600),
 			Records: pulumi.StringArray{
-				pulumi.String("10 feedback-smtp.eu-west-1.amazonses.com"),
+				pulumi.Sprintf("10 feedback-smtp.%s.amazonses.com", args.Region),
 			},
 			AllowOverwrite: pulumi.Bool(true),
 		})
