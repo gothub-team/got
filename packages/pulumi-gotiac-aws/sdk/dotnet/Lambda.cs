@@ -62,8 +62,8 @@ namespace Pulumi.Gotiac
         /// <summary>
         /// The path to the handler in the deployment package.
         /// </summary>
-        [Input("handler", required: true)]
-        public Input<string> Handler { get; set; } = null!;
+        [Input("handlerPath", required: true)]
+        public Input<string> HandlerPath { get; set; } = null!;
 
         /// <summary>
         /// The amount of memory in MB your Lambda Function can use at runtime.

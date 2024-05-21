@@ -25,6 +25,8 @@ func (m *module) Construct(ctx *pulumi.Context, name, typ, urn string) (r pulumi
 		r = &FileHosting{}
 	case "gotiac:index:Lambda":
 		r = &Lambda{}
+	case "gotiac:index:MailDomain":
+		r = &MailDomain{}
 	case "gotiac:index:TestUser":
 		r = &TestUser{}
 	default:

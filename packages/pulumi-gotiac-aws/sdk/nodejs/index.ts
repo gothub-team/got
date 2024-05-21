@@ -15,6 +15,11 @@ export type Lambda = import("./lambda").Lambda;
 export const Lambda: typeof import("./lambda").Lambda = null as any;
 utilities.lazyLoad(exports, ["Lambda"], () => require("./lambda"));
 
+export { MailDomainArgs } from "./mailDomain";
+export type MailDomain = import("./mailDomain").MailDomain;
+export const MailDomain: typeof import("./mailDomain").MailDomain = null as any;
+utilities.lazyLoad(exports, ["MailDomain"], () => require("./mailDomain"));
+
 export { ProviderArgs } from "./provider";
 export type Provider = import("./provider").Provider;
 export const Provider: typeof import("./provider").Provider = null as any;
@@ -34,6 +39,8 @@ const _module = {
                 return new FileHosting(name, <any>undefined, { urn })
             case "gotiac:index:Lambda":
                 return new Lambda(name, <any>undefined, { urn })
+            case "gotiac:index:MailDomain":
+                return new MailDomain(name, <any>undefined, { urn })
             case "gotiac:index:TestUser":
                 return new TestUser(name, <any>undefined, { urn })
             default:

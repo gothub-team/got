@@ -15,20 +15,20 @@ __all__ = ['LambdaArgs', 'Lambda']
 class LambdaArgs:
     def __init__(__self__, *,
                  code_path: pulumi.Input[str],
-                 handler: pulumi.Input[str],
+                 handler_path: pulumi.Input[str],
                  policy_arns: pulumi.Input[Sequence[pulumi.Input[str]]],
                  runtime: pulumi.Input[str],
                  memory_size: Optional[pulumi.Input[float]] = None):
         """
         The set of arguments for constructing a Lambda resource.
         :param pulumi.Input[str] code_path: The path to a .zip file containing your deployment package.
-        :param pulumi.Input[str] handler: The path to the handler in the deployment package.
+        :param pulumi.Input[str] handler_path: The path to the handler in the deployment package.
         :param pulumi.Input[Sequence[pulumi.Input[str]]] policy_arns: The ARNs of the policies that are attached to the Lambda function.
         :param pulumi.Input[str] runtime: The runtime environment for the Lambda function.
         :param pulumi.Input[float] memory_size: The amount of memory in MB your Lambda Function can use at runtime.
         """
         pulumi.set(__self__, "code_path", code_path)
-        pulumi.set(__self__, "handler", handler)
+        pulumi.set(__self__, "handler_path", handler_path)
         pulumi.set(__self__, "policy_arns", policy_arns)
         pulumi.set(__self__, "runtime", runtime)
         if memory_size is not None:
@@ -47,16 +47,16 @@ class LambdaArgs:
         pulumi.set(self, "code_path", value)
 
     @property
-    @pulumi.getter
-    def handler(self) -> pulumi.Input[str]:
+    @pulumi.getter(name="handlerPath")
+    def handler_path(self) -> pulumi.Input[str]:
         """
         The path to the handler in the deployment package.
         """
-        return pulumi.get(self, "handler")
+        return pulumi.get(self, "handler_path")
 
-    @handler.setter
-    def handler(self, value: pulumi.Input[str]):
-        pulumi.set(self, "handler", value)
+    @handler_path.setter
+    def handler_path(self, value: pulumi.Input[str]):
+        pulumi.set(self, "handler_path", value)
 
     @property
     @pulumi.getter(name="policyArns")
@@ -101,7 +101,7 @@ class Lambda(pulumi.ComponentResource):
                  resource_name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
                  code_path: Optional[pulumi.Input[str]] = None,
-                 handler: Optional[pulumi.Input[str]] = None,
+                 handler_path: Optional[pulumi.Input[str]] = None,
                  memory_size: Optional[pulumi.Input[float]] = None,
                  policy_arns: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  runtime: Optional[pulumi.Input[str]] = None,
@@ -111,7 +111,7 @@ class Lambda(pulumi.ComponentResource):
         :param str resource_name: The name of the resource.
         :param pulumi.ResourceOptions opts: Options for the resource.
         :param pulumi.Input[str] code_path: The path to a .zip file containing your deployment package.
-        :param pulumi.Input[str] handler: The path to the handler in the deployment package.
+        :param pulumi.Input[str] handler_path: The path to the handler in the deployment package.
         :param pulumi.Input[float] memory_size: The amount of memory in MB your Lambda Function can use at runtime.
         :param pulumi.Input[Sequence[pulumi.Input[str]]] policy_arns: The ARNs of the policies that are attached to the Lambda function.
         :param pulumi.Input[str] runtime: The runtime environment for the Lambda function.
@@ -140,7 +140,7 @@ class Lambda(pulumi.ComponentResource):
                  resource_name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
                  code_path: Optional[pulumi.Input[str]] = None,
-                 handler: Optional[pulumi.Input[str]] = None,
+                 handler_path: Optional[pulumi.Input[str]] = None,
                  memory_size: Optional[pulumi.Input[float]] = None,
                  policy_arns: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  runtime: Optional[pulumi.Input[str]] = None,
@@ -158,9 +158,9 @@ class Lambda(pulumi.ComponentResource):
             if code_path is None and not opts.urn:
                 raise TypeError("Missing required property 'code_path'")
             __props__.__dict__["code_path"] = code_path
-            if handler is None and not opts.urn:
-                raise TypeError("Missing required property 'handler'")
-            __props__.__dict__["handler"] = handler
+            if handler_path is None and not opts.urn:
+                raise TypeError("Missing required property 'handler_path'")
+            __props__.__dict__["handler_path"] = handler_path
             __props__.__dict__["memory_size"] = memory_size
             if policy_arns is None and not opts.urn:
                 raise TypeError("Missing required property 'policy_arns'")

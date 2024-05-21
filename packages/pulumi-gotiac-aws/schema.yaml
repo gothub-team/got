@@ -1,8 +1,22 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/pulumi/pulumi/master/pkg/codegen/schema/pulumi.json
 ---
 name: gotiac
-pluginDownloadURL: https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.0.49
+pluginDownloadURL: https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.0.50
 resources:
+    gotiac:index:MailDomain:
+        isComponent: true
+        inputProperties:
+            domain:
+                type: string
+                description: The domain to be used for the mailboxes
+        requiredInputs:
+            - domain
+        properties:
+            organizationId:
+                type: string
+                description: The ID of the organization that can be used to create mailboxes
+        required:
+            - organizationId
     gotiac:index:FileHosting:
         isComponent: true
         inputProperties:
