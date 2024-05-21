@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/apigatewayv2"
-	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/cognito"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/iam"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/lambda"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
@@ -12,8 +11,6 @@ import (
 
 // The set of arguments for creating a Lambda component resource.
 type ApiLambdaArgs struct {
-	// The APIs execution ARN
-	UserPoolId pulumi.IDInput `pulumi:"userPoolId"`
 	// The the path to the .zip for the lambda code
 	CodePath pulumi.StringInput `pulumi:"codePath"`
 	// The handler for the lambda function
@@ -63,43 +60,6 @@ func NewApiLambda(ctx *pulumi.Context,
 	if err != nil {
 		return nil, err
 	}
-
-	userPool, err := cognito.GetUserPool(ctx, name, args.UserPoolId, &cognito.UserPoolState{});
-	if err != nil {
-		return nil, err
-	}
-
-	userPoolClient, err := cognito.NewUserPoolClient(ctx, "api-client", &cognito.UserPoolClientArgs{
-		Name:           pulumi.String("client"),
-		UserPoolId:     userPool.ID(),
-		GenerateSecret: pulumi.Bool(true),
-		ExplicitAuthFlows: pulumi.StringArray{
-			pulumi.String("ADMIN_NO_SRP_AUTH"),
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	// Create Cognito Authorizer
-	authorizer, err := apigatewayv2.NewAuthorizer(ctx, fmt.Sprintf("%s-Authorizer", name), &apigatewayv2.AuthorizerArgs{
-		ApiId: args.ApiId,
-		AuthorizerType: pulumi.String("JWT"),
-		IdentitySources: pulumi.StringArray{ 
-			pulumi.String("$request.header.Authorization"),
-		},
-		JwtConfiguration: &apigatewayv2.AuthorizerJwtConfigurationArgs{
-			Audiences: userPoolClient.ID().ApplyT(func(id string) (pulumi.StringArray) {
-				return pulumi.StringArray{
-					pulumi.String(id),
-				}
-			}).(pulumi.StringArrayOutput),
-			Issuer: userPool.Endpoint,
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
  
 	// Create the lambda function
 	lambdaFunction, err := NewLambda(ctx, name, &LambdaArgs{
@@ -140,7 +100,7 @@ func NewApiLambda(ctx *pulumi.Context,
 	// Create the API route
 	apiRoute, err := apigatewayv2.NewRoute(ctx, fmt.Sprintf("%s-Route", name), &apigatewayv2.RouteArgs{
 		ApiId: args.ApiId,
-		AuthorizerId: authorizer.ID(),
+		AuthorizerId: args.AuthorizerId,
 		AuthorizationType: pulumi.String("JWT"),
 		RouteKey: pulumi.Sprintf("%s %s", args.Method , args.RoutePath),
 		Target: integration.ID().ApplyT(func(id string) (string, error) {
