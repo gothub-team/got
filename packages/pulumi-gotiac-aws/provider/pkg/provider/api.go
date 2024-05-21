@@ -91,6 +91,14 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	stage, err := apigatewayv2.NewStage(ctx, "test-api-stage", &apigatewayv2.StageArgs{
+		ApiId: api.ID(),
+		AutoDeploy: pulumi.Bool(true),
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	userPool, err := cognito.GetUserPool(ctx, name, args.UserPoolId, &cognito.UserPoolState{});
 	if err != nil {
 		return nil, err
@@ -146,7 +154,7 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	component.Endpoint = api.ApiEndpoint
+	component.Endpoint = stage.InvokeUrl
 
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
 		// "name": lambdaFunction.Name,
@@ -154,7 +162,7 @@ func NewApi(ctx *pulumi.Context,
 		// "role": lambdaFunction.Role,
 		"function": apiLambda.Function,
 		// "route": apiRoute,
-		"endpoint": api.ApiEndpoint,
+		"endpoint": stage.InvokeUrl,
 	}); err != nil {
 		return nil, err
 	}
