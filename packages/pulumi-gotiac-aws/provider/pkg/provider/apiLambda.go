@@ -45,7 +45,7 @@ type ApiLambda struct {
 	// The role of the lambda resource
 	Function lambda.FunctionOutput `pulumi:"function"`
 	// The role of the lambda resource
-	Route apigatewayv2.Route `pulumi:"route"`
+	Route apigatewayv2.RouteOutput `pulumi:"route"`
 }
 
 // NewApiLambda creates a new Lambda component resource.
@@ -76,7 +76,7 @@ func NewApiLambda(ctx *pulumi.Context,
 	// Create the permission for the API Gateway to invoke the lambda function
 	_, err = lambda.NewPermission(ctx, fmt.Sprintf("%s-Permission", name), &lambda.PermissionArgs{
 		Action:   pulumi.String("lambda:InvokeFunction"),
-		Function: lambdaFunction.Arn,
+		Function: lambdaFunction.Function,
 		Principal: pulumi.String("apigateway.amazonaws.com"),
 		SourceArn: args.ExecutionArn,
 	})
@@ -88,7 +88,6 @@ func NewApiLambda(ctx *pulumi.Context,
 		ApiId:                   args.ApiId,
 		IntegrationType:         pulumi.String("AWS_PROXY"),
 		ConnectionType:          pulumi.String("INTERNET"),
-		ContentHandlingStrategy: pulumi.String("CONVERT_TO_TEXT"),
 		IntegrationMethod:       args.Method,
 		IntegrationUri:          lambdaFunction.Function.InvokeArn(),
 		PassthroughBehavior:     pulumi.String("WHEN_NO_MATCH"),
@@ -110,6 +109,12 @@ func NewApiLambda(ctx *pulumi.Context,
 	if err != nil {
 		return nil, err
 	}
+
+	component.Name = lambdaFunction.Name
+	component.Arn = lambdaFunction.Arn
+	component.Role = lambdaFunction.Role
+	component.Function = lambdaFunction.Function
+	component.Route = apiRoute.ToRouteOutput()
 
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
 		"name": lambdaFunction.Name,

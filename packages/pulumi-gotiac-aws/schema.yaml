@@ -83,6 +83,45 @@ resources:
         required:
             - name
             - arn
+    gotiac:index:Api:
+        isComponent: true
+        inputProperties:
+            userPoolId:
+                type: string
+                description: ID of the user pool.
+            codePath:
+                type: string
+                description: The path to a .zip file containing your deployment package.
+            handlerPath:
+                type: string
+                description: The path to the handler in the deployment package.
+            routePath:
+                type: string
+                description: The path to the route in the API.
+            memorySize:
+                type: number
+                description: The amount of memory in MB your Lambda Function can use at runtime.
+            runtime:
+                type: string
+                description: The runtime environment for the Lambda function.
+            policyArns:
+                type: array
+                items:
+                    type: string
+                description: The ARNs of the policies that are attached to the Lambda function.
+        requiredInputs:
+            - userPoolId
+            - codePath
+            - handlerPath
+            - routePath
+            - runtime
+            - policyArns
+        properties:
+            endpoint:
+                type: string
+                description: The endpoint of the API.
+        required:
+            - endpoint
 language:
     csharp:
         packageReferences:

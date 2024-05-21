@@ -140,6 +140,11 @@ func NewLambda(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	component.Name = lambdaFunction.Name
+	component.Arn = lambdaFunction.Arn
+	component.Role = iamRole.ToRoleOutput()
+	component.Function = lambdaFunction.ToFunctionOutput()
+
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
 		"name": lambdaFunction.Name,
 		"arn": lambdaFunction.Arn,

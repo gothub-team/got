@@ -112,7 +112,7 @@ func NewApi(ctx *pulumi.Context,
 	authorizer, err := apigatewayv2.NewAuthorizer(ctx, fmt.Sprintf("%s-Authorizer", name), &apigatewayv2.AuthorizerArgs{
 		ApiId: api.ID(),
 		AuthorizerType: pulumi.String("JWT"),
-		IdentitySources: pulumi.StringArray{ 
+		IdentitySources: pulumi.StringArray{
 			pulumi.String("$request.header.Authorization"),
 		},
 		JwtConfiguration: &apigatewayv2.AuthorizerJwtConfigurationArgs{
@@ -121,7 +121,9 @@ func NewApi(ctx *pulumi.Context,
 					pulumi.String(id),
 				}
 			}).(pulumi.StringArrayOutput),
-			Issuer: userPool.Endpoint,
+			Issuer: userPool.Endpoint.ApplyT(func(endpoint string) (string) {
+				return "https://" + endpoint
+			}).(pulumi.StringOutput).ToStringPtrOutput(),
 		},
 	})
 	if err != nil {
@@ -138,11 +140,13 @@ func NewApi(ctx *pulumi.Context,
 		PolicyArns: args.PolicyArns,
 		ApiId: api.ID(),
 		ExecutionArn: api.ExecutionArn,
-		RoutePath: pulumi.String("test"),
+		RoutePath: args.RoutePath,
 	})
 	if err != nil {
 		return nil, err
 	}
+
+	component.Endpoint = api.ApiEndpoint
 
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
 		// "name": lambdaFunction.Name,
