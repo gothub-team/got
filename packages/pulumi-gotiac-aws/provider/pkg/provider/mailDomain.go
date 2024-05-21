@@ -6,7 +6,9 @@ import (
 
 	"github.com/gothub-team/got/packages/pulumi-gotiac-aws/provider/pkg/util"
 	"github.com/gothub-team/pulumi-awsworkmail/sdk/go/awsworkmail"
+	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/route53"
+	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/ses"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
@@ -37,13 +39,23 @@ func NewMailDomain(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	// Create an ACM certificate for the domain
+	euWest1, err := aws.NewProvider(ctx, "eu-west-1", &aws.ProviderArgs{
+		Region: pulumi.String("eu-west-1"),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	hostedZoneId := util.LookUpHostedZone(ctx, args.Domain)
+
 	organization, err := awsworkmail.NewOrganization(ctx, "WorkMailOrganization", &awsworkmail.OrganizationArgs{
 		Region: pulumi.String("eu-west-1"),
 		Alias: args.Domain.ToStringOutput().ApplyT(func(domain string) string {
 			return strings.ReplaceAll(domain, ".", "") + "-" + name
 		}).(pulumi.StringOutput),
 		DomainName:   args.Domain.ToStringOutput(),
-		HostedZoneId: util.LookUpHostedZone(ctx, args.Domain),
+		HostedZoneId: hostedZoneId,
 	})
 	if err != nil {
 		return nil, err
@@ -63,6 +75,45 @@ func NewMailDomain(ctx *pulumi.Context,
 			if err != nil {
 				return err
 			}
+		}
+
+		// Create a new SES MailFrom Validation
+		mailFrom, err := ses.NewMailFrom(ctx, "example", &ses.MailFromArgs{
+			Domain: args.Domain,
+			MailFromDomain: args.Domain.ToStringOutput().ApplyT(func(domain string) (string, error) {
+				return fmt.Sprintf("mail.%v", domain), nil
+			}).(pulumi.StringOutput),
+		}, pulumi.Provider(euWest1))
+		if err != nil {
+			return err
+		}
+		// Example Route53 MX record
+		_, err = route53.NewRecord(ctx, "example_ses_domain_mail_from_mx", &route53.RecordArgs{
+			ZoneId: hostedZoneId,
+			Name:   mailFrom.MailFromDomain,
+			Type:   pulumi.String(route53.RecordTypeMX),
+			Ttl:    pulumi.Int(600),
+			Records: pulumi.StringArray{
+				pulumi.String("10 feedback-smtp.eu-west-1.amazonses.com"),
+			},
+			AllowOverwrite: pulumi.Bool(true),
+		})
+		if err != nil {
+			return err
+		}
+		// Example Route53 TXT record for SPF
+		_, err = route53.NewRecord(ctx, "example_ses_domain_mail_from_txt", &route53.RecordArgs{
+			ZoneId: hostedZoneId,
+			Name:   mailFrom.MailFromDomain,
+			Type:   pulumi.String(route53.RecordTypeTXT),
+			Ttl:    pulumi.Int(600),
+			Records: pulumi.StringArray{
+				pulumi.String("v=spf1 include:amazonses.com -all"),
+			},
+			AllowOverwrite: pulumi.Bool(true),
+		})
+		if err != nil {
+			return err
 		}
 		return nil
 	})
