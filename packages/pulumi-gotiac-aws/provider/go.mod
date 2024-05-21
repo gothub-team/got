@@ -8,7 +8,7 @@ retract [v0.0.1, v0.0.15]
 
 require (
 	github.com/ghodss/yaml v1.0.0
-	github.com/gothub-team/pulumi-awsworkmail/sdk v0.0.17
+	github.com/gothub-team/pulumi-awsworkmail/sdk v0.0.28
 	github.com/pkg/errors v0.9.1
 	github.com/pulumi/pulumi-aws/sdk/v6 v6.36.0
 	github.com/pulumi/pulumi-random/sdk/v4 v4.16.1

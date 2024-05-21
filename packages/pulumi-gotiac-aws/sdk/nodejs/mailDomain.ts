@@ -20,9 +20,9 @@ export class MailDomain extends pulumi.ComponentResource {
     }
 
     /**
-     * A random string to ensure uniqueness.
+     * The ID of the organization that can be used to create mailboxes
      */
-    public /*out*/ readonly random!: pulumi.Output<string>;
+    public /*out*/ readonly organizationId!: pulumi.Output<string>;
 
     /**
      * Create a MailDomain resource with the given unique name, arguments, and options.
@@ -31,13 +31,17 @@ export class MailDomain extends pulumi.ComponentResource {
      * @param args The arguments to use to populate this resource's properties.
      * @param opts A bag of options that control this resource's behavior.
      */
-    constructor(name: string, args?: MailDomainArgs, opts?: pulumi.ComponentResourceOptions) {
+    constructor(name: string, args: MailDomainArgs, opts?: pulumi.ComponentResourceOptions) {
         let resourceInputs: pulumi.Inputs = {};
         opts = opts || {};
         if (!opts.id) {
-            resourceInputs["random"] = undefined /*out*/;
+            if ((!args || args.domain === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'domain'");
+            }
+            resourceInputs["domain"] = args ? args.domain : undefined;
+            resourceInputs["organizationId"] = undefined /*out*/;
         } else {
-            resourceInputs["random"] = undefined /*out*/;
+            resourceInputs["organizationId"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
         super(MailDomain.__pulumiType, name, resourceInputs, opts, true /*remote*/);
@@ -48,4 +52,8 @@ export class MailDomain extends pulumi.ComponentResource {
  * The set of arguments for constructing a MailDomain resource.
  */
 export interface MailDomainArgs {
+    /**
+     * The domain to be used for the mailboxes
+     */
+    domain: pulumi.Input<string>;
 }

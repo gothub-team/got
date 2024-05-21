@@ -10,6 +10,7 @@
         "noFallthroughCasesInSwitch": true,
         "forceConsistentCasingInFileNames": true,
         "strict": true,
+        "verbatimModuleSyntax": false,
 
         "types": ["@types/node"]
     }
