@@ -36,8 +36,6 @@ func NewMailDomain(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	fmt.Println(name)
-
 	organization, err := awsworkmail.NewOrganization(ctx, "WorkMailOrganization", &awsworkmail.OrganizationArgs{
 		Region: pulumi.String("eu-west-1"),
 		Alias: args.Domain.ToStringOutput().ApplyT(func(domain string) string {
@@ -49,6 +47,17 @@ func NewMailDomain(ctx *pulumi.Context,
 	if err != nil {
 		return nil, err
 	}
+	organization.Records.ApplyT(func(records []awsworkmail.DnsRecord) error {
+		for _, record := range records {
+			fmt.Println("Record: ", record.Type)
+			fmt.Println("Record: ", record.Hostname)
+			fmt.Println("Record: ", record.Value)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 
 	component.OrganizationId = organization.ID().ToStringOutput()
 
