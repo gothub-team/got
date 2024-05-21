@@ -23,13 +23,14 @@ export default $config({
             bucketName: env.FILE_HOSTING_BUCKET,
         });
 
-        const mailDomain = new gotiac.MailDomain('MailDomain', {});
+        new gotiac.MailDomain('MailDomain', {
+            domain: env.BASE_DOMAIN,
+        });
 
         return {
             url: pulumi.interpolate`https://${fileHosting.url}`,
             privateKeyId: fileHosting.privateKeyId,
             privateKeyParameterName: fileHosting.privateKeyParameterName,
-            random: pulumi.interpolate`${mailDomain.random}`,
         };
     },
 });
