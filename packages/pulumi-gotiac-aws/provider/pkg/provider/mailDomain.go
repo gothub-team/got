@@ -6,6 +6,7 @@ import (
 
 	"github.com/gothub-team/got/packages/pulumi-gotiac-aws/provider/pkg/util"
 	"github.com/gothub-team/pulumi-awsworkmail/sdk/go/awsworkmail"
+	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/route53"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
@@ -48,10 +49,17 @@ func NewMailDomain(ctx *pulumi.Context,
 		return nil, err
 	}
 	organization.Records.ApplyT(func(records []awsworkmail.DnsRecord) error {
-		for _, record := range records {
-			fmt.Println("Record: ", record.Type)
-			fmt.Println("Record: ", record.Hostname)
-			fmt.Println("Record: ", record.Value)
+		for i, record := range records {
+			_, err := route53.NewRecord(ctx, fmt.Sprintf("WorkMailRecord%v", i), &route53.RecordArgs{
+				Name: pulumi.String(record.Hostname),
+				Type: pulumi.String(record.Type),
+				Records: pulumi.StringArray{
+					pulumi.String(record.Value),
+				},
+				ZoneId:         organization.HostedZoneId.ApplyT(func(zoneId string) string { return zoneId }).(pulumi.StringOutput),
+				Ttl:            pulumi.Int(300),
+				AllowOverwrite: pulumi.Bool(true),
+			})
 			if err != nil {
 				return err
 			}
