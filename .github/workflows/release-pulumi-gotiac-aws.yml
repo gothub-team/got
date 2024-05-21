@@ -68,7 +68,7 @@ jobs:
             fail-fast: true
             matrix:
                 version:
-                    - 'v0.0.50'
+                    - 'v0.1.1'
                 binary:
                     - pulumi-resource-gotiac
                 goversion:
