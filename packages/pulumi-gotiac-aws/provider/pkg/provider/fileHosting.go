@@ -1,9 +1,7 @@
 package provider
 
 import (
-	"errors"
-	"strings"
-
+	"github.com/gothub-team/got/packages/pulumi-gotiac-aws/provider/pkg/util"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/acm"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/cloudfront"
@@ -106,7 +104,7 @@ func NewFileHosting(ctx *pulumi.Context,
 		return nil, err
 	}
 	// Look up the hosted zone for the domain
-	hostedZoneId := lookUpHostedZone(ctx, args.Domain)
+	hostedZoneId := util.LookUpHostedZone(ctx, args.Domain)
 	// Use the Route 53 HostedZone ID and Record Name/Type from the certificate's DomainValidationOptions to create a DNS record
 	validationRecord := certificate.DomainValidationOptions.Index(pulumi.Int(0))
 	// Create a Route 53 record set for the domain
@@ -357,27 +355,4 @@ func NewFileHosting(ctx *pulumi.Context,
 	}
 
 	return component, nil
-}
-
-func lookUpHostedZone(ctx *pulumi.Context, domain pulumi.StringInput) pulumi.StringOutput {
-	return domain.ToStringOutput().ApplyT(func(_domain string) (string, error) {
-		// Split the domain into parts
-		parts := strings.Split(_domain, ".")
-		// Construct each parent domain starting from the full domain
-		for i := range parts {
-			// Join parts from i to end
-			parentDomain := strings.Join(parts[i:], ".") + "."
-			// Look up the hosted zone for the parent domain
-			hostedZone, err := route53.LookupZone(ctx, &route53.LookupZoneArgs{
-				Name: &parentDomain,
-			})
-			if err != nil {
-				continue
-			}
-			if hostedZone != nil {
-				return hostedZone.Id, nil
-			}
-		}
-		return "", errors.New("no hosted zone found for domain " + _domain)
-	}).(pulumi.StringOutput)
 }
