@@ -77,6 +77,11 @@ resources:
             runtime:
                 type: string
                 description: The runtime environment for the Lambda function.
+            environment:
+                type: object
+                description: The environment variables that are accessible from the function code during execution.
+                items:
+                    type: string
             policyArns:
                 type: array
                 items:

@@ -149,6 +149,7 @@ func NewApi(ctx *pulumi.Context,
 		ApiId: api.ID(),
 		ExecutionArn: api.ExecutionArn,
 		RoutePath: args.RoutePath,
+		Environment: pulumi.StringMap{},
 	})
 	if err != nil {
 		return nil, err

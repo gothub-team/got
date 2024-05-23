@@ -52,6 +52,7 @@ export class Lambda extends pulumi.ComponentResource {
                 throw new Error("Missing required property 'runtime'");
             }
             resourceInputs["codePath"] = args ? args.codePath : undefined;
+            resourceInputs["environment"] = args ? args.environment : undefined;
             resourceInputs["handlerPath"] = args ? args.handlerPath : undefined;
             resourceInputs["memorySize"] = args ? args.memorySize : undefined;
             resourceInputs["policyArns"] = args ? args.policyArns : undefined;
@@ -75,6 +76,10 @@ export interface LambdaArgs {
      * The path to a .zip file containing your deployment package.
      */
     codePath: pulumi.Input<string>;
+    /**
+     * The environment variables that are accessible from the function code during execution.
+     */
+    environment?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
     /**
      * The path to the handler in the deployment package.
      */

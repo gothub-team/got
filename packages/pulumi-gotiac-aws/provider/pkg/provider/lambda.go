@@ -17,6 +17,8 @@ type LambdaArgs struct {
 	MemorySize *pulumi.Int `pulumi:"memorySize"`
 	// The lambda runtime
 	Runtime pulumi.StringInput `pulumi:"runtime"`
+	// Map of environment variables to pass to the lambda function
+	Environment pulumi.StringMapInput `pulumi:"environment"`
 	// The array of policy arns that should be attachen to the lambda function role
 	PolicyArns pulumi.StringArrayInput `pulumi:"policyArns"`
 }
@@ -134,6 +136,9 @@ func NewLambda(ctx *pulumi.Context,
 		Role:    iamRole.Arn,
 		Handler: args.HandlerPath,
 		Runtime: args.Runtime,
+		Environment: &lambda.FunctionEnvironmentArgs{
+			Variables: args.Environment,
+		},
 		MemorySize: memorySize,
 	})
 	if err != nil {
