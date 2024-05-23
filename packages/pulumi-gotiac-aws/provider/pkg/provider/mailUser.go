@@ -3,6 +3,7 @@ package provider
 import (
 	"github.com/gothub-team/got/packages/pulumi-gotiac-aws/provider/pkg/util"
 	"github.com/gothub-team/pulumi-awsworkmail/sdk/go/awsworkmail"
+	"github.com/pulumi/pulumi-random/sdk/v4/go/random"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
@@ -54,16 +55,43 @@ func NewMailUser(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	mailUser, err := awsworkmail.NewUser(ctx, "WorkMailUser", &awsworkmail.UserArgs{
-		Region:         args.Region.ToStringOutput(),
-		DisplayName:    args.DisplayName.ToStringOutput(),
-		Name:           args.Name.ToStringOutput(),
-		Domain:         util.OptionalStringPtr(args.Domain),
-		OrganizationId: util.OptionalStringPtr(args.OrganizationId),
+	// Create a random password for the mail  user.
+	password, err := random.NewRandomPassword(ctx, name+"Password", &random.RandomPasswordArgs{
+		Length:     pulumi.Int(64),
+		MinLower:   pulumi.Int(1),
+		MinUpper:   pulumi.Int(1),
+		MinNumeric: pulumi.Int(1),
+		MinSpecial: pulumi.Int(1),
 	})
 	if err != nil {
 		return nil, err
 	}
+
+	mailUser, err := awsworkmail.NewUser(ctx, "WorkMailUser", &awsworkmail.UserArgs{
+		Region:         args.Region.ToStringOutput(),
+		DisplayName:    args.DisplayName.ToStringOutput(),
+		Name:           args.Name.ToStringOutput(),
+		Password:       password.Result.ToStringPtrOutput(),
+		Domain:         util.OptionalStringPtr(args.Domain),
+		OrganizationId: util.OptionalStringPtr(args.OrganizationId),
+		FirstName:      util.OptionalStringPtr(args.FirstName),
+		LastName:       util.OptionalStringPtr(args.LastName),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	args.Enabled.ToBoolOutput().ApplyT(func(enabled bool) error {
+		if enabled {
+			_, err = awsworkmail.NewWorkmailRegistration(ctx, "WorkMailRegistration", &awsworkmail.WorkmailRegistrationArgs{
+				Region:         args.Region.ToStringOutput(),
+				OrganizationId: mailUser.OrganizationId,
+				EmailPrefix:    args.EmailPrefix.ToStringOutput(),
+				EntityId:       mailUser.ID().ToStringOutput(),
+			})
+		}
+		return err
+	})
 
 	component.UserId = mailUser.ID().ToStringOutput()
 

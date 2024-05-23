@@ -41,6 +41,9 @@ export class MailUser extends pulumi.ComponentResource {
             if ((!args || args.emailPrefix === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'emailPrefix'");
             }
+            if ((!args || args.enabled === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'enabled'");
+            }
             if ((!args || args.name === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'name'");
             }
@@ -84,7 +87,7 @@ export interface MailUserArgs {
     /**
      * Whether the mailbox for the user is enabled.
      */
-    enabled?: pulumi.Input<boolean>;
+    enabled: pulumi.Input<boolean>;
     /**
      * The first name of the new user.
      */

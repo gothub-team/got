@@ -64,6 +64,7 @@ resources:
             - displayName
             - name
             - emailPrefix
+            - enabled
         properties:
             userId:
                 type: string
