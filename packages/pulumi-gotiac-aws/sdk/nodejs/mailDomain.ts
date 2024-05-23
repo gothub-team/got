@@ -38,7 +38,11 @@ export class MailDomain extends pulumi.ComponentResource {
             if ((!args || args.domain === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'domain'");
             }
+            if ((!args || args.region === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'region'");
+            }
             resourceInputs["domain"] = args ? args.domain : undefined;
+            resourceInputs["region"] = args ? args.region : undefined;
             resourceInputs["organizationId"] = undefined /*out*/;
         } else {
             resourceInputs["organizationId"] = undefined /*out*/;
@@ -56,4 +60,8 @@ export interface MailDomainArgs {
      * The domain to be used for the mailboxes
      */
     domain: pulumi.Input<string>;
+    /**
+     * The aws region to create the domain in.
+     */
+    region: pulumi.Input<string>;
 }
