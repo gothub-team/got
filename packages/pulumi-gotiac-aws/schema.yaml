@@ -21,6 +21,52 @@ resources:
                 description: The ID of the organization that can be used to create mailboxes
         required:
             - organizationId
+    gotiac:index:MailUser:
+        isComponent: true
+        inputProperties:
+            region:
+                type: string
+                description: The region to create the mail domain in
+            displayName:
+                type: string
+                description: The display name for the new user.
+            name:
+                type: string
+                description:
+                    The name for the new user. WorkMail directory user names have a maximum length of 64. All others
+                    have a maximum length of 20.
+            emailPrefix:
+                type: string
+                description:
+                    The email prefix for the new user. (prefix@domain.com). The default domain of the organization will
+                    be appended automatically.
+            organizationId:
+                type: string
+                description:
+                    The identifier of the organization for which the user is created. Either organizationId or domain
+                    must be specified.
+            domain:
+                type: string
+                description:
+                    The mail domain of the organization for which the user is created. Either organizationId or domain
+                    must be specified.
+            firstName:
+                type: string
+                description: The first name of the new user.
+            lastName:
+                type: string
+                description: The last name of the new user.
+        requiredInputs:
+            - region
+            - displayName
+            - name
+            - emailPrefix
+        properties:
+            userId:
+                type: string
+                description: The ID of the organization that can be used to create mailboxes
+        required:
+            - userId
     gotiac:index:FileHosting:
         isComponent: true
         inputProperties:
