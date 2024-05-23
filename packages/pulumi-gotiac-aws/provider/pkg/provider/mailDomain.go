@@ -49,20 +49,56 @@ func NewMailDomain(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	hostedZoneId := util.LookUpHostedZone(ctx, args.Domain)
-
 	organization, err := awsworkmail.NewOrganization(ctx, "WorkMailOrganization", &awsworkmail.OrganizationArgs{
 		Region: args.Region.ToStringOutput(),
 		Alias: args.Domain.ToStringOutput().ApplyT(func(domain string) string {
 			return strings.ReplaceAll(domain, ".", "") + "-" + name
 		}).(pulumi.StringOutput),
-		DomainName:   args.Domain.ToStringOutput(),
-		HostedZoneId: hostedZoneId,
 	})
 	if err != nil {
 		return nil, err
 	}
-	organization.Records.ApplyT(func(records []awsworkmail.DnsRecord) error {
+
+	hostedZoneId := util.LookUpHostedZone(ctx, args.Domain)
+
+	// Create a new SES Domain Identity
+	domainIdentity, err := ses.NewDomainIdentity(ctx, "WorkMailDomainIdentity", &ses.DomainIdentityArgs{
+		Domain: args.Domain,
+	}, pulumi.Provider(mailRegionProvider))
+	if err != nil {
+		return nil, err
+	}
+	verificationRecord, err := route53.NewRecord(ctx, "example_amazonses_verification_record", &route53.RecordArgs{
+		ZoneId: hostedZoneId,
+		Name:   pulumi.Sprintf("_amazonses.%v", domainIdentity.ID()),
+		Type:   pulumi.String(route53.RecordTypeTXT),
+		Ttl:    pulumi.Int(300),
+		Records: pulumi.StringArray{
+			domainIdentity.VerificationToken,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	domainIdentityVerification, err := ses.NewDomainIdentityVerification(ctx, "example_verification", &ses.DomainIdentityVerificationArgs{
+		Domain: domainIdentity.Domain,
+	}, pulumi.Provider(mailRegionProvider), pulumi.DependsOn([]pulumi.Resource{
+		verificationRecord,
+	}))
+	if err != nil {
+		return nil, err
+	}
+
+	defaultDomain, err := awsworkmail.NewDefaultDomain(ctx, "WorkMailDefaultDomain", &awsworkmail.DefaultDomainArgs{
+		Region:         args.Region.ToStringOutput(),
+		OrganizationId: organization.ID().ToStringOutput(),
+		DomainName:     args.Domain.ToStringOutput(),
+	}, pulumi.DependsOn([]pulumi.Resource{domainIdentityVerification}))
+	if err != nil {
+		return nil, err
+	}
+
+	defaultDomain.Records.ApplyT(func(records []awsworkmail.DnsRecord) error {
 		for i, record := range records {
 			_, err := route53.NewRecord(ctx, fmt.Sprintf("WorkMailRecord%v", i), &route53.RecordArgs{
 				Name: pulumi.String(record.Hostname),
@@ -70,7 +106,7 @@ func NewMailDomain(ctx *pulumi.Context,
 				Records: pulumi.StringArray{
 					pulumi.String(record.Value),
 				},
-				ZoneId:         organization.HostedZoneId.ApplyT(func(zoneId string) string { return zoneId }).(pulumi.StringOutput),
+				ZoneId:         hostedZoneId,
 				Ttl:            pulumi.Int(300),
 				AllowOverwrite: pulumi.Bool(true),
 			})
@@ -81,10 +117,8 @@ func NewMailDomain(ctx *pulumi.Context,
 
 		// Create a new SES MailFrom Validation
 		mailFrom, err := ses.NewMailFrom(ctx, "example", &ses.MailFromArgs{
-			Domain: args.Domain,
-			MailFromDomain: args.Domain.ToStringOutput().ApplyT(func(domain string) (string, error) {
-				return fmt.Sprintf("mail.%v", domain), nil
-			}).(pulumi.StringOutput),
+			Domain:         args.Domain,
+			MailFromDomain: pulumi.Sprintf("mail.%v", args.Domain),
 		}, pulumi.Provider(mailRegionProvider))
 		if err != nil {
 			return err

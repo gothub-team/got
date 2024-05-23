@@ -264,6 +264,8 @@ github.com/gothub-team/pulumi-awsworkmail/sdk v0.1.3 h1:sTAXW1LPG0QdXf0Gew6hITQR
 github.com/gothub-team/pulumi-awsworkmail/sdk v0.1.3/go.mod h1:BMEioysXJbngQnegvbrK9WQE60rftEr9kyos9Ry88yU=
 github.com/gothub-team/pulumi-awsworkmail/sdk v0.1.4 h1:Bak0L2h/y2lT2wrs+YK6Xz79hjS+7M5Vjm4DuNEYiVA=
 github.com/gothub-team/pulumi-awsworkmail/sdk v0.1.4/go.mod h1:BMEioysXJbngQnegvbrK9WQE60rftEr9kyos9Ry88yU=
+github.com/gothub-team/pulumi-awsworkmail/sdk v0.1.5 h1:YtgFYNsm6a+mYtEJezaF+lrjCk0HGtCIGTTWotj3DBo=
+github.com/gothub-team/pulumi-awsworkmail/sdk v0.1.5/go.mod h1:BMEioysXJbngQnegvbrK9WQE60rftEr9kyos9Ry88yU=
 github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645 h1:MJG/KsmcqMwFAkh8mTnAwhyKoB+sTAnY4CACC110tbU=
 github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645/go.mod h1:6iZfnjpejD4L/4DwD7NryNaJyCQdzwWwH2MWhCA90Kw=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
