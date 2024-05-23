@@ -40,6 +40,9 @@ resources:
                 description:
                     The email prefix for the new user. (prefix@domain.com). The default domain of the organization will
                     be appended automatically.
+            enabled:
+                type: boolean
+                description: Whether the mailbox for the user is enabled.
             organizationId:
                 type: string
                 description:

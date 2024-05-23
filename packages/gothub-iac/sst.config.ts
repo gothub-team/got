@@ -28,6 +28,14 @@ export default $config({
             region: env.AWS_MAIL_REGION,
         });
 
+        new gotiac.MailUser('MailUser', {
+            region: env.AWS_MAIL_REGION,
+            domain: env.BASE_DOMAIN,
+            displayName: 'Info',
+            name: 'Info',
+            emailPrefix: 'info',
+        });
+
         return {
             // url: pulumi.interpolate`https://${fileHosting.url}`,
             // privateKeyId: fileHosting.privateKeyId,

@@ -18,6 +18,8 @@ type MailUserArgs struct {
 	// The email prefix for the new user. (prefix@domain.com).
 	// The default domain of the organization will be appended automatically.
 	EmailPrefix pulumi.StringInput `pulumi:"emailPrefix"`
+	// Whether the mailbox for the user is enabled.
+	Enabled pulumi.BoolInput `pulumi:"enabled"`
 	// The identifier of the organization for which the user is created. Either
 	// organizationId or domain must be specified.
 	OrganizationId *pulumi.StringInput `pulumi:"organizationId,optional"`
@@ -54,6 +56,8 @@ func NewMailUser(ctx *pulumi.Context,
 
 	mailUser, err := awsworkmail.NewUser(ctx, "WorkMailUser", &awsworkmail.UserArgs{
 		Region:         args.Region.ToStringOutput(),
+		DisplayName:    args.DisplayName.ToStringOutput(),
+		Name:           args.Name.ToStringOutput(),
 		Domain:         util.OptionalStringPtr(args.Domain),
 		OrganizationId: util.OptionalStringPtr(args.OrganizationId),
 	})

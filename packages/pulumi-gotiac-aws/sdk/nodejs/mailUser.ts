@@ -50,6 +50,7 @@ export class MailUser extends pulumi.ComponentResource {
             resourceInputs["displayName"] = args ? args.displayName : undefined;
             resourceInputs["domain"] = args ? args.domain : undefined;
             resourceInputs["emailPrefix"] = args ? args.emailPrefix : undefined;
+            resourceInputs["enabled"] = args ? args.enabled : undefined;
             resourceInputs["firstName"] = args ? args.firstName : undefined;
             resourceInputs["lastName"] = args ? args.lastName : undefined;
             resourceInputs["name"] = args ? args.name : undefined;
@@ -80,6 +81,10 @@ export interface MailUserArgs {
      * The email prefix for the new user. (prefix@domain.com). The default domain of the organization will be appended automatically.
      */
     emailPrefix: pulumi.Input<string>;
+    /**
+     * Whether the mailbox for the user is enabled.
+     */
+    enabled?: pulumi.Input<boolean>;
     /**
      * The first name of the new user.
      */
