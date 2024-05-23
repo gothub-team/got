@@ -116,6 +116,7 @@ func NewFileHosting(ctx *pulumi.Context,
 		Records: pulumi.StringArray{
 			validationRecord.ResourceRecordValue().Elem(),
 		},
+		AllowOverwrite: pulumi.Bool(true),
 	}, pulumi.Provider(usEast1))
 	if err != nil {
 		return nil, err
