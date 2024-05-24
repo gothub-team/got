@@ -15,6 +15,11 @@ export type FileHosting = import("./fileHosting").FileHosting;
 export const FileHosting: typeof import("./fileHosting").FileHosting = null as any;
 utilities.lazyLoad(exports, ["FileHosting"], () => require("./fileHosting"));
 
+export { GraphStoreArgs } from "./graphStore";
+export type GraphStore = import("./graphStore").GraphStore;
+export const GraphStore: typeof import("./graphStore").GraphStore = null as any;
+utilities.lazyLoad(exports, ["GraphStore"], () => require("./graphStore"));
+
 export { LambdaArgs } from "./lambda";
 export type Lambda = import("./lambda").Lambda;
 export const Lambda: typeof import("./lambda").Lambda = null as any;
@@ -44,6 +49,8 @@ const _module = {
                 return new Api(name, <any>undefined, { urn })
             case "gotiac:index:FileHosting":
                 return new FileHosting(name, <any>undefined, { urn })
+            case "gotiac:index:GraphStore":
+                return new GraphStore(name, <any>undefined, { urn })
             case "gotiac:index:Lambda":
                 return new Lambda(name, <any>undefined, { urn })
             case "gotiac:index:MailDomain":

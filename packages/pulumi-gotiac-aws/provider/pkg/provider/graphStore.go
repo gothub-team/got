@@ -20,15 +20,16 @@ type GraphStoreArgs struct {
 // The GraphStore component resource.
 type GraphStore struct {
 	pulumi.ResourceState
-	BucketNodes BucketInfo `pulumi:"bucketNodes"`
+	BucketNodes pulumi.MapOutput `pulumi:"bucketNodes"`
+	BucketNodesName pulumi.StringOutput `pulumi:"bucketNodesName"`
 	BucketEdges BucketInfo `pulumi:"bucketEdges"`
 	BucketReverseEdges BucketInfo `pulumi:"bucketReverseEdges"`
 	BucketRightsRead BucketInfo `pulumi:"bucketRightsRead"`
 	BucketRightsWrite BucketInfo `pulumi:"bucketRightsWrite"`
 	BucketRightsAdmin BucketInfo `pulumi:"bucketRightsAdmin"`
 	BucketRightsOwner BucketInfo `pulumi:"bucketRightsOwner"`
-	storageReadPolicyArn pulumi.StringOutput `pulumi:"storageReadPolicyArn"`
-	storageWritePolicyArn pulumi.StringOutput `pulumi:"storageWritePolicyArn"`
+	StorageReadPolicyArn pulumi.StringOutput `pulumi:"storageReadPolicyArn"`
+	StorageWritePolicyArn pulumi.StringOutput `pulumi:"storageWritePolicyArn"`
 }
 
 type BucketInfo struct {
@@ -56,32 +57,32 @@ func NewGraphStore(ctx *pulumi.Context,
 	}
 
 	// create edges buckets
-	bucketEdges, err  := lookupOrCreateBucket(ctx, args.BucketEdgesName, name + "-edges")
-	if err != nil {
-		return nil, err
-	}
-	bucketReverseEdges, err  := lookupOrCreateBucket(ctx, args.BucketReverseEdgesName, name + "-reverse-edges")
-	if err != nil {
-		return nil, err
-	}
+	// bucketEdges, err  := lookupOrCreateBucket(ctx, args.BucketEdgesName, name + "-edges")
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// bucketReverseEdges, err  := lookupOrCreateBucket(ctx, args.BucketReverseEdgesName, name + "-reverse-edges")
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	// create right buckets
-	bucketRightsRead, err  := lookupOrCreateBucket(ctx, args.BucketRightsReadName, name + "-rights-read")
-	if err != nil {
-		return nil, err
-	}
-	bucketRightsWrite, err  := lookupOrCreateBucket(ctx, args.BucketRightsWriteName, name + "-rights-write")
-	if err != nil {
-		return nil, err
-	}
-	bucketRightsAdmin, err  := lookupOrCreateBucket(ctx, args.BucketRightsAdminName, name + "-rights-admin")
-	if err != nil {
-		return nil, err
-	}
-	bucketRightsOwner, err  := lookupOrCreateBucket(ctx, args.BucketRightsOwnerName, name + "-rights-owner")
-	if err != nil {
-		return nil, err
-	}
+	// bucketRightsRead, err  := lookupOrCreateBucket(ctx, args.BucketRightsReadName, name + "-rights-read")
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// bucketRightsWrite, err  := lookupOrCreateBucket(ctx, args.BucketRightsWriteName, name + "-rights-write")
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// bucketRightsAdmin, err  := lookupOrCreateBucket(ctx, args.BucketRightsAdminName, name + "-rights-admin")
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// bucketRightsOwner, err  := lookupOrCreateBucket(ctx, args.BucketRightsOwnerName, name + "-rights-owner")
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	storageReadPolicy, err := iam.NewPolicy(ctx, name + "-storage-read-policy", &iam.PolicyArgs{
 		Name:        pulumi.String(name + "-storage-read-policy"),
@@ -98,12 +99,12 @@ func NewGraphStore(ctx *pulumi.Context,
 					},
 					"Resource": []interface{}{
 						pulumi.Sprintf("%v/*", bucketNodes.Arn),
-						pulumi.Sprintf("%v/*", bucketEdges.Arn),
-						pulumi.Sprintf("%v/*", bucketReverseEdges.Arn),
-						pulumi.Sprintf("%v/*", bucketRightsRead.Arn),
-						pulumi.Sprintf("%v/*", bucketRightsWrite.Arn),
-						pulumi.Sprintf("%v/*", bucketRightsAdmin.Arn),
-						pulumi.Sprintf("%v/*", bucketRightsOwner.Arn),
+						// pulumi.Sprintf("%v/*", bucketEdges.Arn),
+						// pulumi.Sprintf("%v/*", bucketReverseEdges.Arn),
+						// pulumi.Sprintf("%v/*", bucketRightsRead.Arn),
+						// pulumi.Sprintf("%v/*", bucketRightsWrite.Arn),
+						// pulumi.Sprintf("%v/*", bucketRightsAdmin.Arn),
+						// pulumi.Sprintf("%v/*", bucketRightsOwner.Arn),
 					},
 				},
 				{
@@ -113,12 +114,12 @@ func NewGraphStore(ctx *pulumi.Context,
 					},
 					"Resource": []interface{}{
 						pulumi.Sprintf("%v", bucketNodes.Arn),
-						pulumi.Sprintf("%v", bucketEdges.Arn),
-						pulumi.Sprintf("%v", bucketReverseEdges.Arn),
-						pulumi.Sprintf("%v", bucketRightsRead.Arn),
-						pulumi.Sprintf("%v", bucketRightsWrite.Arn),
-						pulumi.Sprintf("%v", bucketRightsAdmin.Arn),
-						pulumi.Sprintf("%v", bucketRightsOwner.Arn),
+						// pulumi.Sprintf("%v", bucketEdges.Arn),
+						// pulumi.Sprintf("%v", bucketReverseEdges.Arn),
+						// pulumi.Sprintf("%v", bucketRightsRead.Arn),
+						// pulumi.Sprintf("%v", bucketRightsWrite.Arn),
+						// pulumi.Sprintf("%v", bucketRightsAdmin.Arn),
+						// pulumi.Sprintf("%v", bucketRightsOwner.Arn),
 					},
 				},
 			},
@@ -144,12 +145,12 @@ func NewGraphStore(ctx *pulumi.Context,
 					},
 					"Resource": []interface{}{
 						pulumi.Sprintf("%v/*", bucketNodes.Arn),
-						pulumi.Sprintf("%v/*", bucketEdges.Arn),
-						pulumi.Sprintf("%v/*", bucketReverseEdges.Arn),
-						pulumi.Sprintf("%v/*", bucketRightsRead.Arn),
-						pulumi.Sprintf("%v/*", bucketRightsWrite.Arn),
-						pulumi.Sprintf("%v/*", bucketRightsAdmin.Arn),
-						pulumi.Sprintf("%v/*", bucketRightsOwner.Arn),
+						// pulumi.Sprintf("%v/*", bucketEdges.Arn),
+						// pulumi.Sprintf("%v/*", bucketReverseEdges.Arn),
+						// pulumi.Sprintf("%v/*", bucketRightsRead.Arn),
+						// pulumi.Sprintf("%v/*", bucketRightsWrite.Arn),
+						// pulumi.Sprintf("%v/*", bucketRightsAdmin.Arn),
+						// pulumi.Sprintf("%v/*", bucketRightsOwner.Arn),
 					},
 				},
 			},
@@ -159,18 +160,21 @@ func NewGraphStore(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	component.BucketNodes = *bucketNodes
-	component.BucketEdges = *bucketEdges
-	component.BucketReverseEdges = *bucketReverseEdges
-	component.BucketRightsRead = *bucketRightsRead
-	component.BucketRightsWrite = *bucketRightsWrite
-	component.BucketRightsAdmin = *bucketRightsAdmin
-	component.BucketRightsOwner = *bucketRightsOwner
-	component.storageReadPolicyArn = storageReadPolicy.Arn
-	component.storageWritePolicyArn = storageWritePolicy.Arn
+	component.BucketNodes = pulumi.Map{
+		"name": bucketNodes.Name,
+		"arn": bucketNodes.Arn,
+	}.ToMapOutput()
+	component.BucketNodesName = bucketNodes.Name.ToStringOutput()
+	// component.BucketEdges = *bucketEdges
+	// component.BucketReverseEdges = *bucketReverseEdges
+	// component.BucketRightsRead = *bucketRightsRead
+	// component.BucketRightsWrite = *bucketRightsWrite
+	// component.BucketRightsAdmin = *bucketRightsAdmin
+	// component.BucketRightsOwner = *bucketRightsOwner
+	component.StorageReadPolicyArn = storageReadPolicy.Arn
+	component.StorageWritePolicyArn = storageWritePolicy.Arn
 
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
-
 	}); err != nil {
 		return nil, err
 	}

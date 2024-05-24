@@ -35,6 +35,8 @@ func construct(ctx *pulumi.Context, typ, name string, inputs provider.ConstructI
 		return constructLambda(ctx, name, inputs, options)
 	case "gotiac:index:Api":
 		return constructApi(ctx, name, inputs, options)
+	case "gotiac:index:GraphStore":
+		return constructGraphStore(ctx, name, inputs, options)
 	default:
 		return nil, errors.Errorf("unknown resource type %s", typ)
 	}
@@ -138,6 +140,23 @@ func constructApi(ctx *pulumi.Context, name string, inputs provider.ConstructInp
 
 	// Create the component resource.
 	testUser, err := NewApi(ctx, name, args, options)
+	if err != nil {
+		return nil, errors.Wrap(err, "creating component")
+	}
+
+	return provider.NewConstructResult(testUser)
+}
+
+func constructGraphStore(ctx *pulumi.Context, name string, inputs provider.ConstructInputs,
+	options pulumi.ResourceOption) (*provider.ConstructResult, error) {
+
+	args := &GraphStoreArgs{}
+	if err := inputs.CopyTo(args); err != nil {
+		return nil, errors.Wrap(err, "setting args")
+	}
+
+	// Create the component resource.
+	testUser, err := NewGraphStore(ctx, name, args, options)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating component")
 	}

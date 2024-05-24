@@ -145,6 +145,115 @@ resources:
                 description: The endpoint of the API.
         required:
             - endpoint
+    gotiac:index:GraphStore:
+        isComponent: true
+        inputProperties:
+            bucketNodesName:
+                type: string
+                description: The bucket to be used for node storage
+            bucketEdgesName:
+                type: string
+                description: The bucket to be used for edge storage
+            bucketReverseEdgesName:
+                type: string
+                description: The bucket to be used for reverse edge storage
+            bucketRightsReadName:
+                type: string
+                description: The bucket to be used for read right storage
+            bucketRightsWriteName:
+                type: string
+                description: The bucket to be used for write right storage
+            bucketRightsAdminName:
+                type: string
+                description: The bucket to be used for admin right storage
+            bucketRightsOwnerName:
+                type: string
+                description: The bucket to be used for owner right storage
+        requiredInputs:
+        properties:
+            bucketNodes:
+                type: object
+                properties:
+                    name:
+                        type: string
+                        description: The name of the bucket.
+                    arn:
+                        type: string
+                        description: The ARN of the bucket.
+            bucketNodesName:
+                type: string
+                description: The ARN of the storage write policy.
+            bucketEdges:
+                type: object
+                properties:
+                    name:
+                        type: string
+                        description: The name of the bucket.
+                    arn:
+                        type: string
+                        description: The ARN of the bucket.
+            bucketReverseEdges:
+                type: object
+                properties:
+                    name:
+                        type: string
+                        description: The name of the bucket.
+                    arn:
+                        type: string
+                        description: The ARN of the bucket.
+            bucketRightsRead:
+                type: object
+                properties:
+                    name:
+                        type: string
+                        description: The name of the bucket.
+                    arn:
+                        type: string
+                        description: The ARN of the bucket.
+            bucketRightsWrite:
+                type: object
+                properties:
+                    name:
+                        type: string
+                        description: The name of the bucket.
+                    arn:
+                        type: string
+                        description: The ARN of the bucket.
+            bucketRightsAdmin:
+                type: object
+                properties:
+                    name:
+                        type: string
+                        description: The name of the bucket.
+                    arn:
+                        type: string
+                        description: The ARN of the bucket.
+            bucketRightsOwner:
+                type: object
+                properties:
+                    name:
+                        type: string
+                        description: The name of the bucket.
+                    arn:
+                        type: string
+                        description: The ARN of the bucket.
+            storageReadPolicyArn:
+                type: string
+                description: The ARN of the storage read policy.
+            storageWritePolicyArn:
+                type: string
+                description: The ARN of the storage write policy.
+        required:
+            - bucketNodes
+            - bucketNodesName
+            - bucketEdges
+            - bucketReverseEdges
+            - bucketRightsRead
+            - bucketRightsWrite
+            - bucketRightsAdmin
+            - bucketRightsOwner
+            - storageReadPolicyArn
+            - storageWritePolicyArn
 language:
     csharp:
         packageReferences:
