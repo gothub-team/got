@@ -59,6 +59,10 @@ resources:
             lastName:
                 type: string
                 description: The last name of the new user.
+            # passwordSeed:
+            #     type: string
+            #     description:
+            #         The password seed for the new user. Change will trigger a resource update with new password.
         requiredInputs:
             - region
             - displayName

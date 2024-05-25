@@ -31,7 +31,8 @@ type MailUserArgs struct {
 	FirstName *pulumi.StringInput `pulumi:"firstName,optional"`
 	// The last name of the new user.
 	LastName *pulumi.StringInput `pulumi:"lastName,optional"`
-	// The password for the new user.
+	// The password seed for the new user. Change will trigger a resource update with new password.
+	// PasswordSeed *pulumi.StringInput `pulumi:"passwordSeed"`
 }
 
 // The MailUser component resource.
@@ -55,6 +56,12 @@ func NewMailUser(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	// keepers := pulumi.ToStringMap(map[string]string{"name": "base"}).ToStringMapOutput()
+	// if args.PasswordSeed != nil {
+	// 	keepers = (*args.PasswordSeed).ToStringOutput().ApplyT(func(seed string) map[string]string {
+	// 		return map[string]string{"name": seed}
+	// 	}).(pulumi.StringMapOutput)
+	// }
 	// Create a random password for the mail  user.
 	password, err := random.NewRandomPassword(ctx, name+"Password", &random.RandomPasswordArgs{
 		Length:     pulumi.Int(64),
@@ -62,6 +69,7 @@ func NewMailUser(ctx *pulumi.Context,
 		MinUpper:   pulumi.Int(1),
 		MinNumeric: pulumi.Int(1),
 		MinSpecial: pulumi.Int(1),
+		// Keepers:    keepers,
 	})
 	if err != nil {
 		return nil, err
