@@ -1,6 +1,7 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 // import * as pulumi from '@pulumi/pulumi';
 import * as gotiac from '@gothub/pulumi-gotiac-aws';
+import * as fs from 'fs';
 import { env } from './env';
 
 export default $config({
@@ -28,14 +29,19 @@ export default $config({
             region: env.AWS_MAIL_REGION,
         });
 
-        // const user = new gotiac.MailUser('MailUser', {
-        //     region: env.AWS_MAIL_REGION,
-        //     domain: env.BASE_DOMAIN,
-        //     displayName: 'Info',
-        //     name: 'Info',
-        //     emailPrefix: 'info',
-        //     enabled: false,
-        // });
+        const user = new gotiac.MailUser('MailUser', {
+            region: env.AWS_MAIL_REGION,
+            domain: env.BASE_DOMAIN,
+            displayName: 'Info',
+            name: 'Info',
+            emailPrefix: 'info',
+            enabled: false,
+        });
+
+        fs.writeFileSync('.secrets.env', '');
+        user.password.apply((password) => {
+            fs.appendFileSync('.secrets.env', `export MAIL_USER_PW='${password}'\n`);
+        });
 
         return {
             // url: pulumi.interpolate`https://${fileHosting.url}`,
