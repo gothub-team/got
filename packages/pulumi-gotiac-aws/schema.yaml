@@ -73,8 +73,12 @@ resources:
             userId:
                 type: string
                 description: The ID of the organization that can be used to create mailboxes
+            password:
+                type: string
+                description: The password of the new user.
         required:
             - userId
+            - password
     gotiac:index:FileHosting:
         isComponent: true
         inputProperties:

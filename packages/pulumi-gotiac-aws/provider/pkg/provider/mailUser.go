@@ -41,6 +41,9 @@ type MailUser struct {
 
 	// The ID of the organization that can be used to create mailboxes
 	UserId pulumi.StringOutput `pulumi:"userId"`
+
+	// Password
+	Password pulumi.StringOutput `pulumi:"password"`
 }
 
 // NewMailUser creates a new MailUser component resource.
@@ -102,9 +105,11 @@ func NewMailUser(ctx *pulumi.Context,
 	})
 
 	component.UserId = mailUser.ID().ToStringOutput()
+	component.Password = password.Result
 
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
-		"userId": mailUser.UserId,
+		"userId":   mailUser.UserId,
+		"password": password.Result,
 	}); err != nil {
 		return nil, err
 	}

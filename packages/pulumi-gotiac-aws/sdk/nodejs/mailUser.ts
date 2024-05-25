@@ -20,6 +20,10 @@ export class MailUser extends pulumi.ComponentResource {
     }
 
     /**
+     * The password of the new user.
+     */
+    public /*out*/ readonly password!: pulumi.Output<string>;
+    /**
      * The ID of the organization that can be used to create mailboxes
      */
     public /*out*/ readonly userId!: pulumi.Output<string>;
@@ -59,8 +63,10 @@ export class MailUser extends pulumi.ComponentResource {
             resourceInputs["name"] = args ? args.name : undefined;
             resourceInputs["organizationId"] = args ? args.organizationId : undefined;
             resourceInputs["region"] = args ? args.region : undefined;
+            resourceInputs["password"] = undefined /*out*/;
             resourceInputs["userId"] = undefined /*out*/;
         } else {
+            resourceInputs["password"] = undefined /*out*/;
             resourceInputs["userId"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
