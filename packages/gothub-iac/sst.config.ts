@@ -33,7 +33,7 @@ export default $config({
             region: env.AWS_MAIL_REGION,
             domain: env.BASE_DOMAIN,
             displayName: 'Info',
-            name: 'Info',
+            name: `info@${env.BASE_DOMAIN}`,
             emailPrefix: 'info',
             enabled: true,
         });
