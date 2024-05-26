@@ -26,6 +26,9 @@ type MailDomain struct {
 
 	// The ID of the organization that can be used to create mailboxes
 	OrganizationId pulumi.StringOutput `pulumi:"organizationId"`
+
+	// The IMAP server host for the mail domain
+	ImapServer pulumi.StringOutput `pulumi:"imapServer"`
 }
 
 // NewMailDomain creates a new MailDomain component resource.
@@ -155,9 +158,11 @@ func NewMailDomain(ctx *pulumi.Context,
 	})
 
 	component.OrganizationId = organization.ID().ToStringOutput()
+	component.ImapServer = pulumi.Sprintf("imap.mail.%s.awsapps.com", args.Region)
 
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
 		"organizationId": component.OrganizationId,
+		"imapServer":     component.ImapServer,
 	}); err != nil {
 		return nil, err
 	}

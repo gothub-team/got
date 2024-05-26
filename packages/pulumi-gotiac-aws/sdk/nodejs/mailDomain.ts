@@ -20,6 +20,10 @@ export class MailDomain extends pulumi.ComponentResource {
     }
 
     /**
+     * The IMAP server host for the mail domain
+     */
+    public /*out*/ readonly imapServer!: pulumi.Output<string>;
+    /**
      * The ID of the organization that can be used to create mailboxes
      */
     public /*out*/ readonly organizationId!: pulumi.Output<string>;
@@ -43,8 +47,10 @@ export class MailDomain extends pulumi.ComponentResource {
             }
             resourceInputs["domain"] = args ? args.domain : undefined;
             resourceInputs["region"] = args ? args.region : undefined;
+            resourceInputs["imapServer"] = undefined /*out*/;
             resourceInputs["organizationId"] = undefined /*out*/;
         } else {
+            resourceInputs["imapServer"] = undefined /*out*/;
             resourceInputs["organizationId"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);

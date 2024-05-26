@@ -24,7 +24,7 @@ export default $config({
             bucketName: env.FILE_HOSTING_BUCKET,
         });
 
-        new gotiac.MailDomain('MailDomain', {
+        const mailDomain = new gotiac.MailDomain('MailDomain', {
             domain: env.BASE_DOMAIN,
             region: env.AWS_MAIL_REGION,
         });
@@ -41,6 +41,9 @@ export default $config({
         fs.writeFileSync('.secrets.env', '');
         user.password.apply((password) => {
             fs.appendFileSync('.secrets.env', `export MAIL_USER_PW='${password}'\n`);
+        });
+        mailDomain.imapServer.apply((imapServer) => {
+            fs.appendFileSync('.secrets.env', `export MAIL_IMAP_SERVER='${imapServer}'\n`);
         });
 
         return {
