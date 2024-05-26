@@ -40,6 +40,9 @@ export const envSchema = z.object({
     AWS_PROFILE: z.string(),
 
     BASE_DOMAIN: z.string(),
+    MAIL_USERNAME: z.string(),
+    MAIL_USER_PW: z.string(),
+    MAIL_IMAP_SERVER: z.string(),
     GOT_API_URL: z.string().endsWith('/'),
     USER_POOL_ID: z.string(),
     TEST_USER_1_EMAIL: z.string(),

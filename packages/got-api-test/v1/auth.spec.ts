@@ -2,11 +2,14 @@ import { describe, beforeAll, beforeEach, it, expect } from 'bun:test';
 import { createApi, type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import { env } from '../env';
+import { createMailClient } from './shared/mail';
+
+export const match6Digits = (str: string) => str.match(/[0-9]{6}/)?.[0];
 
 let testId: string;
 let api: GotApi;
-// let userEmail: string;
 let invalidReq: Promise<unknown>;
+let mailClient: ReturnType<typeof createMailClient>;
 beforeAll(async () => {
     api = createApi({
         host: env.GOT_API_URL,
@@ -14,7 +17,14 @@ beforeAll(async () => {
         sessionExpireTime: 1000 * 60 * 5,
     });
     testId = `test-${crypto.randomBytes(8).toString('hex')}`;
-    // userEmail = `info+${testId}@${env.BASE_DOMAIN}`;
+    mailClient = createMailClient({
+        host: env.MAIL_IMAP_SERVER,
+        port: 993,
+        user: `info@${env.BASE_DOMAIN}`,
+        pass: env.MAIL_USER_PW,
+        mailbox: 'Inbox',
+    });
+    await mailClient.init();
 });
 
 describe('register', () => {
@@ -67,13 +77,13 @@ describe('register', () => {
         });
     });
 
-    describe.only('given valid credentials', () => {
+    describe('given valid credentials', () => {
         const email = `info+${testId}@${env.BASE_DOMAIN}`;
         const password = `${testId}-pw-1`;
         let registerInitRequest: unknown;
 
         beforeAll(async () => {
-            registerInitRequest = await api.registerInit({ email, password });
+            registerInitRequest = api.registerInit({ email, password });
         });
 
         describe('response', () => {
@@ -85,13 +95,44 @@ describe('register', () => {
         });
 
         describe('given the user receives the verification email', () => {
+            let verificationCode: string;
             beforeAll(async () => {
-                invalidReq = api.registerVerify({ email, password });
+                const verificationMail = await mailClient.receiveMailTo(email);
+                verificationCode = match6Digits(verificationMail) ?? '';
+                console.log(verificationCode);
             });
 
-            it('resolves with success message', async () => {
-                return expect(invalidReq).resolves.toEqual({
-                    message: 'User was verified.',
+            describe('verifiaction Code', () => {
+                it('is a 6-digit number', () => {
+                    expect(verificationCode).toHaveLength(6);
+                });
+            });
+
+            describe('given the user submits the verification code', () => {
+                let verifyRequest: Promise<unknown>;
+                beforeAll(async () => {
+                    verifyRequest = api.registerVerify({ email, verificationCode });
+                });
+
+                describe('response', () => {
+                    it('resolves with success message', async () => {
+                        return expect(verifyRequest).resolves.toEqual({
+                            message: 'Success.',
+                        });
+                    });
+                });
+
+                describe('given the user logs in', () => {
+                    let loginRequest: Promise<void>;
+                    beforeAll(async () => {
+                        loginRequest = api.login({ email, password });
+                    });
+
+                    describe('response', () => {
+                        it('resolves', async () => {
+                            return expect(loginRequest).resolves.toBeUndefined();
+                        });
+                    });
                 });
             });
         });
