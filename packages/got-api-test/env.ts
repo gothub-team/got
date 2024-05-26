@@ -39,6 +39,7 @@ export const envSchema = z.object({
     AWS_REGION: z.enum(awsRegions),
     AWS_PROFILE: z.string(),
 
+    BASE_DOMAIN: z.string(),
     GOT_API_URL: z.string().endsWith('/'),
     USER_POOL_ID: z.string(),
     TEST_USER_1_EMAIL: z.string(),
