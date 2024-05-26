@@ -10,7 +10,9 @@
         "@gothub/typescript-util": "workspace:*",
         "@gothub/got-api": "workspace:*",
         "@types/aws-lambda": "8.10.137",
-        "@types/bun": "^1.1.0"
+        "@types/bun": "^1.1.0",
+        "@types/imapflow": "^1.0.18",
+        "imapflow": "^1.0.162"
     },
     "peerDependencies": {
         "typescript": "^5.0.0"

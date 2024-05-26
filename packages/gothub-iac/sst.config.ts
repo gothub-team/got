@@ -35,7 +35,7 @@ export default $config({
             displayName: 'Info',
             name: 'Info',
             emailPrefix: 'info',
-            enabled: false,
+            enabled: true,
         });
 
         fs.writeFileSync('.secrets.env', '');

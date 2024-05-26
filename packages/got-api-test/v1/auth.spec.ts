@@ -66,4 +66,34 @@ describe('register', () => {
             });
         });
     });
+
+    describe.only('given valid credentials', () => {
+        const email = `info+${testId}@${env.BASE_DOMAIN}`;
+        const password = `${testId}-pw-1`;
+        let registerInitRequest: unknown;
+
+        beforeAll(async () => {
+            registerInitRequest = await api.registerInit({ email, password });
+        });
+
+        describe('response', () => {
+            it('resolves with success message', async () => {
+                return expect(registerInitRequest).resolves.toEqual({
+                    message: 'User was created. Check email for verification.',
+                });
+            });
+        });
+
+        describe('given the user receives the verification email', () => {
+            beforeAll(async () => {
+                invalidReq = api.registerVerify({ email, password });
+            });
+
+            it('resolves with success message', async () => {
+                return expect(invalidReq).resolves.toEqual({
+                    message: 'User was verified.',
+                });
+            });
+        });
+    });
 });
