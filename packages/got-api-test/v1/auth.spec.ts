@@ -82,34 +82,22 @@ describe('auth flows', () => {
 
 describe.only('error handling', () => {
     describe('registerInit', () => {
-        describe('given a valid email address', () => {
-            const email = `info+test-1@${env.BASE_DOMAIN}`;
-            const invalidPasswords = [['tee2eee'], ['teeeeeee']];
-            describe.each(invalidPasswords)(`and an invalid password`, (password: string) => {
-                it('throws InvalidPasswordError', async () => {
-                    return expect(api.registerInit({ email, password })).rejects.toThrow({
-                        name: 'InvalidPasswordError',
-                        message: 'The password must contain at least 8 characters and at least 1 number.',
-                    });
+        const invalidPasswords = [['tee2eee'], ['teeeeeee']];
+        describe.each(invalidPasswords)(`given an invalid password`, (password: string) => {
+            it('throws InvalidPasswordError', async () => {
+                return expect(api.registerInit({ email: `info+test-1@${env.BASE_DOMAIN}`, password })).rejects.toThrow({
+                    name: 'InvalidPasswordError',
+                    message: 'The password must contain at least 8 characters and at least 1 number.',
                 });
             });
         });
 
-        describe('given a valid password', () => {
-            const password = `test-1-pw-1`;
-            const invalidEmails = [
-                [''],
-                ['Tes.T@test.com'],
-                ['tes.t@tesT.com'],
-                [' tes.t@test.com'],
-                ['tes.t@test.com '],
-            ];
-            describe.each(invalidEmails)('and an invalid email address', (email: string) => {
-                it('throws InvalidEmailError', async () => {
-                    return expect(api.registerInit({ email, password })).rejects.toThrow({
-                        name: 'InvalidEmailError',
-                        message: 'The email must be valid and must not contain upper case letters or spaces.',
-                    });
+        const invalidEmails = [[''], ['Tes.T@test.com'], ['tes.t@tesT.com'], [' tes.t@test.com'], ['tes.t@test.com ']];
+        describe.each(invalidEmails)('given an invalid email address', (email: string) => {
+            it('throws InvalidEmailError', async () => {
+                return expect(api.registerInit({ email, password: `test-1-pw-1` })).rejects.toThrow({
+                    name: 'InvalidEmailError',
+                    message: 'The email must be valid and must not contain upper case letters or spaces.',
                 });
             });
         });
@@ -180,6 +168,17 @@ describe.only('error handling', () => {
             });
         });
 
+        describe('given an invalid password', () => {
+            const password = 'invalid';
+            it('throws LoginVerifyError', async () => {
+                return expect(api.login({ email: env.TEST_USER_1_EMAIL, password })).rejects.toThrow({
+                    name: 'LoginVerifyError',
+                    message:
+                        'The password could not be verified. Please check password, userId, secretBlock, signature and timestamp.',
+                });
+            });
+        });
+
         describe('given a user that does not exist', () => {
             const email = `non-existing+${testId}@${env.BASE_DOMAIN}`;
             it('throws UserNotFoundError', async () => {
@@ -191,7 +190,7 @@ describe.only('error handling', () => {
         });
     });
 
-    describe('refreshSession', () => {});
+    describe('loginRefresh', () => {});
 
     describe('resetPasswordInit', () => {
         const invalidEmails = [[''], ['Tes.T@test.com'], ['tes.t@tesT.com'], [' tes.t@test.com'], ['tes.t@test.com ']];
@@ -216,6 +215,23 @@ describe.only('error handling', () => {
     });
 
     describe('resetPasswordVerify', () => {
+        const invalidPasswords = [['tee2eee'], ['teeeeeee']];
+        describe.each(invalidPasswords)(`given an invalid password`, (password: string) => {
+            it('throws InvalidPasswordError', async () => {
+                return expect(
+                    api.resetPasswordVerify({
+                        email: `info+${testId}@${env.BASE_DOMAIN}`,
+                        verificationCode: '',
+                        password,
+                        oldPassword: '',
+                    }),
+                ).rejects.toThrow({
+                    name: 'InvalidPasswordError',
+                    message: 'The password must contain at least 8 characters and at least 1 number.',
+                });
+            });
+        });
+
         const invalidEmails = [[''], ['Tes.T@test.com'], ['tes.t@tesT.com'], [' tes.t@test.com'], ['tes.t@test.com ']];
         describe.each(invalidEmails)('given an invalid email address', (email: string) => {
             it('throws InvalidEmailError', async () => {
