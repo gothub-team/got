@@ -18,7 +18,7 @@ beforeAll(async () => {
     testId = `test-${crypto.randomBytes(8).toString('hex')}`;
 });
 
-describe.only('auth flows', () => {
+describe('auth flow', () => {
     describe('given valid credentials', () => {
         let email: string;
         let password: string;
@@ -78,6 +78,15 @@ describe.only('auth flows', () => {
             });
 
             describe('register verify', () => {
+                describe('wrong code', () => {
+                    it('throws VerificationCodeMismatchError', async () => {
+                        return expect(api.registerVerify({ email, verificationCode: '123456' })).rejects.toEqual({
+                            name: 'VerificationCodeMismatchError',
+                            message: 'The verification code does not match.',
+                        });
+                    });
+                });
+
                 describe('resend', () => {
                     it('receives other verification code', async () => {
                         await api.registerVerifyResend({ email });
