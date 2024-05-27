@@ -106,7 +106,7 @@ describe.only('error handling', () => {
             ];
             describe.each(invalidEmails)('and an invalid email address', (email: string) => {
                 it('throws InvalidEmailError', async () => {
-                    return expect((invalidReq = api.registerInit({ email, password }))).rejects.toThrow({
+                    return expect(api.registerInit({ email, password })).rejects.toThrow({
                         name: 'InvalidEmailError',
                         message: 'The email must be valid and must not contain upper case letters or spaces.',
                     });
@@ -135,6 +135,16 @@ describe.only('error handling', () => {
                 });
             });
         });
+
+        describe('given a user that does not exist', () => {
+            const email = `non-existing+${testId}@${env.BASE_DOMAIN}`;
+            it('throws UserNotFoundError', async () => {
+                return expect(api.registerVerify({ email, verificationCode: '123456' })).rejects.toThrow({
+                    name: 'UserNotFoundError',
+                    message: 'No user was found under the given email or user ID.',
+                });
+            });
+        });
     });
 
     describe('registerVerifyResend', () => {
@@ -147,31 +157,41 @@ describe.only('error handling', () => {
                 });
             });
         });
+
+        describe('given a user that does not exist', () => {
+            const email = `non-existing+${testId}@${env.BASE_DOMAIN}`;
+            it('throws UserNotFoundError', async () => {
+                return expect(api.registerVerifyResend({ email })).rejects.toThrow({
+                    name: 'UserNotFoundError',
+                    message: 'No user was found under the given email or user ID.',
+                });
+            });
+        });
     });
 
     describe('login', () => {
         const invalidEmails = [[''], ['Tes.T@test.com'], ['tes.t@tesT.com'], [' tes.t@test.com'], ['tes.t@test.com ']];
         describe.each(invalidEmails)('given an invalid email address', (email: string) => {
             it('throws InvalidEmailError', async () => {
-                return expect(api.login({ email, password: 'some-pass' })).rejects.toThrow({
+                return expect(api.login({ email, password: 'some-pass-1' })).rejects.toThrow({
                     name: 'InvalidEmailError',
                     message: 'The email must be valid and must not contain upper case letters or spaces.',
                 });
             });
         });
+
+        describe('given a user that does not exist', () => {
+            const email = `non-existing+${testId}@${env.BASE_DOMAIN}`;
+            it('throws UserNotFoundError', async () => {
+                return expect(api.login({ email, password: 'some-pass-1' })).rejects.toThrow({
+                    name: 'UserNotFoundError',
+                    message: 'No user was found under the given email or user ID.',
+                });
+            });
+        });
     });
 
-    describe('refreshSession', () => {
-        // const invalidEmails = [[''], ['Tes.T@test.com'], ['tes.t@tesT.com'], [' tes.t@test.com'], ['tes.t@test.com ']];
-        // describe.each(invalidEmails)('given an invalid email address', (email: string) => {
-        //     it('throws InvalidEmailError', async () => {
-        //         return expect(api.refreshSession()).rejects.toThrow({
-        //             name: 'InvalidEmailError',
-        //             message: 'The email must be valid and must not contain upper case letters or spaces.',
-        //         });
-        //     });
-        // });
-    });
+    describe('refreshSession', () => {});
 
     describe('resetPasswordInit', () => {
         const invalidEmails = [[''], ['Tes.T@test.com'], ['tes.t@tesT.com'], [' tes.t@test.com'], ['tes.t@test.com ']];
@@ -180,6 +200,16 @@ describe.only('error handling', () => {
                 return expect(api.resetPasswordInit({ email })).rejects.toThrow({
                     name: 'InvalidEmailError',
                     message: 'The email must be valid and must not contain upper case letters or spaces.',
+                });
+            });
+        });
+
+        describe('given a user that does not exist', () => {
+            const email = `non-existing+${testId}@${env.BASE_DOMAIN}`;
+            it('throws UserNotFoundError', async () => {
+                return expect(api.resetPasswordInit({ email })).rejects.toThrow({
+                    name: 'UserNotFoundError',
+                    message: 'No user was found under the given email or user ID.',
                 });
             });
         });
@@ -194,6 +224,23 @@ describe.only('error handling', () => {
                 ).rejects.toThrow({
                     name: 'InvalidEmailError',
                     message: 'The email must be valid and must not contain upper case letters or spaces.',
+                });
+            });
+        });
+
+        describe('given a user that does not exist', () => {
+            const email = `non-existing+${testId}@${env.BASE_DOMAIN}`;
+            it('throws UserNotFoundError', async () => {
+                return expect(
+                    api.resetPasswordVerify({
+                        email,
+                        verificationCode: '123456',
+                        password: 'some-pass-1',
+                        oldPassword: '',
+                    }),
+                ).rejects.toThrow({
+                    name: 'UserNotFoundError',
+                    message: 'No user was found under the given email or user ID.',
                 });
             });
         });
