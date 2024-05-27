@@ -1,4 +1,4 @@
-import { describe, beforeAll, beforeEach, it, expect } from 'bun:test';
+import { describe, beforeAll, it, expect } from 'bun:test';
 import { createApi, type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import { env } from '../env';
@@ -8,7 +8,6 @@ export const match6Digits = (str: string) => str.match(/[0-9]{6}/)?.[0];
 
 let testId: string;
 let api: GotApi;
-let invalidReq: Promise<unknown>;
 let mailClient: ReturnType<typeof createMailClient>;
 beforeAll(async () => {
     api = createApi({
@@ -81,18 +80,14 @@ describe('auth flows', () => {
     });
 });
 
-describe('error handling', () => {
+describe.only('error handling', () => {
     describe('registerInit', () => {
         describe('given a valid email address', () => {
             const email = `info+test-1@${env.BASE_DOMAIN}`;
             const invalidPasswords = [['tee2eee'], ['teeeeeee']];
-
             describe.each(invalidPasswords)(`and an invalid password`, (password: string) => {
-                beforeEach(async () => {
-                    invalidReq = api.registerInit({ email, password });
-                });
                 it('throws InvalidPasswordError', async () => {
-                    return expect(invalidReq).rejects.toThrow({
+                    return expect(api.registerInit({ email, password })).rejects.toThrow({
                         name: 'InvalidPasswordError',
                         message: 'The password must contain at least 8 characters and at least 1 number.',
                     });
@@ -109,13 +104,9 @@ describe('error handling', () => {
                 [' tes.t@test.com'],
                 ['tes.t@test.com '],
             ];
-
             describe.each(invalidEmails)('and an invalid email address', (email: string) => {
-                beforeEach(async () => {
-                    invalidReq = api.registerInit({ email, password });
-                });
                 it('throws InvalidEmailError', async () => {
-                    return expect(invalidReq).rejects.toThrow({
+                    return expect((invalidReq = api.registerInit({ email, password }))).rejects.toThrow({
                         name: 'InvalidEmailError',
                         message: 'The email must be valid and must not contain upper case letters or spaces.',
                     });
@@ -125,18 +116,86 @@ describe('error handling', () => {
 
         describe('given an existing user', () => {
             const email = env.TEST_USER_1_EMAIL;
-
-            beforeEach(async () => {
-                invalidReq = api.registerInit({ email, password: 'valid-password-1' });
-            });
             it('throws UserAlreadyExistsError', async () => {
-                return expect(invalidReq).rejects.toThrow({
+                return expect(api.registerInit({ email, password: 'valid-password-1' })).rejects.toThrow({
                     name: 'UserExistsError',
                     message: 'There is an existing user with the given email address.',
                 });
             });
         });
     });
-    describe('registerVerify', () => {});
-    describe('login', () => {});
+
+    describe('registerVerify', () => {
+        const invalidEmails = [[''], ['Tes.T@test.com'], ['tes.t@tesT.com'], [' tes.t@test.com'], ['tes.t@test.com ']];
+        describe.each(invalidEmails)('given an invalid email address', (email: string) => {
+            it('throws InvalidEmailError', async () => {
+                return expect(api.registerVerify({ email, verificationCode: '123456' })).rejects.toThrow({
+                    name: 'InvalidEmailError',
+                    message: 'The email must be valid and must not contain upper case letters or spaces.',
+                });
+            });
+        });
+    });
+
+    describe('registerVerifyResend', () => {
+        const invalidEmails = [[''], ['Tes.T@test.com'], ['tes.t@tesT.com'], [' tes.t@test.com'], ['tes.t@test.com ']];
+        describe.each(invalidEmails)('given an invalid email address', (email: string) => {
+            it('throws InvalidEmailError', async () => {
+                return expect(api.registerVerifyResend({ email })).rejects.toThrow({
+                    name: 'InvalidEmailError',
+                    message: 'The email must be valid and must not contain upper case letters or spaces.',
+                });
+            });
+        });
+    });
+
+    describe('login', () => {
+        const invalidEmails = [[''], ['Tes.T@test.com'], ['tes.t@tesT.com'], [' tes.t@test.com'], ['tes.t@test.com ']];
+        describe.each(invalidEmails)('given an invalid email address', (email: string) => {
+            it('throws InvalidEmailError', async () => {
+                return expect(api.login({ email, password: 'some-pass' })).rejects.toThrow({
+                    name: 'InvalidEmailError',
+                    message: 'The email must be valid and must not contain upper case letters or spaces.',
+                });
+            });
+        });
+    });
+
+    describe('refreshSession', () => {
+        // const invalidEmails = [[''], ['Tes.T@test.com'], ['tes.t@tesT.com'], [' tes.t@test.com'], ['tes.t@test.com ']];
+        // describe.each(invalidEmails)('given an invalid email address', (email: string) => {
+        //     it('throws InvalidEmailError', async () => {
+        //         return expect(api.refreshSession()).rejects.toThrow({
+        //             name: 'InvalidEmailError',
+        //             message: 'The email must be valid and must not contain upper case letters or spaces.',
+        //         });
+        //     });
+        // });
+    });
+
+    describe('resetPasswordInit', () => {
+        const invalidEmails = [[''], ['Tes.T@test.com'], ['tes.t@tesT.com'], [' tes.t@test.com'], ['tes.t@test.com ']];
+        describe.each(invalidEmails)('given an invalid email address', (email: string) => {
+            it('throws InvalidEmailError', async () => {
+                return expect(api.resetPasswordInit({ email })).rejects.toThrow({
+                    name: 'InvalidEmailError',
+                    message: 'The email must be valid and must not contain upper case letters or spaces.',
+                });
+            });
+        });
+    });
+
+    describe('resetPasswordVerify', () => {
+        const invalidEmails = [[''], ['Tes.T@test.com'], ['tes.t@tesT.com'], [' tes.t@test.com'], ['tes.t@test.com ']];
+        describe.each(invalidEmails)('given an invalid email address', (email: string) => {
+            it('throws InvalidEmailError', async () => {
+                return expect(
+                    api.resetPasswordVerify({ email, verificationCode: '', password: '', oldPassword: '' }),
+                ).rejects.toThrow({
+                    name: 'InvalidEmailError',
+                    message: 'The email must be valid and must not contain upper case letters or spaces.',
+                });
+            });
+        });
+    });
 });
