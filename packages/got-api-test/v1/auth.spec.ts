@@ -106,15 +106,35 @@ describe('auth flow', () => {
                     });
                 });
 
+                let refreshToken: string;
                 describe('login', () => {
                     it('resolves', async () => {
                         return expect(api.login({ email, password })).resolves.toBeUndefined();
                     });
                     it('has a session', async () => {
                         const session = api.getCurrentSession();
+                        refreshToken = session?.refreshToken || '';
                         expect(session).toHaveProperty('accessToken');
                         expect(session).toHaveProperty('idToken');
                         expect(session).toHaveProperty('refreshToken');
+                    });
+                });
+
+                describe('login refresh', () => {
+                    describe('correct refresh token', () => {
+                        it('resolves with ID token', async () => {
+                            return expect(api.loginRefresh({ refreshToken })).resolves.toHaveProperty('idToken');
+                        });
+                    });
+                    describe('wrong refresh token', () => {
+                        it('throws InvalidRefreshTokenError', async () => {
+                            return expect(
+                                api.loginRefresh({ refreshToken: refreshToken.substring(1) }),
+                            ).rejects.toEqual({
+                                name: 'InvalidRefreshTokenError',
+                                message: 'Refresh token is invalid.',
+                            });
+                        });
                     });
                 });
 
