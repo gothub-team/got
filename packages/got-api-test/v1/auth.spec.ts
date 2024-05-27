@@ -139,6 +139,22 @@ describe('auth flow', () => {
                         });
                     });
 
+                    describe('wrong code', () => {
+                        it('throws VerificationCodeMismatchError', async () => {
+                            return expect(
+                                api.resetPasswordVerify({
+                                    email,
+                                    verificationCode: '123456',
+                                    password: 'some-pass-1',
+                                    oldPassword: '',
+                                }),
+                            ).rejects.toEqual({
+                                name: 'VerificationCodeMismatchError',
+                                message: 'The verification code does not match.',
+                            });
+                        });
+                    });
+
                     describe('verify', () => {
                         it('resolves with success message', async () => {
                             newPassword = `${testId}-pw-2`;
