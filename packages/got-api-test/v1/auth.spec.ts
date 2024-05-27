@@ -18,7 +18,7 @@ beforeAll(async () => {
     testId = `test-${crypto.randomBytes(8).toString('hex')}`;
 });
 
-describe('auth flows', () => {
+describe.only('auth flows', () => {
     describe('given valid credentials', () => {
         let email: string;
         let password: string;
@@ -31,6 +31,24 @@ describe('auth flows', () => {
             it('resolves with success message', async () => {
                 return expect(api.registerInit({ email, password })).resolves.toEqual({
                     message: 'User was created. Check email for verification.',
+                });
+            });
+        });
+
+        describe('login unverified', () => {
+            it('throws UserNotVerifiedError', async () => {
+                return expect(api.login({ email, password })).rejects.toThrow({
+                    name: 'UserNotVerifiedError',
+                    message: 'The user must be verified with Register Verify operation.',
+                });
+            });
+        });
+
+        describe('password reset unverified', () => {
+            it('throws UserNotVerifiedError', async () => {
+                return expect(api.resetPasswordInit({ email })).rejects.toThrow({
+                    name: 'UserNotVerifiedError',
+                    message: 'The user must be verified with Register Verify operation.',
                 });
             });
         });
@@ -60,6 +78,17 @@ describe('auth flows', () => {
             });
 
             describe('register verify', () => {
+                describe('resend', () => {
+                    it('receives other verification code', async () => {
+                        await api.registerVerifyResend({ email });
+                        console.log('waiting for mail');
+                        const verificationMail = await mailClient.receiveMailTo(email);
+                        const newVerificationCode = match6Digits(verificationMail) ?? '';
+                        expect(verificationCode).not.toEqual(newVerificationCode);
+                        verificationCode = newVerificationCode;
+                    });
+                });
+
                 describe('response', () => {
                     it('resolves with success message', async () => {
                         return expect(api.registerVerify({ email, verificationCode })).resolves.toEqual({
@@ -69,9 +98,57 @@ describe('auth flows', () => {
                 });
 
                 describe('login', () => {
-                    describe('response', () => {
+                    it('resolves', async () => {
+                        return expect(api.login({ email, password })).resolves.toBeUndefined();
+                    });
+                    it('has a session', async () => {
+                        const session = api.getCurrentSession();
+                        expect(session).toHaveProperty('accessToken');
+                        expect(session).toHaveProperty('idToken');
+                        expect(session).toHaveProperty('refreshToken');
+                    });
+                });
+
+                describe('reset password', () => {
+                    let resetCode: string;
+                    let newPassword: string;
+
+                    describe('init', () => {
+                        it('resolves with success message', async () => {
+                            return expect(api.resetPasswordInit({ email })).resolves.toEqual({
+                                message: 'Success.',
+                            });
+                        });
+                    });
+
+                    describe('verification mail', () => {
+                        it('receives reset code', async () => {
+                            console.log('waiting for mail');
+                            const resetMail = await mailClient.receiveMailTo(email);
+                            resetCode = match6Digits(resetMail) ?? '';
+                            expect(resetCode).toHaveLength(6);
+                        });
+                    });
+
+                    describe('verify', () => {
+                        it('resolves with success message', async () => {
+                            newPassword = `${testId}-pw-2`;
+                            return expect(
+                                api.resetPasswordVerify({
+                                    email,
+                                    verificationCode: resetCode,
+                                    password: newPassword,
+                                    oldPassword: password,
+                                }),
+                            ).resolves.toEqual({
+                                message: 'Success.',
+                            });
+                        });
+                    });
+
+                    describe('login with new password', () => {
                         it('resolves', async () => {
-                            return expect(api.login({ email, password })).resolves.toBeUndefined();
+                            return expect(api.login({ email, password: newPassword })).resolves.toBeUndefined();
                         });
                     });
                 });
@@ -80,7 +157,7 @@ describe('auth flows', () => {
     });
 });
 
-describe.only('error handling', () => {
+describe('error handling', () => {
     describe('registerInit', () => {
         const invalidPasswords = [['tee2eee'], ['teeeeeee']];
         describe.each(invalidPasswords)(`given an invalid password`, (password: string) => {
