@@ -48,18 +48,14 @@ describe('auth flows', () => {
                     pass: env.MAIL_USER_PW,
                     mailbox: 'Inbox',
                 });
-                console.log('init');
                 await mailClient.init();
-                console.log('init done');
             });
 
             describe('default', async () => {
                 it('receives verification code', async () => {
                     console.log('waiting for mail');
                     const verificationMail = await mailClient.receiveMailTo(email);
-                    console.log('mail received');
                     verificationCode = match6Digits(verificationMail) ?? '';
-                    console.log(verificationCode);
                     expect(verificationCode).toHaveLength(6);
                 });
             });
@@ -85,7 +81,7 @@ describe('auth flows', () => {
     });
 });
 
-describe.skip('error handling', () => {
+describe('error handling', () => {
     describe('registerInit', () => {
         describe('given a valid email address', () => {
             const email = `info+test-1@${env.BASE_DOMAIN}`;

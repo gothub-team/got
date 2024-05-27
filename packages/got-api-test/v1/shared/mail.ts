@@ -1,4 +1,4 @@
-import { ImapFlow, type FetchMessageObject, type MailboxLockObject } from 'imapflow';
+import { ImapFlow, type FetchMessageObject } from 'imapflow';
 
 export type MailClientProps = {
     host: string;
@@ -11,7 +11,6 @@ export type MailClientProps = {
 
 export const createMailClient = ({ host, port, user, pass, mailbox, secure = true }: MailClientProps) => {
     let client: ImapFlow | undefined;
-    let lock: MailboxLockObject | undefined;
 
     let subscribers: Record<string, ((message: FetchMessageObject) => void) | undefined> = {};
 
@@ -38,14 +37,12 @@ export const createMailClient = ({ host, port, user, pass, mailbox, secure = tru
         // Wait until client connects and authorizes
         await client.connect();
 
-        // Select and lock a mailbox. Throws if mailbox does not exist
-        lock = await client.getMailboxLock(mailbox);
+        await client.mailboxOpen(mailbox);
 
         client.on('exists', handleEmailCountChange);
     };
 
     const handleEmailCountChange = async ({ prevCount }: { prevCount: number }) => {
-        console.log('exists', performance.now());
         const messages = await client?.fetch(`${prevCount + 1}:*`, {
             envelope: true,
             bodyParts: ['1'],
@@ -63,9 +60,7 @@ export const createMailClient = ({ host, port, user, pass, mailbox, secure = tru
     const close = async () => {
         subscribers = {};
         // Make sure lock is released, otherwise next `getMailboxLock()` never returns
-        lock?.release();
-        lock = undefined;
-
+        await client?.mailboxClose();
         await client?.logout();
         client = undefined;
     };
@@ -83,6 +78,7 @@ export const createMailClient = ({ host, port, user, pass, mailbox, secure = tru
             const timeout = setTimeout(() => {
                 reject('no mails received');
             }, 60000);
+            client?.idle();
             subscribeTo(toEmail, (message: FetchMessageObject) => {
                 resolve(message.bodyParts.get('1')?.toString() || '');
                 clearTimeout(timeout);
