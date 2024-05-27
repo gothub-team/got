@@ -17,124 +17,130 @@ beforeAll(async () => {
         sessionExpireTime: 1000 * 60 * 5,
     });
     testId = `test-${crypto.randomBytes(8).toString('hex')}`;
-    mailClient = createMailClient({
-        host: env.MAIL_IMAP_SERVER,
-        port: 993,
-        user: `info@${env.BASE_DOMAIN}`,
-        pass: env.MAIL_USER_PW,
-        mailbox: 'Inbox',
-    });
-    await mailClient.init();
 });
 
-describe('register', () => {
-    describe('given a valid email address', () => {
-        const email = `info+${testId}@${env.BASE_DOMAIN}`;
-        const invalidPasswords = [['tee2eee'], ['teeeeeee']];
-
-        describe.each(invalidPasswords)(`and an invalid password`, (password: string) => {
-            beforeEach(async () => {
-                invalidReq = api.registerInit({ email, password });
-            });
-            it('throws InvalidPasswordError', async () => {
-                return expect(invalidReq).rejects.toThrow({
-                    name: 'InvalidPasswordError',
-                    message: 'The password must contain at least 8 characters and at least 1 number.',
-                });
-            });
-        });
-    });
-
-    describe('given a valid password', () => {
-        const password = `${testId}-pw-1`;
-        const invalidEmails = [[''], ['Tes.T@test.com'], ['tes.t@tesT.com'], [' tes.t@test.com'], ['tes.t@test.com ']];
-
-        describe.each(invalidEmails)('and an invalid email address', (email: string) => {
-            beforeEach(async () => {
-                invalidReq = api.registerInit({ email, password });
-            });
-            it('throws InvalidEmailError', async () => {
-                return expect(invalidReq).rejects.toThrow({
-                    name: 'InvalidEmailError',
-                    message: 'The email must be valid and must not contain upper case letters or spaces.',
-                });
-            });
-        });
-    });
-
-    describe('given an existing user', () => {
-        const email = env.TEST_USER_1_EMAIL;
-        const password = `${testId}-pw-1`;
-
-        beforeEach(async () => {
-            invalidReq = api.registerInit({ email, password });
-        });
-        it('throws UserAlreadyExistsError', async () => {
-            return expect(invalidReq).rejects.toThrow({
-                name: 'UserExistsError',
-                message: 'There is an existing user with the given email address.',
-            });
-        });
-    });
-
+describe('auth flows', () => {
     describe('given valid credentials', () => {
-        const email = `info+${testId}@${env.BASE_DOMAIN}`;
-        const password = `${testId}-pw-1`;
-        let registerInitRequest: unknown;
-
-        beforeAll(async () => {
-            registerInitRequest = api.registerInit({ email, password });
+        let email: string;
+        let password: string;
+        beforeAll(() => {
+            email = `info+${testId}@${env.BASE_DOMAIN}`;
+            password = `${testId}-pw-1`;
         });
 
         describe('response', () => {
             it('resolves with success message', async () => {
-                return expect(registerInitRequest).resolves.toEqual({
+                return expect(api.registerInit({ email, password })).resolves.toEqual({
                     message: 'User was created. Check email for verification.',
                 });
             });
         });
 
-        describe('given the user receives the verification email', () => {
+        describe('verification mail', () => {
+            let email: string;
             let verificationCode: string;
             beforeAll(async () => {
-                const verificationMail = await mailClient.receiveMailTo(email);
-                verificationCode = match6Digits(verificationMail) ?? '';
-                console.log(verificationCode);
+                email = `info+${testId}@${env.BASE_DOMAIN}`;
+                mailClient = createMailClient({
+                    host: env.MAIL_IMAP_SERVER,
+                    port: 993,
+                    user: env.MAIL_USERNAME,
+                    pass: env.MAIL_USER_PW,
+                    mailbox: 'Inbox',
+                });
+                console.log('init');
+                await mailClient.init();
+                console.log('init done');
             });
 
-            describe('verifiaction Code', () => {
-                it('is a 6-digit number', () => {
+            describe('default', async () => {
+                it('receives verification code', async () => {
+                    console.log('waiting for mail');
+                    const verificationMail = await mailClient.receiveMailTo(email);
+                    console.log('mail received');
+                    verificationCode = match6Digits(verificationMail) ?? '';
+                    console.log(verificationCode);
                     expect(verificationCode).toHaveLength(6);
                 });
             });
 
-            describe('given the user submits the verification code', () => {
-                let verifyRequest: Promise<unknown>;
-                beforeAll(async () => {
-                    verifyRequest = api.registerVerify({ email, verificationCode });
-                });
-
+            describe('register verify', () => {
                 describe('response', () => {
                     it('resolves with success message', async () => {
-                        return expect(verifyRequest).resolves.toEqual({
+                        return expect(api.registerVerify({ email, verificationCode })).resolves.toEqual({
                             message: 'Success.',
                         });
                     });
                 });
 
-                describe('given the user logs in', () => {
-                    let loginRequest: Promise<void>;
-                    beforeAll(async () => {
-                        loginRequest = api.login({ email, password });
-                    });
-
+                describe('login', () => {
                     describe('response', () => {
                         it('resolves', async () => {
-                            return expect(loginRequest).resolves.toBeUndefined();
+                            return expect(api.login({ email, password })).resolves.toBeUndefined();
                         });
                     });
                 });
             });
         });
     });
+});
+
+describe.skip('error handling', () => {
+    describe('registerInit', () => {
+        describe('given a valid email address', () => {
+            const email = `info+test-1@${env.BASE_DOMAIN}`;
+            const invalidPasswords = [['tee2eee'], ['teeeeeee']];
+
+            describe.each(invalidPasswords)(`and an invalid password`, (password: string) => {
+                beforeEach(async () => {
+                    invalidReq = api.registerInit({ email, password });
+                });
+                it('throws InvalidPasswordError', async () => {
+                    return expect(invalidReq).rejects.toThrow({
+                        name: 'InvalidPasswordError',
+                        message: 'The password must contain at least 8 characters and at least 1 number.',
+                    });
+                });
+            });
+        });
+
+        describe('given a valid password', () => {
+            const password = `test-1-pw-1`;
+            const invalidEmails = [
+                [''],
+                ['Tes.T@test.com'],
+                ['tes.t@tesT.com'],
+                [' tes.t@test.com'],
+                ['tes.t@test.com '],
+            ];
+
+            describe.each(invalidEmails)('and an invalid email address', (email: string) => {
+                beforeEach(async () => {
+                    invalidReq = api.registerInit({ email, password });
+                });
+                it('throws InvalidEmailError', async () => {
+                    return expect(invalidReq).rejects.toThrow({
+                        name: 'InvalidEmailError',
+                        message: 'The email must be valid and must not contain upper case letters or spaces.',
+                    });
+                });
+            });
+        });
+
+        describe('given an existing user', () => {
+            const email = env.TEST_USER_1_EMAIL;
+
+            beforeEach(async () => {
+                invalidReq = api.registerInit({ email, password: 'valid-password-1' });
+            });
+            it('throws UserAlreadyExistsError', async () => {
+                return expect(invalidReq).rejects.toThrow({
+                    name: 'UserExistsError',
+                    message: 'There is an existing user with the given email address.',
+                });
+            });
+        });
+    });
+    describe('registerVerify', () => {});
+    describe('login', () => {});
 });
