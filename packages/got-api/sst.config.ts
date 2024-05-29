@@ -22,21 +22,10 @@ export default $config({
         };
     },
     async run() {
-        // const lambda = new gotiac.Lambda('TestLambda', {
-        //     runtime: 'nodejs18.x',
-        //     codePath: path.join(process.cwd(), 'index.zip'),
-        //     handlerPath: 'index.handler',
-        //     policyArns: [],
-        // });
         const api = new gotiac.Api('TestApi', {
             userPoolId: 'eu-central-1_orSPNPiED',
-            routePath: '/test',
-            runtime: 'nodejs18.x',
-            codePath: path.join(process.cwd(), 'index.zip'),
-            handlerPath: 'index.handler',
-            policyArns: [],
-        });
-        const graphStorage = new gotiac.GraphStore('TestGraphStore', {
+            runtime: 'nodejs20.x',
+            codePath: path.join(process.cwd(), 'dist/lambda/zips'),
             bucketNodesName: `${AWS_PROFILE}-nodes`,
             bucketEdgesName: `${AWS_PROFILE}-edges`,
             bucketReverseEdgesName: `${AWS_PROFILE}-reverse-edges`,
@@ -45,17 +34,6 @@ export default $config({
             bucketRightsAdminName: `${AWS_PROFILE}-rights-admin`,
             bucketRightsOwnerName: `${AWS_PROFILE}-owners`,
         });
-        return {
-            nodes: graphStorage.bucketNodes,
-            nodesName: graphStorage.bucketNodes.apply((a) => a.name),
-            edges: graphStorage.bucketEdges,
-            reverseEdges: graphStorage.bucketReverseEdges,
-            rightsRead: graphStorage.bucketRightsRead,
-            rightsWrite: graphStorage.bucketRightsWrite,
-            rightsAdmin: graphStorage.bucketRightsAdmin,
-            rightsOwner: graphStorage.bucketRightsOwner,
-            readPolicyArn: graphStorage.storageReadPolicyArn,
-            writePolicyArn: graphStorage.storageWritePolicyArn,
-        };
+        return api;
     },
 });
