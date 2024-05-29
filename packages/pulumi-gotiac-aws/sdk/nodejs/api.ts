@@ -38,26 +38,21 @@ export class Api extends pulumi.ComponentResource {
             if ((!args || args.codePath === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'codePath'");
             }
-            if ((!args || args.handlerPath === undefined) && !opts.urn) {
-                throw new Error("Missing required property 'handlerPath'");
-            }
-            if ((!args || args.policyArns === undefined) && !opts.urn) {
-                throw new Error("Missing required property 'policyArns'");
-            }
-            if ((!args || args.routePath === undefined) && !opts.urn) {
-                throw new Error("Missing required property 'routePath'");
-            }
             if ((!args || args.runtime === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'runtime'");
             }
             if ((!args || args.userPoolId === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'userPoolId'");
             }
+            resourceInputs["bucketEdgesName"] = args ? args.bucketEdgesName : undefined;
+            resourceInputs["bucketNodesName"] = args ? args.bucketNodesName : undefined;
+            resourceInputs["bucketReverseEdgesName"] = args ? args.bucketReverseEdgesName : undefined;
+            resourceInputs["bucketRightsAdminName"] = args ? args.bucketRightsAdminName : undefined;
+            resourceInputs["bucketRightsOwnerName"] = args ? args.bucketRightsOwnerName : undefined;
+            resourceInputs["bucketRightsReadName"] = args ? args.bucketRightsReadName : undefined;
+            resourceInputs["bucketRightsWriteName"] = args ? args.bucketRightsWriteName : undefined;
             resourceInputs["codePath"] = args ? args.codePath : undefined;
-            resourceInputs["handlerPath"] = args ? args.handlerPath : undefined;
-            resourceInputs["memorySize"] = args ? args.memorySize : undefined;
             resourceInputs["policyArns"] = args ? args.policyArns : undefined;
-            resourceInputs["routePath"] = args ? args.routePath : undefined;
             resourceInputs["runtime"] = args ? args.runtime : undefined;
             resourceInputs["userPoolId"] = args ? args.userPoolId : undefined;
             resourceInputs["endpoint"] = undefined /*out*/;
@@ -74,25 +69,41 @@ export class Api extends pulumi.ComponentResource {
  */
 export interface ApiArgs {
     /**
-     * The path to a .zip file containing your deployment package.
+     * The Name of the existing bucket for edge storage.
+     */
+    bucketEdgesName?: pulumi.Input<string>;
+    /**
+     * The Name of the existing bucket for node storage.
+     */
+    bucketNodesName?: pulumi.Input<string>;
+    /**
+     * The Name of the existing bucket for reverse edge storage.
+     */
+    bucketReverseEdgesName?: pulumi.Input<string>;
+    /**
+     * The Name of the existing bucket for admin right storage.
+     */
+    bucketRightsAdminName?: pulumi.Input<string>;
+    /**
+     * The Name of the existing bucket for owner right storage.
+     */
+    bucketRightsOwnerName?: pulumi.Input<string>;
+    /**
+     * The Name of the existing bucket for read right storage.
+     */
+    bucketRightsReadName?: pulumi.Input<string>;
+    /**
+     * The Name of the existing bucket for write right storage.
+     */
+    bucketRightsWriteName?: pulumi.Input<string>;
+    /**
+     * The path to the directory containing the deployment packages.
      */
     codePath: pulumi.Input<string>;
     /**
-     * The path to the handler in the deployment package.
-     */
-    handlerPath: pulumi.Input<string>;
-    /**
-     * The amount of memory in MB your Lambda Function can use at runtime.
-     */
-    memorySize?: pulumi.Input<number>;
-    /**
      * The ARNs of the policies that are attached to the Lambda function.
      */
-    policyArns: pulumi.Input<pulumi.Input<string>[]>;
-    /**
-     * The path to the route in the API.
-     */
-    routePath: pulumi.Input<string>;
+    policyArns?: pulumi.Input<pulumi.Input<string>[]>;
     /**
      * The runtime environment for the Lambda function.
      */

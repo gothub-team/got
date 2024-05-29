@@ -19,17 +19,34 @@ export class GraphStore extends pulumi.ComponentResource {
         return obj['__pulumiType'] === GraphStore.__pulumiType;
     }
 
-    public /*out*/ readonly bucketEdges!: pulumi.Output<{[key: string]: string}>;
-    public /*out*/ readonly bucketNodes!: pulumi.Output<{[key: string]: string}>;
     /**
-     * The ARN of the storage write policy.
+     * The Name of the bucket for edge storage.
+     */
+    public readonly bucketEdgesName!: pulumi.Output<string>;
+    /**
+     * The Name of the bucket for node storage.
      */
     public readonly bucketNodesName!: pulumi.Output<string>;
-    public /*out*/ readonly bucketReverseEdges!: pulumi.Output<{[key: string]: string}>;
-    public /*out*/ readonly bucketRightsAdmin!: pulumi.Output<{[key: string]: string}>;
-    public /*out*/ readonly bucketRightsOwner!: pulumi.Output<{[key: string]: string}>;
-    public /*out*/ readonly bucketRightsRead!: pulumi.Output<{[key: string]: string}>;
-    public /*out*/ readonly bucketRightsWrite!: pulumi.Output<{[key: string]: string}>;
+    /**
+     * The Name of the bucket for reverse edge storage.
+     */
+    public readonly bucketReverseEdgesName!: pulumi.Output<string>;
+    /**
+     * The Name of the bucket for admin right storage.
+     */
+    public readonly bucketRightsAdminName!: pulumi.Output<string>;
+    /**
+     * The Name of the bucket for owner right storage.
+     */
+    public readonly bucketRightsOwnerName!: pulumi.Output<string>;
+    /**
+     * The Name of the bucket for read right storage.
+     */
+    public readonly bucketRightsReadName!: pulumi.Output<string>;
+    /**
+     * The Name of the bucket for write right storage.
+     */
+    public readonly bucketRightsWriteName!: pulumi.Output<string>;
     /**
      * The ARN of the storage read policy.
      */
@@ -57,24 +74,16 @@ export class GraphStore extends pulumi.ComponentResource {
             resourceInputs["bucketRightsOwnerName"] = args ? args.bucketRightsOwnerName : undefined;
             resourceInputs["bucketRightsReadName"] = args ? args.bucketRightsReadName : undefined;
             resourceInputs["bucketRightsWriteName"] = args ? args.bucketRightsWriteName : undefined;
-            resourceInputs["bucketEdges"] = undefined /*out*/;
-            resourceInputs["bucketNodes"] = undefined /*out*/;
-            resourceInputs["bucketReverseEdges"] = undefined /*out*/;
-            resourceInputs["bucketRightsAdmin"] = undefined /*out*/;
-            resourceInputs["bucketRightsOwner"] = undefined /*out*/;
-            resourceInputs["bucketRightsRead"] = undefined /*out*/;
-            resourceInputs["bucketRightsWrite"] = undefined /*out*/;
             resourceInputs["storageReadPolicyArn"] = undefined /*out*/;
             resourceInputs["storageWritePolicyArn"] = undefined /*out*/;
         } else {
-            resourceInputs["bucketEdges"] = undefined /*out*/;
-            resourceInputs["bucketNodes"] = undefined /*out*/;
+            resourceInputs["bucketEdgesName"] = undefined /*out*/;
             resourceInputs["bucketNodesName"] = undefined /*out*/;
-            resourceInputs["bucketReverseEdges"] = undefined /*out*/;
-            resourceInputs["bucketRightsAdmin"] = undefined /*out*/;
-            resourceInputs["bucketRightsOwner"] = undefined /*out*/;
-            resourceInputs["bucketRightsRead"] = undefined /*out*/;
-            resourceInputs["bucketRightsWrite"] = undefined /*out*/;
+            resourceInputs["bucketReverseEdgesName"] = undefined /*out*/;
+            resourceInputs["bucketRightsAdminName"] = undefined /*out*/;
+            resourceInputs["bucketRightsOwnerName"] = undefined /*out*/;
+            resourceInputs["bucketRightsReadName"] = undefined /*out*/;
+            resourceInputs["bucketRightsWriteName"] = undefined /*out*/;
             resourceInputs["storageReadPolicyArn"] = undefined /*out*/;
             resourceInputs["storageWritePolicyArn"] = undefined /*out*/;
         }
