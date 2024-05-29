@@ -20,13 +20,13 @@ type GraphStoreArgs struct {
 // The GraphStore component resource.
 type GraphStore struct {
 	pulumi.ResourceState
-	BucketNodes pulumi.MapOutput `pulumi:"bucketNodes"`
-	BucketEdges pulumi.MapOutput `pulumi:"bucketEdges"`
-	BucketReverseEdges pulumi.MapOutput `pulumi:"bucketReverseEdges"`
-	BucketRightsRead pulumi.MapOutput `pulumi:"bucketRightsRead"`
-	BucketRightsWrite pulumi.MapOutput `pulumi:"bucketRightsWrite"`
-	BucketRightsAdmin pulumi.MapOutput `pulumi:"bucketRightsAdmin"`
-	BucketRightsOwner pulumi.MapOutput `pulumi:"bucketRightsOwner"`
+	BucketNodesName pulumi.StringOutput `pulumi:"bucketNodesName"`
+	BucketEdgesName pulumi.StringOutput `pulumi:"bucketEdges"`
+	BucketReverseEdgesName pulumi.StringOutput `pulumi:"bucketReverseEdges"`
+	BucketRightsReadName pulumi.StringOutput `pulumi:"bucketRightsRead"`
+	BucketRightsWriteName pulumi.StringOutput `pulumi:"bucketRightsWrite"`
+	BucketRightsAdminName pulumi.StringOutput `pulumi:"bucketRightsAdmin"`
+	BucketRightsOwnerName pulumi.StringOutput `pulumi:"bucketRightsOwner"`
 	StorageReadPolicyArn pulumi.StringOutput `pulumi:"storageReadPolicyArn"`
 	StorageWritePolicyArn pulumi.StringOutput `pulumi:"storageWritePolicyArn"`
 }
@@ -159,34 +159,14 @@ func NewGraphStore(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	component.BucketNodes = pulumi.Map{
-		"name": bucketNodes.Name,
-		"arn": bucketNodes.Arn,
-	}.ToMapOutput()
-	component.BucketEdges = pulumi.Map{
-		"name": bucketEdges.Name,
-		"arn": bucketEdges.Arn,
-	}.ToMapOutput()
-	component.BucketReverseEdges = pulumi.Map{
-		"name": bucketReverseEdges.Name,
-		"arn": bucketReverseEdges.Arn,
-	}.ToMapOutput()
-	component.BucketRightsRead = pulumi.Map{
-		"name": bucketRightsRead.Name,
-		"arn": bucketRightsRead.Arn,
-	}.ToMapOutput()
-	component.BucketRightsWrite = pulumi.Map{
-		"name": bucketRightsWrite.Name,
-		"arn": bucketRightsWrite.Arn,
-	}.ToMapOutput()
-	component.BucketRightsAdmin = pulumi.Map{
-		"name": bucketRightsAdmin.Name,
-		"arn": bucketRightsAdmin.Arn,
-	}.ToMapOutput()
-	component.BucketRightsOwner = pulumi.Map{
-		"name": bucketRightsOwner.Name,
-		"arn": bucketRightsOwner.Arn,
-	}.ToMapOutput()
+	component.BucketNodesName = bucketNodes.Name.ToStringOutput()
+	component.BucketEdgesName = bucketEdges.Name.ToStringOutput()
+	component.BucketReverseEdgesName = bucketReverseEdges.Name.ToStringOutput()
+	component.BucketRightsReadName = bucketRightsRead.Name.ToStringOutput()
+	component.BucketRightsWriteName = bucketRightsWrite.Name.ToStringOutput()
+	component.BucketRightsAdminName = bucketRightsAdmin.Name.ToStringOutput()
+	component.BucketRightsOwnerName = bucketRightsOwner.Name.ToStringOutput()
+
 	component.StorageReadPolicyArn = storageReadPolicy.Arn
 	component.StorageWritePolicyArn = storageWritePolicy.Arn
 

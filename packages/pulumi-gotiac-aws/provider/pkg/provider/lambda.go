@@ -129,8 +129,7 @@ func NewLambda(ctx *pulumi.Context,
 		memorySize = pulumi.Int(512)
 	}
 
-
-	lambdaFunction, err := lambda.NewFunction(ctx, "test_lambda", &lambda.FunctionArgs{
+	lambdaFunction, err := lambda.NewFunction(ctx, name, &lambda.FunctionArgs{
 		Code:    args.CodePath.ToStringOutput().ApplyT(func(s string) pulumi.Archive { return pulumi.NewFileArchive(s) }).(pulumi.ArchiveOutput),
 		Name:    pulumi.String(name),
 		Role:    iamRole.Arn,

@@ -15,32 +15,28 @@ type ApiArgs struct {
 	UserPoolId pulumi.IDInput `pulumi:"userPoolId"`
 	// The the path to the .zip for the lambda code
 	CodePath pulumi.StringInput `pulumi:"codePath"`
-	// The handler for the lambda function
-	HandlerPath pulumi.StringInput `pulumi:"handlerPath"`
-	// The api route path
-	RoutePath pulumi.StringInput `pulumi:"routePath"`
-	// The memory size for the lambda function
-	MemorySize *pulumi.Int `pulumi:"memorySize"`
 	// The lambda runtime
 	Runtime pulumi.StringInput `pulumi:"runtime"`
 	// The array of policy arns that should be attachen to the lambda function role
 	PolicyArns pulumi.StringArrayInput `pulumi:"policyArns"`
+	BucketNodesName *pulumi.StringInput `pulumi:"bucketNodesName"`
+	BucketEdgesName *pulumi.StringInput `pulumi:"bucketEdgesName"`
+	BucketReverseEdgesName *pulumi.StringInput `pulumi:"bucketReverseEdgesName"`
+	BucketRightsReadName *pulumi.StringInput `pulumi:"bucketRightsReadName"`
+	BucketRightsWriteName *pulumi.StringInput `pulumi:"bucketRightsWriteName"`
+	BucketRightsAdminName *pulumi.StringInput `pulumi:"bucketRightsAdminName"`
+	BucketRightsOwnerName *pulumi.StringInput `pulumi:"bucketRightsOwnerName"`
 }
 
 // The Api component resource.
 type Api struct {
 	pulumi.ResourceState
-	// // The name of the lambda resource
-	// Name pulumi.StringOutput `pulumi:"name"`
-	// // The ARN of the lambda resource
-	// Arn pulumi.StringOutput `pulumi:"arn"`
-	// // The role of the lambda resource
-	// Role iam.RoleOutput `pulumi:"role"`
-	// The role of the lambda resource
-	Function lambda.FunctionOutput `pulumi:"function"`
-	// // The role of the lambda resource
 	// Route apigatewayv2.Route `pulumi:"route"`
 	Endpoint pulumi.StringOutput `pulumi:"endpoint"`
+	PullFunction lambda.FunctionOutput `pulumi:"pullFunction"`
+	PullEndpoint pulumi.StringOutput `pulumi:"pullEndpoint"`
+	PushFunction lambda.FunctionOutput `pulumi:"pushFunction"`
+	PushEndpoint pulumi.StringOutput `pulumi:"pushEndpoint"`
 }
 
 // NewApi creates a new Lambda component resource.
@@ -138,32 +134,119 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	apiLambda, err := NewApiLambda(ctx, "test-api-lambda", &ApiLambdaArgs{
+	graphStore, err := NewGraphStore(ctx, name + "-graph-store", &GraphStoreArgs{
+		BucketNodesName: args.BucketNodesName,
+		BucketEdgesName: args.BucketEdgesName,
+		BucketReverseEdgesName: args.BucketReverseEdgesName,
+		BucketRightsReadName: args.BucketRightsReadName,
+		BucketRightsWriteName: args.BucketRightsWriteName,
+		BucketRightsAdminName: args.BucketRightsAdminName,
+		BucketRightsOwnerName: args.BucketRightsOwnerName,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	pullMem := pulumi.Int(2048)
+	pullEnv := pulumi.StringMap{
+		"BUCKET_NODES": graphStore.BucketNodesName,
+		"BUCKET_EDGES": graphStore.BucketEdgesName,
+		"BUCKET_REVERSE_EDGES": graphStore.BucketReverseEdgesName,
+		"BUCKET_RIGHTS_READ": graphStore.BucketRightsReadName,
+		"BUCKET_RIGHTS_WRITE": graphStore.BucketRightsWriteName,
+		"BUCKET_RIGHTS_ADMIN": graphStore.BucketRightsAdminName,
+		"BUCKET_OWNERS": graphStore.BucketRightsOwnerName,
+	}
+
+	pullLambda, err := NewLambda(ctx, name + "PullInternal", &LambdaArgs{
 		Runtime: args.Runtime,
-		CodePath: args.CodePath,
-		HandlerPath: args.HandlerPath,
-		MemorySize: args.MemorySize,
+		CodePath: pulumi.Sprintf("%s/pull.zip", args.CodePath),
+		HandlerPath: pulumi.String("index.handlerInvoke"),
+		MemorySize: &pullMem,
+		PolicyArns: pulumi.StringArray{
+			graphStore.StorageReadPolicyArn,
+		},
+		Environment: pullEnv,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	pullApiLambda, err := NewApiLambda(ctx, name + "PullApi", &ApiLambdaArgs{
+		Runtime: args.Runtime,
+		CodePath: pulumi.Sprintf("%s/pull.zip", args.CodePath),
+		HandlerPath: pulumi.String("index.handlerHttp"),
+		MemorySize: &pullMem,
 		Method: pulumi.String("POST"),
 		AuthorizerId: authorizer.ID(),
-		PolicyArns: args.PolicyArns,
+		PolicyArns: pulumi.StringArray{
+			graphStore.StorageReadPolicyArn,
+		},
 		ApiId: api.ID(),
 		ExecutionArn: api.ExecutionArn,
-		RoutePath: args.RoutePath,
-		Environment: pulumi.StringMap{},
+		RoutePath: pulumi.String("/pull"),
+		Environment: pullEnv,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	pushMem := pulumi.Int(2048)
+	pushEnv := pulumi.StringMap{
+		"BUCKET_NODES": graphStore.BucketNodesName,
+		"BUCKET_EDGES": graphStore.BucketEdgesName,
+		"BUCKET_REVERSE_EDGES": graphStore.BucketReverseEdgesName,
+		"BUCKET_RIGHTS_READ": graphStore.BucketRightsReadName,
+		"BUCKET_RIGHTS_WRITE": graphStore.BucketRightsWriteName,
+		"BUCKET_RIGHTS_ADMIN": graphStore.BucketRightsAdminName,
+		"BUCKET_OWNERS": graphStore.BucketRightsOwnerName,
+	}
+
+	pushLambda, err := NewLambda(ctx, name + "PushInternal", &LambdaArgs{
+		Runtime: args.Runtime,
+		CodePath: pulumi.Sprintf("%s/push.zip", args.CodePath),
+		HandlerPath: pulumi.String("index.handlerInvoke"),
+		MemorySize: &pushMem,
+		PolicyArns: pulumi.StringArray{
+			graphStore.StorageReadPolicyArn,
+			graphStore.StorageWritePolicyArn,
+		},
+		Environment: pushEnv,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	pushApiLambda, err := NewApiLambda(ctx, name + "PushApi", &ApiLambdaArgs{
+		Runtime: args.Runtime,
+		CodePath: pulumi.Sprintf("%s/push.zip", args.CodePath),
+		HandlerPath: pulumi.String("index.handlerHttp"),
+		MemorySize: &pushMem,
+		Method: pulumi.String("POST"),
+		AuthorizerId: authorizer.ID(),
+		PolicyArns: pulumi.StringArray{
+			graphStore.StorageReadPolicyArn,
+			graphStore.StorageWritePolicyArn,
+		},
+		ApiId: api.ID(),
+		ExecutionArn: api.ExecutionArn,
+		RoutePath: pulumi.String("/push"),
+		Environment: pushEnv,
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	component.Endpoint = stage.InvokeUrl
+	component.PullFunction = pullLambda.Function
+	component.PullEndpoint = pullApiLambda.Route.RouteKey()
+	component.PushFunction = pushLambda.Function
+	component.PushEndpoint = pushApiLambda.Route.RouteKey()
 
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
-		// "name": lambdaFunction.Name,
-		// "arn": lambdaFunction.Arn,
-		// "role": lambdaFunction.Role,
-		"function": apiLambda.Function,
-		// "route": apiRoute,
 		"endpoint": stage.InvokeUrl,
+		"pullFunction": pullLambda.Function,
+		"pullEndpoint": pullApiLambda.Route.RouteKey(),
 	}); err != nil {
 		return nil, err
 	}
