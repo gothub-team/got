@@ -2,7 +2,7 @@
     "name": "@gothub/got-api-test",
     "type": "module",
     "bin": {
-        "test": "index.ts"
+        "got-api-test": "index.ts"
     },
     "scripts": {
         "lint": "eslint .",
