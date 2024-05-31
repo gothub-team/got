@@ -5,6 +5,7 @@ import (
 
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/apigatewayv2"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/cognito"
+	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/iam"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/lambda"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
@@ -37,6 +38,8 @@ type Api struct {
 	PullEndpoint pulumi.StringOutput `pulumi:"pullEndpoint"`
 	PushFunction lambda.FunctionOutput `pulumi:"pushFunction"`
 	PushEndpoint pulumi.StringOutput `pulumi:"pushEndpoint"`
+	PullInvokePolicyArn pulumi.StringOutput `pulumi:"pullInvokePolicyArn"`
+	PushInvokePolicyArn pulumi.StringOutput `pulumi:"pushInvokePolicyArn"`
 }
 
 // NewApi creates a new Lambda component resource.
@@ -172,6 +175,28 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	pullLambdaInvokePolicy, err := iam.NewPolicy(ctx, name + "-invoke-pull-policy", &iam.PolicyArgs{
+		Path:        pulumi.String("/"),
+		Description: pulumi.String("IAM policy for writing the got s3 storage"),
+		Policy:      pulumi.Any(map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				{
+					"Effect": "Allow",
+					"Action": []interface{}{
+						"lambda:InvokeFunction",
+					},
+					"Resource": []interface{}{
+						pullLambda.Arn,
+					},
+				},
+			},
+		}),
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	pullApiLambda, err := NewApiLambda(ctx, name + "PullApi", &ApiLambdaArgs{
 		Runtime: args.Runtime,
 		CodePath: pulumi.Sprintf("%s/pull.zip", args.CodePath),
@@ -217,6 +242,28 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	pushLambdaInvokePolicy, err := iam.NewPolicy(ctx, name + "-invoke-push-policy", &iam.PolicyArgs{
+		Path:        pulumi.String("/"),
+		Description: pulumi.String("IAM policy for writing the got s3 storage"),
+		Policy:      pulumi.Any(map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				{
+					"Effect": "Allow",
+					"Action": []interface{}{
+						"lambda:InvokeFunction",
+					},
+					"Resource": []interface{}{
+						pushLambda.Arn,
+					},
+				},
+			},
+		}),
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	pushApiLambda, err := NewApiLambda(ctx, name + "PushApi", &ApiLambdaArgs{
 		Runtime: args.Runtime,
 		CodePath: pulumi.Sprintf("%s/push.zip", args.CodePath),
@@ -242,6 +289,8 @@ func NewApi(ctx *pulumi.Context,
 	component.PullEndpoint = pullApiLambda.Route.RouteKey()
 	component.PushFunction = pushLambda.Function
 	component.PushEndpoint = pushApiLambda.Route.RouteKey()
+	component.PullInvokePolicyArn = pullLambdaInvokePolicy.Arn
+	component.PushInvokePolicyArn = pushLambdaInvokePolicy.Arn
 
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
 		"endpoint": stage.InvokeUrl,

@@ -152,8 +152,26 @@ resources:
             endpoint:
                 type: string
                 description: The endpoint of the API.
+            pullFunction:
+                type: string
+            pullEndpoint:
+                type: string
+            pushFunction:
+                type: string
+            pushEndpoint:
+                type: string
+            pullInvokePolicyArn:
+                type: string
+            pushInvokePolicyArn:
+                type: string
         required:
             - endpoint
+            - pullFunction
+            - pullEndpoint
+            - pushFunction
+            - pushEndpoint
+            - pullInvokePolicyArn
+            - pushInvokePolicyArn
     gotiac:index:GraphStore:
         isComponent: true
         inputProperties:

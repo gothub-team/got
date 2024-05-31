@@ -85,14 +85,16 @@ func NewLambda(ctx *pulumi.Context,
 				},
 			},
 		}),
-	})
+	}, pulumi.DependsOn([]pulumi.Resource{logGroup}))
 	if err != nil {
 		return nil, err
 	}
 
+	allow := "Allow"
 	assumeRolePolicy, err := iam.GetPolicyDocument(ctx, &iam.GetPolicyDocumentArgs{
 		Statements: []iam.GetPolicyDocumentStatement{
 			{
+				Effect: &allow,
 				Actions: []string{
 					"sts:AssumeRole",
 				},
@@ -117,7 +119,7 @@ func NewLambda(ctx *pulumi.Context,
 		ManagedPolicyArns: pulumi.All(args.PolicyArns, loggingPolicy.Arn).ApplyT(func(args []interface{}) []string {
 			return append(args[0].([]string), args[1].(string))
 		}).(pulumi.StringArrayOutput),
-	})
+	}, pulumi.DependsOn([]pulumi.Resource{loggingPolicy}))
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +141,7 @@ func NewLambda(ctx *pulumi.Context,
 			Variables: args.Environment,
 		},
 		MemorySize: memorySize,
-	})
+	}, pulumi.DependsOn([]pulumi.Resource{iamRole}))
 	if err != nil {
 		return nil, err
 	}

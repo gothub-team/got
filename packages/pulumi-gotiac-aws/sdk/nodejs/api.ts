@@ -23,6 +23,12 @@ export class Api extends pulumi.ComponentResource {
      * The endpoint of the API.
      */
     public /*out*/ readonly endpoint!: pulumi.Output<string>;
+    public /*out*/ readonly pullEndpoint!: pulumi.Output<string>;
+    public /*out*/ readonly pullFunction!: pulumi.Output<string>;
+    public /*out*/ readonly pullInvokePolicyArn!: pulumi.Output<string>;
+    public /*out*/ readonly pushEndpoint!: pulumi.Output<string>;
+    public /*out*/ readonly pushFunction!: pulumi.Output<string>;
+    public /*out*/ readonly pushInvokePolicyArn!: pulumi.Output<string>;
 
     /**
      * Create a Api resource with the given unique name, arguments, and options.
@@ -56,8 +62,20 @@ export class Api extends pulumi.ComponentResource {
             resourceInputs["runtime"] = args ? args.runtime : undefined;
             resourceInputs["userPoolId"] = args ? args.userPoolId : undefined;
             resourceInputs["endpoint"] = undefined /*out*/;
+            resourceInputs["pullEndpoint"] = undefined /*out*/;
+            resourceInputs["pullFunction"] = undefined /*out*/;
+            resourceInputs["pullInvokePolicyArn"] = undefined /*out*/;
+            resourceInputs["pushEndpoint"] = undefined /*out*/;
+            resourceInputs["pushFunction"] = undefined /*out*/;
+            resourceInputs["pushInvokePolicyArn"] = undefined /*out*/;
         } else {
             resourceInputs["endpoint"] = undefined /*out*/;
+            resourceInputs["pullEndpoint"] = undefined /*out*/;
+            resourceInputs["pullFunction"] = undefined /*out*/;
+            resourceInputs["pullInvokePolicyArn"] = undefined /*out*/;
+            resourceInputs["pushEndpoint"] = undefined /*out*/;
+            resourceInputs["pushFunction"] = undefined /*out*/;
+            resourceInputs["pushInvokePolicyArn"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
         super(Api.__pulumiType, name, resourceInputs, opts, true /*remote*/);
