@@ -49,6 +49,10 @@ jobs:
             - name: Publish
               working-directory: ./packages/got-api-test
               shell: bash
+              run: pnpm install
+            - name: Publish
+              working-directory: ./packages/got-api-test
+              shell: bash
               run: pnpm publish --access public --no-git-checks
               env:
                   NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
