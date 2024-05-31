@@ -1,6 +1,9 @@
 {
     "name": "@gothub/got-api-test",
     "type": "module",
+    "bin": {
+        "test": "index.ts"
+    },
     "scripts": {
         "lint": "eslint .",
         "test": "bun test --timeout 100000"
