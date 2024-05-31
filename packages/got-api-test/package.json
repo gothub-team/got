@@ -1,6 +1,6 @@
 {
     "name": "@gothub/got-api-test",
-    "version": "0.0.18",
+    "version": "0.0.19",
     "type": "module",
     "bin": {
         "got-api-test": "index.ts"
