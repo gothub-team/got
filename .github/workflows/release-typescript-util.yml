@@ -38,10 +38,28 @@ jobs:
               with:
                   node-version: '20.x'
                   registry-url: ${{env.NPM_REGISTRY_URL}}
-            - uses: JS-DevTools/npm-publish@v1
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
               with:
-                  access: 'public'
-                  token: ${{ env.NPM_TOKEN }}
-                  package: ${{github.workspace}}/packages/typescript-util/package.json
+                  version: 9
+            # - name: Set version to release tag
+            #   working-directory: ./packages/typescript-util
+            #   shell: bash
+            #   run: pnpm version from-git --no-commit-hooks --no-git-tag-version --allow-same-version
+            - name: Install
+              shell: bash
+              run: pnpm install
+            - name: Publish
+              working-directory: ./packages/typescript-util
+              shell: bash
+              run: pnpm publish --access public --no-git-checks
+              env:
+                  NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
+            # - name: Push version changes to main branch
+            #   uses: stefanzweifel/git-auto-commit-action@v5
+            #   with:
+            #       commit_message: 'chore: release ${{ github.event.release.tag_name }}'
+            #       branch: ${{ github.event.repository.default_branch }}
+            #       file_pattern: packages/typescript-util/package.json
         strategy:
             fail-fast: true
