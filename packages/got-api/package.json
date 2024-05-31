@@ -1,6 +1,6 @@
 {
     "name": "@gothub/got-api",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "type": "module",
     "module": "client-js/index.ts",
     "types": "client-js/index.ts",
