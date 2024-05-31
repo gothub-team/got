@@ -137,6 +137,7 @@ func NewLambda(ctx *pulumi.Context,
 		Role:    iamRole.Arn,
 		Handler: args.HandlerPath,
 		Runtime: args.Runtime,
+		Timeout: pulumi.Int(30),
 		Environment: &lambda.FunctionEnvironmentArgs{
 			Variables: args.Environment,
 		},
