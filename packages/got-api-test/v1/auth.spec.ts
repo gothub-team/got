@@ -1,10 +1,20 @@
 import { describe, beforeAll, it, expect } from 'bun:test';
 import { createApi, type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
-import { env } from '../env';
 import { createMailClient } from './shared/mail';
+import { parseEnv } from '@gothub/typescript-util';
+import { BASE_DOMAIN, GOT_API_URL, MAIL_IMAP_SERVER, MAIL_USERNAME, MAIL_USER_PW, TEST_USER_1_EMAIL } from '../env';
 
 export const match6Digits = (str: string) => str.match(/[0-9]{6}/)?.[0];
+
+const env = parseEnv({
+    BASE_DOMAIN,
+    GOT_API_URL,
+    MAIL_USERNAME,
+    MAIL_USER_PW,
+    MAIL_IMAP_SERVER,
+    TEST_USER_1_EMAIL,
+});
 
 let testId: string;
 let api: GotApi;
