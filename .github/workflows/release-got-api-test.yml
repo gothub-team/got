@@ -40,6 +40,8 @@ jobs:
                   registry-url: ${{env.NPM_REGISTRY_URL}}
             - name: Setup pnpm
               uses: pnpm/action-setup@v4
+              with:
+                  version: 9
             - name: Set version to release tag
               working-directory: ./packages/got-api-test
               shell: bash
