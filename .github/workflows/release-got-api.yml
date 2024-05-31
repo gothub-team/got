@@ -2,7 +2,7 @@ name: release-pulumi-gotiac-aws
 on:
     push:
         tags:
-            - 'packages/got-api-test/v*.*.*'
+            - 'packages/got-api/v*.*.*'
             - '!v*.*.*-**'
 env:
     # THIS GITHUB_TOKEN IS A REQUIREMENT TO BE ABLE TO WRITE TO GH RELEASES
@@ -29,7 +29,7 @@ jobs:
                   node-version: ${{matrix.nodeversion}}
                   registry-url: ${{env.NPM_REGISTRY_URL}}
             - name: Check worktree clean
-              working-directory: ./packages/got-api-test
+              working-directory: ./packages/got-api
               run: |
                   git update-index -q --refresh
                   if ! git diff-files --quiet; then
@@ -46,6 +46,6 @@ jobs:
               with:
                   access: 'public'
                   token: ${{ env.NPM_TOKEN }}
-                  package: ${{github.workspace}}/packages/got-api-test/package.json
+                  package: ${{github.workspace}}/packages/got-api/package.json
         strategy:
             fail-fast: true

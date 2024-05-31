@@ -1,6 +1,6 @@
 {
     "name": "@gothub/got-api-test",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "type": "module",
     "bin": {
         "got-api-test": "index.ts"
@@ -10,9 +10,6 @@
         "test": "bun test --timeout 100000"
     },
     "devDependencies": {
-        "@gothub/got-core": "workspace:*",
-        "@gothub/typescript-util": "workspace:*",
-        "@gothub/got-api": "workspace:*",
         "@types/aws-lambda": "8.10.137",
         "@types/bun": "^1.1.0",
         "@types/imapflow": "^1.0.18",
@@ -22,6 +19,9 @@
         "typescript": "^5.0.0"
     },
     "dependencies": {
+        "@gothub/got-core": "workspace:*",
+        "@gothub/typescript-util": "workspace:*",
+        "@gothub/got-api": "workspace:*",
         "sst": "ion"
     }
 }
