@@ -31,7 +31,7 @@ jobs:
             - name: Setup Bun
               uses: oven-sh/setup-bun@v1
             - name: Check worktree clean
-              working-directory: ./packages/pulumi-gotiac-aws
+              working-directory: ./packages/got-api-test
               run: |
                   git update-index -q --refresh
                   if ! git diff-files --quiet; then
@@ -44,7 +44,7 @@ jobs:
               with:
                   access: 'public'
                   token: ${{ env.NPM_TOKEN }}
-                  package: ${{github.workspace}}/packages/pulumi-gotiac-aws/sdk/nodejs/bin/package.json
+                  package: ${{github.workspace}}/packages/got-api-test/package.json
         strategy:
             fail-fast: true
             # matrix:
