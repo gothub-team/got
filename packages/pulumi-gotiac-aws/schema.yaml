@@ -19,8 +19,12 @@ resources:
             organizationId:
                 type: string
                 description: The ID of the organization that can be used to create mailboxes
+            imapServer:
+                type: string
+                description: The IMAP server host for the mail domain
         required:
             - organizationId
+            - imapServer
     gotiac:index:MailUser:
         isComponent: true
         inputProperties:

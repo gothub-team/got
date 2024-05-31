@@ -1,5 +1,7 @@
 {
     "name": "@gothub/got-api",
+    "version": "0.0.3",
+    "license": "MIT",
     "type": "module",
     "module": "client-js/index.ts",
     "types": "client-js/index.ts",

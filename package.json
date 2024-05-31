@@ -2,6 +2,7 @@
     "name": "got",
     "private": true,
     "type": "module",
+    "license": "MIT",
     "workspaces": [
         "packages/*",
         "packages/pulumi-gotiac-aws/sdk/nodejs"

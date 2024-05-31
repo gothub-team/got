@@ -35,7 +35,7 @@ export const post = async <D, R>(
             console.error('err', err);
         }) as Promise<R>;
     }
-    return Promise.reject(response.json());
+    return Promise.reject(await response.json());
 };
 
 /**
