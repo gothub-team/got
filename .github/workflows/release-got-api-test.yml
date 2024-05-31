@@ -46,8 +46,7 @@ jobs:
             #   working-directory: ./packages/got-api-test
             #   shell: bash
             #   run: pnpm version from-git --no-commit-hooks --no-git-tag-version --allow-same-version
-            - name: Publish
-              working-directory: ./packages/got-api-test
+            - name: Install
               shell: bash
               run: pnpm install
             - name: Publish
