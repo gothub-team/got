@@ -1,6 +1,7 @@
 {
     "name": "@gothub/got-core",
     "version": "0.0.3",
+    "license": "MIT",
     "type": "module",
     "main": "dist/cjs/index.js",
     "module": "dist/module/index.js",
