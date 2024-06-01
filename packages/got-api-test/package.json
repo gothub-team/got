@@ -3,8 +3,9 @@
     "version": "0.0.22",
     "license": "MIT",
     "type": "module",
+    "main": "index.ts",
     "bin": {
-        "got-api-test": "index.ts"
+        "got-api-test": "test.ts"
     },
     "scripts": {
         "lint": "eslint .",
