@@ -39,7 +39,7 @@ export const envSchema = z.object({
     AWS_REGION: z.enum(awsRegions),
     AWS_PROFILE: z.string(),
     AWS_MAIL_REGION: z.enum(awsRegions),
-    BASE_DOMAIN: z.string(),
+    MAIL_DOMAIN: z.string(),
     FILE_HOSTING_DOMAIN: z.string(),
     FILE_HOSTING_BUCKET: z.string().optional(),
 });

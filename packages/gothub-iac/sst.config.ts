@@ -25,15 +25,15 @@ export default $config({
         });
 
         const mailDomain = new gotiac.MailDomain('MailDomain', {
-            domain: env.BASE_DOMAIN,
+            domain: env.MAIL_DOMAIN,
             region: env.AWS_MAIL_REGION,
         });
 
         const user = new gotiac.MailUser('MailUser', {
             region: env.AWS_MAIL_REGION,
-            domain: env.BASE_DOMAIN,
+            domain: env.MAIL_DOMAIN,
             displayName: 'Info',
-            name: `info@${env.BASE_DOMAIN}`,
+            name: `info@${env.MAIL_DOMAIN}`,
             emailPrefix: 'info',
             enabled: true,
         });
