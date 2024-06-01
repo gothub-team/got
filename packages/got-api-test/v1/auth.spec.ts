@@ -15,7 +15,7 @@ const env = parseEnv({
     TEST_USER_1_EMAIL,
 });
 
-const [TEST_MAIL_PREFIX, TEST_MAIL_DOMAIN] = env.TEST_USER_1_EMAIL.split('@');
+const [TEST_MAIL_PREFIX, TEST_MAIL_DOMAIN] = env.MAIL_USERNAME.split('@');
 
 let testId: string;
 let api: GotApi;
