@@ -23,7 +23,7 @@
         "typescript": "^5.0.0"
     },
     "dependencies": {
-        "@gothub/got-core": "workspace:*",
+        "@gothub/got-core": "workspace:^",
         "sst": "ion"
     }
 }

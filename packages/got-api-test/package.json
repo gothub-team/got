@@ -20,9 +20,9 @@
         "typescript": "^5.0.0"
     },
     "dependencies": {
-        "@gothub/got-core": "workspace:*",
-        "@gothub/typescript-util": "workspace:*",
-        "@gothub/got-api": "workspace:*",
+        "@gothub/got-core": "workspace:^",
+        "@gothub/typescript-util": "workspace:^",
+        "@gothub/got-api": "workspace:^",
         "imapflow": "^1.0.162",
         "sst": "ion"
     }
