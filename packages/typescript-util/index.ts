@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const parseEnv = (schemaObject: Record<string, z.Schema>): Record<string, string> => {
+export const parseEnv = <T extends Record<string, z.Schema>>(schemaObject: T): z.infer<typeof schema> => {
     const schema = z.object(schemaObject);
     try {
         const result = schema.parse(process.env);

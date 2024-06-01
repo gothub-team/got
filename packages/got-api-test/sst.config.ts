@@ -1,8 +1,16 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 import * as gotiac from '@gothub/pulumi-gotiac-aws';
+import { AWS_PROFILE, AWS_REGION, USER_POOL_ID, parseEnv } from '@gothub/typescript-util';
 import * as fs from 'fs';
+import { TEST_USER_1_EMAIL, TEST_USER_2_EMAIL } from './env';
 
-import { env } from './env';
+const env = parseEnv({
+    AWS_REGION,
+    AWS_PROFILE,
+    USER_POOL_ID,
+    TEST_USER_1_EMAIL,
+    TEST_USER_2_EMAIL,
+});
 
 export default $config({
     app(input) {

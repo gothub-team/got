@@ -2,7 +2,24 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as gotiac from '@gothub/pulumi-gotiac-aws';
 import * as fs from 'fs';
-import { env } from './env';
+import {
+    AWS_MAIL_REGION,
+    AWS_PROFILE,
+    AWS_REGION,
+    FILE_HOSTING_DOMAIN,
+    MAIL_DOMAIN,
+    parseEnv,
+} from '@gothub/typescript-util';
+import { FILE_HOSTING_BUCKET } from './env';
+
+const env = parseEnv({
+    AWS_REGION,
+    AWS_PROFILE,
+    AWS_MAIL_REGION,
+    MAIL_DOMAIN,
+    FILE_HOSTING_DOMAIN,
+    FILE_HOSTING_BUCKET,
+});
 
 export default $config({
     app(input) {

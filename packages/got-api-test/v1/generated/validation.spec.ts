@@ -1,11 +1,18 @@
 import { describe, beforeAll, beforeEach, it, expect } from 'bun:test';
-import { env } from '../../env';
+import { TEST_USER_1_EMAIL, TEST_USER_1_PW } from '../../env';
 import { createUserApi } from '../shared';
 import { assocPathMutate } from '@gothub/got-core';
+import { GOT_API_URL, parseEnv } from '@gothub/typescript-util';
 
 const strictAdditionalProperties = false;
 const strictLoginValidation = false;
 const strictArrayValidation = false;
+
+const env = parseEnv({
+    GOT_API_URL,
+    TEST_USER_1_EMAIL,
+    TEST_USER_1_PW,
+});
 
 let headers: Record<string, string>;
 beforeAll(async () => {
