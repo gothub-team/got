@@ -30,6 +30,11 @@ export type MailDomain = import("./mailDomain").MailDomain;
 export const MailDomain: typeof import("./mailDomain").MailDomain = null as any;
 utilities.lazyLoad(exports, ["MailDomain"], () => require("./mailDomain"));
 
+export { MailUserArgs } from "./mailUser";
+export type MailUser = import("./mailUser").MailUser;
+export const MailUser: typeof import("./mailUser").MailUser = null as any;
+utilities.lazyLoad(exports, ["MailUser"], () => require("./mailUser"));
+
 export { ProviderArgs } from "./provider";
 export type Provider = import("./provider").Provider;
 export const Provider: typeof import("./provider").Provider = null as any;
@@ -55,6 +60,8 @@ const _module = {
                 return new Lambda(name, <any>undefined, { urn })
             case "gotiac:index:MailDomain":
                 return new MailDomain(name, <any>undefined, { urn })
+            case "gotiac:index:MailUser":
+                return new MailUser(name, <any>undefined, { urn })
             case "gotiac:index:TestUser":
                 return new TestUser(name, <any>undefined, { urn })
             default:

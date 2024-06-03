@@ -1,21 +1,28 @@
 {
     "name": "@gothub/got-api-test",
+    "version": "0.0.22",
+    "license": "MIT",
     "type": "module",
+    "bin": {
+        "got-api-test": "index.ts"
+    },
     "scripts": {
         "lint": "eslint .",
         "test": "bun test --timeout 100000"
     },
     "devDependencies": {
-        "@gothub/got-core": "workspace:*",
-        "@gothub/typescript-util": "workspace:*",
-        "@gothub/got-api": "workspace:*",
         "@types/aws-lambda": "8.10.137",
-        "@types/bun": "^1.1.0"
+        "@types/bun": "^1.1.0",
+        "@types/imapflow": "^1.0.18"
     },
     "peerDependencies": {
         "typescript": "^5.0.0"
     },
     "dependencies": {
+        "@gothub/got-core": "workspace:*",
+        "@gothub/typescript-util": "workspace:*",
+        "@gothub/got-api": "workspace:*",
+        "imapflow": "^1.0.162",
         "sst": "ion"
     }
 }

@@ -1,6 +1,7 @@
 /// <reference path="./.sst/platform/config.d.ts" />
-// import * as pulumi from '@pulumi/pulumi';
+import * as pulumi from '@pulumi/pulumi';
 import * as gotiac from '@gothub/pulumi-gotiac-aws';
+import * as fs from 'fs';
 import { env } from './env';
 
 export default $config({
@@ -18,20 +19,37 @@ export default $config({
         };
     },
     async run() {
-        // const fileHosting = new gotiac.FileHosting('FileHosting', {
-        //     domain: env.FILE_HOSTING_DOMAIN,
-        //     bucketName: env.FILE_HOSTING_BUCKET,
-        // });
+        const fileHosting = new gotiac.FileHosting('FileHosting', {
+            domain: env.FILE_HOSTING_DOMAIN,
+            bucketName: env.FILE_HOSTING_BUCKET,
+        });
 
-        new gotiac.MailDomain('MailDomain', {
+        const mailDomain = new gotiac.MailDomain('MailDomain', {
             domain: env.BASE_DOMAIN,
             region: env.AWS_MAIL_REGION,
         });
 
+        const user = new gotiac.MailUser('MailUser', {
+            region: env.AWS_MAIL_REGION,
+            domain: env.BASE_DOMAIN,
+            displayName: 'Info',
+            name: `info@${env.BASE_DOMAIN}`,
+            emailPrefix: 'info',
+            enabled: true,
+        });
+
+        fs.writeFileSync('.secrets.env', '');
+        user.password.apply((password) => {
+            fs.appendFileSync('.secrets.env', `export MAIL_USER_PW='${password}'\n`);
+        });
+        mailDomain.imapServer.apply((imapServer) => {
+            fs.appendFileSync('.secrets.env', `export MAIL_IMAP_SERVER='${imapServer}'\n`);
+        });
+
         return {
-            // url: pulumi.interpolate`https://${fileHosting.url}`,
-            // privateKeyId: fileHosting.privateKeyId,
-            // privateKeyParameterName: fileHosting.privateKeyParameterName,
+            url: pulumi.interpolate`https://${fileHosting.url}`,
+            privateKeyId: fileHosting.privateKeyId,
+            privateKeyParameterName: fileHosting.privateKeyParameterName,
         };
     },
 });

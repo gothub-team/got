@@ -19,8 +19,70 @@ resources:
             organizationId:
                 type: string
                 description: The ID of the organization that can be used to create mailboxes
+            imapServer:
+                type: string
+                description: The IMAP server host for the mail domain
         required:
             - organizationId
+            - imapServer
+    gotiac:index:MailUser:
+        isComponent: true
+        inputProperties:
+            region:
+                type: string
+                description: The region to create the mail domain in
+            displayName:
+                type: string
+                description: The display name for the new user.
+            name:
+                type: string
+                description:
+                    The name for the new user. WorkMail directory user names have a maximum length of 64. All others
+                    have a maximum length of 20.
+            emailPrefix:
+                type: string
+                description:
+                    The email prefix for the new user. (prefix@domain.com). The default domain of the organization will
+                    be appended automatically.
+            enabled:
+                type: boolean
+                description: Whether the mailbox for the user is enabled.
+            organizationId:
+                type: string
+                description:
+                    The identifier of the organization for which the user is created. Either organizationId or domain
+                    must be specified.
+            domain:
+                type: string
+                description:
+                    The mail domain of the organization for which the user is created. Either organizationId or domain
+                    must be specified.
+            firstName:
+                type: string
+                description: The first name of the new user.
+            lastName:
+                type: string
+                description: The last name of the new user.
+            # passwordSeed:
+            #     type: string
+            #     description:
+            #         The password seed for the new user. Change will trigger a resource update with new password.
+        requiredInputs:
+            - region
+            - displayName
+            - name
+            - emailPrefix
+            - enabled
+        properties:
+            userId:
+                type: string
+                description: The ID of the organization that can be used to create mailboxes
+            password:
+                type: string
+                description: The password of the new user.
+        required:
+            - userId
+            - password
     gotiac:index:FileHosting:
         isComponent: true
         inputProperties:
