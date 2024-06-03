@@ -24,7 +24,7 @@ type ApiLambdaArgs struct {
 	// The api route path
 	RoutePath pulumi.StringInput `pulumi:"routePath"`
 	// The ID of the authorizer
-	AuthorizerId pulumi.StringInput `pulumi:"authorizerId"`
+	AuthorizerId pulumi.StringPtrInput `pulumi:"authorizerId"`
 	// The memory size for the lambda function
 	MemorySize *pulumi.Int `pulumi:"memorySize"`
 	// The lambda runtime
@@ -62,15 +62,15 @@ func NewApiLambda(ctx *pulumi.Context,
 	if err != nil {
 		return nil, err
 	}
- 
+
 	// Create the lambda function
 	lambdaFunction, err := NewLambda(ctx, name, &LambdaArgs{
-		CodePath:	 args.CodePath,
+		CodePath:    args.CodePath,
 		HandlerPath: args.HandlerPath,
-		MemorySize: args.MemorySize,
-		Runtime: args.Runtime,
+		MemorySize:  args.MemorySize,
+		Runtime:     args.Runtime,
 		Environment: args.Environment,
-		PolicyArns: args.PolicyArns,
+		PolicyArns:  args.PolicyArns,
 	})
 	if err != nil {
 		return nil, err
@@ -78,8 +78,8 @@ func NewApiLambda(ctx *pulumi.Context,
 
 	// Create the permission for the API Gateway to invoke the lambda function
 	_, err = lambda.NewPermission(ctx, fmt.Sprintf("%s-Permission", name), &lambda.PermissionArgs{
-		Action:   pulumi.String("lambda:InvokeFunction"),
-		Function: lambdaFunction.Function,
+		Action:    pulumi.String("lambda:InvokeFunction"),
+		Function:  lambdaFunction.Function,
 		Principal: pulumi.String("apigateway.amazonaws.com"),
 		SourceArn: pulumi.Sprintf("%s/*/*%s", args.ExecutionArn, args.RoutePath),
 	})
@@ -88,28 +88,40 @@ func NewApiLambda(ctx *pulumi.Context,
 	}
 
 	integration, err := apigatewayv2.NewIntegration(ctx, fmt.Sprintf("%s-Integration", name), &apigatewayv2.IntegrationArgs{
-		ApiId:                   args.ApiId,
-		IntegrationType:         pulumi.String("AWS_PROXY"),
+		ApiId:           args.ApiId,
+		IntegrationType: pulumi.String("AWS_PROXY"),
 		// ConnectionType:          pulumi.String("INTERNET"),
-		PayloadFormatVersion:    pulumi.String("2.0"),
-		IntegrationMethod:       args.Method,
-		IntegrationUri:          lambdaFunction.Function.InvokeArn(),
+		PayloadFormatVersion: pulumi.String("2.0"),
+		IntegrationMethod:    args.Method,
+		IntegrationUri:       lambdaFunction.Function.InvokeArn(),
 		// PassthroughBehavior:     pulumi.String("WHEN_NO_MATCH"),
 	})
 	if err != nil {
 		return nil, err
 	}
 
+	var authorizerId pulumi.StringInput
+	if args.AuthorizerId != nil {
+		authorizerId = args.AuthorizerId
+	}
+
+	var AuthorizationType pulumi.StringInput
+	if args.AuthorizerId != nil {
+		AuthorizationType = pulumi.String("JWT")
+	} else {
+		AuthorizationType = pulumi.String("NONE")
+	}
+
 	// Create the API route
 	apiRoute, err := apigatewayv2.NewRoute(ctx, fmt.Sprintf("%s-Route", name), &apigatewayv2.RouteArgs{
-		ApiId: args.ApiId,
-		AuthorizerId: args.AuthorizerId,
-		AuthorizationType: pulumi.String("JWT"),
-		RouteKey: pulumi.Sprintf("%s %s", args.Method , args.RoutePath),
+		ApiId:             args.ApiId,
+		AuthorizerId:      authorizerId,
+		AuthorizationType: AuthorizationType,
+		RouteKey:          pulumi.Sprintf("%s %s", args.Method, args.RoutePath),
 		Target: integration.ID().ApplyT(func(id string) (string, error) {
 			return fmt.Sprintf("integrations/%v", id), nil
 		}).(pulumi.StringOutput),
-	});
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -121,11 +133,11 @@ func NewApiLambda(ctx *pulumi.Context,
 	component.Route = apiRoute.ToRouteOutput()
 
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
-		"name": lambdaFunction.Name,
-		"arn": lambdaFunction.Arn,
-		"role": lambdaFunction.Role,
+		"name":     lambdaFunction.Name,
+		"arn":      lambdaFunction.Arn,
+		"role":     lambdaFunction.Role,
 		"function": lambdaFunction.Function,
-		"route": apiRoute,
+		"route":    apiRoute,
 	}); err != nil {
 		return nil, err
 	}
