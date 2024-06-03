@@ -88,13 +88,13 @@ func NewApiLambda(ctx *pulumi.Context,
 	}
 
 	integration, err := apigatewayv2.NewIntegration(ctx, fmt.Sprintf("%s-Integration", name), &apigatewayv2.IntegrationArgs{
-		ApiId:           args.ApiId,
-		IntegrationType: pulumi.String("AWS_PROXY"),
-		// ConnectionType:          pulumi.String("INTERNET"),
+		ApiId:                args.ApiId,
+		IntegrationType:      pulumi.String("AWS_PROXY"),
+		ConnectionType:       pulumi.String("INTERNET"),
 		PayloadFormatVersion: pulumi.String("2.0"),
-		IntegrationMethod:    args.Method,
+		IntegrationMethod:    pulumi.String("POST"),
 		IntegrationUri:       lambdaFunction.Function.InvokeArn(),
-		// PassthroughBehavior:     pulumi.String("WHEN_NO_MATCH"),
+		PassthroughBehavior:  pulumi.String("WHEN_NO_MATCH"),
 	})
 	if err != nil {
 		return nil, err
