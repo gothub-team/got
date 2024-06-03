@@ -100,7 +100,7 @@ func NewApiLambda(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	var authorizerId pulumi.StringInput
+	var authorizerId pulumi.StringPtrInput
 	if args.AuthorizerId != nil {
 		authorizerId = args.AuthorizerId
 	}
