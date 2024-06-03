@@ -6,7 +6,6 @@ import (
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/apigatewayv2"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/cognito"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/iam"
-	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/lambda"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
@@ -33,22 +32,22 @@ type ApiArgs struct {
 type Api struct {
 	pulumi.ResourceState
 	// Route apigatewayv2.Route `pulumi:"route"`
-	Endpoint                         pulumi.StringOutput   `pulumi:"endpoint"`
-	PullFunction                     lambda.FunctionOutput `pulumi:"pullFunction"`
-	PullEndpoint                     pulumi.StringOutput   `pulumi:"pullEndpoint"`
-	PushFunction                     lambda.FunctionOutput `pulumi:"pushFunction"`
-	PushEndpoint                     pulumi.StringOutput   `pulumi:"pushEndpoint"`
-	PullInvokePolicyArn              pulumi.StringOutput   `pulumi:"pullInvokePolicyArn"`
-	PushInvokePolicyArn              pulumi.StringOutput   `pulumi:"pushInvokePolicyArn"`
-	AuthLoginInitEndpoint            pulumi.StringOutput   `pulumi:"authLoginInitEndpoint"`
-	AuthLoginVerifyEndpoint          pulumi.StringOutput   `pulumi:"authLoginVerifyEndpoint"`
-	AuthLoginRefreshEndpoint         pulumi.StringOutput   `pulumi:"authLoginRefreshEndpoint"`
-	AuthRegisterInitEndpoint         pulumi.StringOutput   `pulumi:"authRegisterInitEndpoint"`
-	AuthRegisterVerifyEndpoint       pulumi.StringOutput   `pulumi:"authRegisterVerifyEndpoint"`
-	AuthRegisterVerifyResendEndpoint pulumi.StringOutput   `pulumi:"authRegisterVerifyResendEndpoint"`
-	AuthResetPasswordInitEndpoint    pulumi.StringOutput   `pulumi:"authResetPasswordInitEndpoint"`
-	AuthResetPasswordVerifyEndpoint  pulumi.StringOutput   `pulumi:"authResetPasswordVerifyEndpoint"`
-	AuthInviteUserEndpoint           pulumi.StringOutput   `pulumi:"authInviteUserEndpoint"`
+	Endpoint pulumi.StringOutput `pulumi:"endpoint"`
+	// PullFunction                     lambda.FunctionOutput `pulumi:"pullFunction"`
+	PullEndpoint pulumi.StringOutput `pulumi:"pullEndpoint"`
+	// PushFunction                     lambda.FunctionOutput `pulumi:"pushFunction"`
+	PushEndpoint                     pulumi.StringOutput `pulumi:"pushEndpoint"`
+	PullInvokePolicyArn              pulumi.StringOutput `pulumi:"pullInvokePolicyArn"`
+	PushInvokePolicyArn              pulumi.StringOutput `pulumi:"pushInvokePolicyArn"`
+	AuthLoginInitEndpoint            pulumi.StringOutput `pulumi:"authLoginInitEndpoint"`
+	AuthLoginVerifyEndpoint          pulumi.StringOutput `pulumi:"authLoginVerifyEndpoint"`
+	AuthLoginRefreshEndpoint         pulumi.StringOutput `pulumi:"authLoginRefreshEndpoint"`
+	AuthRegisterInitEndpoint         pulumi.StringOutput `pulumi:"authRegisterInitEndpoint"`
+	AuthRegisterVerifyEndpoint       pulumi.StringOutput `pulumi:"authRegisterVerifyEndpoint"`
+	AuthRegisterVerifyResendEndpoint pulumi.StringOutput `pulumi:"authRegisterVerifyResendEndpoint"`
+	AuthResetPasswordInitEndpoint    pulumi.StringOutput `pulumi:"authResetPasswordInitEndpoint"`
+	AuthResetPasswordVerifyEndpoint  pulumi.StringOutput `pulumi:"authResetPasswordVerifyEndpoint"`
+	AuthInviteUserEndpoint           pulumi.StringOutput `pulumi:"authInviteUserEndpoint"`
 }
 
 // NewApi creates a new Lambda component resource.
@@ -290,12 +289,11 @@ func NewApi(ctx *pulumi.Context,
 	}
 
 	AuthLoginInitApiLambda, err := NewApiLambda(ctx, name+"AuthLoginInit", &ApiLambdaArgs{
-		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/auth/login-init.zip", args.CodePath),
-		HandlerPath:  pulumi.String("index.handleHttp"),
-		MemorySize:   &AuthMem,
-		Method:       pulumi.String("POST"),
-		AuthorizerId: authorizer.ID(),
+		Runtime:     args.Runtime,
+		CodePath:    pulumi.Sprintf("%s/auth/login-init.zip", args.CodePath),
+		HandlerPath: pulumi.String("index.handleHttp"),
+		MemorySize:  &AuthMem,
+		Method:      pulumi.String("POST"),
 		PolicyArns: pulumi.StringArray{
 			auth.AuthUserPolicyArn,
 		},
@@ -309,12 +307,11 @@ func NewApi(ctx *pulumi.Context,
 	}
 
 	AuthLoginVerifyApiLambda, err := NewApiLambda(ctx, name+"AuthLoginVerify", &ApiLambdaArgs{
-		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/auth/login-verify.zip", args.CodePath),
-		HandlerPath:  pulumi.String("index.handleHttp"),
-		MemorySize:   &AuthMem,
-		Method:       pulumi.String("POST"),
-		AuthorizerId: authorizer.ID(),
+		Runtime:     args.Runtime,
+		CodePath:    pulumi.Sprintf("%s/auth/login-verify.zip", args.CodePath),
+		HandlerPath: pulumi.String("index.handleHttp"),
+		MemorySize:  &AuthMem,
+		Method:      pulumi.String("POST"),
 		PolicyArns: pulumi.StringArray{
 			auth.AuthUserPolicyArn,
 		},
@@ -328,12 +325,11 @@ func NewApi(ctx *pulumi.Context,
 	}
 
 	AuthLoginRefreshApiLambda, err := NewApiLambda(ctx, name+"AuthLoginRefresh", &ApiLambdaArgs{
-		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/auth/login-refresh.zip", args.CodePath),
-		HandlerPath:  pulumi.String("index.handleHttp"),
-		MemorySize:   &AuthMem,
-		Method:       pulumi.String("POST"),
-		AuthorizerId: authorizer.ID(),
+		Runtime:     args.Runtime,
+		CodePath:    pulumi.Sprintf("%s/auth/login-refresh.zip", args.CodePath),
+		HandlerPath: pulumi.String("index.handleHttp"),
+		MemorySize:  &AuthMem,
+		Method:      pulumi.String("POST"),
 		PolicyArns: pulumi.StringArray{
 			auth.AuthUserPolicyArn,
 		},
@@ -347,12 +343,11 @@ func NewApi(ctx *pulumi.Context,
 	}
 
 	AuthRegisterInitApiLambda, err := NewApiLambda(ctx, name+"AuthRegisterInit", &ApiLambdaArgs{
-		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/auth/register-init.zip", args.CodePath),
-		HandlerPath:  pulumi.String("index.handleHttp"),
-		MemorySize:   &AuthMem,
-		Method:       pulumi.String("POST"),
-		AuthorizerId: authorizer.ID(),
+		Runtime:     args.Runtime,
+		CodePath:    pulumi.Sprintf("%s/auth/register-init.zip", args.CodePath),
+		HandlerPath: pulumi.String("index.handleHttp"),
+		MemorySize:  &AuthMem,
+		Method:      pulumi.String("POST"),
 		PolicyArns: pulumi.StringArray{
 			auth.AuthUserPolicyArn,
 		},
@@ -366,12 +361,11 @@ func NewApi(ctx *pulumi.Context,
 	}
 
 	AuthRegisterVerifyApiLambda, err := NewApiLambda(ctx, name+"AuthRegisterVerify", &ApiLambdaArgs{
-		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/auth/register-verify.zip", args.CodePath),
-		HandlerPath:  pulumi.String("index.handleHttp"),
-		MemorySize:   &AuthMem,
-		Method:       pulumi.String("POST"),
-		AuthorizerId: authorizer.ID(),
+		Runtime:     args.Runtime,
+		CodePath:    pulumi.Sprintf("%s/auth/register-verify.zip", args.CodePath),
+		HandlerPath: pulumi.String("index.handleHttp"),
+		MemorySize:  &AuthMem,
+		Method:      pulumi.String("POST"),
 		PolicyArns: pulumi.StringArray{
 			auth.AuthUserPolicyArn,
 		},
@@ -385,12 +379,11 @@ func NewApi(ctx *pulumi.Context,
 	}
 
 	AuthRegisterVerifyResendApiLambda, err := NewApiLambda(ctx, name+"AuthRegisterVerifyResend", &ApiLambdaArgs{
-		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/auth/register-verify-resend.zip", args.CodePath),
-		HandlerPath:  pulumi.String("index.handleHttp"),
-		MemorySize:   &AuthMem,
-		Method:       pulumi.String("POST"),
-		AuthorizerId: authorizer.ID(),
+		Runtime:     args.Runtime,
+		CodePath:    pulumi.Sprintf("%s/auth/register-verify-resend.zip", args.CodePath),
+		HandlerPath: pulumi.String("index.handleHttp"),
+		MemorySize:  &AuthMem,
+		Method:      pulumi.String("POST"),
 		PolicyArns: pulumi.StringArray{
 			auth.AuthUserPolicyArn,
 		},
@@ -404,12 +397,11 @@ func NewApi(ctx *pulumi.Context,
 	}
 
 	AuthResetPasswordInitApiLambda, err := NewApiLambda(ctx, name+"AuthResetPasswordInit", &ApiLambdaArgs{
-		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/auth/reset-password-init.zip", args.CodePath),
-		HandlerPath:  pulumi.String("index.handleHttp"),
-		MemorySize:   &AuthMem,
-		Method:       pulumi.String("POST"),
-		AuthorizerId: authorizer.ID(),
+		Runtime:     args.Runtime,
+		CodePath:    pulumi.Sprintf("%s/auth/reset-password-init.zip", args.CodePath),
+		HandlerPath: pulumi.String("index.handleHttp"),
+		MemorySize:  &AuthMem,
+		Method:      pulumi.String("POST"),
 		PolicyArns: pulumi.StringArray{
 			auth.AuthUserPolicyArn,
 		},
@@ -423,12 +415,11 @@ func NewApi(ctx *pulumi.Context,
 	}
 
 	AuthResetPasswordVerifyApiLambda, err := NewApiLambda(ctx, name+"AuthResetPasswordVerify", &ApiLambdaArgs{
-		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/auth/reset-password-verify.zip", args.CodePath),
-		HandlerPath:  pulumi.String("index.handleHttp"),
-		MemorySize:   &AuthMem,
-		Method:       pulumi.String("POST"),
-		AuthorizerId: authorizer.ID(),
+		Runtime:     args.Runtime,
+		CodePath:    pulumi.Sprintf("%s/auth/reset-password-verify.zip", args.CodePath),
+		HandlerPath: pulumi.String("index.handleHttp"),
+		MemorySize:  &AuthMem,
+		Method:      pulumi.String("POST"),
 		PolicyArns: pulumi.StringArray{
 			auth.AuthUserPolicyArn,
 		},
@@ -462,9 +453,9 @@ func NewApi(ctx *pulumi.Context,
 	}
 
 	component.Endpoint = stage.InvokeUrl
-	component.PullFunction = pullLambda.Function
+	// component.PullFunction = pullLambda.Function
 	component.PullEndpoint = pullApiLambda.Route.RouteKey()
-	component.PushFunction = pushLambda.Function
+	// component.PushFunction = pushLambda.Function
 	component.PushEndpoint = pushApiLambda.Route.RouteKey()
 	component.PullInvokePolicyArn = pullLambdaInvokePolicy.Arn
 	component.PushInvokePolicyArn = pushLambdaInvokePolicy.Arn
