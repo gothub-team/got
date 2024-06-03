@@ -2,9 +2,17 @@ import { describe, beforeAll, beforeEach, it, expect, mock } from 'bun:test';
 import { type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import { URL } from 'url';
-import { env } from '../env';
+import { TEST_USER_1_EMAIL, TEST_USER_1_PW, TEST_USER_2_EMAIL, TEST_USER_2_PW } from '../env';
 import { createUserApi } from './shared';
 import type { DownloadNodeFileView, Graph, PushResult } from '@gothub/got-core';
+import { parseEnv } from '@gothub/typescript-util';
+
+const env = parseEnv({
+    TEST_USER_1_EMAIL,
+    TEST_USER_1_PW,
+    TEST_USER_2_EMAIL,
+    TEST_USER_2_PW,
+});
 
 let testId: string;
 let user1Api: GotApi;

@@ -1,10 +1,11 @@
 {
     "name": "@gothub/got-api-test",
-    "version": "0.0.22",
+    "version": "0.0.25",
     "license": "MIT",
     "type": "module",
+    "main": "index.ts",
     "bin": {
-        "got-api-test": "index.ts"
+        "got-api-test": "test.ts"
     },
     "scripts": {
         "lint": "eslint .",
@@ -19,9 +20,9 @@
         "typescript": "^5.0.0"
     },
     "dependencies": {
-        "@gothub/got-core": "workspace:*",
-        "@gothub/typescript-util": "workspace:*",
-        "@gothub/got-api": "workspace:*",
+        "@gothub/got-core": "workspace:^",
+        "@gothub/typescript-util": "workspace:^",
+        "@gothub/got-api": "workspace:^",
         "imapflow": "^1.0.162",
         "sst": "ion"
     }

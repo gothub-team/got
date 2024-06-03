@@ -3,7 +3,15 @@ import { type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import type { Graph, Node, PushResult } from '@gothub/got-core';
 import { createUserApi } from './shared';
-import { env } from '../env';
+import { parseEnv } from '@gothub/typescript-util';
+import { TEST_USER_1_EMAIL, TEST_USER_1_PW, TEST_USER_2_EMAIL, TEST_USER_2_PW } from '../env';
+
+const env = parseEnv({
+    TEST_USER_1_EMAIL,
+    TEST_USER_1_PW,
+    TEST_USER_2_EMAIL,
+    TEST_USER_2_PW,
+});
 
 let testId: string;
 let user1Api: GotApi;
