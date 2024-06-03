@@ -443,6 +443,7 @@ func NewApi(ctx *pulumi.Context,
 		PolicyArns: pulumi.StringArray{
 			auth.AuthUserPolicyArn,
 			auth.AuthAdminPolicyArn,
+			pullLambdaInvokePolicy.Arn,
 		},
 		ApiId:        api.ID(),
 		ExecutionArn: api.ExecutionArn,
