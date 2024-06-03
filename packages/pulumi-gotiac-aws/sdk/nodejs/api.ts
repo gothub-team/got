@@ -19,10 +19,20 @@ export class Api extends pulumi.ComponentResource {
         return obj['__pulumiType'] === Api.__pulumiType;
     }
 
+    public /*out*/ readonly authInviteUserEndpoint!: pulumi.Output<string>;
+    public /*out*/ readonly authLoginInitEndpoint!: pulumi.Output<string>;
+    public /*out*/ readonly authLoginRefreshEndpoint!: pulumi.Output<string>;
+    public /*out*/ readonly authLoginVerifyEndpoint!: pulumi.Output<string>;
+    public /*out*/ readonly authRegisterInitEndpoint!: pulumi.Output<string>;
+    public /*out*/ readonly authRegisterVerifyEndpoint!: pulumi.Output<string>;
+    public /*out*/ readonly authRegisterVerifyResendEndpoint!: pulumi.Output<string>;
+    public /*out*/ readonly authResetPasswordInitEndpoint!: pulumi.Output<string>;
+    public /*out*/ readonly authResetPasswordVerifyEndpoint!: pulumi.Output<string>;
     /**
      * The endpoint of the API.
      */
     public /*out*/ readonly endpoint!: pulumi.Output<string>;
+    public /*out*/ readonly openApiEndpoint!: pulumi.Output<string>;
     public /*out*/ readonly pullEndpoint!: pulumi.Output<string>;
     public /*out*/ readonly pullFunction!: pulumi.Output<string>;
     public /*out*/ readonly pullInvokePolicyArn!: pulumi.Output<string>;
@@ -61,7 +71,17 @@ export class Api extends pulumi.ComponentResource {
             resourceInputs["policyArns"] = args ? args.policyArns : undefined;
             resourceInputs["runtime"] = args ? args.runtime : undefined;
             resourceInputs["userPoolId"] = args ? args.userPoolId : undefined;
+            resourceInputs["authInviteUserEndpoint"] = undefined /*out*/;
+            resourceInputs["authLoginInitEndpoint"] = undefined /*out*/;
+            resourceInputs["authLoginRefreshEndpoint"] = undefined /*out*/;
+            resourceInputs["authLoginVerifyEndpoint"] = undefined /*out*/;
+            resourceInputs["authRegisterInitEndpoint"] = undefined /*out*/;
+            resourceInputs["authRegisterVerifyEndpoint"] = undefined /*out*/;
+            resourceInputs["authRegisterVerifyResendEndpoint"] = undefined /*out*/;
+            resourceInputs["authResetPasswordInitEndpoint"] = undefined /*out*/;
+            resourceInputs["authResetPasswordVerifyEndpoint"] = undefined /*out*/;
             resourceInputs["endpoint"] = undefined /*out*/;
+            resourceInputs["openApiEndpoint"] = undefined /*out*/;
             resourceInputs["pullEndpoint"] = undefined /*out*/;
             resourceInputs["pullFunction"] = undefined /*out*/;
             resourceInputs["pullInvokePolicyArn"] = undefined /*out*/;
@@ -69,7 +89,17 @@ export class Api extends pulumi.ComponentResource {
             resourceInputs["pushFunction"] = undefined /*out*/;
             resourceInputs["pushInvokePolicyArn"] = undefined /*out*/;
         } else {
+            resourceInputs["authInviteUserEndpoint"] = undefined /*out*/;
+            resourceInputs["authLoginInitEndpoint"] = undefined /*out*/;
+            resourceInputs["authLoginRefreshEndpoint"] = undefined /*out*/;
+            resourceInputs["authLoginVerifyEndpoint"] = undefined /*out*/;
+            resourceInputs["authRegisterInitEndpoint"] = undefined /*out*/;
+            resourceInputs["authRegisterVerifyEndpoint"] = undefined /*out*/;
+            resourceInputs["authRegisterVerifyResendEndpoint"] = undefined /*out*/;
+            resourceInputs["authResetPasswordInitEndpoint"] = undefined /*out*/;
+            resourceInputs["authResetPasswordVerifyEndpoint"] = undefined /*out*/;
             resourceInputs["endpoint"] = undefined /*out*/;
+            resourceInputs["openApiEndpoint"] = undefined /*out*/;
             resourceInputs["pullEndpoint"] = undefined /*out*/;
             resourceInputs["pullFunction"] = undefined /*out*/;
             resourceInputs["pullInvokePolicyArn"] = undefined /*out*/;

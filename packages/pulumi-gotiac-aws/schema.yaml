@@ -226,6 +226,26 @@ resources:
                 type: string
             pushInvokePolicyArn:
                 type: string
+            authLoginInitEndpoint:
+                type: string
+            authLoginVerifyEndpoint:
+                type: string
+            authLoginRefreshEndpoint:
+                type: string
+            authRegisterInitEndpoint:
+                type: string
+            authRegisterVerifyEndpoint:
+                type: string
+            authRegisterVerifyResendEndpoint:
+                type: string
+            authResetPasswordInitEndpoint:
+                type: string
+            authResetPasswordVerifyEndpoint:
+                type: string
+            authInviteUserEndpoint:
+                type: string
+            openApiEndpoint:
+                type: string
         required:
             - endpoint
             - pullFunction
@@ -234,6 +254,16 @@ resources:
             - pushEndpoint
             - pullInvokePolicyArn
             - pushInvokePolicyArn
+            - authLoginInitEndpoint
+            - authLoginVerifyEndpoint
+            - authLoginRefreshEndpoint
+            - authRegisterInitEndpoint
+            - authRegisterVerifyEndpoint
+            - authRegisterVerifyResendEndpoint
+            - authResetPasswordInitEndpoint
+            - authResetPasswordVerifyEndpoint
+            - authInviteUserEndpoint
+            - openApiEndpoint
     gotiac:index:GraphStore:
         isComponent: true
         inputProperties:
