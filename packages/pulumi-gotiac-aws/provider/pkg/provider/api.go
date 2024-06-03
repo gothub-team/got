@@ -48,6 +48,7 @@ type Api struct {
 	AuthResetPasswordInitEndpoint    pulumi.StringOutput `pulumi:"authResetPasswordInitEndpoint"`
 	AuthResetPasswordVerifyEndpoint  pulumi.StringOutput `pulumi:"authResetPasswordVerifyEndpoint"`
 	AuthInviteUserEndpoint           pulumi.StringOutput `pulumi:"authInviteUserEndpoint"`
+	OpenApiEndpoint                  pulumi.StringOutput `pulumi:"openApiEndpoint"`
 }
 
 // NewApi creates a new Lambda component resource.
@@ -432,7 +433,6 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	// TODO this needs auth and higher memory maybe?
 	AuthInviteUserApiLambda, err := NewApiLambda(ctx, name+"AuthInviteUser", &ApiLambdaArgs{
 		Runtime:      args.Runtime,
 		CodePath:     pulumi.Sprintf("%s/auth/invite-user.zip", args.CodePath),
@@ -454,6 +454,22 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	OpenApiApiLambda, err := NewApiLambda(ctx, name+"OpenApi", &ApiLambdaArgs{
+		Runtime:      args.Runtime,
+		CodePath:     pulumi.Sprintf("%s/api.zip", args.CodePath),
+		HandlerPath:  pulumi.String("index.handleHttp"),
+		MemorySize:   &AuthMem,
+		Method:       pulumi.String("POST"),
+		PolicyArns:   pulumi.StringArray{},
+		ApiId:        api.ID(),
+		ExecutionArn: api.ExecutionArn,
+		RoutePath:    pulumi.String("/api"),
+		Environment:  pulumi.StringMap{},
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	component.Endpoint = stage.InvokeUrl
 	// component.PullFunction = pullLambda.Function
 	component.PullEndpoint = pullApiLambda.Route.RouteKey()
@@ -470,6 +486,7 @@ func NewApi(ctx *pulumi.Context,
 	component.AuthResetPasswordInitEndpoint = AuthResetPasswordInitApiLambda.Route.RouteKey()
 	component.AuthResetPasswordVerifyEndpoint = AuthResetPasswordVerifyApiLambda.Route.RouteKey()
 	component.AuthInviteUserEndpoint = AuthInviteUserApiLambda.Route.RouteKey()
+	component.OpenApiEndpoint = OpenApiApiLambda.Route.RouteKey()
 
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
 		"endpoint":     stage.InvokeUrl,
