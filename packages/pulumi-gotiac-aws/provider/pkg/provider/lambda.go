@@ -58,11 +58,11 @@ func NewLambda(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	loggingPolicy, err := iam.NewPolicy(ctx, name + "-logging", &iam.PolicyArgs{
+	loggingPolicy, err := iam.NewPolicy(ctx, name+"-logging", &iam.PolicyArgs{
 		Name:        pulumi.String(name + "-logging"),
 		Path:        pulumi.String("/"),
 		Description: pulumi.String("IAM policy for logging from a lambda"),
-		Policy:      pulumi.Any(map[string]interface{}{
+		Policy: pulumi.Any(map[string]interface{}{
 			"Version": "2012-10-17",
 			"Statement": []map[string]interface{}{
 				{
@@ -113,7 +113,7 @@ func NewLambda(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	iamRole, err := iam.NewRole(ctx, name + "-role", &iam.RoleArgs{
+	iamRole, err := iam.NewRole(ctx, name+"-role", &iam.RoleArgs{
 		Name:             pulumi.String(name + "-role"),
 		AssumeRolePolicy: pulumi.String(assumeRolePolicy.Json),
 		ManagedPolicyArns: pulumi.All(args.PolicyArns, loggingPolicy.Arn).ApplyT(func(args []interface{}) []string {
@@ -153,9 +153,9 @@ func NewLambda(ctx *pulumi.Context,
 	component.Function = lambdaFunction.ToFunctionOutput()
 
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
-		"name": lambdaFunction.Name,
-		"arn": lambdaFunction.Arn,
-		"role": iamRole,
+		"name":     lambdaFunction.Name,
+		"arn":      lambdaFunction.Arn,
+		"role":     iamRole,
 		"function": lambdaFunction,
 	}); err != nil {
 		return nil, err

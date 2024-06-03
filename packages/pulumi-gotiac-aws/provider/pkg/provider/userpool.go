@@ -14,13 +14,13 @@ type UserpoolArgs struct {
 // The Userpool component resource.
 type Userpool struct {
 	pulumi.ResourceState
-	UserPool cognito.UserPoolOutput `pulumi:"userPool"`
-	UserPoolId pulumi.StringOutput `pulumi:"userPoolId"`
-	UserPoolEndpoint pulumi.StringOutput `pulumi:"userPoolEndpoint"`
-	UserPoolClient cognito.UserPoolClientOutput `pulumi:"userPoolClient"`
-	UserPoolClientId pulumi.StringOutput `pulumi:"userPoolClientId"`
-	AuthUserPolicyArn pulumi.StringOutput `pulumi:"authUserPolicyArn"`
-	AuthAdminPolicyArn pulumi.StringOutput `pulumi:"authAdminPolicyArn"`
+	UserPool           cognito.UserPoolOutput       `pulumi:"userPool"`
+	UserPoolId         pulumi.StringOutput          `pulumi:"userPoolId"`
+	UserPoolEndpoint   pulumi.StringOutput          `pulumi:"userPoolEndpoint"`
+	UserPoolClient     cognito.UserPoolClientOutput `pulumi:"userPoolClient"`
+	UserPoolClientId   pulumi.StringOutput          `pulumi:"userPoolClientId"`
+	AuthUserPolicyArn  pulumi.StringOutput          `pulumi:"authUserPolicyArn"`
+	AuthAdminPolicyArn pulumi.StringOutput          `pulumi:"authAdminPolicyArn"`
 }
 
 // NewUserpool creates a new Userpool component resource.
@@ -36,12 +36,12 @@ func NewUserpool(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	userPool, err := cognito.GetUserPool(ctx, name, args.UserPoolId, &cognito.UserPoolState{});
+	userPool, err := cognito.GetUserPool(ctx, name, args.UserPoolId, &cognito.UserPoolState{})
 	if err != nil {
 		return nil, err
 	}
 
-	userPoolClient, err := cognito.NewUserPoolClient(ctx, name + "-userpoolclient", &cognito.UserPoolClientArgs{
+	userPoolClient, err := cognito.NewUserPoolClient(ctx, name+"-userpoolclient", &cognito.UserPoolClientArgs{
 		Name:           pulumi.String("client"),
 		UserPoolId:     userPool.ID(),
 		GenerateSecret: pulumi.Bool(true),
@@ -52,11 +52,11 @@ func NewUserpool(ctx *pulumi.Context,
 	if err != nil {
 		return nil, err
 	}
- 
-	authUserPolicy, err := iam.NewPolicy(ctx, name + "-auth-user-policy", &iam.PolicyArgs{
+
+	authUserPolicy, err := iam.NewPolicy(ctx, name+"-auth-user-policy", &iam.PolicyArgs{
 		Path:        pulumi.String("/"),
 		Description: pulumi.String("IAM policy for writing the got s3 storage"),
-		Policy:      pulumi.Any(map[string]interface{}{
+		Policy: pulumi.Any(map[string]interface{}{
 			"Version": "2012-10-17",
 			"Statement": []map[string]interface{}{
 				{
@@ -81,10 +81,10 @@ func NewUserpool(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	authAdminPolicy, err := iam.NewPolicy(ctx, name + "-auth-admin-policy", &iam.PolicyArgs{
+	authAdminPolicy, err := iam.NewPolicy(ctx, name+"-auth-admin-policy", &iam.PolicyArgs{
 		Path:        pulumi.String("/"),
 		Description: pulumi.String("IAM policy for writing the got s3 storage"),
-		Policy:      pulumi.Any(map[string]interface{}{
+		Policy: pulumi.Any(map[string]interface{}{
 			"Version": "2012-10-17",
 			"Statement": []map[string]interface{}{
 				{
@@ -110,19 +110,18 @@ func NewUserpool(ctx *pulumi.Context,
 	}
 
 	component.UserPool = userPool.ToUserPoolOutput()
-	component.UserPoolId = userPool.ID().ApplyT(func(id string) (pulumi.String) {
+	component.UserPoolId = userPool.ID().ApplyT(func(id string) pulumi.String {
 		return pulumi.String(id)
 	}).(pulumi.StringOutput)
 	component.UserPoolEndpoint = userPool.Endpoint
 	component.UserPoolClient = userPoolClient.ToUserPoolClientOutput()
-	component.UserPoolClientId = userPoolClient.ID().ApplyT(func(id string) (pulumi.String) {
+	component.UserPoolClientId = userPoolClient.ID().ApplyT(func(id string) pulumi.String {
 		return pulumi.String(id)
 	}).(pulumi.StringOutput)
 	component.AuthUserPolicyArn = authUserPolicy.Arn
 	component.AuthAdminPolicyArn = authAdminPolicy.Arn
 
-	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
-	}); err != nil {
+	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{}); err != nil {
 		return nil, err
 	}
 
