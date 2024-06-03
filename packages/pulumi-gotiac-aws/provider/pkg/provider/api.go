@@ -442,6 +442,7 @@ func NewApi(ctx *pulumi.Context,
 		AuthorizerId: authorizer.ID(),
 		PolicyArns: pulumi.StringArray{
 			auth.AuthUserPolicyArn,
+			auth.AuthAdminPolicyArn,
 		},
 		ApiId:        api.ID(),
 		ExecutionArn: api.ExecutionArn,
