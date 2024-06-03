@@ -1,6 +1,6 @@
 {
     "name": "@gothub/got-core",
-    "version": "0.0.3",
+    "version": "0.0.6",
     "license": "MIT",
     "type": "module",
     "main": "dist/cjs/index.js",
@@ -15,7 +15,8 @@
         "@gothub/typescript-util": "workspace:*",
         "@types/bun": "latest",
         "ramda": "^0.30.0",
-        "@gothub-team/got-util": "^0.24.2"
+        "@gothub-team/got-util": "^0.24.2",
+        "esbuild": "^0.21.4"
     },
     "peerDependencies": {
         "typescript": "^5.0.0"

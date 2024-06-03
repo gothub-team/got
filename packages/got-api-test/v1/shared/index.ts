@@ -1,5 +1,9 @@
 import { createApi } from '@gothub/got-api';
-import { env } from '../../env';
+import { GOT_API_URL, parseEnv } from '@gothub/typescript-util';
+
+const env = parseEnv({
+    GOT_API_URL,
+});
 
 export const createUserApi = async (email: string, password: string) => {
     const api = createApi({

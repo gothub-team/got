@@ -2,19 +2,20 @@ import { describe, beforeAll, it, expect } from 'bun:test';
 import { createApi, type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import { createMailClient } from './shared/mail';
-import { parseEnv } from '@gothub/typescript-util';
-import { BASE_DOMAIN, GOT_API_URL, MAIL_IMAP_SERVER, MAIL_USERNAME, MAIL_USER_PW, TEST_USER_1_EMAIL } from '../env';
+import { GOT_API_URL, parseEnv } from '@gothub/typescript-util';
+import { MAIL_IMAP_SERVER, MAIL_USERNAME, MAIL_USER_PW, TEST_USER_1_EMAIL } from '../env';
 
 export const match6Digits = (str: string) => str.match(/[0-9]{6}/)?.[0];
 
 const env = parseEnv({
-    BASE_DOMAIN,
     GOT_API_URL,
     MAIL_USERNAME,
     MAIL_USER_PW,
     MAIL_IMAP_SERVER,
     TEST_USER_1_EMAIL,
 });
+
+const [TEST_MAIL_PREFIX, TEST_MAIL_DOMAIN] = env.MAIL_USERNAME.split('@');
 
 let testId: string;
 let api: GotApi;
@@ -33,7 +34,7 @@ describe('auth flow', () => {
         let email: string;
         let password: string;
         beforeAll(() => {
-            email = `info+${testId}@${env.BASE_DOMAIN}`;
+            email = `${TEST_MAIL_PREFIX}+${testId}@${TEST_MAIL_DOMAIN}`;
             password = `${testId}-pw-1`;
         });
 
@@ -67,7 +68,7 @@ describe('auth flow', () => {
             let email: string;
             let verificationCode: string;
             beforeAll(async () => {
-                email = `info+${testId}@${env.BASE_DOMAIN}`;
+                email = `${TEST_MAIL_PREFIX}+${testId}@${TEST_MAIL_DOMAIN}`;
                 mailClient = createMailClient({
                     host: env.MAIL_IMAP_SERVER,
                     port: 993,
@@ -217,7 +218,9 @@ describe('error handling', () => {
         const invalidPasswords = [['tee2eee'], ['teeeeeee']];
         describe.each(invalidPasswords)(`given an invalid password`, (password: string) => {
             it('throws InvalidPasswordError', async () => {
-                return expect(api.registerInit({ email: `info+test-1@${env.BASE_DOMAIN}`, password })).rejects.toThrow({
+                return expect(
+                    api.registerInit({ email: `${TEST_MAIL_PREFIX}+test-1@${TEST_MAIL_DOMAIN}`, password }),
+                ).rejects.toThrow({
                     name: 'InvalidPasswordError',
                     message: 'The password must contain at least 8 characters and at least 1 number.',
                 });
@@ -257,7 +260,7 @@ describe('error handling', () => {
         });
 
         describe('given a user that does not exist', () => {
-            const email = `non-existing+${testId}@${env.BASE_DOMAIN}`;
+            const email = `non-existing+${testId}@${TEST_MAIL_DOMAIN}`;
             it('throws UserNotFoundError', async () => {
                 return expect(api.registerVerify({ email, verificationCode: '123456' })).rejects.toThrow({
                     name: 'UserNotFoundError',
@@ -279,7 +282,7 @@ describe('error handling', () => {
         });
 
         describe('given a user that does not exist', () => {
-            const email = `non-existing+${testId}@${env.BASE_DOMAIN}`;
+            const email = `non-existing+${testId}@${TEST_MAIL_DOMAIN}`;
             it('throws UserNotFoundError', async () => {
                 return expect(api.registerVerifyResend({ email })).rejects.toThrow({
                     name: 'UserNotFoundError',
@@ -312,7 +315,7 @@ describe('error handling', () => {
         });
 
         describe('given a user that does not exist', () => {
-            const email = `non-existing+${testId}@${env.BASE_DOMAIN}`;
+            const email = `non-existing+${testId}@${TEST_MAIL_DOMAIN}`;
             it('throws UserNotFoundError', async () => {
                 return expect(api.login({ email, password: 'some-pass-1' })).rejects.toThrow({
                     name: 'UserNotFoundError',
@@ -336,7 +339,7 @@ describe('error handling', () => {
         });
 
         describe('given a user that does not exist', () => {
-            const email = `non-existing+${testId}@${env.BASE_DOMAIN}`;
+            const email = `non-existing+${testId}@${TEST_MAIL_DOMAIN}`;
             it('throws UserNotFoundError', async () => {
                 return expect(api.resetPasswordInit({ email })).rejects.toThrow({
                     name: 'UserNotFoundError',
@@ -352,7 +355,7 @@ describe('error handling', () => {
             it('throws InvalidPasswordError', async () => {
                 return expect(
                     api.resetPasswordVerify({
-                        email: `info+${testId}@${env.BASE_DOMAIN}`,
+                        email: `${TEST_MAIL_PREFIX}+${testId}@${TEST_MAIL_DOMAIN}`,
                         verificationCode: '',
                         password,
                         oldPassword: '',
@@ -377,7 +380,7 @@ describe('error handling', () => {
         });
 
         describe('given a user that does not exist', () => {
-            const email = `non-existing+${testId}@${env.BASE_DOMAIN}`;
+            const email = `non-existing+${testId}@${TEST_MAIL_DOMAIN}`;
             it('throws UserNotFoundError', async () => {
                 return expect(
                     api.resetPasswordVerify({
