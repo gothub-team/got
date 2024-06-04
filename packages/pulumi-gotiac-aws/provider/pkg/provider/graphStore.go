@@ -84,7 +84,6 @@ func NewGraphStore(ctx *pulumi.Context,
 	}
 
 	storageReadPolicy, err := iam.NewPolicy(ctx, name+"-storage-read-policy", &iam.PolicyArgs{
-		Name:        pulumi.String(name + "-storage-read-policy"),
 		Path:        pulumi.String("/"),
 		Description: pulumi.String("IAM policy for reading the got s3 storage"),
 		Policy: pulumi.Any(map[string]interface{}{
@@ -129,7 +128,6 @@ func NewGraphStore(ctx *pulumi.Context,
 	}
 
 	storageWritePolicy, err := iam.NewPolicy(ctx, name+"-storage-write-policy", &iam.PolicyArgs{
-		Name:        pulumi.String(name + "-storage-write-policy"),
 		Path:        pulumi.String("/"),
 		Description: pulumi.String("IAM policy for writing the got s3 storage"),
 		Policy: pulumi.Any(map[string]interface{}{

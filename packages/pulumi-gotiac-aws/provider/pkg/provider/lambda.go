@@ -50,8 +50,7 @@ func NewLambda(ctx *pulumi.Context,
 	}
 
 	// Create a log group for the lambda function
-	logGroup, err := cloudwatch.NewLogGroup(ctx, name, &cloudwatch.LogGroupArgs{
-		Name:            pulumi.String("/aws/lambda/" + name),
+	logGroup, err := cloudwatch.NewLogGroup(ctx, "/aws/lambda/"+name, &cloudwatch.LogGroupArgs{
 		RetentionInDays: pulumi.Int(30),
 	})
 	if err != nil {
@@ -59,7 +58,6 @@ func NewLambda(ctx *pulumi.Context,
 	}
 
 	loggingPolicy, err := iam.NewPolicy(ctx, name+"-logging", &iam.PolicyArgs{
-		Name:        pulumi.String(name + "-logging"),
 		Path:        pulumi.String("/"),
 		Description: pulumi.String("IAM policy for logging from a lambda"),
 		Policy: pulumi.Any(map[string]interface{}{
@@ -114,7 +112,6 @@ func NewLambda(ctx *pulumi.Context,
 	}
 
 	iamRole, err := iam.NewRole(ctx, name+"-role", &iam.RoleArgs{
-		Name:             pulumi.String(name + "-role"),
 		AssumeRolePolicy: pulumi.String(assumeRolePolicy.Json),
 		ManagedPolicyArns: pulumi.All(args.PolicyArns, loggingPolicy.Arn).ApplyT(func(args []interface{}) []string {
 			return append(args[0].([]string), args[1].(string))
@@ -133,7 +130,6 @@ func NewLambda(ctx *pulumi.Context,
 
 	lambdaFunction, err := lambda.NewFunction(ctx, name, &lambda.FunctionArgs{
 		Code:    args.CodePath.ToStringOutput().ApplyT(func(s string) pulumi.Archive { return pulumi.NewFileArchive(s) }).(pulumi.ArchiveOutput),
-		Name:    pulumi.String(name),
 		Role:    iamRole.Arn,
 		Handler: args.HandlerPath,
 		Runtime: args.Runtime,
@@ -142,6 +138,10 @@ func NewLambda(ctx *pulumi.Context,
 			Variables: args.Environment,
 		},
 		MemorySize: memorySize,
+		LoggingConfig: &lambda.FunctionLoggingConfigArgs{
+			LogGroup:  logGroup.Name,
+			LogFormat: pulumi.String("Text"),
+		},
 	}, pulumi.DependsOn([]pulumi.Resource{iamRole}))
 	if err != nil {
 		return nil, err
