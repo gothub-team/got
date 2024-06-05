@@ -62,3 +62,6 @@ export const configureCreateCurriedGraph = (store: CurriedStore, onError: (e: Er
 
     return createGraph;
 };
+
+export type CreateCurriedGraph = ReturnType<typeof configureCreateCurriedGraph>;
+export type CreateCurriedGraphRes = ReturnType<ReturnType<typeof configureCreateCurriedGraph>>;

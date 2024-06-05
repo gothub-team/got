@@ -4,7 +4,7 @@ import { type State } from '../types/state';
 import { mergeGraphsRight, mergeOverwriteGraphsRight } from '../utils/mergeGraph';
 import { assocPathMutate, dissocPathMutate, getPathOr, mergeGraphObjRight } from '../utils/util';
 
-const getEmptyStack = () => ({
+export const getEmptyStack = () => ({
     graph: {},
     errors: {},
     files: {},

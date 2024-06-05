@@ -9,7 +9,7 @@ import { configureCreateLocalGraph } from './local-store/createLocalGraph';
 import { configureCreateLocalCurriedGraph } from './local-store/createLocalCurriedGraph';
 
 type SetupOption = {
-    api: StoreAPI;
+    api: StoreAPI; // TODO: make type module and fix this
     select: <TRes>(fnSelect: (state: State) => TRes) => TRes;
     dispatch: (action: GOT_ACTION) => void;
     onError: (e: Error) => void;
@@ -49,7 +49,13 @@ export const setup = ({ api, dispatch, select, onError, onWarn }: SetupOption) =
     };
 };
 
+export type * from './types/state';
+export type * from './types/actions';
 export type * from './types/graph';
 export type * from './types/graphObjects';
 export type * from './types/view';
+export type { CreateGraph, CreateGraphRes } from './store/createGraph';
+export type { CreateCurriedGraph, CreateCurriedGraphRes } from './store/createCurriedGraph';
+
 export * from './utils/util';
+export * from './reducer/reducer';
