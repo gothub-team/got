@@ -76,8 +76,8 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     const validateWarn = createInputValidator(onWarn);
 
     validateWarn(GOT_STORE_CONFIG, API, API, api);
-    validateWarn(GOT_STORE_CONFIG, FUNCTION, 'dispatch', dispatch);
-    validateWarn(GOT_STORE_CONFIG, FUNCTION, 'select', select);
+    validateWarn(GOT_STORE_CONFIG, FUNCTION, DISPATCH, dispatch);
+    validateWarn(GOT_STORE_CONFIG, FUNCTION, SELECT, select);
 
     const store = createStore({
         api,
@@ -87,7 +87,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
 
     const merge = (fromGraphName: string, toGraphName: string) => {
         if (
-            validateError(GOT_MERGE, FUNCTION, 'dispatch', dispatch) &&
+            validateError(GOT_MERGE, FUNCTION, DISPATCH, dispatch) &&
             validateError(GOT_MERGE, STRING, 'fromGraphName', fromGraphName) &&
             validateError(GOT_MERGE, STRING, 'toGraphName', toGraphName)
         ) {
@@ -96,7 +96,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     };
     const mergeGraph = (fromGraph: Graph, toGraphName: string) => {
         if (
-            validateError(GOT_MERGE_GRAPH, FUNCTION, 'dispatch', dispatch) &&
+            validateError(GOT_MERGE_GRAPH, FUNCTION, DISPATCH, dispatch) &&
             validateError(GOT_MERGE_GRAPH, GRAPH, 'fromGraph', fromGraph) &&
             validateError(GOT_MERGE_GRAPH, STRING, 'toGraphName', toGraphName)
         ) {
@@ -105,7 +105,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     };
     const mergeOverwriteGraph = (fromGraph: Graph, toGraphName: string) => {
         if (
-            validateError(GOT_MERGE_OVERWRITE_GRAPH, FUNCTION, 'dispatch', dispatch) &&
+            validateError(GOT_MERGE_OVERWRITE_GRAPH, FUNCTION, DISPATCH, dispatch) &&
             validateError(GOT_MERGE_OVERWRITE_GRAPH, GRAPH, 'fromGraph', fromGraph) &&
             validateError(GOT_MERGE_OVERWRITE_GRAPH, STRING, 'toGraphName', toGraphName)
         ) {
@@ -114,40 +114,40 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     };
     const clear = (graphName: string) => {
         if (
-            validateError(GOT_CLEAR, FUNCTION, 'dispatch', dispatch) &&
-            validateError(GOT_CLEAR, STRING, 'graphName', graphName)
+            validateError(GOT_CLEAR, FUNCTION, DISPATCH, dispatch) &&
+            validateError(GOT_CLEAR, STRING, GRAPH_NAME, graphName)
         ) {
             return store.clear(graphName);
         }
     };
     const clearAll = () => {
-        if (validateError(GOT_CLEAR_ALL, FUNCTION, 'dispatch', dispatch)) {
+        if (validateError(GOT_CLEAR_ALL, FUNCTION, DISPATCH, dispatch)) {
             return store.clearAll();
         }
     };
 
     const selectNode = (stack: string[], nodeId: string, state: State) => {
         if (
-            validateError(GOT_SELECT_NODE, FUNCTION, 'select', select) &&
+            validateError(GOT_SELECT_NODE, FUNCTION, SELECT, select) &&
             validateError(GOT_SELECT_NODE, STACK, STACK, stack) &&
-            validateError(GOT_SELECT_NODE, STRING, 'nodeId', nodeId)
+            validateError(GOT_SELECT_NODE, STRING, NODE_ID, nodeId)
         ) {
             return store.selectNode(stack, nodeId, state);
         }
     };
     const getNode = (stack: string[], nodeId: string) => {
         if (
-            validateError(GOT_GET_NODE, FUNCTION, 'select', select) &&
+            validateError(GOT_GET_NODE, FUNCTION, SELECT, select) &&
             validateError(GOT_GET_NODE, STACK, STACK, stack) &&
-            validateError(GOT_GET_NODE, STRING, 'nodeId', nodeId)
+            validateError(GOT_GET_NODE, STRING, NODE_ID, nodeId)
         ) {
             return store.getNode(stack, nodeId);
         }
     };
     const setNode = (graphName: string, node: Node) => {
         if (
-            validateError(GOT_SET_NODE, FUNCTION, 'dispatch', dispatch) &&
-            validateError(GOT_SET_NODE, STRING, 'graphName', graphName) &&
+            validateError(GOT_SET_NODE, FUNCTION, DISPATCH, dispatch) &&
+            validateError(GOT_SET_NODE, STRING, GRAPH_NAME, graphName) &&
             validateError(GOT_SET_NODE, NODE, NODE, node)
         ) {
             return store.setNode(graphName, node);
@@ -155,9 +155,9 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     };
     const removeNode = (graphName: string, nodeId: string) => {
         if (
-            validateError(GOT_REMOVE_NODE, FUNCTION, 'dispatch', dispatch) &&
-            validateError(GOT_REMOVE_NODE, STRING, 'graphName', graphName) &&
-            validateError(GOT_REMOVE_NODE, STRING, 'nodeId', nodeId)
+            validateError(GOT_REMOVE_NODE, FUNCTION, DISPATCH, dispatch) &&
+            validateError(GOT_REMOVE_NODE, STRING, GRAPH_NAME, graphName) &&
+            validateError(GOT_REMOVE_NODE, STRING, NODE_ID, nodeId)
         ) {
             return store.removeNode(graphName, nodeId);
         }
@@ -165,32 +165,32 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
 
     const selectMetadata = (stack: string[], edgeTypes: string, fromId: string, toId: string, state: State) => {
         if (
-            validateError(GOT_SELECT_METADATA, FUNCTION, 'select', select) &&
+            validateError(GOT_SELECT_METADATA, FUNCTION, SELECT, select) &&
             validateError(GOT_SELECT_METADATA, STACK, STACK, stack) &&
             validateError(GOT_SELECT_METADATA, EDGE_TYPES, EDGE_TYPES, edgeTypes) &&
-            validateError(GOT_SELECT_METADATA, STRING, 'fromId', fromId) &&
-            validateError(GOT_SELECT_METADATA, STRING, 'toId', toId)
+            validateError(GOT_SELECT_METADATA, STRING, FROM_ID, fromId) &&
+            validateError(GOT_SELECT_METADATA, STRING, TO_ID, toId)
         ) {
             return store.selectMetadata(stack, edgeTypes, fromId, toId, state);
         }
     };
     const getMetadata = (stack: string[], edgeTypes: string, fromId: string, toId: string) => {
         if (
-            validateError(GOT_GET_METADATA, FUNCTION, 'select', select) &&
+            validateError(GOT_GET_METADATA, FUNCTION, SELECT, select) &&
             validateError(GOT_GET_METADATA, STACK, STACK, stack) &&
             validateError(GOT_GET_METADATA, EDGE_TYPES, EDGE_TYPES, edgeTypes) &&
-            validateError(GOT_GET_METADATA, STRING, 'fromId', fromId) &&
-            validateError(GOT_GET_METADATA, STRING, 'toId', toId)
+            validateError(GOT_GET_METADATA, STRING, FROM_ID, fromId) &&
+            validateError(GOT_GET_METADATA, STRING, TO_ID, toId)
         ) {
             return store.getMetadata(stack, edgeTypes, fromId, toId);
         }
     };
     const selectEdge = (stack: string[], edgeTypes: string, fromId: string, state: State): Record<string, Metadata> => {
         if (
-            validateError(GOT_SELECT_EDGE, FUNCTION, 'select', select) &&
+            validateError(GOT_SELECT_EDGE, FUNCTION, SELECT, select) &&
             validateError(GOT_SELECT_EDGE, STACK, STACK, stack) &&
             validateError(GOT_SELECT_EDGE, EDGE_TYPES, EDGE_TYPES, edgeTypes) &&
-            validateError(GOT_SELECT_EDGE, STRING, 'fromId', fromId)
+            validateError(GOT_SELECT_EDGE, STRING, FROM_ID, fromId)
         ) {
             return store.selectEdge(stack, edgeTypes, fromId, state);
         }
@@ -198,10 +198,10 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     };
     const getEdge = (stack: string[], edgeTypes: string, fromId: string): Record<string, Metadata> => {
         if (
-            validateError(GOT_GET_EDGE, FUNCTION, 'select', select) &&
+            validateError(GOT_GET_EDGE, FUNCTION, SELECT, select) &&
             validateError(GOT_GET_EDGE, STACK, STACK, stack) &&
             validateError(GOT_GET_EDGE, EDGE_TYPES, EDGE_TYPES, edgeTypes) &&
-            validateError(GOT_GET_EDGE, STRING, 'fromId', fromId)
+            validateError(GOT_GET_EDGE, STRING, FROM_ID, fromId)
         ) {
             return store.getEdge(stack, edgeTypes, fromId);
         }
@@ -214,10 +214,10 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
         state: State,
     ): Record<string, Metadata> => {
         if (
-            validateError(GOT_SELECT_REVERSE_EDGE, FUNCTION, 'select', select) &&
+            validateError(GOT_SELECT_REVERSE_EDGE, FUNCTION, SELECT, select) &&
             validateError(GOT_SELECT_REVERSE_EDGE, STACK, STACK, stack) &&
             validateError(GOT_SELECT_REVERSE_EDGE, EDGE_TYPES, EDGE_TYPES, edgeTypes) &&
-            validateError(GOT_SELECT_REVERSE_EDGE, STRING, 'toId', toId)
+            validateError(GOT_SELECT_REVERSE_EDGE, STRING, TO_ID, toId)
         ) {
             return store.selectReverseEdge(stack, edgeTypes, toId, state);
         }
@@ -225,10 +225,10 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     };
     const getReverseEdge = (stack: string[], edgeTypes: string, toId: string): Record<string, Metadata> => {
         if (
-            validateError(GOT_GET_REVERSE_EDGE, FUNCTION, 'select', select) &&
+            validateError(GOT_GET_REVERSE_EDGE, FUNCTION, SELECT, select) &&
             validateError(GOT_GET_REVERSE_EDGE, STACK, STACK, stack) &&
             validateError(GOT_GET_REVERSE_EDGE, EDGE_TYPES, EDGE_TYPES, edgeTypes) &&
-            validateError(GOT_GET_REVERSE_EDGE, STRING, 'toId', toId)
+            validateError(GOT_GET_REVERSE_EDGE, STRING, TO_ID, toId)
         ) {
             return store.getReverseEdge(stack, edgeTypes, toId);
         }
@@ -237,10 +237,10 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
 
     const add = (graphName: string, edgeTypes: string, fromId: string, toNode: Node, metadata: Metadata = true) => {
         if (
-            validateError(GOT_ADD, FUNCTION, 'dispatch', dispatch) &&
-            validateError(GOT_ADD, STRING, 'graphName', graphName) &&
+            validateError(GOT_ADD, FUNCTION, DISPATCH, dispatch) &&
+            validateError(GOT_ADD, STRING, GRAPH_NAME, graphName) &&
             validateError(GOT_ADD, EDGE_TYPES, EDGE_TYPES, edgeTypes) &&
-            validateError(GOT_ADD, STRING, 'fromId', fromId) &&
+            validateError(GOT_ADD, STRING, FROM_ID, fromId) &&
             validateError(GOT_ADD, NODE, 'toNode', toNode) &&
             validateError(GOT_ADD, METADATA, METADATA, metadata)
         ) {
@@ -249,10 +249,10 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     };
     const remove = (graphName: string, edgeTypes: string, fromId: string, toNode: Node | string) => {
         if (
-            validateError(GOT_REMOVE, FUNCTION, 'dispatch', dispatch) &&
-            validateError(GOT_REMOVE, STRING, 'graphName', graphName) &&
+            validateError(GOT_REMOVE, FUNCTION, DISPATCH, dispatch) &&
+            validateError(GOT_REMOVE, STRING, GRAPH_NAME, graphName) &&
             validateError(GOT_REMOVE, EDGE_TYPES, EDGE_TYPES, edgeTypes) &&
-            validateError(GOT_REMOVE, STRING, 'fromId', fromId) &&
+            validateError(GOT_REMOVE, STRING, FROM_ID, fromId) &&
             validateError(GOT_REMOVE, NODE, 'toNode', toNode)
         ) {
             return store.remove(graphName, edgeTypes, fromId, toNode);
@@ -266,10 +266,10 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
         metadata: Metadata = true,
     ) => {
         if (
-            validateError(GOT_ASSOC, FUNCTION, 'dispatch', dispatch) &&
-            validateError(GOT_ASSOC, STRING, 'graphName', graphName) &&
+            validateError(GOT_ASSOC, FUNCTION, DISPATCH, dispatch) &&
+            validateError(GOT_ASSOC, STRING, GRAPH_NAME, graphName) &&
             validateError(GOT_ASSOC, EDGE_TYPES, EDGE_TYPES, edgeTypes) &&
-            validateError(GOT_ASSOC, STRING, 'fromId', fromId) &&
+            validateError(GOT_ASSOC, STRING, FROM_ID, fromId) &&
             validateError(GOT_ASSOC, NODE, 'toNode', toNode) &&
             validateError(GOT_ASSOC, METADATA, METADATA, metadata)
         ) {
@@ -278,10 +278,10 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     };
     const dissoc = (graphName: string, edgeTypes: string, fromId: string, toNode: Node | string) => {
         if (
-            validateError(GOT_DISSOC, FUNCTION, 'dispatch', dispatch) &&
-            validateError(GOT_DISSOC, STRING, 'graphName', graphName) &&
+            validateError(GOT_DISSOC, FUNCTION, DISPATCH, dispatch) &&
+            validateError(GOT_DISSOC, STRING, GRAPH_NAME, graphName) &&
             validateError(GOT_DISSOC, EDGE_TYPES, EDGE_TYPES, edgeTypes) &&
-            validateError(GOT_DISSOC, STRING, 'fromId', fromId) &&
+            validateError(GOT_DISSOC, STRING, FROM_ID, fromId) &&
             validateError(GOT_DISSOC, NODE, 'toNode', toNode)
         ) {
             return store.dissoc(graphName, edgeTypes, fromId, toNode);
@@ -290,9 +290,9 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
 
     const selectRights = (stack: string[], nodeId: string, state: State) => {
         if (
-            validateError(GOT_SELECT_RIGHTS, FUNCTION, 'select', select) &&
+            validateError(GOT_SELECT_RIGHTS, FUNCTION, SELECT, select) &&
             validateError(GOT_SELECT_RIGHTS, STACK, STACK, stack) &&
-            validateError(GOT_SELECT_RIGHTS, STRING, 'nodeId', nodeId)
+            validateError(GOT_SELECT_RIGHTS, STRING, NODE_ID, nodeId)
         ) {
             return store.selectRights(stack, nodeId, state);
         }
@@ -300,9 +300,9 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     };
     const getRights = (stack: string[], nodeId: string) => {
         if (
-            validateError(GOT_GET_RIGHTS, FUNCTION, 'select', select) &&
+            validateError(GOT_GET_RIGHTS, FUNCTION, SELECT, select) &&
             validateError(GOT_GET_RIGHTS, STACK, STACK, stack) &&
-            validateError(GOT_GET_RIGHTS, STRING, 'nodeId', nodeId)
+            validateError(GOT_GET_RIGHTS, STRING, NODE_ID, nodeId)
         ) {
             return store.getRights(stack, nodeId);
         }
@@ -310,9 +310,9 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     };
     const setRights = (graphName: string, nodeId: string, email: string, rights: RightTypes) => {
         if (
-            validateError(GOT_SET_RIGHTS, FUNCTION, 'dispatch', dispatch) &&
-            validateError(GOT_SET_RIGHTS, STRING, 'graphName', graphName) &&
-            validateError(GOT_SET_RIGHTS, STRING, 'nodeId', nodeId) &&
+            validateError(GOT_SET_RIGHTS, FUNCTION, DISPATCH, dispatch) &&
+            validateError(GOT_SET_RIGHTS, STRING, GRAPH_NAME, graphName) &&
+            validateError(GOT_SET_RIGHTS, STRING, NODE_ID, nodeId) &&
             validateError(GOT_SET_RIGHTS, STRING, 'email', email) &&
             validateError(GOT_SET_RIGHTS, RIGHTS, RIGHTS, rights)
         ) {
@@ -321,9 +321,9 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     };
     const setRoleRights = (graphName: string, nodeId: string, role: string, rights: RightTypes) => {
         if (
-            validateError(GOT_SET_ROLE_RIGHTS, FUNCTION, 'dispatch', dispatch) &&
-            validateError(GOT_SET_ROLE_RIGHTS, STRING, 'graphName', graphName) &&
-            validateError(GOT_SET_ROLE_RIGHTS, STRING, 'nodeId', nodeId) &&
+            validateError(GOT_SET_ROLE_RIGHTS, FUNCTION, DISPATCH, dispatch) &&
+            validateError(GOT_SET_ROLE_RIGHTS, STRING, GRAPH_NAME, graphName) &&
+            validateError(GOT_SET_ROLE_RIGHTS, STRING, NODE_ID, nodeId) &&
             validateError(GOT_SET_ROLE_RIGHTS, STRING, 'role', role) &&
             validateError(GOT_SET_ROLE_RIGHTS, RIGHTS, RIGHTS, rights)
         ) {
@@ -332,10 +332,10 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     };
     const inheritRights = (graphName: string, fromId: string, nodeId: string) => {
         if (
-            validateError(GOT_INHERIT_RIGHTS, FUNCTION, 'dispatch', dispatch) &&
-            validateError(GOT_INHERIT_RIGHTS, STRING, 'graphName', graphName) &&
-            validateError(GOT_INHERIT_RIGHTS, STRING, 'nodeId', nodeId) &&
-            validateError(GOT_INHERIT_RIGHTS, STRING, 'fromId', fromId)
+            validateError(GOT_INHERIT_RIGHTS, FUNCTION, DISPATCH, dispatch) &&
+            validateError(GOT_INHERIT_RIGHTS, STRING, GRAPH_NAME, graphName) &&
+            validateError(GOT_INHERIT_RIGHTS, STRING, NODE_ID, nodeId) &&
+            validateError(GOT_INHERIT_RIGHTS, STRING, FROM_ID, fromId)
         ) {
             return store.inheritRights(graphName, fromId, nodeId);
         }
@@ -343,9 +343,9 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
 
     const selectFiles = (stack: string[], nodeId: string, state: State) => {
         if (
-            validateError(GOT_SELECT_FILES, FUNCTION, 'select', select) &&
+            validateError(GOT_SELECT_FILES, FUNCTION, SELECT, select) &&
             validateError(GOT_SELECT_FILES, STACK, STACK, stack) &&
-            validateError(GOT_SELECT_FILES, STRING, 'nodeId', nodeId)
+            validateError(GOT_SELECT_FILES, STRING, NODE_ID, nodeId)
         ) {
             return store.selectFiles(stack, nodeId, state);
         }
@@ -353,9 +353,9 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     };
     const getFiles = (stack: string[], nodeId: string) => {
         if (
-            validateError(GOT_GET_FILES, FUNCTION, 'select', select) &&
+            validateError(GOT_GET_FILES, FUNCTION, SELECT, select) &&
             validateError(GOT_GET_FILES, STACK, STACK, stack) &&
-            validateError(GOT_GET_FILES, STRING, 'nodeId', nodeId)
+            validateError(GOT_GET_FILES, STRING, NODE_ID, nodeId)
         ) {
             return store.getFiles(stack, nodeId);
         }
@@ -363,9 +363,9 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     };
     const setFile = (graphName: string, nodeId: string, prop: string, filename: string, file: Blob) => {
         if (
-            validateError(GOT_SET_FILE, FUNCTION, 'dispatch', dispatch) &&
-            validateError(GOT_SET_FILE, STRING, 'graphName', graphName) &&
-            validateError(GOT_SET_FILE, STRING, 'nodeId', nodeId) &&
+            validateError(GOT_SET_FILE, FUNCTION, DISPATCH, dispatch) &&
+            validateError(GOT_SET_FILE, STRING, GRAPH_NAME, graphName) &&
+            validateError(GOT_SET_FILE, STRING, NODE_ID, nodeId) &&
             validateError(GOT_SET_FILE, STRING, 'prop', prop) &&
             validateError(GOT_SET_FILE, STRING, 'filename', filename) &&
             validateError(GOT_SET_FILE, BLOB, 'file', file)
@@ -375,9 +375,9 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     };
     const removeFile = (graphName: string, nodeId: string, prop: string) => {
         if (
-            validateError(GOT_REMOVE_FILE, FUNCTION, 'dispatch', dispatch) &&
-            validateError(GOT_REMOVE_FILE, STRING, 'graphName', graphName) &&
-            validateError(GOT_REMOVE_FILE, STRING, 'nodeId', nodeId) &&
+            validateError(GOT_REMOVE_FILE, FUNCTION, DISPATCH, dispatch) &&
+            validateError(GOT_REMOVE_FILE, STRING, GRAPH_NAME, graphName) &&
+            validateError(GOT_REMOVE_FILE, STRING, NODE_ID, nodeId) &&
             validateError(GOT_REMOVE_FILE, STRING, 'prop', prop)
         ) {
             return store.removeFile(graphName, nodeId, prop);
@@ -386,7 +386,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
 
     const selectView = <TView extends View>(stack: string[], view: TView, state: State): ViewResult<TView> => {
         if (
-            validateError(GOT_SELECT_VIEW, FUNCTION, 'select', select) &&
+            validateError(GOT_SELECT_VIEW, FUNCTION, SELECT, select) &&
             validateError(GOT_SELECT_VIEW, STACK, STACK, stack) &&
             validateError(GOT_SELECT_VIEW, VIEW, VIEW, view)
         ) {
@@ -396,7 +396,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     };
     const getView = <TView extends View>(stack: string[], view: TView): ViewResult<TView> => {
         if (
-            validateError(GOT_GET_VIEW, FUNCTION, 'select', select) &&
+            validateError(GOT_GET_VIEW, FUNCTION, SELECT, select) &&
             validateError(GOT_GET_VIEW, STACK, STACK, stack) &&
             validateError(GOT_GET_VIEW, VIEW, VIEW, view)
         ) {
@@ -407,7 +407,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
 
     const selectSubgraph = (stack: string[], view: View, state: State): Graph => {
         if (
-            validateError(GOT_SELECT_SUBGRAPH, FUNCTION, 'select', select) &&
+            validateError(GOT_SELECT_SUBGRAPH, FUNCTION, SELECT, select) &&
             validateError(GOT_SELECT_SUBGRAPH, STACK, STACK, stack) &&
             validateError(GOT_SELECT_SUBGRAPH, VIEW, VIEW, view)
         ) {
@@ -417,7 +417,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     };
     const getSubgraph = (stack: string[], view: View): Graph => {
         if (
-            validateError(GOT_GET_SUBGRAPH, FUNCTION, 'select', select) &&
+            validateError(GOT_GET_SUBGRAPH, FUNCTION, SELECT, select) &&
             validateError(GOT_GET_SUBGRAPH, STACK, STACK, stack) &&
             validateError(GOT_GET_SUBGRAPH, VIEW, VIEW, view)
         ) {
@@ -429,8 +429,8 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     const push = async (graphName: string, toGraphName: string = 'main'): Promise<PushObservables> => {
         if (
             validateError(GOT_PUSH, API, API, api) &&
-            validateError(GOT_PUSH, FUNCTION, 'dispatch', dispatch) &&
-            validateError(GOT_PUSH, STRING, 'graphName', graphName) &&
+            validateError(GOT_PUSH, FUNCTION, DISPATCH, dispatch) &&
+            validateError(GOT_PUSH, STRING, GRAPH_NAME, graphName) &&
             validateError(GOT_PUSH, STRING, 'toGraphName', toGraphName)
         ) {
             try {
@@ -446,7 +446,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
     const pull = async (view: View, toGraphName = 'main'): Promise<Graph> => {
         if (
             validateError(GOT_PULL, API, API, api) &&
-            validateError(GOT_PULL, FUNCTION, 'dispatch', dispatch) &&
+            validateError(GOT_PULL, FUNCTION, DISPATCH, dispatch) &&
             validateError(GOT_PULL, VIEW, VIEW, view) &&
             validateError(GOT_PULL, STRING, 'toGraphName', toGraphName)
         ) {
