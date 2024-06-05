@@ -1,3 +1,7 @@
 import build from '@gothub/typescript-util/esbuild.js';
 
-build();
+build({
+    min: {
+        external: ['react'],
+    },
+});

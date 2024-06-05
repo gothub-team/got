@@ -54,8 +54,8 @@ export type * from './types/actions';
 export type * from './types/graph';
 export type * from './types/graphObjects';
 export type * from './types/view';
-export type { CreateGraph, CreateGraphRes } from './store/createGraph';
-export type { CreateCurriedGraph, CreateCurriedGraphRes } from './store/createCurriedGraph';
+export * from './store/createGraph';
+export * from './store/createCurriedGraph';
 
 export * from './utils/util';
 export * from './reducer/reducer';
