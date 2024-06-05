@@ -114,9 +114,9 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	auth.UserPoolClient.ApplyT(func(client *cognito.UserPoolClient) pulumi.IDOutput {
+	clientID := auth.UserPoolClient.ApplyT(func(client *cognito.UserPoolClient) pulumi.IDOutput {
 		return client.ID()
-	})
+	}).(pulumi.IDOutput)
 
 	// Create Cognito Authorizer
 	authorizer, err := apigatewayv2.NewAuthorizer(ctx, fmt.Sprintf("%s-Authorizer", name), &apigatewayv2.AuthorizerArgs{
@@ -128,6 +128,7 @@ func NewApi(ctx *pulumi.Context,
 		JwtConfiguration: &apigatewayv2.AuthorizerJwtConfigurationArgs{
 			Audiences: pulumi.StringArray{
 				auth.UserPoolId,
+				clientID,
 			},
 			Issuer: pulumi.Sprintf("https://%s", auth.UserPoolEndpoint),
 		},
