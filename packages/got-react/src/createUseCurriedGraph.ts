@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     decideStack,
-    type CreateGraph,
+    type CreateCurriedGraph,
     type Metadata,
     type Node,
     type NodeFileView,
@@ -29,7 +29,7 @@ const useViewEquality = (next: EqualsObj<any>, prev: EqualsObj<any>) =>
     next.requireEqCheck ? fnEquals(next.result, prev.result) : true;
 
 type ConfigureGraphOptions = {
-    createGraph: CreateGraph;
+    createGraph: CreateCurriedGraph;
     useSelector: <TRes>(fnSelect: (state: State) => TRes, fnEquals: (next: any, prev: any) => boolean) => TRes;
 };
 
@@ -40,8 +40,8 @@ type Refs = {
     fnTransformResult?: any;
 };
 
-export const configureUseGraph = ({ createGraph, useSelector }: ConfigureGraphOptions) => {
-    const useGraph = (...stack: string[] | string[1][]) => {
+export const configureUseCurriedGraph = ({ createGraph, useSelector }: ConfigureGraphOptions) => {
+    const useCurriedGraph = (...stack: string[] | string[1][]) => {
         const _stack = decideStack(stack);
 
         const graphFns = useMemo(() => createGraph(..._stack), [...stack]); // TODO: get rid of stack spreading
@@ -54,7 +54,7 @@ export const configureUseGraph = ({ createGraph, useSelector }: ConfigureGraphOp
             refs.current = refsObj;
 
             // creating new function here instead of using currying to make function calls testable
-            const selectView = useCallback((state: State) => graphFns.selectView(_view, state), [_view]);
+            const selectView = useCallback((state: State) => graphFns.selectView(_view)(state), [_view]);
 
             const selector = useCallback(
                 (state: State): EqualsObj<unknown> => {
@@ -100,7 +100,7 @@ export const configureUseGraph = ({ createGraph, useSelector }: ConfigureGraphOp
         const useNode = <TRes>(nodeId: string, fnTransform: (node: Node | undefined) => TRes) => {
             const selector = useCallback(
                 (state: State) => {
-                    const res = graphFns.selectNode(nodeId, state);
+                    const res = graphFns.selectNode(nodeId)(state);
                     let node: Node | undefined;
 
                     if (typeof res === 'object') {
@@ -129,7 +129,7 @@ export const configureUseGraph = ({ createGraph, useSelector }: ConfigureGraphOp
         ) => {
             const selector = useCallback(
                 (state: State) => {
-                    const res = graphFns.selectEdge(edgeTypes, fromId, state);
+                    const res = graphFns.selectEdge(edgeTypes)(fromId)(state);
                     if (fnTransform) {
                         return fnTransform(res);
                     }
@@ -149,7 +149,7 @@ export const configureUseGraph = ({ createGraph, useSelector }: ConfigureGraphOp
         ) => {
             const selector = useCallback(
                 (state: State) => {
-                    const res = graphFns.selectMetadata(edgeTypes, fromId, toId, state);
+                    const res = graphFns.selectMetadata(edgeTypes)(fromId)(toId)(state);
                     if (fnTransform) {
                         return fnTransform(res);
                     }
@@ -164,7 +164,7 @@ export const configureUseGraph = ({ createGraph, useSelector }: ConfigureGraphOp
         const useRights = <TRes>(nodeId: string, fnTransform?: (rights: NodeRightsView) => TRes) => {
             const selector = useCallback(
                 (state: State) => {
-                    const res = graphFns.selectRights(nodeId, state);
+                    const res = graphFns.selectRights(nodeId)(state);
                     if (fnTransform) {
                         return fnTransform(res);
                     }
@@ -179,7 +179,7 @@ export const configureUseGraph = ({ createGraph, useSelector }: ConfigureGraphOp
         const useFiles = <TRes>(nodeId: string, fnTransform?: (files: NodeFilesView<NodeFileView>) => TRes) => {
             const selector = useCallback(
                 (state: State) => {
-                    const res = graphFns.selectFiles(nodeId, state);
+                    const res = graphFns.selectFiles(nodeId)(state);
                     if (fnTransform) {
                         return fnTransform(res);
                     }
@@ -202,5 +202,5 @@ export const configureUseGraph = ({ createGraph, useSelector }: ConfigureGraphOp
         };
     };
 
-    return useGraph;
+    return useCurriedGraph;
 };

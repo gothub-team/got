@@ -4,6 +4,7 @@ import { gotReducer, setup as setupCore, type GOT_ACTION, type State } from '@go
 import type { StoreAPI } from '@gothub/got-core/dist/module/types/api';
 import { getLocalStorageSessionStore } from './util';
 import { configureUseGraph } from './createUseGraph';
+import { configureUseCurriedGraph } from './createUseCurriedGraph';
 
 export declare interface ReduxStore {
     /**
@@ -89,11 +90,30 @@ export const setup = ({
             : useSelector,
     });
 
+    const useCurriedGraph = configureUseCurriedGraph({
+        createGraph: curried.createGraph,
+        useSelector: baseState
+            ? (selector, fnEquals) =>
+                  useSelector(
+                      (state: State | Record<string, State>) =>
+                          selector(((state as Record<string, State>)?.[baseState] || {}) as State),
+                      fnEquals,
+                  )
+            : useSelector,
+    });
+
     return {
         createGraph,
         createLocalGraph,
         useGraph,
+        curried: {
+            createGraph: curried.createGraph,
+            createLocalGraph: curried.createLocalGraph,
+            useGraph: useCurriedGraph,
+        },
         store,
         api,
     };
 };
+
+export { configureUseCurriedGraph, configureUseGraph };
