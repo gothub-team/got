@@ -50,7 +50,6 @@ const buildTs = async (options = {}) => {
         target: 'node18.0',
         platform: 'node',
         format: 'cjs',
-        external: options?.min?.external || [],
         entryPoints: entryFiles,
         outdir: './dist/min',
     });
