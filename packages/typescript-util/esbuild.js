@@ -45,6 +45,19 @@ const buildTs = async (options = {}) => {
     // compile minified CJS
     await build({
         logLevel: 'info',
+        minify: true,
+        treeShaking: true,
+        target: 'node18.0',
+        platform: 'node',
+        format: 'cjs',
+        external: options?.min?.external || [],
+        entryPoints: entryFiles,
+        outdir: './dist/min',
+    });
+
+    // compile minified bundle CJS
+    await build({
+        logLevel: 'info',
         bundle: true,
         minify: true,
         treeShaking: true,
@@ -53,7 +66,7 @@ const buildTs = async (options = {}) => {
         format: 'cjs',
         external: options?.min?.external || [],
         entryPoints: ['./src/index.ts'],
-        outfile: './dist/min/index.js',
+        outfile: './dist/min-bundle/index.js',
     });
 
     // compile ESM with types
