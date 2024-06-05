@@ -58,6 +58,7 @@ const RIGHTS = 'rights';
 const DISPATCH = 'dispatch';
 const SELECT = 'select';
 const GRAPH_NAME = 'graphName';
+const TO_GRAPH_NAME = 'toGraphName';
 const NODE_ID = 'nodeId';
 const FROM_ID = 'fromId';
 const TO_ID = 'toId';
@@ -89,7 +90,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
         if (
             validateError(GOT_MERGE, FUNCTION, DISPATCH, dispatch) &&
             validateError(GOT_MERGE, STRING, 'fromGraphName', fromGraphName) &&
-            validateError(GOT_MERGE, STRING, 'toGraphName', toGraphName)
+            validateError(GOT_MERGE, STRING, TO_GRAPH_NAME, toGraphName)
         ) {
             store.merge(fromGraphName, toGraphName);
         }
@@ -98,7 +99,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
         if (
             validateError(GOT_MERGE_GRAPH, FUNCTION, DISPATCH, dispatch) &&
             validateError(GOT_MERGE_GRAPH, GRAPH, 'fromGraph', fromGraph) &&
-            validateError(GOT_MERGE_GRAPH, STRING, 'toGraphName', toGraphName)
+            validateError(GOT_MERGE_GRAPH, STRING, TO_GRAPH_NAME, toGraphName)
         ) {
             store.mergeGraph(fromGraph, toGraphName);
         }
@@ -107,7 +108,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
         if (
             validateError(GOT_MERGE_OVERWRITE_GRAPH, FUNCTION, DISPATCH, dispatch) &&
             validateError(GOT_MERGE_OVERWRITE_GRAPH, GRAPH, 'fromGraph', fromGraph) &&
-            validateError(GOT_MERGE_OVERWRITE_GRAPH, STRING, 'toGraphName', toGraphName)
+            validateError(GOT_MERGE_OVERWRITE_GRAPH, STRING, TO_GRAPH_NAME, toGraphName)
         ) {
             store.mergeOverwriteGraph(fromGraph, toGraphName);
         }
@@ -431,7 +432,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
             validateError(GOT_PUSH, API, API, api) &&
             validateError(GOT_PUSH, FUNCTION, DISPATCH, dispatch) &&
             validateError(GOT_PUSH, STRING, GRAPH_NAME, graphName) &&
-            validateError(GOT_PUSH, STRING, 'toGraphName', toGraphName)
+            validateError(GOT_PUSH, STRING, TO_GRAPH_NAME, toGraphName)
         ) {
             try {
                 const res = await store.push(graphName, toGraphName);
@@ -448,7 +449,7 @@ export const createErrorHandledStore = (options: CreateErrorHandledStoreOptions)
             validateError(GOT_PULL, API, API, api) &&
             validateError(GOT_PULL, FUNCTION, DISPATCH, dispatch) &&
             validateError(GOT_PULL, VIEW, VIEW, view) &&
-            validateError(GOT_PULL, STRING, 'toGraphName', toGraphName)
+            validateError(GOT_PULL, STRING, TO_GRAPH_NAME, toGraphName)
         ) {
             if (isEmptyObject(view)) {
                 onWarn && onWarn('Pull view is empty');
