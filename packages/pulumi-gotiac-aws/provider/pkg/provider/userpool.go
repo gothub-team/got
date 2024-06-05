@@ -43,7 +43,7 @@ func NewUserpool(ctx *pulumi.Context,
 
 	userPoolClient, err := cognito.NewUserPoolClient(ctx, name+"-userpoolclient", &cognito.UserPoolClientArgs{
 		UserPoolId:     userPool.ID(),
-		GenerateSecret: pulumi.Bool(true),
+		GenerateSecret: pulumi.Bool(false),
 		ExplicitAuthFlows: pulumi.StringArray{
 			pulumi.String("ADMIN_NO_SRP_AUTH"),
 		},
