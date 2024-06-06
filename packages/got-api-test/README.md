@@ -7,6 +7,10 @@ comprehensive suite of tests for the `got` API ensuring its reliability, functio
 
 You can easily run the test suites against your own endpoint that implement the `got` API standard.
 
+```BASH
+bunx @gothub/got-api-test
+```
+
 > To deploy your own instance of our implementation of the API on your AWS account, see the infrastructure as code (IaC)
 > packages in this repo (`@gothub/got-api`, `@gothub/pulumi-got-api-aws`, `@gothub/pulumi-gotiac-aws` and
 > `@gothub/gothub-iac`) All components are deployable and configurable via [SST Ion](https://ion.sst.dev/).
