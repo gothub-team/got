@@ -17,6 +17,8 @@ type LambdaArgs struct {
 	MemorySize *pulumi.Int `pulumi:"memorySize"`
 	// The lambda runtime
 	Runtime pulumi.StringInput `pulumi:"runtime"`
+	// Map of environment variables to pass to the lambda function
+	Environment pulumi.StringMapInput `pulumi:"environment"`
 	// The array of policy arns that should be attachen to the lambda function role
 	PolicyArns pulumi.StringArrayInput `pulumi:"policyArns"`
 }
@@ -48,19 +50,17 @@ func NewLambda(ctx *pulumi.Context,
 	}
 
 	// Create a log group for the lambda function
-	logGroup, err := cloudwatch.NewLogGroup(ctx, name, &cloudwatch.LogGroupArgs{
-		Name:            pulumi.String("/aws/lambda/" + name),
+	logGroup, err := cloudwatch.NewLogGroup(ctx, "/aws/lambda/"+name, &cloudwatch.LogGroupArgs{
 		RetentionInDays: pulumi.Int(30),
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	loggingPolicy, err := iam.NewPolicy(ctx, name + "-logging", &iam.PolicyArgs{
-		Name:        pulumi.String(name + "-logging"),
+	loggingPolicy, err := iam.NewPolicy(ctx, name+"-logging", &iam.PolicyArgs{
 		Path:        pulumi.String("/"),
 		Description: pulumi.String("IAM policy for logging from a lambda"),
-		Policy:      pulumi.Any(map[string]interface{}{
+		Policy: pulumi.Any(map[string]interface{}{
 			"Version": "2012-10-17",
 			"Statement": []map[string]interface{}{
 				{
@@ -83,14 +83,16 @@ func NewLambda(ctx *pulumi.Context,
 				},
 			},
 		}),
-	})
+	}, pulumi.DependsOn([]pulumi.Resource{logGroup}))
 	if err != nil {
 		return nil, err
 	}
 
+	allow := "Allow"
 	assumeRolePolicy, err := iam.GetPolicyDocument(ctx, &iam.GetPolicyDocumentArgs{
 		Statements: []iam.GetPolicyDocumentStatement{
 			{
+				Effect: &allow,
 				Actions: []string{
 					"sts:AssumeRole",
 				},
@@ -109,13 +111,12 @@ func NewLambda(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	iamRole, err := iam.NewRole(ctx, name + "-role", &iam.RoleArgs{
-		Name:             pulumi.String(name + "-role"),
+	iamRole, err := iam.NewRole(ctx, name+"-role", &iam.RoleArgs{
 		AssumeRolePolicy: pulumi.String(assumeRolePolicy.Json),
 		ManagedPolicyArns: pulumi.All(args.PolicyArns, loggingPolicy.Arn).ApplyT(func(args []interface{}) []string {
 			return append(args[0].([]string), args[1].(string))
 		}).(pulumi.StringArrayOutput),
-	})
+	}, pulumi.DependsOn([]pulumi.Resource{loggingPolicy}))
 	if err != nil {
 		return nil, err
 	}
@@ -127,23 +128,34 @@ func NewLambda(ctx *pulumi.Context,
 		memorySize = pulumi.Int(512)
 	}
 
-
-	lambdaFunction, err := lambda.NewFunction(ctx, "test_lambda", &lambda.FunctionArgs{
+	lambdaFunction, err := lambda.NewFunction(ctx, name, &lambda.FunctionArgs{
 		Code:    args.CodePath.ToStringOutput().ApplyT(func(s string) pulumi.Archive { return pulumi.NewFileArchive(s) }).(pulumi.ArchiveOutput),
-		Name:    pulumi.String(name),
 		Role:    iamRole.Arn,
 		Handler: args.HandlerPath,
 		Runtime: args.Runtime,
+		Timeout: pulumi.Int(30),
+		Environment: &lambda.FunctionEnvironmentArgs{
+			Variables: args.Environment,
+		},
 		MemorySize: memorySize,
-	})
+		LoggingConfig: &lambda.FunctionLoggingConfigArgs{
+			LogGroup:  logGroup.Name,
+			LogFormat: pulumi.String("Text"),
+		},
+	}, pulumi.DependsOn([]pulumi.Resource{iamRole}))
 	if err != nil {
 		return nil, err
 	}
 
+	component.Name = lambdaFunction.Name
+	component.Arn = lambdaFunction.Arn
+	component.Role = iamRole.ToRoleOutput()
+	component.Function = lambdaFunction.ToFunctionOutput()
+
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
-		"name": lambdaFunction.Name,
-		"arn": lambdaFunction.Arn,
-		"role": iamRole,
+		"name":     lambdaFunction.Name,
+		"arn":      lambdaFunction.Arn,
+		"role":     iamRole,
 		"function": lambdaFunction,
 	}); err != nil {
 		return nil, err

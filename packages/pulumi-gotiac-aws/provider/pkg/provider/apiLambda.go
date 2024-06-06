@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/apigatewayv2"
-	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/cognito"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/iam"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/lambda"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
@@ -12,8 +11,6 @@ import (
 
 // The set of arguments for creating a Lambda component resource.
 type ApiLambdaArgs struct {
-	// The APIs execution ARN
-	UserPoolId pulumi.IDInput `pulumi:"userPoolId"`
 	// The the path to the .zip for the lambda code
 	CodePath pulumi.StringInput `pulumi:"codePath"`
 	// The handler for the lambda function
@@ -27,11 +24,13 @@ type ApiLambdaArgs struct {
 	// The api route path
 	RoutePath pulumi.StringInput `pulumi:"routePath"`
 	// The ID of the authorizer
-	AuthorizerId pulumi.StringInput `pulumi:"authorizerId"`
+	AuthorizerId pulumi.StringPtrInput `pulumi:"authorizerId"`
 	// The memory size for the lambda function
 	MemorySize *pulumi.Int `pulumi:"memorySize"`
 	// The lambda runtime
 	Runtime pulumi.StringInput `pulumi:"runtime"`
+	// Map of environment variables to pass to the lambda function
+	Environment pulumi.StringMapInput `pulumi:"environment"`
 	// The array of policy arns that should be attachen to the lambda function role
 	PolicyArns pulumi.StringArrayInput `pulumi:"policyArns"`
 }
@@ -48,7 +47,7 @@ type ApiLambda struct {
 	// The role of the lambda resource
 	Function lambda.FunctionOutput `pulumi:"function"`
 	// The role of the lambda resource
-	Route apigatewayv2.Route `pulumi:"route"`
+	Route apigatewayv2.RouteOutput `pulumi:"route"`
 }
 
 // NewApiLambda creates a new Lambda component resource.
@@ -64,50 +63,14 @@ func NewApiLambda(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	userPool, err := cognito.GetUserPool(ctx, name, args.UserPoolId, &cognito.UserPoolState{});
-	if err != nil {
-		return nil, err
-	}
-
-	userPoolClient, err := cognito.NewUserPoolClient(ctx, "api-client", &cognito.UserPoolClientArgs{
-		Name:           pulumi.String("client"),
-		UserPoolId:     userPool.ID(),
-		GenerateSecret: pulumi.Bool(true),
-		ExplicitAuthFlows: pulumi.StringArray{
-			pulumi.String("ADMIN_NO_SRP_AUTH"),
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	// Create Cognito Authorizer
-	authorizer, err := apigatewayv2.NewAuthorizer(ctx, fmt.Sprintf("%s-Authorizer", name), &apigatewayv2.AuthorizerArgs{
-		ApiId: args.ApiId,
-		AuthorizerType: pulumi.String("JWT"),
-		IdentitySources: pulumi.StringArray{ 
-			pulumi.String("$request.header.Authorization"),
-		},
-		JwtConfiguration: &apigatewayv2.AuthorizerJwtConfigurationArgs{
-			Audiences: userPoolClient.ID().ApplyT(func(id string) (pulumi.StringArray) {
-				return pulumi.StringArray{
-					pulumi.String(id),
-				}
-			}).(pulumi.StringArrayOutput),
-			Issuer: userPool.Endpoint,
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
- 
 	// Create the lambda function
 	lambdaFunction, err := NewLambda(ctx, name, &LambdaArgs{
-		CodePath:	 args.CodePath,
+		CodePath:    args.CodePath,
 		HandlerPath: args.HandlerPath,
-		MemorySize: args.MemorySize,
-		Runtime: args.Runtime,
-		PolicyArns: args.PolicyArns,
+		MemorySize:  args.MemorySize,
+		Runtime:     args.Runtime,
+		Environment: args.Environment,
+		PolicyArns:  args.PolicyArns,
 	})
 	if err != nil {
 		return nil, err
@@ -115,48 +78,66 @@ func NewApiLambda(ctx *pulumi.Context,
 
 	// Create the permission for the API Gateway to invoke the lambda function
 	_, err = lambda.NewPermission(ctx, fmt.Sprintf("%s-Permission", name), &lambda.PermissionArgs{
-		Action:   pulumi.String("lambda:InvokeFunction"),
-		Function: lambdaFunction.Arn,
+		Action:    pulumi.String("lambda:InvokeFunction"),
+		Function:  lambdaFunction.Function,
 		Principal: pulumi.String("apigateway.amazonaws.com"),
-		SourceArn: args.ExecutionArn,
+		SourceArn: pulumi.Sprintf("%s/*/*%s", args.ExecutionArn, args.RoutePath),
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	integration, err := apigatewayv2.NewIntegration(ctx, fmt.Sprintf("%s-Integration", name), &apigatewayv2.IntegrationArgs{
-		ApiId:                   args.ApiId,
-		IntegrationType:         pulumi.String("AWS_PROXY"),
-		ConnectionType:          pulumi.String("INTERNET"),
-		ContentHandlingStrategy: pulumi.String("CONVERT_TO_TEXT"),
-		IntegrationMethod:       args.Method,
-		IntegrationUri:          lambdaFunction.Function.InvokeArn(),
-		PassthroughBehavior:     pulumi.String("WHEN_NO_MATCH"),
+		ApiId:                args.ApiId,
+		IntegrationType:      pulumi.String("AWS_PROXY"),
+		ConnectionType:       pulumi.String("INTERNET"),
+		PayloadFormatVersion: pulumi.String("2.0"),
+		IntegrationMethod:    pulumi.String("POST"),
+		IntegrationUri:       lambdaFunction.Function.InvokeArn(),
+		PassthroughBehavior:  pulumi.String("WHEN_NO_MATCH"),
 	})
 	if err != nil {
 		return nil, err
 	}
 
+	var authorizerId pulumi.StringPtrInput
+	if args.AuthorizerId != nil {
+		authorizerId = args.AuthorizerId
+	}
+
+	var AuthorizationType pulumi.StringInput
+	if args.AuthorizerId != nil {
+		AuthorizationType = pulumi.String("JWT")
+	} else {
+		AuthorizationType = pulumi.String("NONE")
+	}
+
 	// Create the API route
 	apiRoute, err := apigatewayv2.NewRoute(ctx, fmt.Sprintf("%s-Route", name), &apigatewayv2.RouteArgs{
-		ApiId: args.ApiId,
-		AuthorizerId: authorizer.ID(),
-		AuthorizationType: pulumi.String("JWT"),
-		RouteKey: pulumi.Sprintf("%s %s", args.Method , args.RoutePath),
+		ApiId:             args.ApiId,
+		AuthorizerId:      authorizerId,
+		AuthorizationType: AuthorizationType,
+		RouteKey:          pulumi.Sprintf("%s %s", args.Method, args.RoutePath),
 		Target: integration.ID().ApplyT(func(id string) (string, error) {
 			return fmt.Sprintf("integrations/%v", id), nil
 		}).(pulumi.StringOutput),
-	});
+	})
 	if err != nil {
 		return nil, err
 	}
 
+	component.Name = lambdaFunction.Name
+	component.Arn = lambdaFunction.Arn
+	component.Role = lambdaFunction.Role
+	component.Function = lambdaFunction.Function
+	component.Route = apiRoute.ToRouteOutput()
+
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
-		"name": lambdaFunction.Name,
-		"arn": lambdaFunction.Arn,
-		"role": lambdaFunction.Role,
+		"name":     lambdaFunction.Name,
+		"arn":      lambdaFunction.Arn,
+		"role":     lambdaFunction.Role,
 		"function": lambdaFunction.Function,
-		"route": apiRoute,
+		"route":    apiRoute,
 	}); err != nil {
 		return nil, err
 	}
