@@ -1,9 +1,12 @@
 #!/usr/bin/env bun
 
-import { $, argv } from 'bun';
+import { argv } from 'bun';
+
+const [, , ...patterns] = argv;
 
 try {
-    await $`cd ${__dirname}; bun test --timeout 100000 ${argv[2] || ''}`;
+    const proc = Bun.spawn(['bun', 'test', '--timeout', '100000', ...patterns]);
+    await proc.exited;
 } catch (error) {
     //
 }
