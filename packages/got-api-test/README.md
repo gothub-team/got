@@ -86,23 +86,24 @@ suites create email addresses like `info+test-123@your-domain.com` based on this
 server supports the plus-syntax. The main username will still be used to receive test emails.
 
 > See below how you can leverage our IaC components to deploy an AWS Workmail domain including a test mailbox.
+> ([Mail Domain](#mail-domain))
 
 `MAIL_USER_PW`: The password of your IMAP mailbox.
 
 `MAIL_IMAP_SERVER`: The hostname of the IMAP server
 
 `TEST_USER_1_EMAIL`: An existing test user. You can either create them manually via cognito (in case you don't have an
-own implementation of the auth provider) or leverage our IaC components.
+own implementation of the auth provider) or leverage our IaC components as in [Test Users](#test-users).
 
 ### Other Test Suites
 
 `TEST_USER_1_EMAIL`: As above. First test user email that exists before the test suites have been executed. Either
-create it manually or see below to deploy test users via our IaC components.
+create it manually or see below to deploy test users via our IaC components ([Test Users](#test-users)).
 
 `TEST_USER_1_PW`: Password for the first test user.
 
 `TEST_USER_2_EMAIL`: Second test user email that exists before the test suites have been executed. Either create it
-manually or see below to deploy test users via our IaC components.
+manually or see below to deploy test users via our IaC components ([Test Users](#test-users)).
 
 `TEST_USER_2_PW`: Password for the second test user.
 
@@ -194,6 +195,45 @@ This code also writes the passwords securely to an env file after deployment.
 
 Test users can be safely removed via `sst remove` after the test runs. This ensures that there are no useless technical
 users in your user pool.
+
+#### Mail Domain
+
+To deploy a mail domain and a mailbox you can use this code:
+
+> You need to own the domain and have a hosted zone for that domain in your AWS account.
+
+```TypeScript
+/// <reference path="./.sst/platform/config.d.ts" />
+import * as gotiac from '@gothub/pulumi-gotiac-aws';
+import * as fs from 'fs';
+
+export default $config({
+    app(input) { ... },
+    async run() {
+        const mailDomain = new gotiac.MailDomain('MailDomain', {
+            region: 'eu-west-1',
+            domain: 'your-domain.com',
+        });
+
+        const user = new gotiac.MailUser('MailUser', {
+            region: 'eu-west-1',
+            domain: 'your-domain.com',
+            displayName: 'Info',
+            name: `info@your-domain.com`,
+            emailPrefix: 'info',
+            enabled: true, // When you enable a user, AWS charges 4 $ per month
+        });
+
+        fs.writeFileSync('.secrets.env', '');
+        user.password.apply((password) => {
+            fs.appendFileSync('.secrets.env', `export MAIL_USER_PW='${password}'\n`);
+        });
+        mailDomain.imapServer.apply((imapServer) => {
+            fs.appendFileSync('.secrets.env', `export MAIL_IMAP_SERVER='${imapServer}'\n`);
+        });
+    },
+});
+```
 
 ## Test Structure
 
