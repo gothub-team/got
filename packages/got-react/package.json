@@ -1,5 +1,5 @@
 {
-    "name": "@gothub/got-core",
+    "name": "@gothub/got-react",
     "version": "0.0.6",
     "license": "MIT",
     "type": "module",
@@ -11,14 +11,17 @@
         "build": "bun run esbuild.js"
     },
     "devDependencies": {
+        "@gothub-team/got-atom": "^0.24.3",
         "@gothub/typescript-util": "workspace:*",
-        "@types/bun": "latest",
-        "ramda": "^0.30.0",
-        "@gothub-team/got-util": "^0.24.2",
-        "esbuild": "^0.21.4"
+        "@types/react": "^18.3.3"
     },
     "peerDependencies": {
+        "react": "^18.0.0",
         "typescript": "^5.0.0"
     },
-    "dependencies": {}
+    "dependencies": {
+        "@gothub/got-api": "workspace:*",
+        "@gothub/got-core": "workspace:*",
+        "fast-deep-equal": "^3.1.3"
+    }
 }

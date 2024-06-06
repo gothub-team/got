@@ -24,7 +24,7 @@ const clean = () => {
     fs.existsSync('./dist') && fs.rmSync('./dist', { recursive: true, force: true });
 };
 
-const buildTs = async () => {
+const buildTs = async (options = {}) => {
     clean();
 
     const entryFiles = getAllFiles('./src');
@@ -36,8 +36,10 @@ const buildTs = async () => {
         target: 'node18.0',
         platform: 'node',
         format: 'cjs',
+        external: options?.cjs?.external || [],
         entryPoints: entryFiles,
         outdir: './dist/cjs',
+        // outExtension: { '.js': '.cjs' },
     });
 
     // compile minified CJS
@@ -49,6 +51,7 @@ const buildTs = async () => {
         target: 'node18.0',
         platform: 'node',
         format: 'cjs',
+        external: options?.min?.external || [],
         entryPoints: ['./src/index.ts'],
         outfile: './dist/min/index.js',
     });
@@ -60,6 +63,7 @@ const buildTs = async () => {
         target: 'node18.0',
         platform: 'node',
         format: 'esm',
+        external: options?.esm?.external || [],
         entryPoints: entryFiles,
         outdir: './dist/module',
         plugins: [
