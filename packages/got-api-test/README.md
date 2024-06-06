@@ -24,17 +24,11 @@ The tests cover a wide range of scenarios to verify that the API behaves as expe
 -   **Extensible:** Designed to be easily extendable with new tests and scenarios.
 -   **Detailed Reporting:** Clear and detailed reports of test results.
 
-## Getting Started
-
-### Prerequisites
+## Prerequisites
 
 Before you begin, ensure you have the following installed:
 
 -   [Bun](https://bun.sh/) (>= 1.x)
-
-### Installation
-
-### Configuration
 
 ## Running the Tests
 
@@ -44,7 +38,14 @@ To execute all the test suites at once, run:
 bunx @gothub/got-api-test
 ```
 
-To execute specific test suites, list them as arguments:
+Its always a good idea to first test the auth components of your API since all other endpoints are authenticated and
+need two test users in order to comprehensively test the API. (see [Auth](#auth) for configuring your environment)
+
+```BASH
+bunx @gothub/got-api-test auth
+```
+
+To execute any specific test suites, list them as arguments:
 
 ```bash
 bunx @gothub/got-api-test nodes edges
@@ -63,6 +64,45 @@ Possible test suites are:
 -   `wildcards`
 
 This will run the specified test suites and output the results to the console.
+
+## Configuration
+
+Each test suite depends on its own set of environment variables that you need to export in your terminal before you run
+tests.
+
+Test suites will fail with a detailed description of the variables that need to be set.
+
+Here is a breakdown of the env vars and how you should set them:
+
+`GOT_API_URL`: This is the main endpoint of your API instance. In our case we run tests against
+`https://api.dev.gothub.io/`
+
+### Auth
+
+`MAIL_USERNAME`: An IMAP mailbox username that receives mails for your test users. e.g. `info@your-domain.com`. The test
+suites create email addresses like `info+test-123@your-domain.com` based on this env variable so make sure your mail
+server supports the plus-syntax. The main username will still be used to receive test emails.
+
+> See below how you can leverage our IaC components to deploy an AWS Workmail domain including a test mailbox.
+
+`MAIL_USER_PW`: The password of your IMAP mailbox.
+
+`MAIL_IMAP_SERVER`: The hostname of the IMAP server
+
+`TEST_USER_1_EMAIL`: An existing test user. You can either create them manually via cognito (in case you don't have an
+own implementation of the auth provider) or leverage our IaC components.
+
+### Other Test Suites
+
+`TEST_USER_1_EMAIL`: As above. First test user email that exists before the test suites have been executed. Either
+create it manually or see below to deploy test users via our IaC components.
+
+`TEST_USER_1_PW`: Password for the first test user.
+
+`TEST_USER_2_EMAIL`: Second test user email that exists before the test suites have been executed. Either create it
+manually or see below to deploy test users via our IaC components.
+
+`TEST_USER_2_PW`: Password for the second test user.
 
 ## Test Structure
 
