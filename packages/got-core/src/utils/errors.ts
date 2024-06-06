@@ -28,7 +28,7 @@ type ParameterType =
     | 'stack'
     | 'string'
     | 'node'
-    | 'edgeTypes'
+    | 'edgetypes'
     | 'metadata'
     | 'blob'
     | 'view'
@@ -122,7 +122,7 @@ const validate = (type: ParameterType, value: unknown) => {
             return value && typeof value === 'string' && value.length > 0;
         case 'node':
             return value && typeof value === 'object' && (value as Record<string, unknown>).id;
-        case 'edgeTypes':
+        case 'edgetypes':
             return value && typeof value === 'string' && isEdgeTypeString(value);
         case 'view':
         case 'graph':

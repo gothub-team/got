@@ -1,4 +1,4 @@
-name: release-pulumi-gotiac-aws
+name: release-got-api-test
 on:
     push:
         tags:

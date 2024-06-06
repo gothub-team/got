@@ -1,4 +1,4 @@
-name: release-pulumi-gotiac-aws
+name: release-typescript-util
 on:
     push:
         tags:
