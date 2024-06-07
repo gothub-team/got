@@ -128,46 +128,6 @@ resources:
                     The temporary password of the test user. Make sure to destroy the test user after each test run.
         required:
             - password
-    gotiac:index:Lambda:
-        isComponent: true
-        inputProperties:
-            codePath:
-                type: string
-                description: The path to a .zip file containing your deployment package.
-            handlerPath:
-                type: string
-                description: The path to the handler in the deployment package.
-            memorySize:
-                type: number
-                description: The amount of memory in MB your Lambda Function can use at runtime.
-            runtime:
-                type: string
-                description: The runtime environment for the Lambda function.
-            environment:
-                type: object
-                description: The environment variables that are accessible from the function code during execution.
-                items:
-                    type: string
-            policyArns:
-                type: array
-                items:
-                    type: string
-                description: The ARNs of the policies that are attached to the Lambda function.
-        requiredInputs:
-            - codePath
-            - handlerPath
-            - runtime
-            - policyArns
-        properties:
-            name:
-                type: string
-                description: The Name of the Lambda function.
-            arn:
-                type: string
-                description: The ARN of the Lambda function.
-        required:
-            - name
-            - arn
     gotiac:index:Api:
         isComponent: true
         inputProperties:
