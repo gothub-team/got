@@ -2,12 +2,13 @@
 
 import * as gotiac from '@gothub/pulumi-gotiac-aws';
 import * as path from 'path';
-import { AWS_PROFILE, AWS_REGION, USER_POOL_ID, parseEnv } from '@gothub/typescript-util';
+import { API_DOMAIN, AWS_PROFILE, AWS_REGION, USER_POOL_ID, parseEnv } from '@gothub/typescript-util';
 
 const env = parseEnv({
     AWS_PROFILE,
     AWS_REGION,
     USER_POOL_ID,
+    API_DOMAIN,
 });
 
 export default $config({
@@ -27,6 +28,7 @@ export default $config({
     },
     async run() {
         const api = new gotiac.Api('TestApi', {
+            domainName: env.API_DOMAIN,
             userPoolId: env.USER_POOL_ID,
             runtime: 'nodejs20.x',
             codePath: path.join(process.cwd(), 'dist/lambda/zips'),

@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/gothub-team/got/packages/pulumi-gotiac-aws/provider/pkg/util"
@@ -90,7 +91,7 @@ func NewApi(ctx *pulumi.Context,
 		// MaxAge: pulumi.Int(0),
 	}
 
-	api, err := apigatewayv2.NewApi(ctx, "test-api", &apigatewayv2.ApiArgs{
+	api, err := apigatewayv2.NewApi(ctx, name+"Api", &apigatewayv2.ApiArgs{
 		ProtocolType: pulumi.String("HTTP"),
 		// FailOnWarnings: pulumi.Bool(false),
 		CorsConfiguration: corsConfiguration,
@@ -99,7 +100,7 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	stage, err := apigatewayv2.NewStage(ctx, "test-api-stage", &apigatewayv2.StageArgs{
+	stage, err := apigatewayv2.NewStage(ctx, name+"stage", &apigatewayv2.StageArgs{
 		ApiId:      api.ID(),
 		AutoDeploy: pulumi.Bool(true),
 	})
@@ -168,8 +169,12 @@ func NewApi(ctx *pulumi.Context,
 		ZoneId: hostedZoneId,
 		Aliases: route53.RecordAliasArray{
 			&route53.RecordAliasArgs{
-				Name: domainName.DomainNameConfiguration.ApplyT(func(domainNameConfiguration apigatewayv2.DomainNameDomainNameConfiguration) (*string, error) {
-					return domainNameConfiguration.TargetDomainName, nil
+				Name: domainName.DomainNameConfiguration.TargetDomainName().ApplyT(func(targetDomainName *string) (string, error) {
+					if targetDomainName != nil {
+						return *targetDomainName, nil
+					}
+
+					return "", errors.New("targetDomainName is nil")
 				}).(pulumi.StringOutput),
 				ZoneId:               hostedZoneId,
 				EvaluateTargetHealth: pulumi.Bool(false),
@@ -184,7 +189,7 @@ func NewApi(ctx *pulumi.Context,
 		ApiId:      api.ID().ToStringOutput(),
 		Stage:      stage.ID().ToStringOutput(),
 		DomainName: domainName.ID().ToStringOutput(),
-	})
+	}, pulumi.DependsOn([]pulumi.Resource{domainName, api, stage}))
 	if err != nil {
 		return nil, err
 	}

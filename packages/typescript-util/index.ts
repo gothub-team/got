@@ -60,3 +60,4 @@ export const USER_POOL_ID = z.string().describe('Cognito user pool ID that autho
 export const AWS_MAIL_REGION = z.enum(awsRegions).describe('AWS region where the mail domain is hosted.');
 export const MAIL_DOMAIN = z.string().describe('Domain of the mail server.');
 export const FILE_HOSTING_DOMAIN = z.string().describe('Domain of the file hosting service.');
+export const API_DOMAIN = z.string().describe('Domain of the got api.');
