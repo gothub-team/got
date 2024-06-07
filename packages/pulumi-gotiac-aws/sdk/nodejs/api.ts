@@ -34,10 +34,8 @@ export class Api extends pulumi.ComponentResource {
     public /*out*/ readonly endpoint!: pulumi.Output<string>;
     public /*out*/ readonly openApiEndpoint!: pulumi.Output<string>;
     public /*out*/ readonly pullEndpoint!: pulumi.Output<string>;
-    public /*out*/ readonly pullFunction!: pulumi.Output<string>;
     public /*out*/ readonly pullInvokePolicyArn!: pulumi.Output<string>;
     public /*out*/ readonly pushEndpoint!: pulumi.Output<string>;
-    public /*out*/ readonly pushFunction!: pulumi.Output<string>;
     public /*out*/ readonly pushInvokePolicyArn!: pulumi.Output<string>;
 
     /**
@@ -54,6 +52,9 @@ export class Api extends pulumi.ComponentResource {
             if ((!args || args.codePath === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'codePath'");
             }
+            if ((!args || args.domainName === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'domainName'");
+            }
             if ((!args || args.runtime === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'runtime'");
             }
@@ -68,7 +69,7 @@ export class Api extends pulumi.ComponentResource {
             resourceInputs["bucketRightsReadName"] = args ? args.bucketRightsReadName : undefined;
             resourceInputs["bucketRightsWriteName"] = args ? args.bucketRightsWriteName : undefined;
             resourceInputs["codePath"] = args ? args.codePath : undefined;
-            resourceInputs["policyArns"] = args ? args.policyArns : undefined;
+            resourceInputs["domainName"] = args ? args.domainName : undefined;
             resourceInputs["runtime"] = args ? args.runtime : undefined;
             resourceInputs["userPoolId"] = args ? args.userPoolId : undefined;
             resourceInputs["authInviteUserEndpoint"] = undefined /*out*/;
@@ -83,10 +84,8 @@ export class Api extends pulumi.ComponentResource {
             resourceInputs["endpoint"] = undefined /*out*/;
             resourceInputs["openApiEndpoint"] = undefined /*out*/;
             resourceInputs["pullEndpoint"] = undefined /*out*/;
-            resourceInputs["pullFunction"] = undefined /*out*/;
             resourceInputs["pullInvokePolicyArn"] = undefined /*out*/;
             resourceInputs["pushEndpoint"] = undefined /*out*/;
-            resourceInputs["pushFunction"] = undefined /*out*/;
             resourceInputs["pushInvokePolicyArn"] = undefined /*out*/;
         } else {
             resourceInputs["authInviteUserEndpoint"] = undefined /*out*/;
@@ -101,10 +100,8 @@ export class Api extends pulumi.ComponentResource {
             resourceInputs["endpoint"] = undefined /*out*/;
             resourceInputs["openApiEndpoint"] = undefined /*out*/;
             resourceInputs["pullEndpoint"] = undefined /*out*/;
-            resourceInputs["pullFunction"] = undefined /*out*/;
             resourceInputs["pullInvokePolicyArn"] = undefined /*out*/;
             resourceInputs["pushEndpoint"] = undefined /*out*/;
-            resourceInputs["pushFunction"] = undefined /*out*/;
             resourceInputs["pushInvokePolicyArn"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
@@ -149,9 +146,9 @@ export interface ApiArgs {
      */
     codePath: pulumi.Input<string>;
     /**
-     * The ARNs of the policies that are attached to the Lambda function.
+     * Domain name of the got api.
      */
-    policyArns?: pulumi.Input<pulumi.Input<string>[]>;
+    domainName: pulumi.Input<string>;
     /**
      * The runtime environment for the Lambda function.
      */
