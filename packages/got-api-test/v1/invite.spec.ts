@@ -53,7 +53,7 @@ beforeAll(async () => {
 });
 
 describe('invite user flow', () => {
-    describe('given user has read rights on root', () => {
+    describe('given user has admin rights on invite user view', () => {
         let email: string;
         beforeAll(async () => {
             await adminApi.push({
@@ -133,6 +133,29 @@ describe('invite user flow', () => {
                     });
                 });
             });
+        });
+    });
+
+    describe('given user has no admin rights on invite user view', () => {
+        let email: string;
+        beforeAll(async () => {
+            await adminApi.push({
+                nodes: { [INVITE_NODE_ID]: { id: INVITE_NODE_ID } },
+                edges: {
+                    [INVITE_EDGE[0]]: { [INVITE_USER_ROOT]: { [INVITE_EDGE[1]]: { [INVITE_NODE_ID]: true } } },
+                },
+                rights: {
+                    [INVITE_NODE_ID]: { user: { [env.TEST_USER_1_EMAIL]: { read: true, admin: false } } },
+                    [INVITE_USER_ROOT]: { user: { [env.TEST_USER_1_EMAIL]: { read: true } } },
+                },
+            });
+            email = `${TEST_MAIL_PREFIX}+${testId}@${TEST_MAIL_DOMAIN}`;
+        });
+
+        it('throws because of missing admin rights', async () => {
+            return expect(userApi.inviteUser({ email, id: INVITE_NODE_ID })).rejects.toEqual(
+                `User ${env.TEST_USER_1_EMAIL} has no admin rights on node ${INVITE_NODE_ID}`,
+            );
         });
     });
 });
