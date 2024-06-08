@@ -1,6 +1,6 @@
 {
     "name": "@gothub/got-api-test",
-    "version": "0.0.29",
+    "version": "0.1.1",
     "license": "MIT",
     "type": "module",
     "main": "index.ts",

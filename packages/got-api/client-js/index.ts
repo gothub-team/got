@@ -211,7 +211,7 @@ export declare interface GotApi extends GotLowApi {
      */
     inviteUser: <const TInviteUserInput extends InviteUserInput>(
         input: TInviteUserInput,
-    ) => Promise<TInviteUserInput extends LoginInput ? Session : void>;
+    ) => Promise<TInviteUserInput extends LoginInput ? Session : { message: string } | string>;
 }
 
 const isExpired = (msTimestamp?: number) => msTimestamp && msTimestamp * 1000 < Date.now() + 100000;
