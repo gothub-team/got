@@ -1,10 +1,24 @@
 import { z } from 'zod';
+import { ViewSchema } from './util/view';
 
-export const INVITE_USER_ROOT = z
+export const INVITE_USER_VALIDATION_VIEW = z
     .string()
     .optional()
-    .default('root')
-    .describe('Root node ID for which the user needs read rights in order to invite other users.');
+    .default(JSON.stringify({ root: { edges: { 'from/to': { include: { rights: true } } } } }))
+    .transform((content, ctx) => {
+        try {
+            return JSON.parse(content);
+        } catch (error) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: (error as Error).message,
+            });
+            return z.never;
+        }
+    })
+    .pipe(ViewSchema)
+    .describe('Got view that covers nodes for a user needs read rights in order to invite other users.');
+
 export const MAIL_USERNAME = z
     .string()
     .describe('IMAP mailbox username to API test endpoints that send automatic emails.');
