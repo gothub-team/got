@@ -107,8 +107,8 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	auth, err := NewUserpool(ctx, name+"-userpool", &UserpoolArgs{
-		UserPoolId: args.UserPoolId,
+	auth, err := NewUserPool(ctx, name+"-userpool", &UserPoolArgs{
+		UserPoolId: &args.UserPoolId,
 	})
 	if err != nil {
 		return nil, err
