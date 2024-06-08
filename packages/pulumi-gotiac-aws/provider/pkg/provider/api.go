@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/gothub-team/got/packages/pulumi-gotiac-aws/provider/pkg/util"
-	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/acm"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/apigatewayv2"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/cognito"
@@ -108,18 +107,11 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	// Create an ACM certificate for the domain
-	usEast1, err := aws.NewProvider(ctx, "us-east-1", &aws.ProviderArgs{
-		Region: pulumi.String("us-east-1"),
-	})
-	if err != nil {
-		return nil, err
-	}
 	// convert the domain to a string
 	certificate, err := acm.NewCertificate(ctx, name+"Certificate", &acm.CertificateArgs{
 		DomainName:       args.DomainName,
 		ValidationMethod: pulumi.String("DNS"),
-	}, pulumi.Provider(usEast1))
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +130,7 @@ func NewApi(ctx *pulumi.Context,
 			validationRecord.ResourceRecordValue().Elem(),
 		},
 		AllowOverwrite: pulumi.Bool(true),
-	}, pulumi.Provider(usEast1))
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +138,7 @@ func NewApi(ctx *pulumi.Context,
 	// Create a validation object that encapsulates the certificate and its validation DNS entry
 	certificateValidation, err := acm.NewCertificateValidation(ctx, name+"CertValidation", &acm.CertificateValidationArgs{
 		CertificateArn: certificate.Arn,
-	}, pulumi.Provider(usEast1), pulumi.DependsOn([]pulumi.Resource{certificate, validationRecordEntry}))
+	}, pulumi.DependsOn([]pulumi.Resource{certificate, validationRecordEntry}))
 	if err != nil {
 		return nil, err
 	}
@@ -173,10 +165,14 @@ func NewApi(ctx *pulumi.Context,
 					if targetDomainName != nil {
 						return *targetDomainName, nil
 					}
-
 					return "", errors.New("targetDomainName is nil")
 				}).(pulumi.StringOutput),
-				ZoneId:               hostedZoneId,
+				ZoneId: domainName.DomainNameConfiguration.HostedZoneId().ApplyT(func(hostedZoneId *string) (string, error) {
+					if hostedZoneId != nil {
+						return *hostedZoneId, nil
+					}
+					return "", errors.New("hostedZoneId is nil")
+				}).(pulumi.StringOutput),
 				EvaluateTargetHealth: pulumi.Bool(false),
 			},
 		},
