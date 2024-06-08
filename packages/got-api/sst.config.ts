@@ -2,13 +2,13 @@
 
 import * as gotiac from '@gothub/pulumi-gotiac-aws';
 import * as path from 'path';
-import { API_DOMAIN, AWS_PROFILE, AWS_REGION, USER_POOL_ID, parseEnv } from '@gothub/typescript-util';
+import { AWS_PROFILE, AWS_REGION, GOT_API_DOMAIN, USER_POOL_ID, parseEnv } from '@gothub/typescript-util';
 
 const env = parseEnv({
     AWS_PROFILE,
     AWS_REGION,
     USER_POOL_ID,
-    API_DOMAIN,
+    GOT_API_DOMAIN,
 });
 
 export default $config({
@@ -28,17 +28,17 @@ export default $config({
     },
     async run() {
         const api = new gotiac.Api('TestApi', {
-            domainName: env.API_DOMAIN,
+            domainName: env.GOT_API_DOMAIN,
             userPoolId: env.USER_POOL_ID,
             runtime: 'nodejs20.x',
             codePath: path.join(process.cwd(), 'dist/lambda/zips'),
-            bucketNodesName: `${env.AWS_PROFILE}-nodes`,
-            bucketEdgesName: `${env.AWS_PROFILE}-edges`,
-            bucketReverseEdgesName: `${env.AWS_PROFILE}-reverse-edges`,
-            bucketRightsReadName: `${env.AWS_PROFILE}-rights-read`,
-            bucketRightsWriteName: `${env.AWS_PROFILE}-rights-write`,
-            bucketRightsAdminName: `${env.AWS_PROFILE}-rights-admin`,
-            bucketRightsOwnerName: `${env.AWS_PROFILE}-owners`,
+            // bucketNodesName: `${env.AWS_PROFILE}-nodes`,
+            // bucketEdgesName: `${env.AWS_PROFILE}-edges`,
+            // bucketReverseEdgesName: `${env.AWS_PROFILE}-reverse-edges`,
+            // bucketRightsReadName: `${env.AWS_PROFILE}-rights-read`,
+            // bucketRightsWriteName: `${env.AWS_PROFILE}-rights-write`,
+            // bucketRightsAdminName: `${env.AWS_PROFILE}-rights-admin`,
+            // bucketRightsOwnerName: `${env.AWS_PROFILE}-owners`,
         });
         return api;
     },

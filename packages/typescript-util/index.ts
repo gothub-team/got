@@ -55,9 +55,9 @@ export const awsRegions = [
 
 export const AWS_REGION = z.enum(awsRegions).describe('Main AWS region where resources are deployed.');
 export const AWS_PROFILE = z.string().describe('AWS profile to use for deployment.');
+export const GOT_API_DOMAIN = z.string().describe('Domain where the got API should be deployed.');
 export const GOT_API_URL = z.string().endsWith('/').describe('URL of the API Gateway endpoint for the got API.');
 export const USER_POOL_ID = z.string().describe('Cognito user pool ID that authorizes API requests.');
 export const AWS_MAIL_REGION = z.enum(awsRegions).describe('AWS region where the mail domain is hosted.');
 export const MAIL_DOMAIN = z.string().describe('Domain of the mail server.');
 export const FILE_HOSTING_DOMAIN = z.string().describe('Domain of the file hosting service.');
-export const API_DOMAIN = z.string().describe('Domain of the got api.');

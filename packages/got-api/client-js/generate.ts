@@ -2,7 +2,11 @@ import * as R from 'ramda';
 import * as fs from 'fs';
 import { quicktype, InputData, JSONSchemaInput, FetchingJSONSchemaStore } from 'quicktype-core';
 import type { OpenAPIV3_1 } from 'openapi-types';
-import { env } from '../env';
+import { GOT_API_URL, parseEnv } from '@gothub/typescript-util';
+
+const env = parseEnv({
+    GOT_API_URL,
+});
 
 type Operation = {
     method: string;
