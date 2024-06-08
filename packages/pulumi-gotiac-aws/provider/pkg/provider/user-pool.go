@@ -6,13 +6,13 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-// The set of arguments for creating a Userpool component resource.
-type UserpoolArgs struct {
-	UserPoolId pulumi.IDInput `pulumi:"userPoolId"`
+// The set of arguments for creating a UserPool component resource.
+type UserPoolArgs struct {
+	UserPoolId *pulumi.IDInput `pulumi:"userPoolId"`
 }
 
-// The Userpool component resource.
-type Userpool struct {
+// The UserPool component resource.
+type UserPool struct {
 	pulumi.ResourceState
 	UserPool           cognito.UserPoolOutput       `pulumi:"userPool"`
 	UserPoolId         pulumi.StringOutput          `pulumi:"userPoolId"`
@@ -23,15 +23,15 @@ type Userpool struct {
 	AuthAdminPolicyArn pulumi.StringOutput          `pulumi:"authAdminPolicyArn"`
 }
 
-// NewUserpool creates a new Userpool component resource.
-func NewUserpool(ctx *pulumi.Context,
-	name string, args *UserpoolArgs, opts ...pulumi.ResourceOption) (*Userpool, error) {
+// NewUserPool creates a new UserPool component resource.
+func NewUserPool(ctx *pulumi.Context,
+	name string, args *UserPoolArgs, opts ...pulumi.ResourceOption) (*UserPool, error) {
 	if args == nil {
-		args = &UserpoolArgs{}
+		args = &UserPoolArgs{}
 	}
 
-	component := &Userpool{}
-	err := ctx.RegisterComponentResource("gotiac:index:Userpool", name, component, opts...)
+	component := &UserPool{}
+	err := ctx.RegisterComponentResource("gotiac:index:UserPool", name, component, opts...)
 	if err != nil {
 		return nil, err
 	}
