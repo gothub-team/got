@@ -17,6 +17,7 @@ import {
 import { createUserApi } from './shared';
 
 export const match6Digits = (str: string) => str.match(/[0-9]{6}/)?.[0];
+export const matchPassword = (str: string) => str.match(/password: (.+)$/)?.[1];
 
 const env = parseEnv({
     GOT_API_URL,
@@ -77,6 +78,7 @@ describe('invite user flow', () => {
         });
 
         describe('invitation mail', () => {
+            let temporaryPassword: string;
             beforeAll(async () => {
                 mailClient = createMailClient({
                     host: env.MAIL_IMAP_SERVER,
@@ -90,10 +92,45 @@ describe('invite user flow', () => {
 
             describe('default', () => {
                 it('receives invitation mail', async () => {
-                    const emailPromise = mailClient.receiveMailTo(email);
-                    const emailBody = (await emailPromise).replaceAll('=\r\n', '');
+                    const invitationMailText = await mailClient.receiveMailTo(email);
+                    const emailBody = invitationMailText.replaceAll('=\r\n', '');
+                    console.log(emailBody);
+                    temporaryPassword = matchPassword(emailBody) || '';
+                    console.log(temporaryPassword);
+                    expect(temporaryPassword).toBeTruthy();
                     expect(emailBody).toContain('You have been invited.');
                     expect(emailBody).toContain('Please log in with your temporary password: ');
+                });
+            });
+
+            describe('login with temporary password', () => {
+                it.todo('throws PasswordChangeRequiredError', async () => {
+                    return expect(userApi.login({ email, password: temporaryPassword })).rejects.toThrow({
+                        name: 'PasswordResetRequiredError',
+                        message: 'The password must be reset.',
+                    });
+                });
+            });
+
+            describe('password reset', () => {
+                let newPassword: string;
+                describe('response', () => {
+                    it('resets password successfully and returns session', async () => {
+                        newPassword = `${crypto.randomBytes(8).toString('hex')}-pw-1`;
+                        return expect(
+                            userApi.resetPasswordVerify({
+                                email,
+                                oldPassword: temporaryPassword,
+                                password: newPassword,
+                            }),
+                        ).resolves.toHaveProperty('idToken');
+                    });
+                });
+
+                describe('login with new password', () => {
+                    it('resolves', async () => {
+                        return expect(userApi.login({ email, password: newPassword })).resolves.toBeUndefined();
+                    });
                 });
             });
         });
