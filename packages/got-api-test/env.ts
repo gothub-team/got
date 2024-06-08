@@ -17,7 +17,7 @@ export const INVITE_USER_VALIDATION_VIEW = z
         }
     })
     .pipe(ViewSchema)
-    .describe('Got view that covers nodes for a user needs read rights in order to invite other users.');
+    .describe('got view that covers nodes for a user needs read rights in order to invite other users.');
 
 export const MAIL_USERNAME = z
     .string()

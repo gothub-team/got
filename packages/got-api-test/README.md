@@ -74,12 +74,12 @@ tests.
 
 Test suites will fail with a detailed description of the variables that need to be set.
 
+### Environment Variables
+
 Here is a breakdown of the env vars and how you should set them:
 
 `GOT_API_URL`: This is the main endpoint of your API instance. In our case we run tests against
 `https://api.dev.gothub.io/`
-
-### Auth
 
 `MAIL_USERNAME`: An IMAP mailbox username that receives mails for your test users. e.g. `info@your-domain.com`. The test
 suites create email addresses like `info+test-123@your-domain.com` based on this env variable so make sure your mail
@@ -92,13 +92,14 @@ server supports the plus-syntax. The main username will still be used to receive
 
 `MAIL_IMAP_SERVER`: The hostname of the IMAP server
 
-`TEST_USER_1_EMAIL`: An existing test user. You can either create them manually via cognito (in case you don't have an
-own implementation of the auth provider) or leverage our IaC components as in [Test Users](#test-users).
+`TEST_ADMIN_EMAIL`: Admin user email that exists before the test suites have been executed. The user should have admin
+access for the deployed API. Either create it manually or see below to deploy test users via our IaC components
+([Test Users](#test-users)).
 
-### Other Test Suites
+`TEST_ADMIN_PW`: Password for the admin user.
 
-`TEST_USER_1_EMAIL`: As above. First test user email that exists before the test suites have been executed. Either
-create it manually or see below to deploy test users via our IaC components ([Test Users](#test-users)).
+`TEST_USER_1_EMAIL`: First test user email that exists before the test suites have been executed. Either create it
+manually or see below to deploy test users via our IaC components ([Test Users](#test-users)).
 
 `TEST_USER_1_PW`: Password for the first test user.
 
@@ -106,6 +107,11 @@ create it manually or see below to deploy test users via our IaC components ([Te
 manually or see below to deploy test users via our IaC components ([Test Users](#test-users)).
 
 `TEST_USER_2_PW`: Password for the second test user.
+
+`INVITE_USER_VALIDATION_VIEW`: `got` view that covers nodes for a user needs read rights in order to invite other users.
+Defaults to `'{"root":{"edges":{"from/to":{"include":{"rights":true}}}}}'` The user that wants to invite other users
+needs read rights on the root node ID (`root` by default) and read and admin rights on the sub node (along `from/to`
+edge by default)
 
 ### Deploying Test Support Resources
 
