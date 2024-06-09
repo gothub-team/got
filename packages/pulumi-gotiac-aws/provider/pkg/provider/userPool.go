@@ -36,7 +36,7 @@ func NewUserPool(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	userPool, err := cognito.GetUserPool(ctx, name, args.UserPoolId, &cognito.UserPoolState{})
+	userPool, err := cognito.GetUserPool(ctx, name, *args.UserPoolId, &cognito.UserPoolState{})
 	if err != nil {
 		return nil, err
 	}
