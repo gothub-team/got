@@ -1,6 +1,7 @@
-VERSION         := 0.1.5
+VERSION         := 0.1.7
 
 PACK            := gotiac
+PACKDIR         := sdk
 PROJECT         := github.com/gothub-team/got/packages/pulumi-${PACK}-aws
 
 PROVIDER        := pulumi-resource-${PACK}
@@ -59,24 +60,25 @@ install_dotnet_sdk:: build_dotnet_sdk
 
 gen_nodejs_sdk::
 	rm -rf sdk/nodejs
-	cd provider/cmd/${CODEGEN} && go run . nodejs ../../../sdk/nodejs ${SCHEMA_PATH}
+	pulumi package gen-sdk $(WORKING_DIR)/bin/$(PROVIDER) --language nodejs
 
 build_nodejs_sdk:: gen_nodejs_sdk
-	cd sdk/nodejs/ && \
+	cd ${PACKDIR}/nodejs/ && \
 		cp ../../tsconfig.template.json tsconfig.json && \
 		jq '. + {trustedDependencies: ["protobufjs"]}' package.json > temp.json && mv temp.json package.json && \
+		jq '. + {main: "index.js"}' package.json > temp.json && mv temp.json package.json && \
 		bun install && \
 		git checkout HEAD -- ../../../../bun.lockb && \
 		bun x tsc --version && \
-		bun x tsc && \
+ 		bun x tsc && \
 		cp ../../README.md ../../LICENSE package.json ./bin/ && \
-		sed -i.bak -e "s/\$${VERSION}/$(VERSION)/g" ./bin/package.json && \
+		sed -i.bak 's/$${VERSION}/$(VERSION)/g' bin/package.json && \
+		jq '. + {main: "bin/index.js"}' package.json > temp.json && mv temp.json package.json && \
 		rm ./bin/package.json.bak
-		bun run prettier --write ./sdk/nodejs/**/*.ts
+		bun run prettier --write ./**/*.ts
 
 install_nodejs_sdk:: build_nodejs_sdk
 	bun link --cwd ${WORKING_DIR}/sdk/nodejs/bin
-
 
 # Python SDK
 

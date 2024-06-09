@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/pulumi/pulumi/master/pkg/codegen/schema/pulumi.json
 ---
 name: gotiac
-pluginDownloadURL: github://api.github.com/gothub-team
+pluginDownloadURL: github://api.github.com/gothub-team/got
 resources:
     gotiac:index:MailDomain:
         isComponent: true
@@ -128,49 +128,12 @@ resources:
                     The temporary password of the test user. Make sure to destroy the test user after each test run.
         required:
             - password
-    gotiac:index:Lambda:
-        isComponent: true
-        inputProperties:
-            codePath:
-                type: string
-                description: The path to a .zip file containing your deployment package.
-            handlerPath:
-                type: string
-                description: The path to the handler in the deployment package.
-            memorySize:
-                type: number
-                description: The amount of memory in MB your Lambda Function can use at runtime.
-            runtime:
-                type: string
-                description: The runtime environment for the Lambda function.
-            environment:
-                type: object
-                description: The environment variables that are accessible from the function code during execution.
-                items:
-                    type: string
-            policyArns:
-                type: array
-                items:
-                    type: string
-                description: The ARNs of the policies that are attached to the Lambda function.
-        requiredInputs:
-            - codePath
-            - handlerPath
-            - runtime
-            - policyArns
-        properties:
-            name:
-                type: string
-                description: The Name of the Lambda function.
-            arn:
-                type: string
-                description: The ARN of the Lambda function.
-        required:
-            - name
-            - arn
     gotiac:index:Api:
         isComponent: true
         inputProperties:
+            domainName:
+                type: string
+                description: Domain name of the got api.
             userPoolId:
                 type: string
                 description: ID of the user pool.
@@ -180,11 +143,6 @@ resources:
             runtime:
                 type: string
                 description: The runtime environment for the Lambda function.
-            policyArns:
-                type: array
-                items:
-                    type: string
-                description: The ARNs of the policies that are attached to the Lambda function.
             bucketNodesName:
                 type: string
                 description: The Name of the existing bucket for node storage.
@@ -207,6 +165,7 @@ resources:
                 type: string
                 description: The Name of the existing bucket for owner right storage.
         requiredInputs:
+            - domainName
             - userPoolId
             - codePath
             - runtime
@@ -214,11 +173,7 @@ resources:
             endpoint:
                 type: string
                 description: The endpoint of the API.
-            pullFunction:
-                type: string
             pullEndpoint:
-                type: string
-            pushFunction:
                 type: string
             pushEndpoint:
                 type: string
@@ -248,9 +203,7 @@ resources:
                 type: string
         required:
             - endpoint
-            - pullFunction
             - pullEndpoint
-            - pushFunction
             - pushEndpoint
             - pullInvokePolicyArn
             - pushInvokePolicyArn
