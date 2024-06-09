@@ -1,41 +1,41 @@
 package provider
 
 import (
+	"errors"
 	"fmt"
 
+	"github.com/gothub-team/got/packages/pulumi-gotiac-aws/provider/pkg/util"
+	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/acm"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/apigatewayv2"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/cognito"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/iam"
+	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/route53"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
 // The set of arguments for creating a Lambda component resource.
 type ApiArgs struct {
-	// The APIs execution ARN
-	UserPoolId pulumi.IDInput `pulumi:"userPoolId"`
+	DomainName pulumi.StringInput `pulumi:"domainName"`
+	UserPoolId pulumi.IDInput     `pulumi:"userPoolId"`
 	// The the path to the .zip for the lambda code
 	CodePath pulumi.StringInput `pulumi:"codePath"`
 	// The lambda runtime
-	Runtime pulumi.StringInput `pulumi:"runtime"`
-	// The array of policy arns that should be attachen to the lambda function role
-	PolicyArns             pulumi.StringArrayInput `pulumi:"policyArns"`
-	BucketNodesName        *pulumi.StringInput     `pulumi:"bucketNodesName"`
-	BucketEdgesName        *pulumi.StringInput     `pulumi:"bucketEdgesName"`
-	BucketReverseEdgesName *pulumi.StringInput     `pulumi:"bucketReverseEdgesName"`
-	BucketRightsReadName   *pulumi.StringInput     `pulumi:"bucketRightsReadName"`
-	BucketRightsWriteName  *pulumi.StringInput     `pulumi:"bucketRightsWriteName"`
-	BucketRightsAdminName  *pulumi.StringInput     `pulumi:"bucketRightsAdminName"`
-	BucketRightsOwnerName  *pulumi.StringInput     `pulumi:"bucketRightsOwnerName"`
+	Runtime                pulumi.StringInput  `pulumi:"runtime"`
+	BucketNodesName        *pulumi.StringInput `pulumi:"bucketNodesName"`
+	BucketEdgesName        *pulumi.StringInput `pulumi:"bucketEdgesName"`
+	BucketReverseEdgesName *pulumi.StringInput `pulumi:"bucketReverseEdgesName"`
+	BucketRightsReadName   *pulumi.StringInput `pulumi:"bucketRightsReadName"`
+	BucketRightsWriteName  *pulumi.StringInput `pulumi:"bucketRightsWriteName"`
+	BucketRightsAdminName  *pulumi.StringInput `pulumi:"bucketRightsAdminName"`
+	BucketRightsOwnerName  *pulumi.StringInput `pulumi:"bucketRightsOwnerName"`
 }
 
 // The Api component resource.
 type Api struct {
 	pulumi.ResourceState
 	// Route apigatewayv2.Route `pulumi:"route"`
-	Endpoint pulumi.StringOutput `pulumi:"endpoint"`
-	// PullFunction                     lambda.FunctionOutput `pulumi:"pullFunction"`
-	PullEndpoint pulumi.StringOutput `pulumi:"pullEndpoint"`
-	// PushFunction                     lambda.FunctionOutput `pulumi:"pushFunction"`
+	Endpoint                         pulumi.StringOutput `pulumi:"endpoint"`
+	PullEndpoint                     pulumi.StringOutput `pulumi:"pullEndpoint"`
 	PushEndpoint                     pulumi.StringOutput `pulumi:"pushEndpoint"`
 	PullInvokePolicyArn              pulumi.StringOutput `pulumi:"pullInvokePolicyArn"`
 	PushInvokePolicyArn              pulumi.StringOutput `pulumi:"pushInvokePolicyArn"`
@@ -90,7 +90,7 @@ func NewApi(ctx *pulumi.Context,
 		// MaxAge: pulumi.Int(0),
 	}
 
-	api, err := apigatewayv2.NewApi(ctx, "test-api", &apigatewayv2.ApiArgs{
+	api, err := apigatewayv2.NewApi(ctx, name+"Api", &apigatewayv2.ApiArgs{
 		ProtocolType: pulumi.String("HTTP"),
 		// FailOnWarnings: pulumi.Bool(false),
 		CorsConfiguration: corsConfiguration,
@@ -99,10 +99,93 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	stage, err := apigatewayv2.NewStage(ctx, "test-api-stage", &apigatewayv2.StageArgs{
+	stage, err := apigatewayv2.NewStage(ctx, name+"stage", &apigatewayv2.StageArgs{
 		ApiId:      api.ID(),
 		AutoDeploy: pulumi.Bool(true),
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	// convert the domain to a string
+	certificate, err := acm.NewCertificate(ctx, name+"Certificate", &acm.CertificateArgs{
+		DomainName:       args.DomainName,
+		ValidationMethod: pulumi.String("DNS"),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Look up the hosted zone for the domain
+	hostedZoneId := util.LookUpHostedZone(ctx, args.DomainName)
+	// Use the Route 53 HostedZone ID and Record Name/Type from the certificate's DomainValidationOptions to create a DNS record
+	validationRecord := certificate.DomainValidationOptions.Index(pulumi.Int(0))
+	// Create a Route 53 record set for the domain
+	validationRecordEntry, err := route53.NewRecord(ctx, name+"CertificateValidationRecord", &route53.RecordArgs{
+		Name:   validationRecord.ResourceRecordName().Elem(),
+		Type:   validationRecord.ResourceRecordType().Elem(),
+		ZoneId: hostedZoneId,
+		Ttl:    pulumi.Int(300),
+		Records: pulumi.StringArray{
+			validationRecord.ResourceRecordValue().Elem(),
+		},
+		AllowOverwrite: pulumi.Bool(true),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a validation object that encapsulates the certificate and its validation DNS entry
+	certificateValidation, err := acm.NewCertificateValidation(ctx, name+"CertValidation", &acm.CertificateValidationArgs{
+		CertificateArn: certificate.Arn,
+	}, pulumi.DependsOn([]pulumi.Resource{certificate, validationRecordEntry}))
+	if err != nil {
+		return nil, err
+	}
+
+	domainName, err := apigatewayv2.NewDomainName(ctx, name+"DomainName", &apigatewayv2.DomainNameArgs{
+		DomainName: args.DomainName,
+		DomainNameConfiguration: &apigatewayv2.DomainNameDomainNameConfigurationArgs{
+			CertificateArn: certificate.Arn,
+			EndpointType:   pulumi.String("REGIONAL"),
+			SecurityPolicy: pulumi.String("TLS_1_2"),
+		},
+	}, pulumi.DependsOn([]pulumi.Resource{certificateValidation}))
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = route53.NewRecord(ctx, name+"DomainNameRecord", &route53.RecordArgs{
+		Name:   domainName.DomainName,
+		Type:   pulumi.String(route53.RecordTypeA),
+		ZoneId: hostedZoneId,
+		Aliases: route53.RecordAliasArray{
+			&route53.RecordAliasArgs{
+				Name: domainName.DomainNameConfiguration.TargetDomainName().ApplyT(func(targetDomainName *string) (string, error) {
+					if targetDomainName != nil {
+						return *targetDomainName, nil
+					}
+					return "", errors.New("targetDomainName is nil")
+				}).(pulumi.StringOutput),
+				ZoneId: domainName.DomainNameConfiguration.HostedZoneId().ApplyT(func(hostedZoneId *string) (string, error) {
+					if hostedZoneId != nil {
+						return *hostedZoneId, nil
+					}
+					return "", errors.New("hostedZoneId is nil")
+				}).(pulumi.StringOutput),
+				EvaluateTargetHealth: pulumi.Bool(false),
+			},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = apigatewayv2.NewApiMapping(ctx, name+"ApiMapping", &apigatewayv2.ApiMappingArgs{
+		ApiId:      api.ID().ToStringOutput(),
+		Stage:      stage.ID().ToStringOutput(),
+		DomainName: domainName.ID().ToStringOutput(),
+	}, pulumi.DependsOn([]pulumi.Resource{domainName, api, stage}))
 	if err != nil {
 		return nil, err
 	}
@@ -473,7 +556,7 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	component.Endpoint = stage.InvokeUrl
+	component.Endpoint = args.DomainName.ToStringOutput()
 	// component.PullFunction = pullLambda.Function
 	component.PullEndpoint = pullApiLambda.Route.RouteKey()
 	// component.PushFunction = pushLambda.Function
@@ -492,7 +575,7 @@ func NewApi(ctx *pulumi.Context,
 	component.OpenApiEndpoint = OpenApiApiLambda.Route.RouteKey()
 
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
-		"endpoint":     stage.InvokeUrl,
+		"endpoint":     args.DomainName,
 		"pullFunction": pullLambda.Function,
 		"pullEndpoint": pullApiLambda.Route.RouteKey(),
 	}); err != nil {
