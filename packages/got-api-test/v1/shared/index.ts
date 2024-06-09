@@ -6,6 +6,7 @@ const env = parseEnv({
 });
 
 export const createUserApi = async (email: string, password: string, adminMode: boolean = false) => {
+    console.log(env.GOT_API_URL);
     const api = createApi({
         host: env.GOT_API_URL,
         adminMode,

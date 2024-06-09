@@ -441,6 +441,7 @@ func NewApi(ctx *pulumi.Context,
 		"USER_POOL_ID":                userPool.ID(),
 		"CLIENT_ID":                   userPoolClient.ID(),
 		"INVITE_USER_VALIDATION_VIEW": inviteUserValidationView,
+		"PULL_LAMBDA_NAME":            pullLambda.Name,
 	}
 
 	AuthLoginInitApiLambda, err := NewApiLambda(ctx, name+"AuthLoginInit", &ApiLambdaArgs{

@@ -56,8 +56,12 @@ describe('invite user flow', () => {
     describe('given user has admin rights on invite user view', () => {
         let email: string;
         beforeAll(async () => {
-            await adminApi.push({
-                nodes: { [INVITE_NODE_ID]: { id: INVITE_NODE_ID } },
+            console.log(env);
+            const b = await adminApi.push({
+                nodes: {
+                    [INVITE_NODE_ID]: { id: INVITE_NODE_ID },
+                    [INVITE_USER_ROOT]: { id: INVITE_USER_ROOT },
+                },
                 edges: {
                     [INVITE_EDGE[0]]: { [INVITE_USER_ROOT]: { [INVITE_EDGE[1]]: { [INVITE_NODE_ID]: true } } },
                 },
@@ -66,6 +70,9 @@ describe('invite user flow', () => {
                     [INVITE_USER_ROOT]: { user: { [env.TEST_USER_1_EMAIL]: { read: true } } },
                 },
             });
+            console.log(JSON.stringify(b));
+            const a = await userApi.pull(env.INVITE_USER_VALIDATION_VIEW);
+            console.log(JSON.stringify(a));
             email = `${TEST_MAIL_PREFIX}+${testId}@${TEST_MAIL_DOMAIN}`;
         });
 

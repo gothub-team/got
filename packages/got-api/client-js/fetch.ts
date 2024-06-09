@@ -37,6 +37,7 @@ export const post = async <D, R>(
     }
     const text = await response.text();
     try {
+        console.log(text);
         return Promise.reject(JSON.parse(text));
     } catch (error) {
         return Promise.reject(text);

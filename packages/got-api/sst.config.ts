@@ -3,13 +3,12 @@
 import * as gotiac from '@gothub/pulumi-gotiac-aws';
 import * as path from 'path';
 import * as fs from 'fs';
-import { AWS_PROFILE, AWS_REGION, GOT_API_DOMAIN, USER_POOL_ID, parseEnv } from '@gothub/typescript-util';
+import { AWS_PROFILE, AWS_REGION, GOT_API_DOMAIN, parseEnv } from '@gothub/typescript-util';
 import { TEST_ADMIN_EMAIL, TEST_USER_1_EMAIL, TEST_USER_2_EMAIL } from '@gothub/got-api-test/env';
 
 const env = parseEnv({
     AWS_PROFILE,
     AWS_REGION,
-    USER_POOL_ID,
     GOT_API_DOMAIN,
     TEST_ADMIN_EMAIL,
     TEST_USER_1_EMAIL,
