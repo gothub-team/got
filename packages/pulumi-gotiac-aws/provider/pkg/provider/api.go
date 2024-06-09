@@ -20,14 +20,15 @@ type ApiArgs struct {
 	// The the path to the .zip for the lambda code
 	CodePath pulumi.StringInput `pulumi:"codePath"`
 	// The lambda runtime
-	Runtime                pulumi.StringInput  `pulumi:"runtime"`
-	BucketNodesName        *pulumi.StringInput `pulumi:"bucketNodesName"`
-	BucketEdgesName        *pulumi.StringInput `pulumi:"bucketEdgesName"`
-	BucketReverseEdgesName *pulumi.StringInput `pulumi:"bucketReverseEdgesName"`
-	BucketRightsReadName   *pulumi.StringInput `pulumi:"bucketRightsReadName"`
-	BucketRightsWriteName  *pulumi.StringInput `pulumi:"bucketRightsWriteName"`
-	BucketRightsAdminName  *pulumi.StringInput `pulumi:"bucketRightsAdminName"`
-	BucketRightsOwnerName  *pulumi.StringInput `pulumi:"bucketRightsOwnerName"`
+	Runtime                  pulumi.StringInput  `pulumi:"runtime"`
+	BucketNodesName          *pulumi.StringInput `pulumi:"bucketNodesName"`
+	BucketEdgesName          *pulumi.StringInput `pulumi:"bucketEdgesName"`
+	BucketReverseEdgesName   *pulumi.StringInput `pulumi:"bucketReverseEdgesName"`
+	BucketRightsReadName     *pulumi.StringInput `pulumi:"bucketRightsReadName"`
+	BucketRightsWriteName    *pulumi.StringInput `pulumi:"bucketRightsWriteName"`
+	BucketRightsAdminName    *pulumi.StringInput `pulumi:"bucketRightsAdminName"`
+	BucketRightsOwnerName    *pulumi.StringInput `pulumi:"bucketRightsOwnerName"`
+	InviteUserValidationView *pulumi.StringInput `pulumi:"inviteUserValidationView"`
 }
 
 // The Api component resource.
@@ -428,10 +429,18 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	var inviteUserValidationView pulumi.StringOutput
+	if args.InviteUserValidationView != nil {
+		inviteUserValidationView = (*args.InviteUserValidationView).ToStringOutput()
+	} else {
+		inviteUserValidationView = pulumi.String("{\"root\":{\"edges\":{\"from/to\":{\"include\":{\"rights\":true}}}}}").ToStringOutput()
+	}
+
 	AuthMem := pulumi.Int(512)
 	AuthEnv := pulumi.StringMap{
-		"USER_POOL_ID": userPool.ID(),
-		"CLIENT_ID":    userPoolClient.ID(),
+		"USER_POOL_ID":                userPool.ID(),
+		"CLIENT_ID":                   userPoolClient.ID(),
+		"INVITE_USER_VALIDATION_VIEW": inviteUserValidationView,
 	}
 
 	AuthLoginInitApiLambda, err := NewApiLambda(ctx, name+"AuthLoginInit", &ApiLambdaArgs{

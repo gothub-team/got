@@ -172,6 +172,9 @@ resources:
             bucketRightsOwnerName:
                 type: string
                 description: The Name of the existing bucket for owner right storage.
+            inviteUserValidationView:
+                type: string
+                description: got view that covers nodes for a user needs read rights in order to invite other users.
         requiredInputs:
             - domainName
             - userPoolId
