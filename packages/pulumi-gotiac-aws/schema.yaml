@@ -109,6 +109,14 @@ resources:
             - url
             - privateKeyParameterName
             - privateKeyId
+    gotiac:index:UserPool:
+        isComponent: true
+        properties:
+            userPoolId:
+                type: string
+                description: The ID of the cognito user pool that was created.
+        required:
+            - userPoolId
     gotiac:index:TestUser:
         isComponent: true
         inputProperties:
