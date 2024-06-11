@@ -8,11 +8,10 @@ import { AWS_REGION } from './config.js';
 
 const client = new ECSClient({
     region: AWS_REGION,
-    signatureVersion: 'v4',
     apiVersion: 'latest',
 });
 
-export const ecsListTasks = async (clusterName, serviceName) => {
+export const ecsListTasks = async (clusterName: string, serviceName: string) => {
     const command = new ListTasksCommand({
         cluster: clusterName,
         serviceName,
@@ -28,7 +27,7 @@ export const ecsListTasks = async (clusterName, serviceName) => {
     }
 };
 
-export const ecsDescribeTasks = async (clusterName, taskArns) => {
+export const ecsDescribeTasks = async (clusterName: string, taskArns: string[]) => {
     const command = new DescribeTasksCommand({
         cluster: clusterName,
         tasks: taskArns,
@@ -43,7 +42,7 @@ export const ecsDescribeTasks = async (clusterName, taskArns) => {
     }
 };
 
-export const ecsDescribeContainerInstances = async (clusterName, instanceArns) => {
+export const ecsDescribeContainerInstances = async (clusterName: string, instanceArns: string[]) => {
     const command = new DescribeContainerInstancesCommand({
         cluster: clusterName,
         containerInstances: instanceArns,
