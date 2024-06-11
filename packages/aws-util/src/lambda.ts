@@ -8,7 +8,7 @@ const client = new LambdaClient({
 
 const Decoder = new TextDecoder();
 
-export const invokeLambda = async (functionName, body) => {
+export const invokeLambda = async <TBody, TRes>(functionName: string, body: TBody) => {
     const command = new InvokeCommand({
         FunctionName: functionName,
         Payload: JSON.stringify({ body }),
@@ -20,14 +20,15 @@ export const invokeLambda = async (functionName, body) => {
             return Promise.reject(JSON.parse(Decoder.decode(results.Payload)));
         }
 
-        return JSON.parse(Decoder.decode(results.Payload));
+        return JSON.parse(Decoder.decode(results.Payload)) as TRes;
     } catch (err) {
+        // TODO: why not pass the error up?
         console.log(err);
         return undefined;
     }
 };
 
-export const invokeLambdaEvent = async (functionName, body) => {
+export const invokeLambdaEvent = async <TBody>(functionName: string, body: TBody) => {
     const command = new InvokeCommand({
         FunctionName: functionName,
         Payload: JSON.stringify({ body }),
