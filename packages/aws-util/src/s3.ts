@@ -1,6 +1,3 @@
-import * as RA from 'ramda-adjunct';
-import * as R from 'ramda';
-import { Observable } from 'rxjs';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import {
     CompleteMultipartUploadCommand,
@@ -14,24 +11,22 @@ import {
     UploadPartCommand,
 } from '@aws-sdk/client-s3';
 import { AWS_REGION, CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER, MEDIA_DOMAIN } from './config.js';
-import { promiseAll } from './util.js';
 import { signUrl } from './cloudfront.js';
 
 const client = new S3Client({
     region: AWS_REGION,
-    signatureVersion: 'v4',
     apiVersion: 'latest',
 });
 
-const streamToBuffer = (stream) =>
+const streamToBuffer = (stream): Promise<Buffer> =>
     new Promise((resolve, reject) => {
-        const chunks = [];
+        const chunks: Uint8Array = new Uint8Array();
         stream.on('data', (chunk) => chunks.push(chunk));
         stream.on('error', reject);
         stream.on('end', () => resolve(Buffer.concat(chunks)));
     });
 
-export const s3put = async (bucket, key, data) => {
+export const s3put = async (bucket: string, key: string, data: unknown) => {
     const Body = data ? Buffer.from(JSON.stringify(data)) : undefined;
     const command = new PutObjectCommand({
         Bucket: bucket,
@@ -46,7 +41,7 @@ export const s3put = async (bucket, key, data) => {
         return undefined;
     }
 };
-export const s3putRaw = async (bucket, key, data, { contentType }) => {
+export const s3putRaw = async (bucket: string, key: string, data: Buffer, { contentType }: { contentType: string }) => {
     const command = new PutObjectCommand({
         Bucket: bucket,
         Key: key,
@@ -61,7 +56,7 @@ export const s3putRaw = async (bucket, key, data, { contentType }) => {
         return undefined;
     }
 };
-export const s3putSignedUrl = async (bucket, key, { contentType }) => {
+export const s3putSignedUrl = async (bucket: string, key: string, { contentType }: { contentType: string }) => {
     const command = new PutObjectCommand({
         Bucket: bucket,
         Key: key,
@@ -76,7 +71,11 @@ export const s3putSignedUrl = async (bucket, key, { contentType }) => {
     }
 };
 
-export const s3createMultipartUpload = async (bucket, key, { contentType }) => {
+export const s3createMultipartUpload = async (
+    bucket: string,
+    key: string,
+    { contentType }: { contentType: string },
+) => {
     const command = new CreateMultipartUploadCommand({
         Bucket: bucket,
         Key: key,
@@ -92,11 +91,14 @@ export const s3createMultipartUpload = async (bucket, key, { contentType }) => {
     }
 };
 
-export const s3uploadPartSignedUrl = async (bucket, key, { contentType, uploadId, partNumber }) => {
+export const s3uploadPartSignedUrl = async (
+    bucket: string,
+    key: string,
+    { uploadId, partNumber }: { uploadId: string; partNumber: number },
+) => {
     const command = new UploadPartCommand({
         Bucket: bucket,
         Key: key,
-        ContentType: contentType,
         UploadId: uploadId,
         PartNumber: partNumber,
     });
@@ -108,21 +110,30 @@ export const s3uploadPartSignedUrl = async (bucket, key, { contentType, uploadId
     }
 };
 
-export const s3putMultipartSignedUrls = async (bucket, key, { contentType, fileSize, partSize }) => {
+export const s3putMultipartSignedUrls = async (
+    bucket: string,
+    key: string,
+    { contentType, fileSize, partSize }: { contentType: string; fileSize: number; partSize: number },
+) => {
     const uploadId = await s3createMultipartUpload(bucket, key, { contentType });
 
+    if (!uploadId) {
+        console.error('Could not create multipart upload.');
+        return undefined;
+    }
+
     try {
-        const uploadUrls = await R.compose(
-            promiseAll,
-            R.map((partNumber) =>
-                CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER
-                    ? signUrl(`https://${MEDIA_DOMAIN}/${key}?partNumber=${partNumber}&uploadId=${uploadId || ''}`)
-                    : s3uploadPartSignedUrl(bucket, key, { contentType, uploadId, partNumber }),
-            ),
-            R.range(1),
-            R.add(1),
-            Math.ceil,
-        )(fileSize / partSize);
+        const promises = [];
+        for (let i = 0; i <= Math.ceil(fileSize / partSize); i++) {
+            if (CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER) {
+                promises.push(signUrl(`https://${MEDIA_DOMAIN}/${key}?partNumber=${i + 1}&uploadId=${uploadId || ''}`));
+            } else {
+                promises.push(s3uploadPartSignedUrl(bucket, key, { uploadId, partNumber: i + 1 }));
+            }
+        }
+
+        const uploadUrls = await Promise.all(promises);
+
         return { uploadId, uploadUrls };
     } catch (err) {
         console.error(err);
@@ -130,7 +141,11 @@ export const s3putMultipartSignedUrls = async (bucket, key, { contentType, fileS
     }
 };
 
-export const s3completeMultipartUpload = async (bucket, key, { uploadId, partEtags }) => {
+export const s3completeMultipartUpload = async (
+    bucket: string,
+    key: string,
+    { uploadId, partEtags }: { uploadId: string; partEtags: string[] },
+) => {
     const command = new CompleteMultipartUploadCommand({
         Bucket: bucket,
         Key: key,
@@ -151,7 +166,7 @@ export const s3completeMultipartUpload = async (bucket, key, { uploadId, partEta
     }
 };
 
-export const s3get = async (bucket, key) => {
+export const s3get = async (bucket: string, key: string) => {
     const command = new GetObjectCommand({
         Bucket: bucket,
         Key: key,
@@ -163,7 +178,7 @@ export const s3get = async (bucket, key) => {
         return undefined;
     }
 };
-export const s3delete = async (bucket, key) => {
+export const s3delete = async (bucket: string, key: string) => {
     const command = new DeleteObjectCommand({
         Bucket: bucket,
         Key: key,
@@ -175,7 +190,7 @@ export const s3delete = async (bucket, key) => {
         return undefined;
     }
 };
-export const s3exists = async (bucket, key) => {
+export const s3exists = async (bucket: string, key: string) => {
     const command = new HeadObjectCommand({
         Bucket: bucket,
         Key: key,
@@ -187,7 +202,7 @@ export const s3exists = async (bucket, key) => {
         return false;
     }
 };
-export const s3head = async (bucket, key) => {
+export const s3head = async (bucket: string, key: string) => {
     const command = new HeadObjectCommand({
         Bucket: bucket,
         Key: key,
@@ -197,7 +212,7 @@ export const s3head = async (bucket, key) => {
         return {
             etag: results.ETag || '',
             contentType: results.ContentType || '',
-            modifiedDate: results.LastModified.toISOString() || '',
+            modifiedDate: results.LastModified?.toISOString() || '',
             metadata: results.Metadata,
             size: results.ContentLength || 0,
         };
@@ -205,7 +220,7 @@ export const s3head = async (bucket, key) => {
         return false;
     }
 };
-export const s3metadata = async (bucket, key) => {
+export const s3metadata = async (bucket: string, key: string) => {
     const command = new GetObjectCommand({
         Bucket: bucket,
         Key: key,
@@ -214,14 +229,19 @@ export const s3metadata = async (bucket, key) => {
         const results = await client.send(command);
         const buffer = await streamToBuffer(results.Body);
         if (buffer.length > 0) {
-            return JSON.parse(buffer);
+            return JSON.parse(buffer.toString());
         }
-        return RA.isNotNilOrEmpty(results.Metadata) ? results.Metadata : true;
+
+        if (typeof results.Metadata === 'object' && Object.keys(results.Metadata).length >= 0) {
+            return results.Metadata;
+        }
+
+        return true;
     } catch (err) {
         return false;
     }
 };
-export const s3existsPrefix = async (bucket, prefix) => {
+export const s3existsPrefix = async (bucket: string, prefix: string) => {
     const command = new ListObjectsV2Command({
         Bucket: bucket,
         Prefix: prefix,
@@ -234,7 +254,7 @@ export const s3existsPrefix = async (bucket, prefix) => {
         return false;
     }
 };
-export const s3list = async (bucket, prefix) => {
+export const s3list = async (bucket: string, prefix: string) => {
     const command = new ListObjectsV2Command({
         Bucket: bucket,
         Prefix: prefix,
@@ -246,10 +266,17 @@ export const s3list = async (bucket, prefix) => {
         return [];
     }
 };
-export const s3listPaged = (bucket, prefix) =>
-    new Observable((subscriber) => {
+
+type Observable<TNext> = {
+    next: (value: TNext) => void | Promise<void>;
+    complete: () => void | Promise<void>;
+    error: (err: Error) => void | Promise<void>;
+};
+
+export const s3listPaged = (bucket: string, prefix: string) => ({
+    subscribe: (subscriber: Observable<{ Key?: string; ETag?: string }[]>) => {
         try {
-            const _FETCH_PAGE = async (continuationToken) => {
+            const _FETCH_PAGE = async (continuationToken?: string) => {
                 const command = new ListObjectsV2Command({
                     Bucket: bucket,
                     Prefix: prefix,
@@ -265,21 +292,31 @@ export const s3listPaged = (bucket, prefix) =>
             };
             _FETCH_PAGE();
         } catch (err) {
-            subscriber.error(err);
+            subscriber.error(err as Error);
         }
-    });
+    },
+});
 
-export const s3mapListKeysPaged = async (bucket, prefix, fnMap) =>
+export const s3mapListKeysPaged = async (
+    bucket: string,
+    prefix: string,
+    fnMap: (key: string, ETag: string) => void | Promise<void>,
+) =>
     new Promise((resolve, reject) => {
         s3listPaged(bucket, prefix).subscribe({
-            next: R.forEach(({ Key, ETag }) => fnMap && fnMap(Key, ETag)),
-            complete: () => resolve(),
+            next: (arr) =>
+                arr.forEach(({ Key, ETag }) => {
+                    Key && ETag && fnMap(Key, ETag);
+                }),
+            complete: () => resolve(true),
             error: (err) => reject(err),
         });
     });
 
-export const s3listKeysPaged = async (bucket, prefix) => {
-    const records = [];
-    await s3mapListKeysPaged(bucket, prefix, (key) => records.push(key));
+export const s3listKeysPaged = async (bucket: string, prefix: string) => {
+    const records: string[] = [];
+    await s3mapListKeysPaged(bucket, prefix, (key) => {
+        records.push(key);
+    });
     return records;
 };
