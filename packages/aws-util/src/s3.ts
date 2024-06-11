@@ -18,10 +18,11 @@ const client = new S3Client({
     apiVersion: 'latest',
 });
 
-const streamToBuffer = (stream): Promise<Buffer> =>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const streamToBuffer = (stream: any): Promise<Buffer> =>
     new Promise((resolve, reject) => {
-        const chunks: Uint8Array = new Uint8Array();
-        stream.on('data', (chunk) => chunks.push(chunk));
+        const chunks: Buffer[] = [];
+        stream.on('data', (chunk: Buffer) => chunks.push(chunk));
         stream.on('error', reject);
         stream.on('end', () => resolve(Buffer.concat(chunks)));
     });
