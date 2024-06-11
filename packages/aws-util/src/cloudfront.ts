@@ -1,9 +1,9 @@
-import { CLOUDFRONT_ACCESS_KEY_ID, CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER } from './config.js';
-import { ssmGetParameter } from './ssm.js';
+import { CLOUDFRONT_ACCESS_KEY_ID, CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER } from './config';
+import { ssmGetParameter } from './ssm';
 import { getSignedUrl } from '@aws-sdk/cloudfront-signer';
 
 const createGetAccessKey = () => {
-    let promise = null;
+    let promise: Promise<string | void | undefined> | null = null;
 
     return async () => {
         if (!promise) {
@@ -17,15 +17,14 @@ const createGetAccessKey = () => {
 
 const getAccessKey = createGetAccessKey();
 
-export const signUrl = async (url) => {
+const oneDay = 1 * 24 * 60 * 60 * 1000;
+export const signUrl = async (url: string, expires: number = oneDay) => {
     const CLOUDFRONT_ACCESS_KEY = await getAccessKey();
     if (!!CLOUDFRONT_ACCESS_KEY_ID && !!CLOUDFRONT_ACCESS_KEY) {
-        const expires = 1 * 24 * 60 * 60 * 1000;
-
         return getSignedUrl({
             url,
             keyPairId: CLOUDFRONT_ACCESS_KEY_ID,
-            dateLessThan: new Date(Date.now() + expires),
+            dateLessThan: new Date(Date.now() + expires).toDateString(),
             privateKey: CLOUDFRONT_ACCESS_KEY,
         });
     }
