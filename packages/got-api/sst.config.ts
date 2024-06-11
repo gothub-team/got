@@ -31,7 +31,7 @@ export default $config({
             domainName: env.GOT_API_DOMAIN,
             userPoolId: env.USER_POOL_ID,
             runtime: 'nodejs20.x',
-            codePath: path.join(process.cwd(), 'dist/lambda/zips'),
+            codePath: path.join(process.cwd(), 'dist/lambda/handler'),
             // bucketNodesName: `${env.AWS_PROFILE}-nodes`,
             // bucketEdgesName: `${env.AWS_PROFILE}-edges`,
             // bucketReverseEdgesName: `${env.AWS_PROFILE}-reverse-edges`,

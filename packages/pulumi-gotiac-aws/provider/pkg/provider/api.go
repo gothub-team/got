@@ -246,7 +246,7 @@ func NewApi(ctx *pulumi.Context,
 
 	pullLambda, err := NewLambda(ctx, name+"PullInternal", &LambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/pull.zip", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/pull.js", args.CodePath),
 		HandlerPath: pulumi.String("index.handleInvoke"),
 		MemorySize:  &pullMem,
 		PolicyArns: pulumi.StringArray{
@@ -282,7 +282,7 @@ func NewApi(ctx *pulumi.Context,
 
 	pullApiLambda, err := NewApiLambda(ctx, name+"PullApi", &ApiLambdaArgs{
 		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/pull.zip", args.CodePath),
+		CodePath:     pulumi.Sprintf("%s/pull.js", args.CodePath),
 		HandlerPath:  pulumi.String("index.handleHttp"),
 		MemorySize:   &pullMem,
 		Method:       pulumi.String("POST"),
@@ -312,7 +312,7 @@ func NewApi(ctx *pulumi.Context,
 
 	pushLambda, err := NewLambda(ctx, name+"PushInternal", &LambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/push.zip", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/push.js", args.CodePath),
 		HandlerPath: pulumi.String("index.handleInvoke"),
 		MemorySize:  &pushMem,
 		PolicyArns: pulumi.StringArray{
@@ -349,7 +349,7 @@ func NewApi(ctx *pulumi.Context,
 
 	pushApiLambda, err := NewApiLambda(ctx, name+"PushApi", &ApiLambdaArgs{
 		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/push.zip", args.CodePath),
+		CodePath:     pulumi.Sprintf("%s/push.js", args.CodePath),
 		HandlerPath:  pulumi.String("index.handleHttp"),
 		MemorySize:   &pushMem,
 		Method:       pulumi.String("POST"),
@@ -375,7 +375,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthLoginInitApiLambda, err := NewApiLambda(ctx, name+"AuthLoginInit", &ApiLambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/auth/login-init.zip", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/auth/login-init.js", args.CodePath),
 		HandlerPath: pulumi.String("index.handleHttp"),
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
@@ -393,7 +393,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthLoginVerifyApiLambda, err := NewApiLambda(ctx, name+"AuthLoginVerify", &ApiLambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/auth/login-verify.zip", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/auth/login-verify.js", args.CodePath),
 		HandlerPath: pulumi.String("index.handleHttp"),
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
@@ -411,7 +411,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthLoginRefreshApiLambda, err := NewApiLambda(ctx, name+"AuthLoginRefresh", &ApiLambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/auth/login-refresh.zip", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/auth/login-refresh.js", args.CodePath),
 		HandlerPath: pulumi.String("index.handleHttp"),
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
@@ -429,7 +429,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthRegisterInitApiLambda, err := NewApiLambda(ctx, name+"AuthRegisterInit", &ApiLambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/auth/register-init.zip", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/auth/register-init.js", args.CodePath),
 		HandlerPath: pulumi.String("index.handleHttp"),
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
@@ -447,7 +447,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthRegisterVerifyApiLambda, err := NewApiLambda(ctx, name+"AuthRegisterVerify", &ApiLambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/auth/register-verify.zip", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/auth/register-verify.js", args.CodePath),
 		HandlerPath: pulumi.String("index.handleHttp"),
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
@@ -465,7 +465,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthRegisterVerifyResendApiLambda, err := NewApiLambda(ctx, name+"AuthRegisterVerifyResend", &ApiLambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/auth/register-verify-resend.zip", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/auth/register-verify-resend.js", args.CodePath),
 		HandlerPath: pulumi.String("index.handleHttp"),
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
@@ -483,7 +483,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthResetPasswordInitApiLambda, err := NewApiLambda(ctx, name+"AuthResetPasswordInit", &ApiLambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/auth/reset-password-init.zip", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/auth/reset-password-init.js", args.CodePath),
 		HandlerPath: pulumi.String("index.handleHttp"),
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
@@ -502,7 +502,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthResetPasswordVerifyApiLambda, err := NewApiLambda(ctx, name+"AuthResetPasswordVerify", &ApiLambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/auth/reset-password-verify.zip", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/auth/reset-password-verify.js", args.CodePath),
 		HandlerPath: pulumi.String("index.handleHttp"),
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
@@ -521,7 +521,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthInviteUserApiLambda, err := NewApiLambda(ctx, name+"AuthInviteUser", &ApiLambdaArgs{
 		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/auth/invite-user.zip", args.CodePath),
+		CodePath:     pulumi.Sprintf("%s/auth/invite-user.js", args.CodePath),
 		HandlerPath:  pulumi.String("index.handleHttp"),
 		MemorySize:   &AuthMem,
 		Method:       pulumi.String("POST"),
@@ -542,7 +542,7 @@ func NewApi(ctx *pulumi.Context,
 
 	OpenApiApiLambda, err := NewApiLambda(ctx, name+"OpenApi", &ApiLambdaArgs{
 		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/api.zip", args.CodePath),
+		CodePath:     pulumi.Sprintf("%s/api.js", args.CodePath),
 		HandlerPath:  pulumi.String("index.handleHttp"),
 		MemorySize:   &AuthMem,
 		Method:       pulumi.String("GET"),
