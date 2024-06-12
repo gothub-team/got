@@ -17,4 +17,4 @@ ci-scripts/
 
 /provider/cmd/pulumi-resource-*/schema.go
 
-# sdk/nodejs/package.json
+sdk/nodejs/package.json
