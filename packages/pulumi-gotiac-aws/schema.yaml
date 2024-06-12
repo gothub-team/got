@@ -175,6 +175,9 @@ resources:
             bucketRightsOwnerName:
                 type: string
                 description: The Name of the existing bucket for owner right storage.
+            bucketMediaName:
+                type: string
+                description: The Name of the existing bucket for file storage.
             inviteUserValidationView:
                 type: string
                 description: got view that covers nodes for a user needs read rights in order to invite other users.
@@ -255,6 +258,9 @@ resources:
             bucketRightsOwnerName:
                 type: string
                 description: The bucket to be used for owner right storage
+            bucketMediaName:
+                type: string
+                description: The bucket to be used for file storage
             forceDestroy:
                 type: boolean
                 description: If the buckets should be destroyed on stack removal even if they are not empty.
@@ -281,6 +287,9 @@ resources:
             bucketRightsOwnerName:
                 type: string
                 description: The Name of the bucket for owner right storage.
+            bucketMediaName:
+                type: string
+                description: The Name of the bucket for file storage.
             storageReadPolicyArn:
                 type: string
                 description: The ARN of the storage read policy.

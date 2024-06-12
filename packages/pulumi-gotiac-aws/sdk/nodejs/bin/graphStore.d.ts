@@ -10,6 +10,10 @@ export declare class GraphStore extends pulumi.ComponentResource {
      */
     readonly bucketEdgesName: pulumi.Output<string>;
     /**
+     * The Name of the bucket for file storage.
+     */
+    readonly bucketMediaName: pulumi.Output<string | undefined>;
+    /**
      * The Name of the bucket for node storage.
      */
     readonly bucketNodesName: pulumi.Output<string>;
@@ -58,6 +62,10 @@ export interface GraphStoreArgs {
      * The bucket to be used for edge storage
      */
     bucketEdgesName?: pulumi.Input<string>;
+    /**
+     * The bucket to be used for file storage
+     */
+    bucketMediaName?: pulumi.Input<string>;
     /**
      * The bucket to be used for node storage
      */

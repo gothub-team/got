@@ -28,6 +28,7 @@ class GraphStore extends pulumi.ComponentResource {
         opts = opts || {};
         if (!opts.id) {
             resourceInputs["bucketEdgesName"] = args ? args.bucketEdgesName : undefined;
+            resourceInputs["bucketMediaName"] = args ? args.bucketMediaName : undefined;
             resourceInputs["bucketNodesName"] = args ? args.bucketNodesName : undefined;
             resourceInputs["bucketReverseEdgesName"] = args ? args.bucketReverseEdgesName : undefined;
             resourceInputs["bucketRightsAdminName"] = args ? args.bucketRightsAdminName : undefined;
@@ -40,6 +41,7 @@ class GraphStore extends pulumi.ComponentResource {
         }
         else {
             resourceInputs["bucketEdgesName"] = undefined /*out*/;
+            resourceInputs["bucketMediaName"] = undefined /*out*/;
             resourceInputs["bucketNodesName"] = undefined /*out*/;
             resourceInputs["bucketReverseEdgesName"] = undefined /*out*/;
             resourceInputs["bucketRightsAdminName"] = undefined /*out*/;

@@ -62,6 +62,7 @@ export class Api extends pulumi.ComponentResource {
                 throw new Error("Missing required property 'userPoolId'");
             }
             resourceInputs['bucketEdgesName'] = args ? args.bucketEdgesName : undefined;
+            resourceInputs['bucketMediaName'] = args ? args.bucketMediaName : undefined;
             resourceInputs['bucketNodesName'] = args ? args.bucketNodesName : undefined;
             resourceInputs['bucketReverseEdgesName'] = args ? args.bucketReverseEdgesName : undefined;
             resourceInputs['bucketRightsAdminName'] = args ? args.bucketRightsAdminName : undefined;
@@ -119,6 +120,10 @@ export interface ApiArgs {
      * The Name of the existing bucket for edge storage.
      */
     bucketEdgesName?: pulumi.Input<string>;
+    /**
+     * The Name of the existing bucket for file storage.
+     */
+    bucketMediaName?: pulumi.Input<string>;
     /**
      * The Name of the existing bucket for node storage.
      */

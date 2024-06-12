@@ -41,6 +41,10 @@ export interface ApiArgs {
      */
     bucketEdgesName?: pulumi.Input<string>;
     /**
+     * The Name of the existing bucket for file storage.
+     */
+    bucketMediaName?: pulumi.Input<string>;
+    /**
      * The Name of the existing bucket for node storage.
      */
     bucketNodesName?: pulumi.Input<string>;

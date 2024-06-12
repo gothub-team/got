@@ -29,6 +29,7 @@ type ApiArgs struct {
 	BucketRightsWriteName    *pulumi.StringInput `pulumi:"bucketRightsWriteName"`
 	BucketRightsAdminName    *pulumi.StringInput `pulumi:"bucketRightsAdminName"`
 	BucketRightsOwnerName    *pulumi.StringInput `pulumi:"bucketRightsOwnerName"`
+	BucketMediaName          *pulumi.StringInput `pulumi:"bucketMediaName"`
 	InviteUserValidationView *pulumi.StringInput `pulumi:"inviteUserValidationView"`
 }
 
@@ -291,6 +292,7 @@ func NewApi(ctx *pulumi.Context,
 		BucketRightsWriteName:  args.BucketRightsWriteName,
 		BucketRightsAdminName:  args.BucketRightsAdminName,
 		BucketRightsOwnerName:  args.BucketRightsOwnerName,
+		BucketMediaName:        args.BucketMediaName,
 		ForceDestroy:           args.ForceStoreDestroy,
 	})
 	if err != nil {
@@ -315,6 +317,7 @@ func NewApi(ctx *pulumi.Context,
 		MemorySize:  &pullMem,
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
+			graphStore.mediaBucketReadPolicyArn,
 		},
 		Environment: pullEnv,
 	})
@@ -353,6 +356,7 @@ func NewApi(ctx *pulumi.Context,
 		AuthorizerId: authorizer.ID(),
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
+			graphStore.mediaBucketReadPolicyArn,
 		},
 		ApiId:        api.ID(),
 		ExecutionArn: api.ExecutionArn,
@@ -382,6 +386,8 @@ func NewApi(ctx *pulumi.Context,
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
 			graphStore.StorageWritePolicyArn,
+			graphStore.mediaBucketReadPolicyArn,
+			graphStore.mediaBucketWritePolicyArn,
 		},
 		Environment: pushEnv,
 	})
@@ -421,6 +427,8 @@ func NewApi(ctx *pulumi.Context,
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
 			graphStore.StorageWritePolicyArn,
+			graphStore.mediaBucketReadPolicyArn,
+			graphStore.mediaBucketWritePolicyArn,
 		},
 		ApiId:        api.ID(),
 		ExecutionArn: api.ExecutionArn,
