@@ -109,6 +109,14 @@ resources:
             - url
             - privateKeyParameterName
             - privateKeyId
+    gotiac:index:UserPool:
+        isComponent: true
+        properties:
+            userPoolId:
+                type: string
+                description: The ID of the cognito user pool that was created.
+        required:
+            - userPoolId
     gotiac:index:TestUser:
         isComponent: true
         inputProperties:
@@ -164,6 +172,9 @@ resources:
             bucketRightsOwnerName:
                 type: string
                 description: The Name of the existing bucket for owner right storage.
+            inviteUserValidationView:
+                type: string
+                description: got view that covers nodes for a user needs read rights in order to invite other users.
         requiredInputs:
             - domainName
             - userPoolId

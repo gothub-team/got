@@ -70,6 +70,7 @@ export class Api extends pulumi.ComponentResource {
             resourceInputs['bucketRightsWriteName'] = args ? args.bucketRightsWriteName : undefined;
             resourceInputs['codePath'] = args ? args.codePath : undefined;
             resourceInputs['domainName'] = args ? args.domainName : undefined;
+            resourceInputs['inviteUserValidationView'] = args ? args.inviteUserValidationView : undefined;
             resourceInputs['runtime'] = args ? args.runtime : undefined;
             resourceInputs['userPoolId'] = args ? args.userPoolId : undefined;
             resourceInputs['authInviteUserEndpoint'] = undefined /*out*/;
@@ -149,6 +150,10 @@ export interface ApiArgs {
      * Domain name of the got api.
      */
     domainName: pulumi.Input<string>;
+    /**
+     * got view that covers nodes for a user needs read rights in order to invite other users.
+     */
+    inviteUserValidationView?: pulumi.Input<string>;
     /**
      * The runtime environment for the Lambda function.
      */
