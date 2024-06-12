@@ -157,6 +157,9 @@ resources:
             bucketEdgesName:
                 type: string
                 description: The Name of the existing bucket for edge storage.
+            forceStoreDestroy:
+                type: boolean
+                description: If the store buckets should be destroyed on stack removal even if they are not empty.
             bucketReverseEdgesName:
                 type: string
                 description: The Name of the existing bucket for reverse edge storage.
@@ -252,6 +255,9 @@ resources:
             bucketRightsOwnerName:
                 type: string
                 description: The bucket to be used for owner right storage
+            forceDestroy:
+                type: boolean
+                description: If the buckets should be destroyed on stack removal even if they are not empty.
         requiredInputs:
         properties:
             bucketNodesName:

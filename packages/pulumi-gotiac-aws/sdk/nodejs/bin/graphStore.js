@@ -34,6 +34,7 @@ class GraphStore extends pulumi.ComponentResource {
             resourceInputs["bucketRightsOwnerName"] = args ? args.bucketRightsOwnerName : undefined;
             resourceInputs["bucketRightsReadName"] = args ? args.bucketRightsReadName : undefined;
             resourceInputs["bucketRightsWriteName"] = args ? args.bucketRightsWriteName : undefined;
+            resourceInputs["forceDestroy"] = args ? args.forceDestroy : undefined;
             resourceInputs["storageReadPolicyArn"] = undefined /*out*/;
             resourceInputs["storageWritePolicyArn"] = undefined /*out*/;
         }

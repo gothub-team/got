@@ -70,6 +70,7 @@ export class Api extends pulumi.ComponentResource {
             resourceInputs['bucketRightsWriteName'] = args ? args.bucketRightsWriteName : undefined;
             resourceInputs['codePath'] = args ? args.codePath : undefined;
             resourceInputs['domainName'] = args ? args.domainName : undefined;
+            resourceInputs['forceStoreDestroy'] = args ? args.forceStoreDestroy : undefined;
             resourceInputs['inviteUserValidationView'] = args ? args.inviteUserValidationView : undefined;
             resourceInputs['runtime'] = args ? args.runtime : undefined;
             resourceInputs['userPoolId'] = args ? args.userPoolId : undefined;
@@ -150,6 +151,10 @@ export interface ApiArgs {
      * Domain name of the got api.
      */
     domainName: pulumi.Input<string>;
+    /**
+     * If the store buckets should be destroyed on stack removal even if they are not empty.
+     */
+    forceStoreDestroy?: pulumi.Input<boolean>;
     /**
      * got view that covers nodes for a user needs read rights in order to invite other users.
      */

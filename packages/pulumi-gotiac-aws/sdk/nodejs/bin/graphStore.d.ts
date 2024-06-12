@@ -1,4 +1,4 @@
-import * as pulumi from "@pulumi/pulumi";
+import * as pulumi from '@pulumi/pulumi';
 export declare class GraphStore extends pulumi.ComponentResource {
     /**
      * Returns true if the given object is an instance of GraphStore.  This is designed to work even
@@ -82,4 +82,8 @@ export interface GraphStoreArgs {
      * The bucket to be used for write right storage
      */
     bucketRightsWriteName?: pulumi.Input<string>;
+    /**
+     * If the buckets should be destroyed on stack removal even if they are not empty.
+     */
+    forceDestroy?: pulumi.Input<boolean>;
 }

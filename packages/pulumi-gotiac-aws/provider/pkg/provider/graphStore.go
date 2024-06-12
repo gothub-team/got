@@ -15,6 +15,7 @@ type GraphStoreArgs struct {
 	BucketRightsWriteName  *pulumi.StringInput `pulumi:"bucketRightsWriteName"`
 	BucketRightsAdminName  *pulumi.StringInput `pulumi:"bucketRightsAdminName"`
 	BucketRightsOwnerName  *pulumi.StringInput `pulumi:"bucketRightsOwnerName"`
+	ForceDestroy           *pulumi.BoolInput   `pulumi:"forceDestroy"`
 }
 
 // The GraphStore component resource.
@@ -50,35 +51,35 @@ func NewGraphStore(ctx *pulumi.Context,
 	}
 
 	// create nodes bucket
-	bucketNodes, err := lookupOrCreateBucket(ctx, args.BucketNodesName, name+"-nodes")
+	bucketNodes, err := lookupOrCreateBucket(ctx, args.BucketNodesName, name+"-nodes", args.ForceDestroy)
 	if err != nil {
 		return nil, err
 	}
 
 	// create edges buckets
-	bucketEdges, err := lookupOrCreateBucket(ctx, args.BucketEdgesName, name+"-edges")
+	bucketEdges, err := lookupOrCreateBucket(ctx, args.BucketEdgesName, name+"-edges", args.ForceDestroy)
 	if err != nil {
 		return nil, err
 	}
-	bucketReverseEdges, err := lookupOrCreateBucket(ctx, args.BucketReverseEdgesName, name+"-reverse-edges")
+	bucketReverseEdges, err := lookupOrCreateBucket(ctx, args.BucketReverseEdgesName, name+"-reverse-edges", args.ForceDestroy)
 	if err != nil {
 		return nil, err
 	}
 
 	// create right buckets
-	bucketRightsRead, err := lookupOrCreateBucket(ctx, args.BucketRightsReadName, name+"-rights-read")
+	bucketRightsRead, err := lookupOrCreateBucket(ctx, args.BucketRightsReadName, name+"-rights-read", args.ForceDestroy)
 	if err != nil {
 		return nil, err
 	}
-	bucketRightsWrite, err := lookupOrCreateBucket(ctx, args.BucketRightsWriteName, name+"-rights-write")
+	bucketRightsWrite, err := lookupOrCreateBucket(ctx, args.BucketRightsWriteName, name+"-rights-write", args.ForceDestroy)
 	if err != nil {
 		return nil, err
 	}
-	bucketRightsAdmin, err := lookupOrCreateBucket(ctx, args.BucketRightsAdminName, name+"-rights-admin")
+	bucketRightsAdmin, err := lookupOrCreateBucket(ctx, args.BucketRightsAdminName, name+"-rights-admin", args.ForceDestroy)
 	if err != nil {
 		return nil, err
 	}
-	bucketRightsOwner, err := lookupOrCreateBucket(ctx, args.BucketRightsOwnerName, name+"-rights-owner")
+	bucketRightsOwner, err := lookupOrCreateBucket(ctx, args.BucketRightsOwnerName, name+"-rights-owner", args.ForceDestroy)
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +176,7 @@ func NewGraphStore(ctx *pulumi.Context,
 	return component, nil
 }
 
-func lookupOrCreateBucket(ctx *pulumi.Context, name *pulumi.StringInput, fallbackName string) (*BucketInfo, error) {
+func lookupOrCreateBucket(ctx *pulumi.Context, name *pulumi.StringInput, fallbackName string, forceDestroy *pulumi.BoolInput) (*BucketInfo, error) {
 	var bucketName pulumi.StringInput
 	var bucketArn pulumi.StringInput
 	if name != nil {
@@ -192,8 +193,16 @@ func lookupOrCreateBucket(ctx *pulumi.Context, name *pulumi.StringInput, fallbac
 			return lookupResult.Arn, nil
 		}).(pulumi.StringInput)
 	} else {
+		var _forceDestroy pulumi.BoolInput
+		if forceDestroy == nil {
+			_forceDestroy = pulumi.Bool(false)
+		} else {
+			_forceDestroy = *forceDestroy
+		}
 		// Create an S3 bucket to host files for the FileHosting service
-		bucket, err := s3.NewBucket(ctx, fallbackName, &s3.BucketArgs{})
+		bucket, err := s3.NewBucketV2(ctx, fallbackName, &s3.BucketV2Args{
+			ForceDestroy: _forceDestroy,
+		})
 		if err != nil {
 			return nil, err
 		}

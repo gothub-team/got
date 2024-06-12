@@ -37,6 +37,7 @@ export default $config({
             userPoolId: userPool.userPoolId,
             runtime: 'nodejs20.x',
             codePath: path.join(process.cwd(), 'dist/lambda/zips'),
+            forceStoreDestroy: true,
         });
 
         testResources({ userPool });

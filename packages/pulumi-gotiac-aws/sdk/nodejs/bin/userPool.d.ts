@@ -1,4 +1,4 @@
-import * as pulumi from "@pulumi/pulumi";
+import * as pulumi from '@pulumi/pulumi';
 export declare class UserPool extends pulumi.ComponentResource {
     /**
      * Returns true if the given object is an instance of UserPool.  This is designed to work even
@@ -21,5 +21,4 @@ export declare class UserPool extends pulumi.ComponentResource {
 /**
  * The set of arguments for constructing a UserPool resource.
  */
-export interface UserPoolArgs {
-}
+export interface UserPoolArgs {}

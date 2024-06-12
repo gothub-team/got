@@ -48,6 +48,7 @@ class Api extends pulumi.ComponentResource {
             resourceInputs["bucketRightsWriteName"] = args ? args.bucketRightsWriteName : undefined;
             resourceInputs["codePath"] = args ? args.codePath : undefined;
             resourceInputs["domainName"] = args ? args.domainName : undefined;
+            resourceInputs["forceStoreDestroy"] = args ? args.forceStoreDestroy : undefined;
             resourceInputs["inviteUserValidationView"] = args ? args.inviteUserValidationView : undefined;
             resourceInputs["runtime"] = args ? args.runtime : undefined;
             resourceInputs["userPoolId"] = args ? args.userPoolId : undefined;

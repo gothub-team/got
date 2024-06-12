@@ -21,6 +21,7 @@ type ApiArgs struct {
 	CodePath pulumi.StringInput `pulumi:"codePath"`
 	// The lambda runtime
 	Runtime                  pulumi.StringInput  `pulumi:"runtime"`
+	ForceStoreDestroy        *pulumi.BoolInput   `pulumi:"forceStoreDestroy"`
 	BucketNodesName          *pulumi.StringInput `pulumi:"bucketNodesName"`
 	BucketEdgesName          *pulumi.StringInput `pulumi:"bucketEdgesName"`
 	BucketReverseEdgesName   *pulumi.StringInput `pulumi:"bucketReverseEdgesName"`
@@ -290,6 +291,7 @@ func NewApi(ctx *pulumi.Context,
 		BucketRightsWriteName:  args.BucketRightsWriteName,
 		BucketRightsAdminName:  args.BucketRightsAdminName,
 		BucketRightsOwnerName:  args.BucketRightsOwnerName,
+		ForceDestroy:           args.ForceStoreDestroy,
 	})
 	if err != nil {
 		return nil, err

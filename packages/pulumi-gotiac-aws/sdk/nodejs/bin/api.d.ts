@@ -1,4 +1,4 @@
-import * as pulumi from "@pulumi/pulumi";
+import * as pulumi from '@pulumi/pulumi';
 export declare class Api extends pulumi.ComponentResource {
     /**
      * Returns true if the given object is an instance of Api.  This is designed to work even
@@ -72,6 +72,10 @@ export interface ApiArgs {
      * Domain name of the got api.
      */
     domainName: pulumi.Input<string>;
+    /**
+     * If the store buckets should be destroyed on stack removal even if they are not empty.
+     */
+    forceStoreDestroy?: pulumi.Input<boolean>;
     /**
      * got view that covers nodes for a user needs read rights in order to invite other users.
      */

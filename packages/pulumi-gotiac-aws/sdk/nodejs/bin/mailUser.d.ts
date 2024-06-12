@@ -1,4 +1,4 @@
-import * as pulumi from "@pulumi/pulumi";
+import * as pulumi from '@pulumi/pulumi';
 export declare class MailUser extends pulumi.ComponentResource {
     /**
      * Returns true if the given object is an instance of MailUser.  This is designed to work even
