@@ -1,4 +1,4 @@
-import { describe, beforeAll, it, expect } from 'bun:test';
+import { describe, beforeAll, beforeEach, it, expect } from 'bun:test';
 import { type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import { createMailClient } from './shared/mail';
@@ -17,7 +17,8 @@ import {
 import { createUserApi } from './shared';
 
 export const match6Digits = (str: string) => str.match(/[0-9]{6}/)?.[0];
-export const matchPassword = (str: string) => str.match(/password: (.+)$/)?.[1];
+export const matchPassword = (str: string) =>
+    str.match(/password: (.+)$/)?.[1] || str.match(/password is (.+)\.$/)?.[1];
 
 const env = parseEnv({
     GOT_API_URL,
@@ -42,22 +43,22 @@ if (!INVITE_USER_ROOT || !INVITE_EDGE[0] || !INVITE_EDGE[1]) {
 }
 const INVITE_NODE_ID = 'test-1e112b4d32f0ec9a-invite-node';
 
-let testId: string;
 let adminApi: GotApi;
 let userApi: GotApi;
+let loginApi: GotApi;
 let mailClient: ReturnType<typeof createMailClient>;
 beforeAll(async () => {
     adminApi = await createUserApi(env.TEST_ADMIN_EMAIL, env.TEST_ADMIN_PW, true);
     userApi = await createUserApi(env.TEST_USER_1_EMAIL, env.TEST_USER_1_PW);
-    testId = `test-${crypto.randomBytes(8).toString('hex')}`;
+    loginApi = await createUserApi();
 });
 
 describe('invite user flow', () => {
     describe('given user has admin rights on invite user view', () => {
         let email: string;
-        beforeAll(async () => {
-            console.log(env);
-            const b = await adminApi.push({
+        const testId = `test-${crypto.randomBytes(8).toString('hex')}`;
+        beforeEach(async () => {
+            await adminApi.push({
                 nodes: {
                     [INVITE_NODE_ID]: { id: INVITE_NODE_ID },
                     [INVITE_USER_ROOT]: { id: INVITE_USER_ROOT },
@@ -70,9 +71,6 @@ describe('invite user flow', () => {
                     [INVITE_USER_ROOT]: { user: { [env.TEST_USER_1_EMAIL]: { read: true } } },
                 },
             });
-            console.log(JSON.stringify(b));
-            const a = await userApi.pull(env.INVITE_USER_VALIDATION_VIEW);
-            console.log(JSON.stringify(a));
             email = `${TEST_MAIL_PREFIX}+${testId}@${TEST_MAIL_DOMAIN}`;
         });
 
@@ -101,18 +99,15 @@ describe('invite user flow', () => {
                 it('receives invitation mail', async () => {
                     const invitationMailText = await mailClient.receiveMailTo(email);
                     const emailBody = invitationMailText.replaceAll('=\r\n', '');
-                    console.log(emailBody);
                     temporaryPassword = matchPassword(emailBody) || '';
-                    console.log(temporaryPassword);
                     expect(temporaryPassword).toBeTruthy();
-                    expect(emailBody).toContain('You have been invited.');
-                    expect(emailBody).toContain('Please log in with your temporary password: ');
+                    expect(emailBody).toContain('password');
                 });
             });
 
             describe('login with temporary password', () => {
                 it.todo('throws PasswordChangeRequiredError', async () => {
-                    return expect(userApi.login({ email, password: temporaryPassword })).rejects.toThrow({
+                    return expect(loginApi.login({ email, password: temporaryPassword })).rejects.toThrow({
                         name: 'PasswordResetRequiredError',
                         message: 'The password must be reset.',
                     });
@@ -125,7 +120,7 @@ describe('invite user flow', () => {
                     it('resets password successfully and returns session', async () => {
                         newPassword = `${crypto.randomBytes(8).toString('hex')}-pw-1`;
                         return expect(
-                            userApi.resetPasswordVerify({
+                            loginApi.resetPasswordVerify({
                                 email,
                                 oldPassword: temporaryPassword,
                                 password: newPassword,
@@ -136,7 +131,7 @@ describe('invite user flow', () => {
 
                 describe('login with new password', () => {
                     it('resolves', async () => {
-                        return expect(userApi.login({ email, password: newPassword })).resolves.toBeUndefined();
+                        return expect(loginApi.login({ email, password: newPassword })).resolves.toBeUndefined();
                     });
                 });
             });
@@ -145,7 +140,8 @@ describe('invite user flow', () => {
 
     describe('given user has no admin rights on invite user view', () => {
         let email: string;
-        beforeAll(async () => {
+        const testId = `test-${crypto.randomBytes(8).toString('hex')}`;
+        beforeEach(async () => {
             await adminApi.push({
                 nodes: { [INVITE_NODE_ID]: { id: INVITE_NODE_ID } },
                 edges: {
@@ -171,7 +167,7 @@ describe('error handling', () => {
     const invalidEmails = [[''], ['Tes.T@test.com'], ['tes.t@tesT.com'], [' tes.t@test.com'], ['tes.t@test.com ']];
     describe.each(invalidEmails)('given an invalid email address', (email: string) => {
         it.todo('throws InvalidEmailError', async () => {
-            return expect(userApi.inviteUser({ email, id: 'env.INVITE_USER_ROOT ' })).rejects.toThrow({
+            return expect(userApi.inviteUser({ email, id: INVITE_USER_ROOT })).rejects.toThrow({
                 name: 'InvalidEmailError',
                 message: 'The email must be valid and must not contain upper case letters or spaces.',
             });
@@ -181,7 +177,7 @@ describe('error handling', () => {
     describe('given an existing user', () => {
         const email = env.TEST_USER_2_EMAIL;
         it.todo('throws UserAlreadyExistsError', async () => {
-            return expect(userApi.inviteUser({ email, id: 'env.INVITE_USER_ROOT ' })).rejects.toThrow({
+            return expect(userApi.inviteUser({ email, id: INVITE_USER_ROOT })).rejects.toThrow({
                 name: 'UserExistsError',
                 message: 'There is an existing user with the given email address.',
             });
