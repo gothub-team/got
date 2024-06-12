@@ -79,6 +79,7 @@ class Api extends pulumi.ComponentResource {
             resourceInputs["authRegisterVerifyResendEndpoint"] = undefined /*out*/;
             resourceInputs["authResetPasswordInitEndpoint"] = undefined /*out*/;
             resourceInputs["authResetPasswordVerifyEndpoint"] = undefined /*out*/;
+            resourceInputs["bucketMediaName"] = undefined /*out*/;
             resourceInputs["endpoint"] = undefined /*out*/;
             resourceInputs["openApiEndpoint"] = undefined /*out*/;
             resourceInputs["pullEndpoint"] = undefined /*out*/;

@@ -218,6 +218,8 @@ resources:
                 type: string
             openApiEndpoint:
                 type: string
+            bucketMediaName:
+                type: string
         required:
             - endpoint
             - pullEndpoint
@@ -234,6 +236,7 @@ resources:
             - authResetPasswordVerifyEndpoint
             - authInviteUserEndpoint
             - openApiEndpoint
+            - bucketMediaName
     gotiac:index:GraphStore:
         isComponent: true
         inputProperties:

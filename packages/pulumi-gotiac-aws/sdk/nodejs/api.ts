@@ -28,6 +28,7 @@ export class Api extends pulumi.ComponentResource {
     public readonly /*out*/ authRegisterVerifyResendEndpoint!: pulumi.Output<string>;
     public readonly /*out*/ authResetPasswordInitEndpoint!: pulumi.Output<string>;
     public readonly /*out*/ authResetPasswordVerifyEndpoint!: pulumi.Output<string>;
+    public readonly bucketMediaName!: pulumi.Output<string>;
     /**
      * The endpoint of the API.
      */
@@ -100,6 +101,7 @@ export class Api extends pulumi.ComponentResource {
             resourceInputs['authRegisterVerifyResendEndpoint'] = undefined /*out*/;
             resourceInputs['authResetPasswordInitEndpoint'] = undefined /*out*/;
             resourceInputs['authResetPasswordVerifyEndpoint'] = undefined /*out*/;
+            resourceInputs['bucketMediaName'] = undefined /*out*/;
             resourceInputs['endpoint'] = undefined /*out*/;
             resourceInputs['openApiEndpoint'] = undefined /*out*/;
             resourceInputs['pullEndpoint'] = undefined /*out*/;

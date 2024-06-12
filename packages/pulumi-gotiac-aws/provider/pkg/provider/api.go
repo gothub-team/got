@@ -52,6 +52,7 @@ type Api struct {
 	AuthResetPasswordVerifyEndpoint  pulumi.StringOutput `pulumi:"authResetPasswordVerifyEndpoint"`
 	AuthInviteUserEndpoint           pulumi.StringOutput `pulumi:"authInviteUserEndpoint"`
 	OpenApiEndpoint                  pulumi.StringOutput `pulumi:"openApiEndpoint"`
+	BucketMediaName                  pulumi.StringOutput `pulumi:"bucketMediaName"`
 }
 
 // NewApi creates a new Lambda component resource.
@@ -654,6 +655,7 @@ func NewApi(ctx *pulumi.Context,
 	component.AuthResetPasswordVerifyEndpoint = AuthResetPasswordVerifyApiLambda.Route.RouteKey()
 	component.AuthInviteUserEndpoint = AuthInviteUserApiLambda.Route.RouteKey()
 	component.OpenApiEndpoint = OpenApiApiLambda.Route.RouteKey()
+	component.BucketMediaName = graphStore.BucketMediaName
 
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
 		"endpoint":     args.DomainName,

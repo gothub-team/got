@@ -14,6 +14,7 @@ export declare class Api extends pulumi.ComponentResource {
     readonly authRegisterVerifyResendEndpoint: pulumi.Output<string>;
     readonly authResetPasswordInitEndpoint: pulumi.Output<string>;
     readonly authResetPasswordVerifyEndpoint: pulumi.Output<string>;
+    readonly bucketMediaName: pulumi.Output<string>;
     /**
      * The endpoint of the API.
      */
