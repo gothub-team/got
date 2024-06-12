@@ -229,6 +229,7 @@ func NewGraphStore(ctx *pulumi.Context,
 	component.BucketRightsWriteName = bucketRightsWrite.Name.ToStringOutput()
 	component.BucketRightsAdminName = bucketRightsAdmin.Name.ToStringOutput()
 	component.BucketRightsOwnerName = bucketRightsOwner.Name.ToStringOutput()
+	component.BucketMediaName = bucketMedia.Name.ToStringOutput()
 
 	component.StorageReadPolicyArn = storageReadPolicy.Arn
 	component.StorageWritePolicyArn = storageWritePolicy.Arn
