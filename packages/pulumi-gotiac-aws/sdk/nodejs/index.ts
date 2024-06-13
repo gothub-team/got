@@ -40,6 +40,16 @@ export type TestUser = import('./testUser').TestUser;
 export const TestUser: typeof import('./testUser').TestUser = null as any;
 utilities.lazyLoad(exports, ['TestUser'], () => require('./testUser'));
 
+export { UserPoolArgs } from './userPool';
+export type UserPool = import('./userPool').UserPool;
+export const UserPool: typeof import('./userPool').UserPool = null as any;
+utilities.lazyLoad(exports, ['UserPool'], () => require('./userPool'));
+
+// Export sub-modules:
+import * as types from './types';
+
+export { types };
+
 const _module = {
     version: utilities.getVersion(),
     construct: (name: string, type: string, urn: string): pulumi.Resource => {
@@ -56,6 +66,8 @@ const _module = {
                 return new MailUser(name, <any>undefined, { urn });
             case 'gotiac:index:TestUser':
                 return new TestUser(name, <any>undefined, { urn });
+            case 'gotiac:index:UserPool':
+                return new UserPool(name, <any>undefined, { urn });
             default:
                 throw new Error(`unknown resource type ${type}`);
         }

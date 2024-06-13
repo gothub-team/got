@@ -2,6 +2,27 @@
 ---
 name: gotiac
 pluginDownloadURL: github://api.github.com/gothub-team/got
+types:
+    gotiac:index:ApiFileHostingInput:
+        type: object
+        properties:
+            domain:
+                type: string
+                description: The file hosting domain.
+            privateKeyId:
+                type: string
+                description: The ID of the private key which is used to identify which key was used to sign a URL.
+            privateKeyParameterName:
+                type: string
+                description: The ssm parameter name for the private key that is used to sign upload and download URLs.
+            bucketName:
+                type: string
+                description: The name of the created media bucket that is used to store files.
+        required:
+            - domain
+            - privateKeyId
+            - privateKeyParameterName
+            - bucketName
 resources:
     gotiac:index:MailDomain:
         isComponent: true
@@ -84,6 +105,8 @@ resources:
             - userId
             - password
     gotiac:index:FileHosting:
+        description:
+            The FileHosting component creates an s3 bucket for file storage and a CDN distribution for file access.
         isComponent: true
         inputProperties:
             domain:
@@ -93,22 +116,37 @@ resources:
                 type: string
                 description:
                     The name of an existing s3 Bucket to link as origin. If not provided, a new bucket will be created.
+            forceDestroyBucket:
+                type: boolean
+                description: If the bucket should be destroyed on stack removal even if it is not empty.
         requiredInputs:
             - domain
         properties:
-            url:
+            domain:
                 type: string
-                description: The file hosting URL.
-            privateKeyParameterName:
-                type: string
-                description: The parameter name for the private key.
+                description: The file hosting domain.
             privateKeyId:
                 type: string
-                description: The ID the private key.
+                description: The ID of the private key which is used to identify which key was used to sign a URL.
+            privateKeyParameterName:
+                type: string
+                description: The ssm parameter name for the private key that is used to sign upload and download URLs.
+            bucketName:
+                type: string
+                description: The name of the created media bucket that is used to store files.
         required:
-            - url
-            - privateKeyParameterName
+            - domain
             - privateKeyId
+            - privateKeyParameterName
+            - bucketName
+    gotiac:index:UserPool:
+        isComponent: true
+        properties:
+            userPoolId:
+                type: string
+                description: The ID of the cognito user pool that was created.
+        required:
+            - userPoolId
     gotiac:index:TestUser:
         isComponent: true
         inputProperties:
@@ -149,6 +187,9 @@ resources:
             bucketEdgesName:
                 type: string
                 description: The Name of the existing bucket for edge storage.
+            forceStoreDestroy:
+                type: boolean
+                description: If the store buckets should be destroyed on stack removal even if they are not empty.
             bucketReverseEdgesName:
                 type: string
                 description: The Name of the existing bucket for reverse edge storage.
@@ -164,6 +205,11 @@ resources:
             bucketRightsOwnerName:
                 type: string
                 description: The Name of the existing bucket for owner right storage.
+            fileHosting:
+                $ref: '#/types/gotiac:index:ApiFileHostingInput'
+            inviteUserValidationView:
+                type: string
+                description: got view that covers nodes for a user needs read rights in order to invite other users.
         requiredInputs:
             - domainName
             - userPoolId
@@ -201,6 +247,8 @@ resources:
                 type: string
             openApiEndpoint:
                 type: string
+            bucketMediaName:
+                type: string
         required:
             - endpoint
             - pullEndpoint
@@ -217,6 +265,7 @@ resources:
             - authResetPasswordVerifyEndpoint
             - authInviteUserEndpoint
             - openApiEndpoint
+            - bucketMediaName
     gotiac:index:GraphStore:
         isComponent: true
         inputProperties:
@@ -241,6 +290,15 @@ resources:
             bucketRightsOwnerName:
                 type: string
                 description: The bucket to be used for owner right storage
+            bucketLogsName:
+                type: string
+                description: The bucket to be used for log storage
+            bucketMediaName:
+                type: string
+                description: The bucket to be used for file storage
+            forceDestroy:
+                type: boolean
+                description: If the buckets should be destroyed on stack removal even if they are not empty.
         requiredInputs:
         properties:
             bucketNodesName:
@@ -264,12 +322,30 @@ resources:
             bucketRightsOwnerName:
                 type: string
                 description: The Name of the bucket for owner right storage.
+            bucketLogsName:
+                type: string
+                description: The Name of the bucket for file storage.
+            bucketMediaName:
+                type: string
+                description: The Name of the bucket for file storage.
             storageReadPolicyArn:
                 type: string
                 description: The ARN of the storage read policy.
             storageWritePolicyArn:
                 type: string
                 description: The ARN of the storage write policy.
+            logsBucketReadPolicyArn:
+                type: string
+                description: The ARN of the logs bucket read policy.
+            logsBucketWritePolicyArn:
+                type: string
+                description: The ARN of the logs bucket write policy.
+            mediaBucketReadPolicyArn:
+                type: string
+                description: The ARN of the media bucket read policy.
+            mediaBucketWritePolicyArn:
+                type: string
+                description: The ARN of the media bucket write policy.
         required:
             - bucketNodesName
             - bucketEdgesName
@@ -280,6 +356,10 @@ resources:
             - bucketRightsOwnerName
             - storageReadPolicyArn
             - storageWritePolicyArn
+            - logsBucketReadPolicyArn
+            - logsBucketWritePolicyArn
+            - mediaBucketReadPolicyArn
+            - mediaBucketWritePolicyArn
 language:
     csharp:
         packageReferences:

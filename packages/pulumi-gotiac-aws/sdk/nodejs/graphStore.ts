@@ -24,6 +24,14 @@ export class GraphStore extends pulumi.ComponentResource {
      */
     public readonly bucketEdgesName!: pulumi.Output<string>;
     /**
+     * The Name of the bucket for file storage.
+     */
+    public readonly bucketLogsName!: pulumi.Output<string | undefined>;
+    /**
+     * The Name of the bucket for file storage.
+     */
+    public readonly bucketMediaName!: pulumi.Output<string | undefined>;
+    /**
      * The Name of the bucket for node storage.
      */
     public readonly bucketNodesName!: pulumi.Output<string>;
@@ -48,6 +56,22 @@ export class GraphStore extends pulumi.ComponentResource {
      */
     public readonly bucketRightsWriteName!: pulumi.Output<string>;
     /**
+     * The ARN of the logs bucket read policy.
+     */
+    public readonly /*out*/ logsBucketReadPolicyArn!: pulumi.Output<string>;
+    /**
+     * The ARN of the logs bucket write policy.
+     */
+    public readonly /*out*/ logsBucketWritePolicyArn!: pulumi.Output<string>;
+    /**
+     * The ARN of the media bucket read policy.
+     */
+    public readonly /*out*/ mediaBucketReadPolicyArn!: pulumi.Output<string>;
+    /**
+     * The ARN of the media bucket write policy.
+     */
+    public readonly /*out*/ mediaBucketWritePolicyArn!: pulumi.Output<string>;
+    /**
      * The ARN of the storage read policy.
      */
     public readonly /*out*/ storageReadPolicyArn!: pulumi.Output<string>;
@@ -68,22 +92,35 @@ export class GraphStore extends pulumi.ComponentResource {
         opts = opts || {};
         if (!opts.id) {
             resourceInputs['bucketEdgesName'] = args ? args.bucketEdgesName : undefined;
+            resourceInputs['bucketLogsName'] = args ? args.bucketLogsName : undefined;
+            resourceInputs['bucketMediaName'] = args ? args.bucketMediaName : undefined;
             resourceInputs['bucketNodesName'] = args ? args.bucketNodesName : undefined;
             resourceInputs['bucketReverseEdgesName'] = args ? args.bucketReverseEdgesName : undefined;
             resourceInputs['bucketRightsAdminName'] = args ? args.bucketRightsAdminName : undefined;
             resourceInputs['bucketRightsOwnerName'] = args ? args.bucketRightsOwnerName : undefined;
             resourceInputs['bucketRightsReadName'] = args ? args.bucketRightsReadName : undefined;
             resourceInputs['bucketRightsWriteName'] = args ? args.bucketRightsWriteName : undefined;
+            resourceInputs['forceDestroy'] = args ? args.forceDestroy : undefined;
+            resourceInputs['logsBucketReadPolicyArn'] = undefined /*out*/;
+            resourceInputs['logsBucketWritePolicyArn'] = undefined /*out*/;
+            resourceInputs['mediaBucketReadPolicyArn'] = undefined /*out*/;
+            resourceInputs['mediaBucketWritePolicyArn'] = undefined /*out*/;
             resourceInputs['storageReadPolicyArn'] = undefined /*out*/;
             resourceInputs['storageWritePolicyArn'] = undefined /*out*/;
         } else {
             resourceInputs['bucketEdgesName'] = undefined /*out*/;
+            resourceInputs['bucketLogsName'] = undefined /*out*/;
+            resourceInputs['bucketMediaName'] = undefined /*out*/;
             resourceInputs['bucketNodesName'] = undefined /*out*/;
             resourceInputs['bucketReverseEdgesName'] = undefined /*out*/;
             resourceInputs['bucketRightsAdminName'] = undefined /*out*/;
             resourceInputs['bucketRightsOwnerName'] = undefined /*out*/;
             resourceInputs['bucketRightsReadName'] = undefined /*out*/;
             resourceInputs['bucketRightsWriteName'] = undefined /*out*/;
+            resourceInputs['logsBucketReadPolicyArn'] = undefined /*out*/;
+            resourceInputs['logsBucketWritePolicyArn'] = undefined /*out*/;
+            resourceInputs['mediaBucketReadPolicyArn'] = undefined /*out*/;
+            resourceInputs['mediaBucketWritePolicyArn'] = undefined /*out*/;
             resourceInputs['storageReadPolicyArn'] = undefined /*out*/;
             resourceInputs['storageWritePolicyArn'] = undefined /*out*/;
         }
@@ -100,6 +137,14 @@ export interface GraphStoreArgs {
      * The bucket to be used for edge storage
      */
     bucketEdgesName?: pulumi.Input<string>;
+    /**
+     * The bucket to be used for log storage
+     */
+    bucketLogsName?: pulumi.Input<string>;
+    /**
+     * The bucket to be used for file storage
+     */
+    bucketMediaName?: pulumi.Input<string>;
     /**
      * The bucket to be used for node storage
      */
@@ -124,4 +169,8 @@ export interface GraphStoreArgs {
      * The bucket to be used for write right storage
      */
     bucketRightsWriteName?: pulumi.Input<string>;
+    /**
+     * If the buckets should be destroyed on stack removal even if they are not empty.
+     */
+    forceDestroy?: pulumi.Input<boolean>;
 }

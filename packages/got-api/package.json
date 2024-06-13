@@ -1,6 +1,6 @@
 {
     "name": "@gothub/got-api",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "license": "MIT",
     "type": "module",
     "module": "client-js/index.ts",
@@ -15,15 +15,17 @@
         "@types/bun": "latest",
         "@types/ramda": "^0.29.12",
         "@gothub/typescript-util": "workspace:*",
+        "@gothub/got-api-test": "workspace:*",
+        "@gothub/pulumi-gotiac-aws": "workspace:*",
         "openapi-types": "^12.1.3",
         "quicktype-core": "^6.0.71",
         "ramda": "^0.29.1"
     },
     "peerDependencies": {
-        "@gothub-team/got-srp": "^0.3.20",
         "typescript": "^5.0.0"
     },
     "dependencies": {
+        "@gothub-team/got-srp": "^0.3.20",
         "@gothub/got-core": "workspace:^",
         "sst": "ion"
     }
