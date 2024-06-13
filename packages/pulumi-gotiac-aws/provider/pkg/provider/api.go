@@ -20,23 +20,23 @@ type ApiArgs struct {
 	// The the path to the .zip for the lambda code
 	CodePath pulumi.StringInput `pulumi:"codePath"`
 	// The lambda runtime
-	Runtime                  pulumi.StringInput  `pulumi:"runtime"`
-	ForceStoreDestroy        *pulumi.BoolInput   `pulumi:"forceStoreDestroy"`
-	BucketNodesName          *pulumi.StringInput `pulumi:"bucketNodesName"`
-	BucketEdgesName          *pulumi.StringInput `pulumi:"bucketEdgesName"`
-	BucketReverseEdgesName   *pulumi.StringInput `pulumi:"bucketReverseEdgesName"`
-	BucketRightsReadName     *pulumi.StringInput `pulumi:"bucketRightsReadName"`
-	BucketRightsWriteName    *pulumi.StringInput `pulumi:"bucketRightsWriteName"`
-	BucketRightsAdminName    *pulumi.StringInput `pulumi:"bucketRightsAdminName"`
-	BucketRightsOwnerName    *pulumi.StringInput `pulumi:"bucketRightsOwnerName"`
-	BucketMediaName          *pulumi.StringInput `pulumi:"bucketMediaName"`
-	InviteUserValidationView *pulumi.StringInput `pulumi:"inviteUserValidationView"`
-	FileHosting              ApiFileHostingInput `pulumi:"fileHosting"`
+	Runtime                  pulumi.StringInput   `pulumi:"runtime"`
+	ForceStoreDestroy        *pulumi.BoolInput    `pulumi:"forceStoreDestroy"`
+	BucketNodesName          *pulumi.StringInput  `pulumi:"bucketNodesName"`
+	BucketEdgesName          *pulumi.StringInput  `pulumi:"bucketEdgesName"`
+	BucketReverseEdgesName   *pulumi.StringInput  `pulumi:"bucketReverseEdgesName"`
+	BucketRightsReadName     *pulumi.StringInput  `pulumi:"bucketRightsReadName"`
+	BucketRightsWriteName    *pulumi.StringInput  `pulumi:"bucketRightsWriteName"`
+	BucketRightsAdminName    *pulumi.StringInput  `pulumi:"bucketRightsAdminName"`
+	BucketRightsOwnerName    *pulumi.StringInput  `pulumi:"bucketRightsOwnerName"`
+	BucketMediaName          *pulumi.StringInput  `pulumi:"bucketMediaName"`
+	InviteUserValidationView *pulumi.StringInput  `pulumi:"inviteUserValidationView"`
+	FileHosting              *ApiFileHostingInput `pulumi:"fileHosting"`
 }
 
 type ApiFileHostingInput struct {
 	// Bucket     *s3.Bucket          `pulumi:"bucket"`
-	// Url                     pulumi.StringInput `pulumi:"url"`
+	Url                     pulumi.StringInput `pulumi:"url"`
 	PrivateKeyParameterName pulumi.StringInput `pulumi:"privateKeyParameterName"`
 	PrivateKeyId            pulumi.StringInput `pulumi:"privateKeyId"`
 	BucketName              pulumi.StringInput `pulumi:"bucketName"`
@@ -294,6 +294,17 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	cloudfrontAccessKeyId := pulumi.String("").ToStringOutput()
+	cloudfrontNewAccessKeyParameter := pulumi.String("").ToStringOutput()
+	mediaDomain := pulumi.String("").ToStringOutput()
+	var bucketMediaName *pulumi.StringInput
+	if args.FileHosting != nil {
+		cloudfrontAccessKeyId = args.FileHosting.PrivateKeyId.ToStringOutput()
+		cloudfrontNewAccessKeyParameter = args.FileHosting.PrivateKeyParameterName.ToStringOutput()
+		mediaDomain = args.FileHosting.Url.ToStringOutput()
+		bucketMediaName = &args.FileHosting.BucketName
+	}
+
 	graphStore, err := NewGraphStore(ctx, name+"-graph-store", &GraphStoreArgs{
 		BucketNodesName:        args.BucketNodesName,
 		BucketEdgesName:        args.BucketEdgesName,
@@ -302,7 +313,7 @@ func NewApi(ctx *pulumi.Context,
 		BucketRightsWriteName:  args.BucketRightsWriteName,
 		BucketRightsAdminName:  args.BucketRightsAdminName,
 		BucketRightsOwnerName:  args.BucketRightsOwnerName,
-		BucketMediaName:        args.BucketMediaName,
+		BucketMediaName:        bucketMediaName,
 		ForceDestroy:           args.ForceStoreDestroy,
 	})
 	if err != nil {
@@ -311,13 +322,17 @@ func NewApi(ctx *pulumi.Context,
 
 	pullMem := pulumi.Int(2048)
 	pullEnv := pulumi.StringMap{
-		"BUCKET_NODES":         graphStore.BucketNodesName,
-		"BUCKET_EDGES":         graphStore.BucketEdgesName,
-		"BUCKET_REVERSE_EDGES": graphStore.BucketReverseEdgesName,
-		"BUCKET_RIGHTS_READ":   graphStore.BucketRightsReadName,
-		"BUCKET_RIGHTS_WRITE":  graphStore.BucketRightsWriteName,
-		"BUCKET_RIGHTS_ADMIN":  graphStore.BucketRightsAdminName,
-		"BUCKET_OWNERS":        graphStore.BucketRightsOwnerName,
+		"BUCKET_NODES":                        graphStore.BucketNodesName,
+		"BUCKET_EDGES":                        graphStore.BucketEdgesName,
+		"BUCKET_REVERSE_EDGES":                graphStore.BucketReverseEdgesName,
+		"BUCKET_RIGHTS_READ":                  graphStore.BucketRightsReadName,
+		"BUCKET_RIGHTS_WRITE":                 graphStore.BucketRightsWriteName,
+		"BUCKET_RIGHTS_ADMIN":                 graphStore.BucketRightsAdminName,
+		"BUCKET_OWNERS":                       graphStore.BucketRightsOwnerName,
+		"BUCKET_MEDIA":                        graphStore.BucketMediaName,
+		"MEDIA_DOMAIN":                        mediaDomain,
+		"CLOUDFRONT_ACCESS_KEY_ID":            cloudfrontAccessKeyId,
+		"CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER": cloudfrontNewAccessKeyParameter,
 	}
 
 	pullLambda, err := NewLambda(ctx, name+"PullInternal", &LambdaArgs{
@@ -379,13 +394,17 @@ func NewApi(ctx *pulumi.Context,
 
 	pushMem := pulumi.Int(2048)
 	pushEnv := pulumi.StringMap{
-		"BUCKET_NODES":         graphStore.BucketNodesName,
-		"BUCKET_EDGES":         graphStore.BucketEdgesName,
-		"BUCKET_REVERSE_EDGES": graphStore.BucketReverseEdgesName,
-		"BUCKET_RIGHTS_READ":   graphStore.BucketRightsReadName,
-		"BUCKET_RIGHTS_WRITE":  graphStore.BucketRightsWriteName,
-		"BUCKET_RIGHTS_ADMIN":  graphStore.BucketRightsAdminName,
-		"BUCKET_OWNERS":        graphStore.BucketRightsOwnerName,
+		"BUCKET_NODES":                        graphStore.BucketNodesName,
+		"BUCKET_EDGES":                        graphStore.BucketEdgesName,
+		"BUCKET_REVERSE_EDGES":                graphStore.BucketReverseEdgesName,
+		"BUCKET_RIGHTS_READ":                  graphStore.BucketRightsReadName,
+		"BUCKET_RIGHTS_WRITE":                 graphStore.BucketRightsWriteName,
+		"BUCKET_RIGHTS_ADMIN":                 graphStore.BucketRightsAdminName,
+		"BUCKET_OWNERS":                       graphStore.BucketRightsOwnerName,
+		"BUCKET_MEDIA":                        graphStore.BucketMediaName,
+		"MEDIA_DOMAIN":                        mediaDomain,
+		"CLOUDFRONT_ACCESS_KEY_ID":            cloudfrontAccessKeyId,
+		"CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER": cloudfrontNewAccessKeyParameter,
 	}
 
 	pushLambda, err := NewLambda(ctx, name+"PushInternal", &LambdaArgs{

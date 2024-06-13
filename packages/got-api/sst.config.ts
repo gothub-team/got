@@ -17,19 +17,6 @@ const env = parseEnv({
     TEST_USER_2_EMAIL,
 });
 
-export type Transform<T> = Partial<T> | ((args: T) => undefined);
-export function transform<T extends object>(transform: Transform<T> | undefined, args: T) {
-    // Case: transform is a function
-    if (typeof transform === 'function') {
-        transform(args);
-        return args;
-    }
-
-    // Case: no transform
-    // Case: transform is an argument
-    return { ...args, ...transform };
-}
-
 export default $config({
     app(input) {
         return {
@@ -49,6 +36,7 @@ export default $config({
 
         const fileHosting = new gotiac.FileHosting('FileHosting', {
             domain: env.FILE_HOSTING_DOMAIN,
+            forceDestroyBucket: true,
         });
 
         const api = new gotiac.Api('TestApi', {
@@ -58,6 +46,7 @@ export default $config({
             codePath: path.join(process.cwd(), 'dist/lambda/zips'),
             forceStoreDestroy: true,
             fileHosting: {
+                url: fileHosting.url,
                 bucketName: fileHosting.bucketName,
                 privateKeyId: fileHosting.privateKeyId,
                 privateKeyParameterName: fileHosting.privateKeyParameterName,

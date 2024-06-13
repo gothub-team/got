@@ -35,6 +35,7 @@ class FileHosting extends pulumi.ComponentResource {
             }
             resourceInputs["bucketName"] = args ? args.bucketName : undefined;
             resourceInputs["domain"] = args ? args.domain : undefined;
+            resourceInputs["forceDestroyBucket"] = args ? args.forceDestroyBucket : undefined;
             resourceInputs["privateKeyId"] = undefined /*out*/;
             resourceInputs["privateKeyParameterName"] = undefined /*out*/;
             resourceInputs["url"] = undefined /*out*/;

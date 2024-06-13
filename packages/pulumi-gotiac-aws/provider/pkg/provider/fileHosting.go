@@ -19,6 +19,8 @@ type FileHostingArgs struct {
 	// The name of existing s3 Bucket to link as origin. If not provided, a new bucket
 	// will be created.
 	BucketName *pulumi.StringInput `pulumi:"bucketName"`
+	// If set to true, the bucket will be destroyed when the component is destroyed even if not empty.
+	ForceDestroyBucket pulumi.BoolPtrInput `pulumi:"forceDestroyBucket"`
 }
 
 // The FileHosting component resource.
@@ -60,7 +62,9 @@ func NewFileHosting(ctx *pulumi.Context,
 		}).(pulumi.StringOutput)
 	} else {
 		// Create an S3 bucket to host files for the FileHosting service
-		fileHostingBucket, err := s3.NewBucket(ctx, "gotiacFileHosting", &s3.BucketArgs{})
+		fileHostingBucket, err := s3.NewBucketV2(ctx, "gotiacFileHosting", &s3.BucketV2Args{
+			ForceDestroy: args.ForceDestroyBucket,
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -346,6 +350,7 @@ func NewFileHosting(ctx *pulumi.Context,
 	component.PrivateKeyParameterName = fileHostingKeyParameter.Name
 	component.PrivateKeyId = pulumi.StringOutput(publicKey.ID())
 	component.Url = args.Domain.ToStringOutput()
+	component.BucketName = bucketName.ToStringOutput()
 
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
 		"url":                     component.Url,

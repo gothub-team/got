@@ -12,4 +12,8 @@ export interface ApiFileHostingInputArgs {
      * The ssm parameter name for the private key that is used to sign upload and download URLs.
      */
     privateKeyParameterName: pulumi.Input<string>;
+    /**
+     * The file hosting domain.
+     */
+    url: pulumi.Input<string>;
 }

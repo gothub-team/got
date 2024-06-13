@@ -55,6 +55,7 @@ export class FileHosting extends pulumi.ComponentResource {
             }
             resourceInputs['bucketName'] = args ? args.bucketName : undefined;
             resourceInputs['domain'] = args ? args.domain : undefined;
+            resourceInputs['forceDestroyBucket'] = args ? args.forceDestroyBucket : undefined;
             resourceInputs['privateKeyId'] = undefined /*out*/;
             resourceInputs['privateKeyParameterName'] = undefined /*out*/;
             resourceInputs['url'] = undefined /*out*/;
@@ -81,4 +82,8 @@ export interface FileHostingArgs {
      * The file hosting domain.
      */
     domain: pulumi.Input<string>;
+    /**
+     * If the bucket should be destroyed on stack removal even if it is not empty.
+     */
+    forceDestroyBucket?: pulumi.Input<boolean>;
 }
