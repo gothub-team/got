@@ -19,15 +19,6 @@ export const INVITE_USER_VALIDATION_VIEW = z
     .pipe(ViewSchema)
     .describe('got view that covers nodes for a user needs read rights in order to invite other users.');
 
-export const MAIL_USERNAME = z
-    .string()
-    .describe('IMAP mailbox username to API test endpoints that send automatic emails.');
-export const MAIL_USER_PW = z
-    .string()
-    .describe('IMAP mailbox password to API test endpoints that send automatic emails.');
-export const MAIL_IMAP_SERVER = z
-    .string()
-    .describe('IMAP server of the mailbox that is used to test mail sending API endpoints.');
 export const TEST_ADMIN_EMAIL = z
     .string()
     .describe(

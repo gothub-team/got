@@ -61,3 +61,30 @@ export const USER_POOL_ID = z.string().describe('Cognito user pool ID that autho
 export const AWS_MAIL_REGION = z.enum(awsRegions).describe('AWS region where the mail domain is hosted.');
 export const MAIL_DOMAIN = z.string().describe('Domain of the mail server.');
 export const FILE_HOSTING_DOMAIN = z.string().describe('Domain of the file hosting service.');
+export const MAIL_USERNAME = z
+    .string()
+    .describe('IMAP mailbox username to API test endpoints that send automatic emails.');
+export const MAIL_USER_PW = z
+    .string()
+    .describe('IMAP mailbox password to API test endpoints that send automatic emails.');
+export const MAIL_IMAP_SERVER = z
+    .string()
+    .describe('IMAP server of the mailbox that is used to test mail sending API endpoints.');
+// sender|host|user|password|port|secureFlag
+export const NOTIFICATIONS_EMAIL_ACCOUNT = z
+    .string()
+    .optional()
+    .default(JSON.stringify({ root: { edges: { 'from/to': { include: { rights: true } } } } }))
+    .transform((content, ctx) => {
+        try {
+            return JSON.parse(content);
+        } catch (error) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: (error as Error).message,
+            });
+            return z.never;
+        }
+    })
+    .pipe(ViewSchema)
+    .describe('got view that covers nodes for a user needs read rights in order to invite other users.');
