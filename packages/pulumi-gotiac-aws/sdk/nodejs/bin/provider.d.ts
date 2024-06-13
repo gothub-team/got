@@ -1,4 +1,4 @@
-import * as pulumi from "@pulumi/pulumi";
+import * as pulumi from '@pulumi/pulumi';
 export declare class Provider extends pulumi.ProviderResource {
     /**
      * Returns true if the given object is an instance of Provider.  This is designed to work even
@@ -17,5 +17,4 @@ export declare class Provider extends pulumi.ProviderResource {
 /**
  * The set of arguments for constructing a Provider resource.
  */
-export interface ProviderArgs {
-}
+export interface ProviderArgs {}

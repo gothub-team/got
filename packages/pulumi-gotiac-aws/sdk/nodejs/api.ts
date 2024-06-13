@@ -2,6 +2,8 @@
 // *** Do not edit by hand unless you're certain you know what you are doing! ***
 
 import * as pulumi from '@pulumi/pulumi';
+import * as inputs from './types/input';
+import * as outputs from './types/output';
 import * as utilities from './utilities';
 
 export class Api extends pulumi.ComponentResource {
@@ -28,6 +30,7 @@ export class Api extends pulumi.ComponentResource {
     public readonly /*out*/ authRegisterVerifyResendEndpoint!: pulumi.Output<string>;
     public readonly /*out*/ authResetPasswordInitEndpoint!: pulumi.Output<string>;
     public readonly /*out*/ authResetPasswordVerifyEndpoint!: pulumi.Output<string>;
+    public readonly /*out*/ bucketMediaName!: pulumi.Output<string>;
     /**
      * The endpoint of the API.
      */
@@ -70,6 +73,8 @@ export class Api extends pulumi.ComponentResource {
             resourceInputs['bucketRightsWriteName'] = args ? args.bucketRightsWriteName : undefined;
             resourceInputs['codePath'] = args ? args.codePath : undefined;
             resourceInputs['domainName'] = args ? args.domainName : undefined;
+            resourceInputs['fileHosting'] = args ? args.fileHosting : undefined;
+            resourceInputs['forceStoreDestroy'] = args ? args.forceStoreDestroy : undefined;
             resourceInputs['inviteUserValidationView'] = args ? args.inviteUserValidationView : undefined;
             resourceInputs['runtime'] = args ? args.runtime : undefined;
             resourceInputs['userPoolId'] = args ? args.userPoolId : undefined;
@@ -82,6 +87,7 @@ export class Api extends pulumi.ComponentResource {
             resourceInputs['authRegisterVerifyResendEndpoint'] = undefined /*out*/;
             resourceInputs['authResetPasswordInitEndpoint'] = undefined /*out*/;
             resourceInputs['authResetPasswordVerifyEndpoint'] = undefined /*out*/;
+            resourceInputs['bucketMediaName'] = undefined /*out*/;
             resourceInputs['endpoint'] = undefined /*out*/;
             resourceInputs['openApiEndpoint'] = undefined /*out*/;
             resourceInputs['pullEndpoint'] = undefined /*out*/;
@@ -98,6 +104,7 @@ export class Api extends pulumi.ComponentResource {
             resourceInputs['authRegisterVerifyResendEndpoint'] = undefined /*out*/;
             resourceInputs['authResetPasswordInitEndpoint'] = undefined /*out*/;
             resourceInputs['authResetPasswordVerifyEndpoint'] = undefined /*out*/;
+            resourceInputs['bucketMediaName'] = undefined /*out*/;
             resourceInputs['endpoint'] = undefined /*out*/;
             resourceInputs['openApiEndpoint'] = undefined /*out*/;
             resourceInputs['pullEndpoint'] = undefined /*out*/;
@@ -150,6 +157,11 @@ export interface ApiArgs {
      * Domain name of the got api.
      */
     domainName: pulumi.Input<string>;
+    fileHosting?: pulumi.Input<inputs.ApiFileHostingInputArgs>;
+    /**
+     * If the store buckets should be destroyed on stack removal even if they are not empty.
+     */
+    forceStoreDestroy?: pulumi.Input<boolean>;
     /**
      * got view that covers nodes for a user needs read rights in order to invite other users.
      */

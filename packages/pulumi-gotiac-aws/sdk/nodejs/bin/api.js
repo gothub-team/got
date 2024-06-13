@@ -48,6 +48,8 @@ class Api extends pulumi.ComponentResource {
             resourceInputs["bucketRightsWriteName"] = args ? args.bucketRightsWriteName : undefined;
             resourceInputs["codePath"] = args ? args.codePath : undefined;
             resourceInputs["domainName"] = args ? args.domainName : undefined;
+            resourceInputs["fileHosting"] = args ? args.fileHosting : undefined;
+            resourceInputs["forceStoreDestroy"] = args ? args.forceStoreDestroy : undefined;
             resourceInputs["inviteUserValidationView"] = args ? args.inviteUserValidationView : undefined;
             resourceInputs["runtime"] = args ? args.runtime : undefined;
             resourceInputs["userPoolId"] = args ? args.userPoolId : undefined;
@@ -60,6 +62,7 @@ class Api extends pulumi.ComponentResource {
             resourceInputs["authRegisterVerifyResendEndpoint"] = undefined /*out*/;
             resourceInputs["authResetPasswordInitEndpoint"] = undefined /*out*/;
             resourceInputs["authResetPasswordVerifyEndpoint"] = undefined /*out*/;
+            resourceInputs["bucketMediaName"] = undefined /*out*/;
             resourceInputs["endpoint"] = undefined /*out*/;
             resourceInputs["openApiEndpoint"] = undefined /*out*/;
             resourceInputs["pullEndpoint"] = undefined /*out*/;
@@ -77,6 +80,7 @@ class Api extends pulumi.ComponentResource {
             resourceInputs["authRegisterVerifyResendEndpoint"] = undefined /*out*/;
             resourceInputs["authResetPasswordInitEndpoint"] = undefined /*out*/;
             resourceInputs["authResetPasswordVerifyEndpoint"] = undefined /*out*/;
+            resourceInputs["bucketMediaName"] = undefined /*out*/;
             resourceInputs["endpoint"] = undefined /*out*/;
             resourceInputs["openApiEndpoint"] = undefined /*out*/;
             resourceInputs["pullEndpoint"] = undefined /*out*/;

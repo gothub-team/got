@@ -1,4 +1,5 @@
-import * as pulumi from "@pulumi/pulumi";
+import * as pulumi from '@pulumi/pulumi';
+import * as inputs from './types/input';
 export declare class Api extends pulumi.ComponentResource {
     /**
      * Returns true if the given object is an instance of Api.  This is designed to work even
@@ -14,6 +15,7 @@ export declare class Api extends pulumi.ComponentResource {
     readonly authRegisterVerifyResendEndpoint: pulumi.Output<string>;
     readonly authResetPasswordInitEndpoint: pulumi.Output<string>;
     readonly authResetPasswordVerifyEndpoint: pulumi.Output<string>;
+    readonly bucketMediaName: pulumi.Output<string>;
     /**
      * The endpoint of the API.
      */
@@ -72,6 +74,11 @@ export interface ApiArgs {
      * Domain name of the got api.
      */
     domainName: pulumi.Input<string>;
+    fileHosting?: pulumi.Input<inputs.ApiFileHostingInputArgs>;
+    /**
+     * If the store buckets should be destroyed on stack removal even if they are not empty.
+     */
+    forceStoreDestroy?: pulumi.Input<boolean>;
     /**
      * got view that covers nodes for a user needs read rights in order to invite other users.
      */
