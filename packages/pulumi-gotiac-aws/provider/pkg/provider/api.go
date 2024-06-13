@@ -10,6 +10,7 @@ import (
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/cognito"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/iam"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/route53"
+	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/ssm"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
@@ -274,28 +275,6 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	ssmGetParameterPolicy, err := iam.NewPolicy(ctx, name+"-ssm-get-parameter-policy", &iam.PolicyArgs{
-		Path:        pulumi.String("/"),
-		Description: pulumi.String("IAM policy for writing the got s3 storage"),
-		Policy: pulumi.Any(map[string]interface{}{
-			"Version": "2012-10-17",
-			"Statement": []map[string]interface{}{
-				{
-					"Effect": "Allow",
-					"Action": []interface{}{
-						"ssm:GetParameter",
-					},
-					"Resource": []interface{}{
-						"*",
-					},
-				},
-			},
-		}),
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	// Create Cognito Authorizer
 	authorizer, err := apigatewayv2.NewAuthorizer(ctx, fmt.Sprintf("%s-Authorizer", name), &apigatewayv2.AuthorizerArgs{
 		ApiId:          api.ID(),
@@ -316,14 +295,48 @@ func NewApi(ctx *pulumi.Context,
 	}
 
 	cloudfrontAccessKeyId := pulumi.String("").ToStringOutput()
-	cloudfrontNewAccessKeyParameter := pulumi.String("").ToStringOutput()
+	cloudfrontNewAccessKeyParameterName := pulumi.String("").ToStringOutput()
 	mediaDomain := pulumi.String("").ToStringOutput()
 	var bucketMediaName *pulumi.StringInput
+	var ssmGetAccessKeyParameterPolicy *iam.Policy
 	if args.FileHosting != nil {
 		cloudfrontAccessKeyId = args.FileHosting.PrivateKeyId.ToStringOutput()
-		cloudfrontNewAccessKeyParameter = args.FileHosting.PrivateKeyParameterName.ToStringOutput()
+		cloudfrontNewAccessKeyParameterName = args.FileHosting.PrivateKeyParameterName.ToStringOutput()
 		mediaDomain = args.FileHosting.Domain.ToStringOutput()
 		bucketMediaName = &args.FileHosting.BucketName
+
+		cloudfrontNewAccessKeyParameterArn := cloudfrontNewAccessKeyParameterName.ApplyT(func(parameterName string) (string, error) {
+			ssmParameter, err := ssm.LookupParameter(ctx, &ssm.LookupParameterArgs{
+				Name: parameterName,
+			}, nil)
+			if err != nil {
+				return "", err
+			}
+
+			return ssmParameter.Arn, nil
+		}).(pulumi.StringOutput)
+
+		ssmGetAccessKeyParameterPolicy, err = iam.NewPolicy(ctx, name+"-ssm-get-parameter-policy", &iam.PolicyArgs{
+			Path:        pulumi.String("/"),
+			Description: pulumi.String("IAM policy for writing the got s3 storage"),
+			Policy: pulumi.Any(map[string]interface{}{
+				"Version": "2012-10-17",
+				"Statement": []map[string]interface{}{
+					{
+						"Effect": "Allow",
+						"Action": []interface{}{
+							"ssm:GetParameter",
+						},
+						"Resource": []interface{}{
+							cloudfrontNewAccessKeyParameterArn,
+						},
+					},
+				},
+			}),
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	graphStore, err := NewGraphStore(ctx, name+"-graph-store", &GraphStoreArgs{
@@ -353,7 +366,7 @@ func NewApi(ctx *pulumi.Context,
 		"BUCKET_MEDIA":                        graphStore.BucketMediaName,
 		"MEDIA_DOMAIN":                        mediaDomain,
 		"CLOUDFRONT_ACCESS_KEY_ID":            cloudfrontAccessKeyId,
-		"CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER": cloudfrontNewAccessKeyParameter,
+		"CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER": cloudfrontNewAccessKeyParameterName,
 	}
 
 	pullLambda, err := NewLambda(ctx, name+"PullInternal", &LambdaArgs{
@@ -363,7 +376,7 @@ func NewApi(ctx *pulumi.Context,
 		MemorySize:  &pullMem,
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
-			ssmGetParameterPolicy.Arn,
+			ssmGetAccessKeyParameterPolicy.Arn,
 			graphStore.mediaBucketReadPolicyArn,
 		},
 		Environment: pullEnv,
@@ -403,7 +416,7 @@ func NewApi(ctx *pulumi.Context,
 		AuthorizerId: authorizer.ID(),
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
-			ssmGetParameterPolicy.Arn,
+			ssmGetAccessKeyParameterPolicy.Arn,
 			graphStore.mediaBucketReadPolicyArn,
 		},
 		ApiId:        api.ID(),
@@ -428,7 +441,7 @@ func NewApi(ctx *pulumi.Context,
 		"BUCKET_MEDIA":                        graphStore.BucketMediaName,
 		"MEDIA_DOMAIN":                        mediaDomain,
 		"CLOUDFRONT_ACCESS_KEY_ID":            cloudfrontAccessKeyId,
-		"CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER": cloudfrontNewAccessKeyParameter,
+		"CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER": cloudfrontNewAccessKeyParameterName,
 	}
 
 	pushLambda, err := NewLambda(ctx, name+"PushInternal", &LambdaArgs{
@@ -439,7 +452,7 @@ func NewApi(ctx *pulumi.Context,
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
 			graphStore.StorageWritePolicyArn,
-			ssmGetParameterPolicy.Arn,
+			ssmGetAccessKeyParameterPolicy.Arn,
 			graphStore.mediaBucketReadPolicyArn,
 			graphStore.mediaBucketWritePolicyArn,
 			graphStore.logsBucketWritePolicyArn,
@@ -482,7 +495,7 @@ func NewApi(ctx *pulumi.Context,
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
 			graphStore.StorageWritePolicyArn,
-			ssmGetParameterPolicy.Arn,
+			ssmGetAccessKeyParameterPolicy.Arn,
 			graphStore.mediaBucketReadPolicyArn,
 			graphStore.mediaBucketWritePolicyArn,
 			graphStore.logsBucketWritePolicyArn,
