@@ -494,6 +494,29 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	completeUploadEnv := pulumi.StringMap{
+		"BUCKET_MEDIA": graphStore.BucketMediaName,
+	}
+
+	_, err = NewApiLambda(ctx, name+"CompleteUploadApi", &ApiLambdaArgs{
+		Runtime:      args.Runtime,
+		CodePath:     pulumi.Sprintf("%s/completeUpload.zip", args.CodePath),
+		HandlerPath:  pulumi.String("index.handleHttp"),
+		Method:       pulumi.String("POST"),
+		AuthorizerId: authorizer.ID(),
+		PolicyArns: pulumi.StringArray{
+			graphStore.mediaBucketReadPolicyArn,
+			graphStore.mediaBucketWritePolicyArn,
+		},
+		ApiId:        api.ID(),
+		ExecutionArn: api.ExecutionArn,
+		RoutePath:    pulumi.String("/media/complete-upload"),
+		Environment:  completeUploadEnv,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	var inviteUserValidationView pulumi.StringOutput
 	if args.InviteUserValidationView != nil {
 		inviteUserValidationView = (*args.InviteUserValidationView).ToStringOutput()
