@@ -2,6 +2,27 @@
 ---
 name: gotiac
 pluginDownloadURL: github://api.github.com/gothub-team/got
+types:
+    gotiac:index:ApiFileHostingInput:
+        type: object
+        properties:
+            # url:
+            #     type: string
+            #     description: The file hosting domain.
+            privateKeyId:
+                type: string
+                description: The ID of the private key which is used to identify which key was used to sign a URL.
+            privateKeyParameterName:
+                type: string
+                description: The ssm parameter name for the private key that is used to sign upload and download URLs.
+            bucketName:
+                type: string
+                description: The name of the created media bucket that is used to store files.
+        required:
+            # - url
+            - privateKeyId
+            - privateKeyParameterName
+            - bucketName
 resources:
     gotiac:index:MailDomain:
         isComponent: true
@@ -84,6 +105,8 @@ resources:
             - userId
             - password
     gotiac:index:FileHosting:
+        description:
+            The FileHosting component creates an s3 bucket for file storage and a CDN distribution for file access.
         isComponent: true
         inputProperties:
             domain:
@@ -98,17 +121,21 @@ resources:
         properties:
             url:
                 type: string
-                description: The file hosting URL.
-            privateKeyParameterName:
-                type: string
-                description: The parameter name for the private key.
+                description: The file hosting domain.
             privateKeyId:
                 type: string
-                description: The ID the private key.
+                description: The ID of the private key which is used to identify which key was used to sign a URL.
+            privateKeyParameterName:
+                type: string
+                description: The ssm parameter name for the private key that is used to sign upload and download URLs.
+            bucketName:
+                type: string
+                description: The name of the created media bucket that is used to store files.
         required:
             - url
-            - privateKeyParameterName
             - privateKeyId
+            - privateKeyParameterName
+            - bucketName
     gotiac:index:UserPool:
         isComponent: true
         properties:
@@ -175,9 +202,8 @@ resources:
             bucketRightsOwnerName:
                 type: string
                 description: The Name of the existing bucket for owner right storage.
-            bucketMediaName:
-                type: string
-                description: The Name of the existing bucket for file storage.
+            fileHosting:
+                $ref: '#/types/gotiac:index:ApiFileHostingInput'
             inviteUserValidationView:
                 type: string
                 description: got view that covers nodes for a user needs read rights in order to invite other users.

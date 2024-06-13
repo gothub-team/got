@@ -31,6 +31,15 @@ type ApiArgs struct {
 	BucketRightsOwnerName    *pulumi.StringInput `pulumi:"bucketRightsOwnerName"`
 	BucketMediaName          *pulumi.StringInput `pulumi:"bucketMediaName"`
 	InviteUserValidationView *pulumi.StringInput `pulumi:"inviteUserValidationView"`
+	FileHosting              ApiFileHostingInput `pulumi:"fileHosting"`
+}
+
+type ApiFileHostingInput struct {
+	// Bucket     *s3.Bucket          `pulumi:"bucket"`
+	// Url                     pulumi.StringInput `pulumi:"url"`
+	PrivateKeyParameterName pulumi.StringInput `pulumi:"privateKeyParameterName"`
+	PrivateKeyId            pulumi.StringInput `pulumi:"privateKeyId"`
+	BucketName              pulumi.StringInput `pulumi:"bucketName"`
 }
 
 // The Api component resource.

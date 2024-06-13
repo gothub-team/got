@@ -5,6 +5,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FileHosting = void 0;
 const pulumi = require("@pulumi/pulumi");
 const utilities = require("./utilities");
+/**
+ * The FileHosting component creates an s3 bucket for file storage and a CDN distribution for file access.
+ */
 class FileHosting extends pulumi.ComponentResource {
     /**
      * Returns true if the given object is an instance of FileHosting.  This is designed to work even
@@ -37,6 +40,7 @@ class FileHosting extends pulumi.ComponentResource {
             resourceInputs["url"] = undefined /*out*/;
         }
         else {
+            resourceInputs["bucketName"] = undefined /*out*/;
             resourceInputs["privateKeyId"] = undefined /*out*/;
             resourceInputs["privateKeyParameterName"] = undefined /*out*/;
             resourceInputs["url"] = undefined /*out*/;

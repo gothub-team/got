@@ -1,4 +1,5 @@
 import * as pulumi from '@pulumi/pulumi';
+import * as inputs from './types/input';
 export declare class Api extends pulumi.ComponentResource {
     /**
      * Returns true if the given object is an instance of Api.  This is designed to work even
@@ -42,10 +43,6 @@ export interface ApiArgs {
      */
     bucketEdgesName?: pulumi.Input<string>;
     /**
-     * The Name of the existing bucket for file storage.
-     */
-    bucketMediaName?: pulumi.Input<string>;
-    /**
      * The Name of the existing bucket for node storage.
      */
     bucketNodesName?: pulumi.Input<string>;
@@ -77,6 +74,7 @@ export interface ApiArgs {
      * Domain name of the got api.
      */
     domainName: pulumi.Input<string>;
+    fileHosting?: pulumi.Input<inputs.ApiFileHostingInputArgs>;
     /**
      * If the store buckets should be destroyed on stack removal even if they are not empty.
      */

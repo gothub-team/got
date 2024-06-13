@@ -4,6 +4,9 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as utilities from './utilities';
 
+/**
+ * The FileHosting component creates an s3 bucket for file storage and a CDN distribution for file access.
+ */
 export class FileHosting extends pulumi.ComponentResource {
     /** @internal */
     public static readonly __pulumiType = 'gotiac:index:FileHosting';
@@ -20,15 +23,19 @@ export class FileHosting extends pulumi.ComponentResource {
     }
 
     /**
-     * The ID the private key.
+     * The name of the created media bucket that is used to store files.
+     */
+    public readonly bucketName!: pulumi.Output<string>;
+    /**
+     * The ID of the private key which is used to identify which key was used to sign a URL.
      */
     public readonly /*out*/ privateKeyId!: pulumi.Output<string>;
     /**
-     * The parameter name for the private key.
+     * The ssm parameter name for the private key that is used to sign upload and download URLs.
      */
     public readonly /*out*/ privateKeyParameterName!: pulumi.Output<string>;
     /**
-     * The file hosting URL.
+     * The file hosting domain.
      */
     public readonly /*out*/ url!: pulumi.Output<string>;
 
@@ -52,6 +59,7 @@ export class FileHosting extends pulumi.ComponentResource {
             resourceInputs['privateKeyParameterName'] = undefined /*out*/;
             resourceInputs['url'] = undefined /*out*/;
         } else {
+            resourceInputs['bucketName'] = undefined /*out*/;
             resourceInputs['privateKeyId'] = undefined /*out*/;
             resourceInputs['privateKeyParameterName'] = undefined /*out*/;
             resourceInputs['url'] = undefined /*out*/;

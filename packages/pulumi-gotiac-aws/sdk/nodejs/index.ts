@@ -45,6 +45,11 @@ export type UserPool = import('./userPool').UserPool;
 export const UserPool: typeof import('./userPool').UserPool = null as any;
 utilities.lazyLoad(exports, ['UserPool'], () => require('./userPool'));
 
+// Export sub-modules:
+import * as types from './types';
+
+export { types };
+
 const _module = {
     version: utilities.getVersion(),
     construct: (name: string, type: string, urn: string): pulumi.Resource => {

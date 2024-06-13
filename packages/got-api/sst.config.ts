@@ -1,19 +1,34 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
+import * as pulumi from '@pulumi/pulumi';
 import * as gotiac from '@gothub/pulumi-gotiac-aws';
 import * as path from 'path';
 import * as fs from 'fs';
-import { AWS_PROFILE, AWS_REGION, GOT_API_DOMAIN, parseEnv } from '@gothub/typescript-util';
+import { AWS_PROFILE, AWS_REGION, FILE_HOSTING_DOMAIN, GOT_API_DOMAIN, parseEnv } from '@gothub/typescript-util';
 import { TEST_ADMIN_EMAIL, TEST_USER_1_EMAIL, TEST_USER_2_EMAIL } from '@gothub/got-api-test/env';
 
 const env = parseEnv({
     AWS_PROFILE,
     AWS_REGION,
     GOT_API_DOMAIN,
+    FILE_HOSTING_DOMAIN,
     TEST_ADMIN_EMAIL,
     TEST_USER_1_EMAIL,
     TEST_USER_2_EMAIL,
 });
+
+export type Transform<T> = Partial<T> | ((args: T) => undefined);
+export function transform<T extends object>(transform: Transform<T> | undefined, args: T) {
+    // Case: transform is a function
+    if (typeof transform === 'function') {
+        transform(args);
+        return args;
+    }
+
+    // Case: no transform
+    // Case: transform is an argument
+    return { ...args, ...transform };
+}
 
 export default $config({
     app(input) {
@@ -32,17 +47,29 @@ export default $config({
     async run() {
         const userPool = new gotiac.UserPool('TestUserPool');
 
+        const fileHosting = new gotiac.FileHosting('FileHosting', {
+            domain: env.FILE_HOSTING_DOMAIN,
+        });
+
         const api = new gotiac.Api('TestApi', {
             domainName: env.GOT_API_DOMAIN,
             userPoolId: userPool.userPoolId,
             runtime: 'nodejs20.x',
             codePath: path.join(process.cwd(), 'dist/lambda/zips'),
             forceStoreDestroy: true,
+            fileHosting: {
+                bucketName: fileHosting.bucketName,
+                privateKeyId: fileHosting.privateKeyId,
+                privateKeyParameterName: fileHosting.privateKeyParameterName,
+            },
         });
 
         testResources({ userPool });
 
-        return api;
+        return {
+            apiUrl: pulumi.interpolate`https://${api.endpoint}`,
+            fileHostingUrl: pulumi.interpolate`https://${fileHosting.url}`,
+        };
     },
 });
 

@@ -22,3 +22,5 @@ export declare const TestUser: typeof import('./testUser').TestUser;
 export { UserPoolArgs } from './userPool';
 export type UserPool = import('./userPool').UserPool;
 export declare const UserPool: typeof import('./userPool').UserPool;
+import * as types from './types';
+export { types };

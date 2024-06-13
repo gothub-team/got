@@ -40,7 +40,6 @@ class Api extends pulumi.ComponentResource {
                 throw new Error("Missing required property 'userPoolId'");
             }
             resourceInputs["bucketEdgesName"] = args ? args.bucketEdgesName : undefined;
-            resourceInputs["bucketMediaName"] = args ? args.bucketMediaName : undefined;
             resourceInputs["bucketNodesName"] = args ? args.bucketNodesName : undefined;
             resourceInputs["bucketReverseEdgesName"] = args ? args.bucketReverseEdgesName : undefined;
             resourceInputs["bucketRightsAdminName"] = args ? args.bucketRightsAdminName : undefined;
@@ -49,6 +48,7 @@ class Api extends pulumi.ComponentResource {
             resourceInputs["bucketRightsWriteName"] = args ? args.bucketRightsWriteName : undefined;
             resourceInputs["codePath"] = args ? args.codePath : undefined;
             resourceInputs["domainName"] = args ? args.domainName : undefined;
+            resourceInputs["fileHosting"] = args ? args.fileHosting : undefined;
             resourceInputs["forceStoreDestroy"] = args ? args.forceStoreDestroy : undefined;
             resourceInputs["inviteUserValidationView"] = args ? args.inviteUserValidationView : undefined;
             resourceInputs["runtime"] = args ? args.runtime : undefined;
@@ -62,6 +62,7 @@ class Api extends pulumi.ComponentResource {
             resourceInputs["authRegisterVerifyResendEndpoint"] = undefined /*out*/;
             resourceInputs["authResetPasswordInitEndpoint"] = undefined /*out*/;
             resourceInputs["authResetPasswordVerifyEndpoint"] = undefined /*out*/;
+            resourceInputs["bucketMediaName"] = undefined /*out*/;
             resourceInputs["endpoint"] = undefined /*out*/;
             resourceInputs["openApiEndpoint"] = undefined /*out*/;
             resourceInputs["pullEndpoint"] = undefined /*out*/;

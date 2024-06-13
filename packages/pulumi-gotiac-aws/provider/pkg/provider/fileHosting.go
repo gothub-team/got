@@ -25,10 +25,10 @@ type FileHostingArgs struct {
 type FileHosting struct {
 	pulumi.ResourceState
 
-	// Bucket     *s3.Bucket          `pulumi:"bucket"`
 	Url                     pulumi.StringOutput `pulumi:"url"`
 	PrivateKeyParameterName pulumi.StringOutput `pulumi:"privateKeyParameterName"`
 	PrivateKeyId            pulumi.StringOutput `pulumi:"privateKeyId"`
+	BucketName              pulumi.StringOutput `pulumi:"bucketName"`
 }
 
 // NewFileHosting creates a new FileHosting component resource.
