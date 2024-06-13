@@ -275,6 +275,28 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	ssmGetParameterPolicy, err := iam.NewPolicy(ctx, name+"-ssm-get-parameter-policy", &iam.PolicyArgs{
+		Path:        pulumi.String("/"),
+		Description: pulumi.String("IAM policy for writing the got s3 storage"),
+		Policy: pulumi.Any(map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				{
+					"Effect": "Allow",
+					"Action": []interface{}{
+						"ssm:GetParameter",
+					},
+					"Resource": []interface{}{
+						"*",
+					},
+				},
+			},
+		}),
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	// Create Cognito Authorizer
 	authorizer, err := apigatewayv2.NewAuthorizer(ctx, fmt.Sprintf("%s-Authorizer", name), &apigatewayv2.AuthorizerArgs{
 		ApiId:          api.ID(),
@@ -342,6 +364,7 @@ func NewApi(ctx *pulumi.Context,
 		MemorySize:  &pullMem,
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
+			ssmGetParameterPolicy.Arn,
 			graphStore.mediaBucketReadPolicyArn,
 		},
 		Environment: pullEnv,
@@ -381,6 +404,7 @@ func NewApi(ctx *pulumi.Context,
 		AuthorizerId: authorizer.ID(),
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
+			ssmGetParameterPolicy.Arn,
 			graphStore.mediaBucketReadPolicyArn,
 		},
 		ApiId:        api.ID(),
@@ -415,6 +439,7 @@ func NewApi(ctx *pulumi.Context,
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
 			graphStore.StorageWritePolicyArn,
+			ssmGetParameterPolicy.Arn,
 			graphStore.mediaBucketReadPolicyArn,
 			graphStore.mediaBucketWritePolicyArn,
 		},
@@ -456,6 +481,7 @@ func NewApi(ctx *pulumi.Context,
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
 			graphStore.StorageWritePolicyArn,
+			ssmGetParameterPolicy.Arn,
 			graphStore.mediaBucketReadPolicyArn,
 			graphStore.mediaBucketWritePolicyArn,
 		},
