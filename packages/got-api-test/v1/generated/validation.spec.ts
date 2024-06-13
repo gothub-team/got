@@ -18,6 +18,7 @@ let headers: Record<string, string>;
 beforeAll(async () => {
     const user1Api = await createUserApi(env.TEST_USER_1_EMAIL, env.TEST_USER_1_PW);
     headers = {
+        'Content-Type': 'application/json',
         Authorization: `${user1Api.getCurrentSession()?.idToken}`,
     };
 });
