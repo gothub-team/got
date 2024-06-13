@@ -63,11 +63,6 @@ func NewCustomMailer(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	args.NotificationsEmailAccount.Sender.ToStringOutput().ApplyT(func(sender string) (string, error) {
-		fmt.Println("SENDER", sender)
-		return sender, nil
-	})
-
 	// Base64 encode the NotificationsEmailAccount like sender|host|user|password|port|secureFlag
 	notificationsEmailAccount := pulumi.Sprintf(
 		"%s|%s|%s|%s|%s|%t",

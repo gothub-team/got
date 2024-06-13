@@ -49,7 +49,7 @@ type Api struct {
 	Endpoint                         pulumi.StringOutput `pulumi:"endpoint"`
 	PullEndpoint                     pulumi.StringOutput `pulumi:"pullEndpoint"`
 	PushEndpoint                     pulumi.StringOutput `pulumi:"pushEndpoint"`
-	pullLambdaName                   pulumi.StringOutput `pulumi:"pullLambdaName"`
+	PullLambdaName                   pulumi.StringOutput `pulumi:"pullLambdaName"`
 	PullInvokePolicyArn              pulumi.StringOutput `pulumi:"pullInvokePolicyArn"`
 	PushInvokePolicyArn              pulumi.StringOutput `pulumi:"pushInvokePolicyArn"`
 	AuthLoginInitEndpoint            pulumi.StringOutput `pulumi:"authLoginInitEndpoint"`
@@ -758,7 +758,7 @@ func NewApi(ctx *pulumi.Context,
 	component.PullEndpoint = pullApiLambda.Route.RouteKey()
 	// component.PushFunction = pushLambda.Function
 	component.PushEndpoint = pushApiLambda.Route.RouteKey()
-	component.pullLambdaName = pullLambda.Name
+	component.PullLambdaName = pullLambda.Name
 	component.PullInvokePolicyArn = pullLambdaInvokePolicy.Arn
 	component.PushInvokePolicyArn = pushLambdaInvokePolicy.Arn
 	component.AuthLoginInitEndpoint = AuthLoginInitApiLambda.Route.RouteKey()

@@ -36,13 +36,13 @@ func NewUserPool(ctx *pulumi.Context,
 		AutoVerifiedAttributes: pulumi.StringArray{
 			pulumi.String("email"),
 		},
-		PasswordPolicy: &cognito.UserPoolPasswordPolicyArgs{
-			MinimumLength:    pulumi.Int(6),
-			RequireLowercase: pulumi.Bool(false),
-			RequireNumbers:   pulumi.Bool(true),
-			RequireSymbols:   pulumi.Bool(false),
-			RequireUppercase: pulumi.Bool(false),
-		},
+		// PasswordPolicy: &cognito.UserPoolPasswordPolicyArgs{
+		// 	MinimumLength:    pulumi.Int(6),
+		// 	RequireLowercase: pulumi.Bool(false),
+		// 	RequireNumbers:   pulumi.Bool(true),
+		// 	RequireSymbols:   pulumi.Bool(false),
+		// 	RequireUppercase: pulumi.Bool(false),
+		// },
 	})
 	if err != nil {
 		return nil, err
