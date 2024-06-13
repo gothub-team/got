@@ -360,6 +360,35 @@ resources:
             - logsBucketWritePolicyArn
             - mediaBucketReadPolicyArn
             - mediaBucketWritePolicyArn
+    gotiac:index:CustomMailer:
+        properties:
+            userPoolId:
+                type: string
+                description: The ID of the cognito user pool that should be updated with the custom mailer.
+            codePath:
+                type: string
+                description: The path to the .zip for the lambda code.
+            runtime:
+                type: string
+                description: The lambda runtime.
+            notificationsEmailAccount:
+                type: string
+                description:
+                    Notifications email account in the format of `$ echo "sender|host|user|password|port|secureFlag" |
+                    base64`.
+            pullLambdaName:
+                type: string
+                description: The name of the pull lambda function that is used to pull message templates.
+            invokePullPolicyArn:
+                type: string
+                description: The ARN of the pull lambda function.
+        required:
+            - userPoolId
+            - codePath
+            - runtime
+            - notificationsEmailAccount
+            - pullLambdaName
+            - invokePullPolicyArn
 language:
     csharp:
         packageReferences:

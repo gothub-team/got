@@ -318,7 +318,7 @@ func NewApi(ctx *pulumi.Context,
 
 		ssmGetAccessKeyParameterPolicy, err = iam.NewPolicy(ctx, name+"-ssm-get-parameter-policy", &iam.PolicyArgs{
 			Path:        pulumi.String("/"),
-			Description: pulumi.String("IAM policy for writing the got s3 storage"),
+			Description: pulumi.String("IAM policy for retrieving the cloudfront access key parameter"),
 			Policy: pulumi.Any(map[string]interface{}{
 				"Version": "2012-10-17",
 				"Statement": []map[string]interface{}{

@@ -10,6 +10,11 @@ export type Api = import('./api').Api;
 export const Api: typeof import('./api').Api = null as any;
 utilities.lazyLoad(exports, ['Api'], () => require('./api'));
 
+export { CustomMailerArgs } from './customMailer';
+export type CustomMailer = import('./customMailer').CustomMailer;
+export const CustomMailer: typeof import('./customMailer').CustomMailer = null as any;
+utilities.lazyLoad(exports, ['CustomMailer'], () => require('./customMailer'));
+
 export { FileHostingArgs } from './fileHosting';
 export type FileHosting = import('./fileHosting').FileHosting;
 export const FileHosting: typeof import('./fileHosting').FileHosting = null as any;
@@ -56,6 +61,8 @@ const _module = {
         switch (type) {
             case 'gotiac:index:Api':
                 return new Api(name, <any>undefined, { urn });
+            case 'gotiac:index:CustomMailer':
+                return new CustomMailer(name, <any>undefined, { urn });
             case 'gotiac:index:FileHosting':
                 return new FileHosting(name, <any>undefined, { urn });
             case 'gotiac:index:GraphStore':
