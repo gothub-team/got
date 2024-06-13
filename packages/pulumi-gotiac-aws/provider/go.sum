@@ -234,10 +234,6 @@ github.com/googleapis/gax-go/v2 v2.12.4 h1:9gWcmF85Wvq4ryPFvGFaOgPIs1AQX0d0bcbGw
 github.com/googleapis/gax-go/v2 v2.12.4/go.mod h1:KYEYLorsnIGDi/rPC8b5TdlB9kbKoFubselGIoBMCwI=
 github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=
 github.com/gorilla/mux v1.8.1/go.mod h1:AKf9I4AEqPTmMytcMc0KkNouC66V3BtZ4qD5fmWSiMQ=
-github.com/gothub-team/pulumi-awsworkmail/sdk v0.1.8 h1:t4Sd/4Sex9rpZNd7ro9sliUOAh07esQ5MA7gKyzYg84=
-github.com/gothub-team/pulumi-awsworkmail/sdk v0.1.8/go.mod h1:BMEioysXJbngQnegvbrK9WQE60rftEr9kyos9Ry88yU=
-github.com/gothub-team/pulumi-awsworkmail/sdk v0.1.9 h1:zcROebSZYYZsKqOq5h55SFM0dVNhezH1eE2ZP/RfKms=
-github.com/gothub-team/pulumi-awsworkmail/sdk v0.1.9/go.mod h1:BMEioysXJbngQnegvbrK9WQE60rftEr9kyos9Ry88yU=
 github.com/gothub-team/pulumi-awsworkmail/sdk v0.1.10 h1:QzBdCDj1hFeGNiptzgtIimgmEJnQrmBBvZqjyqGfF6U=
 github.com/gothub-team/pulumi-awsworkmail/sdk v0.1.10/go.mod h1:BMEioysXJbngQnegvbrK9WQE60rftEr9kyos9Ry88yU=
 github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645 h1:MJG/KsmcqMwFAkh8mTnAwhyKoB+sTAnY4CACC110tbU=

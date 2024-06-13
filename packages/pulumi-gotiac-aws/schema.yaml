@@ -393,6 +393,7 @@ resources:
             - mediaBucketReadPolicyArn
             - mediaBucketWritePolicyArn
     gotiac:index:CustomMailer:
+        isComponent: true
         inputProperties:
             userPoolId:
                 type: string

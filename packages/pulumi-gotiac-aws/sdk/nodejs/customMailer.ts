@@ -6,19 +6,7 @@ import * as inputs from './types/input';
 import * as outputs from './types/output';
 import * as utilities from './utilities';
 
-export class CustomMailer extends pulumi.CustomResource {
-    /**
-     * Get an existing CustomMailer resource's state with the given name, ID, and optional extra
-     * properties used to qualify the lookup.
-     *
-     * @param name The _unique_ name of the resulting resource.
-     * @param id The _unique_ provider ID of the resource to lookup.
-     * @param opts Optional settings to control the behavior of the CustomResource.
-     */
-    public static get(name: string, id: pulumi.Input<pulumi.ID>, opts?: pulumi.CustomResourceOptions): CustomMailer {
-        return new CustomMailer(name, undefined as any, { ...opts, id: id });
-    }
-
+export class CustomMailer extends pulumi.ComponentResource {
     /** @internal */
     public static readonly __pulumiType = 'gotiac:index:CustomMailer';
 
@@ -40,7 +28,7 @@ export class CustomMailer extends pulumi.CustomResource {
      * @param args The arguments to use to populate this resource's properties.
      * @param opts A bag of options that control this resource's behavior.
      */
-    constructor(name: string, args: CustomMailerArgs, opts?: pulumi.CustomResourceOptions) {
+    constructor(name: string, args: CustomMailerArgs, opts?: pulumi.ComponentResourceOptions) {
         let resourceInputs: pulumi.Inputs = {};
         opts = opts || {};
         if (!opts.id) {
@@ -71,7 +59,7 @@ export class CustomMailer extends pulumi.CustomResource {
         } else {
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
-        super(CustomMailer.__pulumiType, name, resourceInputs, opts);
+        super(CustomMailer.__pulumiType, name, resourceInputs, opts, true /*remote*/);
     }
 }
 

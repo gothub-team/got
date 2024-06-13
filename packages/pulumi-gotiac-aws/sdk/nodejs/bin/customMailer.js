@@ -5,18 +5,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CustomMailer = void 0;
 const pulumi = require("@pulumi/pulumi");
 const utilities = require("./utilities");
-class CustomMailer extends pulumi.CustomResource {
-    /**
-     * Get an existing CustomMailer resource's state with the given name, ID, and optional extra
-     * properties used to qualify the lookup.
-     *
-     * @param name The _unique_ name of the resulting resource.
-     * @param id The _unique_ provider ID of the resource to lookup.
-     * @param opts Optional settings to control the behavior of the CustomResource.
-     */
-    static get(name, id, opts) {
-        return new CustomMailer(name, undefined, Object.assign(Object.assign({}, opts), { id: id }));
-    }
+class CustomMailer extends pulumi.ComponentResource {
     /**
      * Returns true if the given object is an instance of CustomMailer.  This is designed to work even
      * when multiple copies of the Pulumi SDK have been loaded into the same process.
@@ -66,7 +55,7 @@ class CustomMailer extends pulumi.CustomResource {
         else {
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
-        super(CustomMailer.__pulumiType, name, resourceInputs, opts);
+        super(CustomMailer.__pulumiType, name, resourceInputs, opts, true /*remote*/);
     }
 }
 exports.CustomMailer = CustomMailer;

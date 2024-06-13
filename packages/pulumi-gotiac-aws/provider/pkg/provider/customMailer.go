@@ -154,7 +154,7 @@ func NewCustomMailer(ctx *pulumi.Context,
 	customMailerLambda, err := NewLambda(ctx, name+"EmailSenderLambda", &LambdaArgs{
 		Runtime:     args.Runtime,
 		CodePath:    pulumi.Sprintf("%s/authMailMessage.js", args.CodePath),
-		HandlerPath: pulumi.String("pull.handleInvoke"),
+		HandlerPath: pulumi.String("authMailMessage.handleInvoke"),
 		MemorySize:  &pullMem,
 		PolicyArns: pulumi.StringArray{
 			ssmGetNotificationsEmailAccountParameterPolicy.Arn,
@@ -178,6 +178,8 @@ func NewCustomMailer(ctx *pulumi.Context,
 
 	customMailer, err := awsworkmail.NewCognitoEmailSender(ctx, "CognitoEmailSender", &awsworkmail.CognitoEmailSenderArgs{
 		UserPoolId: args.UserPoolId.ToStringOutput(),
+		KmsKeyArn:  kmsKey.Arn,
+		LambdaArn:  customMailerLambda.Arn,
 	})
 	if err != nil {
 		return nil, err
