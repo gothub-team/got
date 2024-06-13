@@ -13,6 +13,10 @@ export declare class FileHosting extends pulumi.ComponentResource {
      */
     readonly bucketName: pulumi.Output<string>;
     /**
+     * The file hosting domain.
+     */
+    readonly domain: pulumi.Output<string>;
+    /**
      * The ID of the private key which is used to identify which key was used to sign a URL.
      */
     readonly privateKeyId: pulumi.Output<string>;
@@ -20,10 +24,6 @@ export declare class FileHosting extends pulumi.ComponentResource {
      * The ssm parameter name for the private key that is used to sign upload and download URLs.
      */
     readonly privateKeyParameterName: pulumi.Output<string>;
-    /**
-     * The file hosting domain.
-     */
-    readonly url: pulumi.Output<string>;
     /**
      * Create a FileHosting resource with the given unique name, arguments, and options.
      *

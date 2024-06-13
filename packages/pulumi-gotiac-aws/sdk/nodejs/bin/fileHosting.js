@@ -38,13 +38,12 @@ class FileHosting extends pulumi.ComponentResource {
             resourceInputs["forceDestroyBucket"] = args ? args.forceDestroyBucket : undefined;
             resourceInputs["privateKeyId"] = undefined /*out*/;
             resourceInputs["privateKeyParameterName"] = undefined /*out*/;
-            resourceInputs["url"] = undefined /*out*/;
         }
         else {
             resourceInputs["bucketName"] = undefined /*out*/;
+            resourceInputs["domain"] = undefined /*out*/;
             resourceInputs["privateKeyId"] = undefined /*out*/;
             resourceInputs["privateKeyParameterName"] = undefined /*out*/;
-            resourceInputs["url"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
         super(FileHosting.__pulumiType, name, resourceInputs, opts, true /*remote*/);

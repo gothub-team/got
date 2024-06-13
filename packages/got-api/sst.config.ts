@@ -46,7 +46,7 @@ export default $config({
             codePath: path.join(process.cwd(), 'dist/lambda/zips'),
             forceStoreDestroy: true,
             fileHosting: {
-                url: fileHosting.url,
+                domain: fileHosting.domain,
                 bucketName: fileHosting.bucketName,
                 privateKeyId: fileHosting.privateKeyId,
                 privateKeyParameterName: fileHosting.privateKeyParameterName,
@@ -57,7 +57,7 @@ export default $config({
 
         return {
             apiUrl: pulumi.interpolate`https://${api.endpoint}`,
-            fileHostingUrl: pulumi.interpolate`https://${fileHosting.url}`,
+            fileHostingUrl: pulumi.interpolate`https://${fileHosting.domain}`,
         };
     },
 });

@@ -27,6 +27,10 @@ export class FileHosting extends pulumi.ComponentResource {
      */
     public readonly bucketName!: pulumi.Output<string>;
     /**
+     * The file hosting domain.
+     */
+    public readonly domain!: pulumi.Output<string>;
+    /**
      * The ID of the private key which is used to identify which key was used to sign a URL.
      */
     public readonly /*out*/ privateKeyId!: pulumi.Output<string>;
@@ -34,10 +38,6 @@ export class FileHosting extends pulumi.ComponentResource {
      * The ssm parameter name for the private key that is used to sign upload and download URLs.
      */
     public readonly /*out*/ privateKeyParameterName!: pulumi.Output<string>;
-    /**
-     * The file hosting domain.
-     */
-    public readonly /*out*/ url!: pulumi.Output<string>;
 
     /**
      * Create a FileHosting resource with the given unique name, arguments, and options.
@@ -58,12 +58,11 @@ export class FileHosting extends pulumi.ComponentResource {
             resourceInputs['forceDestroyBucket'] = args ? args.forceDestroyBucket : undefined;
             resourceInputs['privateKeyId'] = undefined /*out*/;
             resourceInputs['privateKeyParameterName'] = undefined /*out*/;
-            resourceInputs['url'] = undefined /*out*/;
         } else {
             resourceInputs['bucketName'] = undefined /*out*/;
+            resourceInputs['domain'] = undefined /*out*/;
             resourceInputs['privateKeyId'] = undefined /*out*/;
             resourceInputs['privateKeyParameterName'] = undefined /*out*/;
-            resourceInputs['url'] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
         super(FileHosting.__pulumiType, name, resourceInputs, opts, true /*remote*/);

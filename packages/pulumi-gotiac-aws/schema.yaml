@@ -6,7 +6,7 @@ types:
     gotiac:index:ApiFileHostingInput:
         type: object
         properties:
-            url:
+            domain:
                 type: string
                 description: The file hosting domain.
             privateKeyId:
@@ -19,7 +19,7 @@ types:
                 type: string
                 description: The name of the created media bucket that is used to store files.
         required:
-            - url
+            - domain
             - privateKeyId
             - privateKeyParameterName
             - bucketName
@@ -122,7 +122,7 @@ resources:
         requiredInputs:
             - domain
         properties:
-            url:
+            domain:
                 type: string
                 description: The file hosting domain.
             privateKeyId:
@@ -135,7 +135,7 @@ resources:
                 type: string
                 description: The name of the created media bucket that is used to store files.
         required:
-            - url
+            - domain
             - privateKeyId
             - privateKeyParameterName
             - bucketName

@@ -35,8 +35,7 @@ type ApiArgs struct {
 }
 
 type ApiFileHostingInput struct {
-	// Bucket     *s3.Bucket          `pulumi:"bucket"`
-	Url                     pulumi.StringInput `pulumi:"url"`
+	Domain                  pulumi.StringInput `pulumi:"domain"`
 	PrivateKeyParameterName pulumi.StringInput `pulumi:"privateKeyParameterName"`
 	PrivateKeyId            pulumi.StringInput `pulumi:"privateKeyId"`
 	BucketName              pulumi.StringInput `pulumi:"bucketName"`
@@ -323,7 +322,7 @@ func NewApi(ctx *pulumi.Context,
 	if args.FileHosting != nil {
 		cloudfrontAccessKeyId = args.FileHosting.PrivateKeyId.ToStringOutput()
 		cloudfrontNewAccessKeyParameter = args.FileHosting.PrivateKeyParameterName.ToStringOutput()
-		mediaDomain = args.FileHosting.Url.ToStringOutput()
+		mediaDomain = args.FileHosting.Domain.ToStringOutput()
 		bucketMediaName = &args.FileHosting.BucketName
 	}
 

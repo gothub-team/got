@@ -11,6 +11,10 @@ export interface ApiFileHostingInputArgs {
      */
     bucketName: pulumi.Input<string>;
     /**
+     * The file hosting domain.
+     */
+    domain: pulumi.Input<string>;
+    /**
      * The ID of the private key which is used to identify which key was used to sign a URL.
      */
     privateKeyId: pulumi.Input<string>;
@@ -18,8 +22,4 @@ export interface ApiFileHostingInputArgs {
      * The ssm parameter name for the private key that is used to sign upload and download URLs.
      */
     privateKeyParameterName: pulumi.Input<string>;
-    /**
-     * The file hosting domain.
-     */
-    url: pulumi.Input<string>;
 }
