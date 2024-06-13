@@ -29,7 +29,7 @@ type ApiArgs struct {
 	BucketRightsWriteName    *pulumi.StringInput  `pulumi:"bucketRightsWriteName"`
 	BucketRightsAdminName    *pulumi.StringInput  `pulumi:"bucketRightsAdminName"`
 	BucketRightsOwnerName    *pulumi.StringInput  `pulumi:"bucketRightsOwnerName"`
-	BucketMediaName          *pulumi.StringInput  `pulumi:"bucketMediaName"`
+	BucketLogsName           *pulumi.StringInput  `pulumi:"bucketLogsName"`
 	InviteUserValidationView *pulumi.StringInput  `pulumi:"inviteUserValidationView"`
 	FileHosting              *ApiFileHostingInput `pulumi:"fileHosting"`
 }
@@ -424,6 +424,7 @@ func NewApi(ctx *pulumi.Context,
 		"BUCKET_RIGHTS_WRITE":                 graphStore.BucketRightsWriteName,
 		"BUCKET_RIGHTS_ADMIN":                 graphStore.BucketRightsAdminName,
 		"BUCKET_OWNERS":                       graphStore.BucketRightsOwnerName,
+		"BUCKET_LOGS":                         graphStore.BucketLogsName,
 		"BUCKET_MEDIA":                        graphStore.BucketMediaName,
 		"MEDIA_DOMAIN":                        mediaDomain,
 		"CLOUDFRONT_ACCESS_KEY_ID":            cloudfrontAccessKeyId,
@@ -441,6 +442,7 @@ func NewApi(ctx *pulumi.Context,
 			ssmGetParameterPolicy.Arn,
 			graphStore.mediaBucketReadPolicyArn,
 			graphStore.mediaBucketWritePolicyArn,
+			graphStore.logsBucketWritePolicyArn,
 		},
 		Environment: pushEnv,
 	})
@@ -483,6 +485,7 @@ func NewApi(ctx *pulumi.Context,
 			ssmGetParameterPolicy.Arn,
 			graphStore.mediaBucketReadPolicyArn,
 			graphStore.mediaBucketWritePolicyArn,
+			graphStore.logsBucketWritePolicyArn,
 		},
 		ApiId:        api.ID(),
 		ExecutionArn: api.ExecutionArn,

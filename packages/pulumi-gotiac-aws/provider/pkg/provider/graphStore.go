@@ -15,6 +15,7 @@ type GraphStoreArgs struct {
 	BucketRightsWriteName  *pulumi.StringInput `pulumi:"bucketRightsWriteName"`
 	BucketRightsAdminName  *pulumi.StringInput `pulumi:"bucketRightsAdminName"`
 	BucketRightsOwnerName  *pulumi.StringInput `pulumi:"bucketRightsOwnerName"`
+	BucketLogsName         *pulumi.StringInput `pulumi:"bucketLogsName"`
 	BucketMediaName        *pulumi.StringInput `pulumi:"bucketMediaName"`
 	ForceDestroy           *pulumi.BoolInput   `pulumi:"forceDestroy"`
 }
@@ -29,9 +30,12 @@ type GraphStore struct {
 	BucketRightsWriteName     pulumi.StringOutput `pulumi:"bucketRightsWrite"`
 	BucketRightsAdminName     pulumi.StringOutput `pulumi:"bucketRightsAdmin"`
 	BucketRightsOwnerName     pulumi.StringOutput `pulumi:"bucketRightsOwner"`
+	BucketLogsName            pulumi.StringOutput `pulumi:"bucketLogs"`
 	BucketMediaName           pulumi.StringOutput `pulumi:"bucketMedia"`
 	StorageReadPolicyArn      pulumi.StringOutput `pulumi:"storageReadPolicyArn"`
 	StorageWritePolicyArn     pulumi.StringOutput `pulumi:"storageWritePolicyArn"`
+	logsBucketReadPolicyArn   pulumi.StringOutput `pulumi:"logsBucketReadPolicyArn"`
+	logsBucketWritePolicyArn  pulumi.StringOutput `pulumi:"logsBucketWritePolicyArn"`
 	mediaBucketReadPolicyArn  pulumi.StringOutput `pulumi:"mediaBucketReadPolicyArn"`
 	mediaBucketWritePolicyArn pulumi.StringOutput `pulumi:"mediaBucketWritePolicyArn"`
 }
@@ -84,6 +88,10 @@ func NewGraphStore(ctx *pulumi.Context,
 		return nil, err
 	}
 	bucketRightsOwner, err := lookupOrCreateBucket(ctx, args.BucketRightsOwnerName, name+"-rights-owner", args.ForceDestroy)
+	if err != nil {
+		return nil, err
+	}
+	bucketLogs, err := lookupOrCreateBucket(ctx, args.BucketRightsOwnerName, name+"-logs", args.ForceDestroy)
 	if err != nil {
 		return nil, err
 	}
@@ -166,6 +174,62 @@ func NewGraphStore(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	logsBucketReadPolicy, err := iam.NewPolicy(ctx, name+"-logs-bucket-read-policy", &iam.PolicyArgs{
+		Path:        pulumi.String("/"),
+		Description: pulumi.String("IAM policy for reading the logs bucket"),
+		Policy: pulumi.Any(map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				{
+					"Effect": "Allow",
+					"Action": []interface{}{
+						"s3:GetObject",
+						"s3:GetObjectVersion",
+					},
+					"Resource": []interface{}{
+						pulumi.Sprintf("%v/*", bucketLogs.Arn),
+					},
+				},
+				{
+					"Effect": "Allow",
+					"Action": []interface{}{
+						"s3:ListBucket",
+					},
+					"Resource": []interface{}{
+						pulumi.Sprintf("%v", bucketLogs.Arn),
+					},
+				},
+			},
+		}),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	logsBucketWritePolicy, err := iam.NewPolicy(ctx, name+"-logs-bucket-write-policy", &iam.PolicyArgs{
+		Path:        pulumi.String("/"),
+		Description: pulumi.String("IAM policy for writing the logs bucket"),
+		Policy: pulumi.Any(map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				{
+					"Effect": "Allow",
+					"Action": []interface{}{
+						"s3:DeleteObject",
+						"s3:PutObject",
+						"s3:RestoreObject",
+					},
+					"Resource": []interface{}{
+						pulumi.Sprintf("%v/*", bucketLogs.Arn),
+					},
+				},
+			},
+		}),
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	mediaBucketReadPolicy, err := iam.NewPolicy(ctx, name+"-media-bucket-read-policy", &iam.PolicyArgs{
 		Path:        pulumi.String("/"),
 		Description: pulumi.String("IAM policy for reading the media bucket"),
@@ -229,10 +293,13 @@ func NewGraphStore(ctx *pulumi.Context,
 	component.BucketRightsWriteName = bucketRightsWrite.Name.ToStringOutput()
 	component.BucketRightsAdminName = bucketRightsAdmin.Name.ToStringOutput()
 	component.BucketRightsOwnerName = bucketRightsOwner.Name.ToStringOutput()
+	component.BucketLogsName = bucketLogs.Name.ToStringOutput()
 	component.BucketMediaName = bucketMedia.Name.ToStringOutput()
 
 	component.StorageReadPolicyArn = storageReadPolicy.Arn
 	component.StorageWritePolicyArn = storageWritePolicy.Arn
+	component.logsBucketReadPolicyArn = logsBucketReadPolicy.Arn
+	component.logsBucketWritePolicyArn = logsBucketWritePolicy.Arn
 	component.mediaBucketReadPolicyArn = mediaBucketReadPolicy.Arn
 	component.mediaBucketWritePolicyArn = mediaBucketWritePolicy.Arn
 
