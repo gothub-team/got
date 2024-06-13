@@ -532,6 +532,28 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	getLogsEnv := pulumi.StringMap{
+		"BUCKET_LOGS": graphStore.BucketLogsName,
+	}
+
+	_, err = NewApiLambda(ctx, name+"GetLogsApi", &ApiLambdaArgs{
+		Runtime:      args.Runtime,
+		CodePath:     pulumi.Sprintf("%s/get-logs.js", args.CodePath),
+		HandlerPath:  pulumi.String("get-logs.handleHttp"),
+		Method:       pulumi.String("POST"),
+		AuthorizerId: authorizer.ID(),
+		PolicyArns: pulumi.StringArray{
+			graphStore.logsBucketReadPolicyArn,
+		},
+		ApiId:        api.ID(),
+		ExecutionArn: api.ExecutionArn,
+		RoutePath:    pulumi.String("/get-logs"),
+		Environment:  getLogsEnv,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	var inviteUserValidationView pulumi.StringOutput
 	if args.InviteUserValidationView != nil {
 		inviteUserValidationView = (*args.InviteUserValidationView).ToStringOutput()
