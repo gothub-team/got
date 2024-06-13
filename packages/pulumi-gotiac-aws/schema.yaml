@@ -290,6 +290,9 @@ resources:
             bucketRightsOwnerName:
                 type: string
                 description: The bucket to be used for owner right storage
+            bucketLogsName:
+                type: string
+                description: The bucket to be used for log storage
             bucketMediaName:
                 type: string
                 description: The bucket to be used for file storage
@@ -319,6 +322,9 @@ resources:
             bucketRightsOwnerName:
                 type: string
                 description: The Name of the bucket for owner right storage.
+            bucketLogsName:
+                type: string
+                description: The Name of the bucket for file storage.
             bucketMediaName:
                 type: string
                 description: The Name of the bucket for file storage.
@@ -328,6 +334,18 @@ resources:
             storageWritePolicyArn:
                 type: string
                 description: The ARN of the storage write policy.
+            logsBucketReadPolicyArn:
+                type: string
+                description: The ARN of the logs bucket read policy.
+            logsBucketWritePolicyArn:
+                type: string
+                description: The ARN of the logs bucket write policy.
+            mediaBucketReadPolicyArn:
+                type: string
+                description: The ARN of the media bucket read policy.
+            mediaBucketWritePolicyArn:
+                type: string
+                description: The ARN of the media bucket write policy.
         required:
             - bucketNodesName
             - bucketEdgesName
@@ -338,6 +356,10 @@ resources:
             - bucketRightsOwnerName
             - storageReadPolicyArn
             - storageWritePolicyArn
+            - logsBucketReadPolicyArn
+            - logsBucketWritePolicyArn
+            - mediaBucketReadPolicyArn
+            - mediaBucketWritePolicyArn
 language:
     csharp:
         packageReferences:
