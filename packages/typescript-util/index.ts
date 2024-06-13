@@ -70,21 +70,21 @@ export const MAIL_USER_PW = z
 export const MAIL_IMAP_SERVER = z
     .string()
     .describe('IMAP server of the mailbox that is used to test mail sending API endpoints.');
-// sender|host|user|password|port|secureFlag
-export const NOTIFICATIONS_EMAIL_ACCOUNT = z
+
+export const NOTIFICATIONS_EMAIL_SENDER = z
     .string()
-    .optional()
-    .default(JSON.stringify({ root: { edges: { 'from/to': { include: { rights: true } } } } }))
-    .transform((content, ctx) => {
-        try {
-            return JSON.parse(content);
-        } catch (error) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: (error as Error).message,
-            });
-            return z.never;
-        }
-    })
-    .pipe(ViewSchema)
-    .describe('got view that covers nodes for a user needs read rights in order to invite other users.');
+    .describe('Display name of the sender of the notifications emails.');
+export const NOTIFICATIONS_EMAIL_HOST = z.string().describe('SMTP host of the email server that sends notifications.');
+export const NOTIFICATIONS_EMAIL_USER = z
+    .string()
+    .describe('SMTP username of the email server that sends notifications.');
+export const NOTIFICATIONS_EMAIL_PASSWORD = z
+    .string()
+    .describe('SMTP password of the email server that sends notifications.');
+export const NOTIFICATIONS_EMAIL_PORT = z.string().describe('SMTP port of the email server that sends notifications.');
+export const NOTIFICATIONS_EMAIL_SECURE_FLAG = z
+    .string()
+    .toLowerCase()
+    .transform((value) => JSON.parse(value))
+    .pipe(z.boolean())
+    .describe('Flag that indicates if the email server uses secure connection.');
