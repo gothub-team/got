@@ -31,17 +31,17 @@ type CustomMailerArgs struct {
 
 type NotificationsEmailAccount struct {
 	// Display name of the sender of the notifications emails.
-	Sender pulumi.StringInput
+	Sender pulumi.StringInput `pulumi:"sender"`
 	// SMTP host of the email server that sends notifications.
-	Host pulumi.StringInput
+	Host pulumi.StringInput `pulumi:"host"`
 	// SMTP username of the email server that sends notifications.
-	User pulumi.StringInput
+	User pulumi.StringInput `pulumi:"user"`
 	// SMTP password of the email server that sends notifications.
-	Password pulumi.StringInput
+	Password pulumi.StringInput `pulumi:"password"`
 	// SMTP port of the email server that sends notifications.
-	Port pulumi.StringInput
+	Port pulumi.StringInput `pulumi:"port"`
 	// Flag that indicates if the email server uses secure connection.
-	SecureFlag pulumi.BoolInput
+	SecureFlag pulumi.BoolInput `pulumi:"secureFlag"`
 }
 
 // The CustomMailer component resource.
@@ -62,6 +62,11 @@ func NewCustomMailer(ctx *pulumi.Context,
 	if err != nil {
 		return nil, err
 	}
+
+	args.NotificationsEmailAccount.Sender.ToStringOutput().ApplyT(func(sender string) (string, error) {
+		fmt.Println("SENDER", sender)
+		return sender, nil
+	})
 
 	// Base64 encode the NotificationsEmailAccount like sender|host|user|password|port|secureFlag
 	notificationsEmailAccount := pulumi.Sprintf(
@@ -147,8 +152,31 @@ func NewCustomMailer(ctx *pulumi.Context,
 
 	pullMem := pulumi.Int(2048)
 	pullEnv := pulumi.StringMap{
-		"CUSTOM_MAIL_MESSAGE_KEY_ARN": kmsKey.Arn,
-		"PULL_LAMBDA_NAME":            args.PullLambdaName,
+		"NOTIFICATIONS_EMAIL_ACCOUNT_PARAMETER_NAME": ssmParameter.Name,
+		"CUSTOM_MAIL_MESSAGE_KEY_ARN":                kmsKey.Arn,
+		"PULL_LAMBDA_NAME":                           args.PullLambdaName,
+	}
+
+	decryptKeyPolicy, err := iam.NewPolicy(ctx, name+"-decrypt-key-policy", &iam.PolicyArgs{
+		Path:        pulumi.String("/"),
+		Description: pulumi.String("IAM policy for decrypting via KMS key"),
+		Policy: pulumi.Any(map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				{
+					"Effect": "Allow",
+					"Action": []interface{}{
+						"kms:Decrypt",
+					},
+					"Resource": []interface{}{
+						kmsKey.Arn,
+					},
+				},
+			},
+		}),
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	customMailerLambda, err := NewLambda(ctx, name+"EmailSenderLambda", &LambdaArgs{
@@ -159,6 +187,7 @@ func NewCustomMailer(ctx *pulumi.Context,
 		PolicyArns: pulumi.StringArray{
 			ssmGetNotificationsEmailAccountParameterPolicy.Arn,
 			args.InvokePullPolicyArn,
+			decryptKeyPolicy.Arn,
 		},
 		Environment: pullEnv,
 	})
