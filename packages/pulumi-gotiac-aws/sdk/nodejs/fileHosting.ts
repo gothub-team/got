@@ -4,6 +4,9 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as utilities from './utilities';
 
+/**
+ * The FileHosting component creates an s3 bucket for file storage and a CDN distribution for file access.
+ */
 export class FileHosting extends pulumi.ComponentResource {
     /** @internal */
     public static readonly __pulumiType = 'gotiac:index:FileHosting';
@@ -20,17 +23,21 @@ export class FileHosting extends pulumi.ComponentResource {
     }
 
     /**
-     * The ID the private key.
+     * The name of the created media bucket that is used to store files.
+     */
+    public readonly bucketName!: pulumi.Output<string>;
+    /**
+     * The file hosting domain.
+     */
+    public readonly domain!: pulumi.Output<string>;
+    /**
+     * The ID of the private key which is used to identify which key was used to sign a URL.
      */
     public readonly /*out*/ privateKeyId!: pulumi.Output<string>;
     /**
-     * The parameter name for the private key.
+     * The ssm parameter name for the private key that is used to sign upload and download URLs.
      */
     public readonly /*out*/ privateKeyParameterName!: pulumi.Output<string>;
-    /**
-     * The file hosting URL.
-     */
-    public readonly /*out*/ url!: pulumi.Output<string>;
 
     /**
      * Create a FileHosting resource with the given unique name, arguments, and options.
@@ -48,13 +55,14 @@ export class FileHosting extends pulumi.ComponentResource {
             }
             resourceInputs['bucketName'] = args ? args.bucketName : undefined;
             resourceInputs['domain'] = args ? args.domain : undefined;
+            resourceInputs['forceDestroyBucket'] = args ? args.forceDestroyBucket : undefined;
             resourceInputs['privateKeyId'] = undefined /*out*/;
             resourceInputs['privateKeyParameterName'] = undefined /*out*/;
-            resourceInputs['url'] = undefined /*out*/;
         } else {
+            resourceInputs['bucketName'] = undefined /*out*/;
+            resourceInputs['domain'] = undefined /*out*/;
             resourceInputs['privateKeyId'] = undefined /*out*/;
             resourceInputs['privateKeyParameterName'] = undefined /*out*/;
-            resourceInputs['url'] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
         super(FileHosting.__pulumiType, name, resourceInputs, opts, true /*remote*/);
@@ -73,4 +81,8 @@ export interface FileHostingArgs {
      * The file hosting domain.
      */
     domain: pulumi.Input<string>;
+    /**
+     * If the bucket should be destroyed on stack removal even if it is not empty.
+     */
+    forceDestroyBucket?: pulumi.Input<boolean>;
 }

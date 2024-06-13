@@ -15,20 +15,25 @@ type GraphStoreArgs struct {
 	BucketRightsWriteName  *pulumi.StringInput `pulumi:"bucketRightsWriteName"`
 	BucketRightsAdminName  *pulumi.StringInput `pulumi:"bucketRightsAdminName"`
 	BucketRightsOwnerName  *pulumi.StringInput `pulumi:"bucketRightsOwnerName"`
+	BucketMediaName        *pulumi.StringInput `pulumi:"bucketMediaName"`
+	ForceDestroy           *pulumi.BoolInput   `pulumi:"forceDestroy"`
 }
 
 // The GraphStore component resource.
 type GraphStore struct {
 	pulumi.ResourceState
-	BucketNodesName        pulumi.StringOutput `pulumi:"bucketNodesName"`
-	BucketEdgesName        pulumi.StringOutput `pulumi:"bucketEdges"`
-	BucketReverseEdgesName pulumi.StringOutput `pulumi:"bucketReverseEdges"`
-	BucketRightsReadName   pulumi.StringOutput `pulumi:"bucketRightsRead"`
-	BucketRightsWriteName  pulumi.StringOutput `pulumi:"bucketRightsWrite"`
-	BucketRightsAdminName  pulumi.StringOutput `pulumi:"bucketRightsAdmin"`
-	BucketRightsOwnerName  pulumi.StringOutput `pulumi:"bucketRightsOwner"`
-	StorageReadPolicyArn   pulumi.StringOutput `pulumi:"storageReadPolicyArn"`
-	StorageWritePolicyArn  pulumi.StringOutput `pulumi:"storageWritePolicyArn"`
+	BucketNodesName           pulumi.StringOutput `pulumi:"bucketNodesName"`
+	BucketEdgesName           pulumi.StringOutput `pulumi:"bucketEdges"`
+	BucketReverseEdgesName    pulumi.StringOutput `pulumi:"bucketReverseEdges"`
+	BucketRightsReadName      pulumi.StringOutput `pulumi:"bucketRightsRead"`
+	BucketRightsWriteName     pulumi.StringOutput `pulumi:"bucketRightsWrite"`
+	BucketRightsAdminName     pulumi.StringOutput `pulumi:"bucketRightsAdmin"`
+	BucketRightsOwnerName     pulumi.StringOutput `pulumi:"bucketRightsOwner"`
+	BucketMediaName           pulumi.StringOutput `pulumi:"bucketMedia"`
+	StorageReadPolicyArn      pulumi.StringOutput `pulumi:"storageReadPolicyArn"`
+	StorageWritePolicyArn     pulumi.StringOutput `pulumi:"storageWritePolicyArn"`
+	mediaBucketReadPolicyArn  pulumi.StringOutput `pulumi:"mediaBucketReadPolicyArn"`
+	mediaBucketWritePolicyArn pulumi.StringOutput `pulumi:"mediaBucketWritePolicyArn"`
 }
 
 type BucketInfo struct {
@@ -50,35 +55,39 @@ func NewGraphStore(ctx *pulumi.Context,
 	}
 
 	// create nodes bucket
-	bucketNodes, err := lookupOrCreateBucket(ctx, args.BucketNodesName, name+"-nodes")
+	bucketNodes, err := lookupOrCreateBucket(ctx, args.BucketNodesName, name+"-nodes", args.ForceDestroy)
 	if err != nil {
 		return nil, err
 	}
 
 	// create edges buckets
-	bucketEdges, err := lookupOrCreateBucket(ctx, args.BucketEdgesName, name+"-edges")
+	bucketEdges, err := lookupOrCreateBucket(ctx, args.BucketEdgesName, name+"-edges", args.ForceDestroy)
 	if err != nil {
 		return nil, err
 	}
-	bucketReverseEdges, err := lookupOrCreateBucket(ctx, args.BucketReverseEdgesName, name+"-reverse-edges")
+	bucketReverseEdges, err := lookupOrCreateBucket(ctx, args.BucketReverseEdgesName, name+"-reverse-edges", args.ForceDestroy)
 	if err != nil {
 		return nil, err
 	}
 
 	// create right buckets
-	bucketRightsRead, err := lookupOrCreateBucket(ctx, args.BucketRightsReadName, name+"-rights-read")
+	bucketRightsRead, err := lookupOrCreateBucket(ctx, args.BucketRightsReadName, name+"-rights-read", args.ForceDestroy)
 	if err != nil {
 		return nil, err
 	}
-	bucketRightsWrite, err := lookupOrCreateBucket(ctx, args.BucketRightsWriteName, name+"-rights-write")
+	bucketRightsWrite, err := lookupOrCreateBucket(ctx, args.BucketRightsWriteName, name+"-rights-write", args.ForceDestroy)
 	if err != nil {
 		return nil, err
 	}
-	bucketRightsAdmin, err := lookupOrCreateBucket(ctx, args.BucketRightsAdminName, name+"-rights-admin")
+	bucketRightsAdmin, err := lookupOrCreateBucket(ctx, args.BucketRightsAdminName, name+"-rights-admin", args.ForceDestroy)
 	if err != nil {
 		return nil, err
 	}
-	bucketRightsOwner, err := lookupOrCreateBucket(ctx, args.BucketRightsOwnerName, name+"-rights-owner")
+	bucketRightsOwner, err := lookupOrCreateBucket(ctx, args.BucketRightsOwnerName, name+"-rights-owner", args.ForceDestroy)
+	if err != nil {
+		return nil, err
+	}
+	bucketMedia, err := lookupOrCreateBucket(ctx, args.BucketMediaName, name+"-media", args.ForceDestroy)
 	if err != nil {
 		return nil, err
 	}
@@ -157,6 +166,62 @@ func NewGraphStore(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	mediaBucketReadPolicy, err := iam.NewPolicy(ctx, name+"-media-bucket-read-policy", &iam.PolicyArgs{
+		Path:        pulumi.String("/"),
+		Description: pulumi.String("IAM policy for reading the media bucket"),
+		Policy: pulumi.Any(map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				{
+					"Effect": "Allow",
+					"Action": []interface{}{
+						"s3:GetObject",
+						"s3:GetObjectVersion",
+					},
+					"Resource": []interface{}{
+						pulumi.Sprintf("%v/*", bucketMedia.Arn),
+					},
+				},
+				{
+					"Effect": "Allow",
+					"Action": []interface{}{
+						"s3:ListBucket",
+					},
+					"Resource": []interface{}{
+						pulumi.Sprintf("%v", bucketMedia.Arn),
+					},
+				},
+			},
+		}),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	mediaBucketWritePolicy, err := iam.NewPolicy(ctx, name+"-media-bucket-write-policy", &iam.PolicyArgs{
+		Path:        pulumi.String("/"),
+		Description: pulumi.String("IAM policy for writing the media bucket"),
+		Policy: pulumi.Any(map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				{
+					"Effect": "Allow",
+					"Action": []interface{}{
+						"s3:DeleteObject",
+						"s3:PutObject",
+						"s3:RestoreObject",
+					},
+					"Resource": []interface{}{
+						pulumi.Sprintf("%v/*", bucketMedia.Arn),
+					},
+				},
+			},
+		}),
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	component.BucketNodesName = bucketNodes.Name.ToStringOutput()
 	component.BucketEdgesName = bucketEdges.Name.ToStringOutput()
 	component.BucketReverseEdgesName = bucketReverseEdges.Name.ToStringOutput()
@@ -164,9 +229,12 @@ func NewGraphStore(ctx *pulumi.Context,
 	component.BucketRightsWriteName = bucketRightsWrite.Name.ToStringOutput()
 	component.BucketRightsAdminName = bucketRightsAdmin.Name.ToStringOutput()
 	component.BucketRightsOwnerName = bucketRightsOwner.Name.ToStringOutput()
+	component.BucketMediaName = bucketMedia.Name.ToStringOutput()
 
 	component.StorageReadPolicyArn = storageReadPolicy.Arn
 	component.StorageWritePolicyArn = storageWritePolicy.Arn
+	component.mediaBucketReadPolicyArn = mediaBucketReadPolicy.Arn
+	component.mediaBucketWritePolicyArn = mediaBucketWritePolicy.Arn
 
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{}); err != nil {
 		return nil, err
@@ -175,7 +243,7 @@ func NewGraphStore(ctx *pulumi.Context,
 	return component, nil
 }
 
-func lookupOrCreateBucket(ctx *pulumi.Context, name *pulumi.StringInput, fallbackName string) (*BucketInfo, error) {
+func lookupOrCreateBucket(ctx *pulumi.Context, name *pulumi.StringInput, fallbackName string, forceDestroy *pulumi.BoolInput) (*BucketInfo, error) {
 	var bucketName pulumi.StringInput
 	var bucketArn pulumi.StringInput
 	if name != nil {
@@ -192,8 +260,16 @@ func lookupOrCreateBucket(ctx *pulumi.Context, name *pulumi.StringInput, fallbac
 			return lookupResult.Arn, nil
 		}).(pulumi.StringInput)
 	} else {
+		var _forceDestroy pulumi.BoolInput
+		if forceDestroy == nil {
+			_forceDestroy = pulumi.Bool(false)
+		} else {
+			_forceDestroy = *forceDestroy
+		}
 		// Create an S3 bucket to host files for the FileHosting service
-		bucket, err := s3.NewBucket(ctx, fallbackName, &s3.BucketArgs{})
+		bucket, err := s3.NewBucketV2(ctx, fallbackName, &s3.BucketV2Args{
+			ForceDestroy: _forceDestroy,
+		})
 		if err != nil {
 			return nil, err
 		}

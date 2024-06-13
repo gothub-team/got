@@ -20,14 +20,25 @@ type ApiArgs struct {
 	// The the path to the .zip for the lambda code
 	CodePath pulumi.StringInput `pulumi:"codePath"`
 	// The lambda runtime
-	Runtime                pulumi.StringInput  `pulumi:"runtime"`
-	BucketNodesName        *pulumi.StringInput `pulumi:"bucketNodesName"`
-	BucketEdgesName        *pulumi.StringInput `pulumi:"bucketEdgesName"`
-	BucketReverseEdgesName *pulumi.StringInput `pulumi:"bucketReverseEdgesName"`
-	BucketRightsReadName   *pulumi.StringInput `pulumi:"bucketRightsReadName"`
-	BucketRightsWriteName  *pulumi.StringInput `pulumi:"bucketRightsWriteName"`
-	BucketRightsAdminName  *pulumi.StringInput `pulumi:"bucketRightsAdminName"`
-	BucketRightsOwnerName  *pulumi.StringInput `pulumi:"bucketRightsOwnerName"`
+	Runtime                  pulumi.StringInput   `pulumi:"runtime"`
+	ForceStoreDestroy        *pulumi.BoolInput    `pulumi:"forceStoreDestroy"`
+	BucketNodesName          *pulumi.StringInput  `pulumi:"bucketNodesName"`
+	BucketEdgesName          *pulumi.StringInput  `pulumi:"bucketEdgesName"`
+	BucketReverseEdgesName   *pulumi.StringInput  `pulumi:"bucketReverseEdgesName"`
+	BucketRightsReadName     *pulumi.StringInput  `pulumi:"bucketRightsReadName"`
+	BucketRightsWriteName    *pulumi.StringInput  `pulumi:"bucketRightsWriteName"`
+	BucketRightsAdminName    *pulumi.StringInput  `pulumi:"bucketRightsAdminName"`
+	BucketRightsOwnerName    *pulumi.StringInput  `pulumi:"bucketRightsOwnerName"`
+	BucketMediaName          *pulumi.StringInput  `pulumi:"bucketMediaName"`
+	InviteUserValidationView *pulumi.StringInput  `pulumi:"inviteUserValidationView"`
+	FileHosting              *ApiFileHostingInput `pulumi:"fileHosting"`
+}
+
+type ApiFileHostingInput struct {
+	Domain                  pulumi.StringInput `pulumi:"domain"`
+	PrivateKeyParameterName pulumi.StringInput `pulumi:"privateKeyParameterName"`
+	PrivateKeyId            pulumi.StringInput `pulumi:"privateKeyId"`
+	BucketName              pulumi.StringInput `pulumi:"bucketName"`
 }
 
 // The Api component resource.
@@ -49,6 +60,7 @@ type Api struct {
 	AuthResetPasswordVerifyEndpoint  pulumi.StringOutput `pulumi:"authResetPasswordVerifyEndpoint"`
 	AuthInviteUserEndpoint           pulumi.StringOutput `pulumi:"authInviteUserEndpoint"`
 	OpenApiEndpoint                  pulumi.StringOutput `pulumi:"openApiEndpoint"`
+	BucketMediaName                  pulumi.StringOutput `pulumi:"bucketMediaName"`
 }
 
 // NewApi creates a new Lambda component resource.
@@ -190,16 +202,99 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	auth, err := NewUserpool(ctx, name+"-userpool", &UserpoolArgs{
-		UserPoolId: args.UserPoolId,
+	userPool, err := cognito.GetUserPool(ctx, name, args.UserPoolId, &cognito.UserPoolState{})
+	if err != nil {
+		return nil, err
+	}
+
+	userPoolClient, err := cognito.NewUserPoolClient(ctx, name+"-userpoolclient", &cognito.UserPoolClientArgs{
+		UserPoolId:     userPool.ID(),
+		GenerateSecret: pulumi.Bool(false),
+		ExplicitAuthFlows: pulumi.StringArray{
+			pulumi.String("ADMIN_NO_SRP_AUTH"),
+		},
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	clientID := auth.UserPoolClient.ApplyT(func(client *cognito.UserPoolClient) pulumi.IDOutput {
-		return client.ID()
-	}).(pulumi.IDOutput)
+	authUserPolicy, err := iam.NewPolicy(ctx, name+"-auth-user-policy", &iam.PolicyArgs{
+		Path:        pulumi.String("/"),
+		Description: pulumi.String("IAM policy for writing the got s3 storage"),
+		Policy: pulumi.Any(map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				{
+					"Effect": "Allow",
+					"Action": []interface{}{
+						"cognito-idp:InitiateAuth",
+						"cognito-idp:RespondToAuthChallenge",
+						"cognito-idp:SignUp",
+						"cognito-idp:ConfirmSignUp",
+						"cognito-idp:ResendConfirmationCode",
+						"cognito-idp:ForgotPassword",
+						"cognito-idp:ConfirmForgotPassword",
+					},
+					"Resource": []interface{}{
+						userPool.Arn,
+					},
+				},
+			},
+		}),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	authAdminPolicy, err := iam.NewPolicy(ctx, name+"-auth-admin-policy", &iam.PolicyArgs{
+		Path:        pulumi.String("/"),
+		Description: pulumi.String("IAM policy for writing the got s3 storage"),
+		Policy: pulumi.Any(map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				{
+					"Effect": "Allow",
+					"Action": []interface{}{
+						"cognito-idp:AdminGetUser",
+						"cognito-idp:AdminCreateUser",
+						"cognito-idp:AdminDeleteUser",
+						"cognito-idp:AdminInitiateAuth",
+						"cognito-idp:AdminRespondToAuthChallenge",
+						"cognito-idp:AdminUpdateUserAttributes",
+						"cognito-idp:AdminSetUserPassword",
+					},
+					"Resource": []interface{}{
+						userPool.Arn,
+					},
+				},
+			},
+		}),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	ssmGetParameterPolicy, err := iam.NewPolicy(ctx, name+"-ssm-get-parameter-policy", &iam.PolicyArgs{
+		Path:        pulumi.String("/"),
+		Description: pulumi.String("IAM policy for writing the got s3 storage"),
+		Policy: pulumi.Any(map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				{
+					"Effect": "Allow",
+					"Action": []interface{}{
+						"ssm:GetParameter",
+					},
+					"Resource": []interface{}{
+						"*",
+					},
+				},
+			},
+		}),
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	// Create Cognito Authorizer
 	authorizer, err := apigatewayv2.NewAuthorizer(ctx, fmt.Sprintf("%s-Authorizer", name), &apigatewayv2.AuthorizerArgs{
@@ -210,14 +305,25 @@ func NewApi(ctx *pulumi.Context,
 		},
 		JwtConfiguration: &apigatewayv2.AuthorizerJwtConfigurationArgs{
 			Audiences: pulumi.StringArray{
-				auth.UserPoolId,
-				clientID,
+				userPool.ID(),
+				userPoolClient.ID(),
 			},
-			Issuer: pulumi.Sprintf("https://%s", auth.UserPoolEndpoint),
+			Issuer: pulumi.Sprintf("https://%s", userPool.Endpoint),
 		},
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	cloudfrontAccessKeyId := pulumi.String("").ToStringOutput()
+	cloudfrontNewAccessKeyParameter := pulumi.String("").ToStringOutput()
+	mediaDomain := pulumi.String("").ToStringOutput()
+	var bucketMediaName *pulumi.StringInput
+	if args.FileHosting != nil {
+		cloudfrontAccessKeyId = args.FileHosting.PrivateKeyId.ToStringOutput()
+		cloudfrontNewAccessKeyParameter = args.FileHosting.PrivateKeyParameterName.ToStringOutput()
+		mediaDomain = args.FileHosting.Domain.ToStringOutput()
+		bucketMediaName = &args.FileHosting.BucketName
 	}
 
 	graphStore, err := NewGraphStore(ctx, name+"-graph-store", &GraphStoreArgs{
@@ -228,6 +334,8 @@ func NewApi(ctx *pulumi.Context,
 		BucketRightsWriteName:  args.BucketRightsWriteName,
 		BucketRightsAdminName:  args.BucketRightsAdminName,
 		BucketRightsOwnerName:  args.BucketRightsOwnerName,
+		BucketMediaName:        bucketMediaName,
+		ForceDestroy:           args.ForceStoreDestroy,
 	})
 	if err != nil {
 		return nil, err
@@ -235,13 +343,17 @@ func NewApi(ctx *pulumi.Context,
 
 	pullMem := pulumi.Int(2048)
 	pullEnv := pulumi.StringMap{
-		"BUCKET_NODES":         graphStore.BucketNodesName,
-		"BUCKET_EDGES":         graphStore.BucketEdgesName,
-		"BUCKET_REVERSE_EDGES": graphStore.BucketReverseEdgesName,
-		"BUCKET_RIGHTS_READ":   graphStore.BucketRightsReadName,
-		"BUCKET_RIGHTS_WRITE":  graphStore.BucketRightsWriteName,
-		"BUCKET_RIGHTS_ADMIN":  graphStore.BucketRightsAdminName,
-		"BUCKET_OWNERS":        graphStore.BucketRightsOwnerName,
+		"BUCKET_NODES":                        graphStore.BucketNodesName,
+		"BUCKET_EDGES":                        graphStore.BucketEdgesName,
+		"BUCKET_REVERSE_EDGES":                graphStore.BucketReverseEdgesName,
+		"BUCKET_RIGHTS_READ":                  graphStore.BucketRightsReadName,
+		"BUCKET_RIGHTS_WRITE":                 graphStore.BucketRightsWriteName,
+		"BUCKET_RIGHTS_ADMIN":                 graphStore.BucketRightsAdminName,
+		"BUCKET_OWNERS":                       graphStore.BucketRightsOwnerName,
+		"BUCKET_MEDIA":                        graphStore.BucketMediaName,
+		"MEDIA_DOMAIN":                        mediaDomain,
+		"CLOUDFRONT_ACCESS_KEY_ID":            cloudfrontAccessKeyId,
+		"CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER": cloudfrontNewAccessKeyParameter,
 	}
 
 	pullLambda, err := NewLambda(ctx, name+"PullInternal", &LambdaArgs{
@@ -251,6 +363,8 @@ func NewApi(ctx *pulumi.Context,
 		MemorySize:  &pullMem,
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
+			ssmGetParameterPolicy.Arn,
+			graphStore.mediaBucketReadPolicyArn,
 		},
 		Environment: pullEnv,
 	})
@@ -289,6 +403,8 @@ func NewApi(ctx *pulumi.Context,
 		AuthorizerId: authorizer.ID(),
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
+			ssmGetParameterPolicy.Arn,
+			graphStore.mediaBucketReadPolicyArn,
 		},
 		ApiId:        api.ID(),
 		ExecutionArn: api.ExecutionArn,
@@ -301,13 +417,17 @@ func NewApi(ctx *pulumi.Context,
 
 	pushMem := pulumi.Int(2048)
 	pushEnv := pulumi.StringMap{
-		"BUCKET_NODES":         graphStore.BucketNodesName,
-		"BUCKET_EDGES":         graphStore.BucketEdgesName,
-		"BUCKET_REVERSE_EDGES": graphStore.BucketReverseEdgesName,
-		"BUCKET_RIGHTS_READ":   graphStore.BucketRightsReadName,
-		"BUCKET_RIGHTS_WRITE":  graphStore.BucketRightsWriteName,
-		"BUCKET_RIGHTS_ADMIN":  graphStore.BucketRightsAdminName,
-		"BUCKET_OWNERS":        graphStore.BucketRightsOwnerName,
+		"BUCKET_NODES":                        graphStore.BucketNodesName,
+		"BUCKET_EDGES":                        graphStore.BucketEdgesName,
+		"BUCKET_REVERSE_EDGES":                graphStore.BucketReverseEdgesName,
+		"BUCKET_RIGHTS_READ":                  graphStore.BucketRightsReadName,
+		"BUCKET_RIGHTS_WRITE":                 graphStore.BucketRightsWriteName,
+		"BUCKET_RIGHTS_ADMIN":                 graphStore.BucketRightsAdminName,
+		"BUCKET_OWNERS":                       graphStore.BucketRightsOwnerName,
+		"BUCKET_MEDIA":                        graphStore.BucketMediaName,
+		"MEDIA_DOMAIN":                        mediaDomain,
+		"CLOUDFRONT_ACCESS_KEY_ID":            cloudfrontAccessKeyId,
+		"CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER": cloudfrontNewAccessKeyParameter,
 	}
 
 	pushLambda, err := NewLambda(ctx, name+"PushInternal", &LambdaArgs{
@@ -318,6 +438,9 @@ func NewApi(ctx *pulumi.Context,
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
 			graphStore.StorageWritePolicyArn,
+			ssmGetParameterPolicy.Arn,
+			graphStore.mediaBucketReadPolicyArn,
+			graphStore.mediaBucketWritePolicyArn,
 		},
 		Environment: pushEnv,
 	})
@@ -357,6 +480,9 @@ func NewApi(ctx *pulumi.Context,
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
 			graphStore.StorageWritePolicyArn,
+			ssmGetParameterPolicy.Arn,
+			graphStore.mediaBucketReadPolicyArn,
+			graphStore.mediaBucketWritePolicyArn,
 		},
 		ApiId:        api.ID(),
 		ExecutionArn: api.ExecutionArn,
@@ -367,10 +493,42 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	completeUploadEnv := pulumi.StringMap{
+		"BUCKET_MEDIA": graphStore.BucketMediaName,
+	}
+
+	_, err = NewApiLambda(ctx, name+"CompleteUploadApi", &ApiLambdaArgs{
+		Runtime:      args.Runtime,
+		CodePath:     pulumi.Sprintf("%s/completeUpload.zip", args.CodePath),
+		HandlerPath:  pulumi.String("index.handleHttp"),
+		Method:       pulumi.String("POST"),
+		AuthorizerId: authorizer.ID(),
+		PolicyArns: pulumi.StringArray{
+			graphStore.mediaBucketReadPolicyArn,
+			graphStore.mediaBucketWritePolicyArn,
+		},
+		ApiId:        api.ID(),
+		ExecutionArn: api.ExecutionArn,
+		RoutePath:    pulumi.String("/media/complete-upload"),
+		Environment:  completeUploadEnv,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var inviteUserValidationView pulumi.StringOutput
+	if args.InviteUserValidationView != nil {
+		inviteUserValidationView = (*args.InviteUserValidationView).ToStringOutput()
+	} else {
+		inviteUserValidationView = pulumi.String("{\"root\":{\"edges\":{\"from/to\":{\"include\":{\"rights\":true}}}}}").ToStringOutput()
+	}
+
 	AuthMem := pulumi.Int(512)
 	AuthEnv := pulumi.StringMap{
-		"USER_POOL_ID": auth.UserPoolId,
-		"CLIENT_ID":    auth.UserPoolClientId,
+		"USER_POOL_ID":                userPool.ID(),
+		"CLIENT_ID":                   userPoolClient.ID(),
+		"INVITE_USER_VALIDATION_VIEW": inviteUserValidationView,
+		"PULL_LAMBDA_NAME":            pullLambda.Name,
 	}
 
 	AuthLoginInitApiLambda, err := NewApiLambda(ctx, name+"AuthLoginInit", &ApiLambdaArgs{
@@ -380,7 +538,7 @@ func NewApi(ctx *pulumi.Context,
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
 		PolicyArns: pulumi.StringArray{
-			auth.AuthUserPolicyArn,
+			authUserPolicy.Arn,
 		},
 		ApiId:        api.ID(),
 		ExecutionArn: api.ExecutionArn,
@@ -398,7 +556,7 @@ func NewApi(ctx *pulumi.Context,
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
 		PolicyArns: pulumi.StringArray{
-			auth.AuthUserPolicyArn,
+			authUserPolicy.Arn,
 		},
 		ApiId:        api.ID(),
 		ExecutionArn: api.ExecutionArn,
@@ -416,7 +574,7 @@ func NewApi(ctx *pulumi.Context,
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
 		PolicyArns: pulumi.StringArray{
-			auth.AuthUserPolicyArn,
+			authUserPolicy.Arn,
 		},
 		ApiId:        api.ID(),
 		ExecutionArn: api.ExecutionArn,
@@ -434,7 +592,7 @@ func NewApi(ctx *pulumi.Context,
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
 		PolicyArns: pulumi.StringArray{
-			auth.AuthUserPolicyArn,
+			authUserPolicy.Arn,
 		},
 		ApiId:        api.ID(),
 		ExecutionArn: api.ExecutionArn,
@@ -452,7 +610,7 @@ func NewApi(ctx *pulumi.Context,
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
 		PolicyArns: pulumi.StringArray{
-			auth.AuthUserPolicyArn,
+			authUserPolicy.Arn,
 		},
 		ApiId:        api.ID(),
 		ExecutionArn: api.ExecutionArn,
@@ -470,7 +628,7 @@ func NewApi(ctx *pulumi.Context,
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
 		PolicyArns: pulumi.StringArray{
-			auth.AuthUserPolicyArn,
+			authUserPolicy.Arn,
 		},
 		ApiId:        api.ID(),
 		ExecutionArn: api.ExecutionArn,
@@ -488,8 +646,8 @@ func NewApi(ctx *pulumi.Context,
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
 		PolicyArns: pulumi.StringArray{
-			auth.AuthUserPolicyArn,
-			auth.AuthAdminPolicyArn,
+			authUserPolicy.Arn,
+			authAdminPolicy.Arn,
 		},
 		ApiId:        api.ID(),
 		ExecutionArn: api.ExecutionArn,
@@ -507,8 +665,8 @@ func NewApi(ctx *pulumi.Context,
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
 		PolicyArns: pulumi.StringArray{
-			auth.AuthUserPolicyArn,
-			auth.AuthAdminPolicyArn,
+			authUserPolicy.Arn,
+			authAdminPolicy.Arn,
 		},
 		ApiId:        api.ID(),
 		ExecutionArn: api.ExecutionArn,
@@ -527,8 +685,8 @@ func NewApi(ctx *pulumi.Context,
 		Method:       pulumi.String("POST"),
 		AuthorizerId: authorizer.ID(),
 		PolicyArns: pulumi.StringArray{
-			auth.AuthUserPolicyArn,
-			auth.AuthAdminPolicyArn,
+			authUserPolicy.Arn,
+			authAdminPolicy.Arn,
 			pullLambdaInvokePolicy.Arn,
 		},
 		ApiId:        api.ID(),
@@ -573,6 +731,7 @@ func NewApi(ctx *pulumi.Context,
 	component.AuthResetPasswordVerifyEndpoint = AuthResetPasswordVerifyApiLambda.Route.RouteKey()
 	component.AuthInviteUserEndpoint = AuthInviteUserApiLambda.Route.RouteKey()
 	component.OpenApiEndpoint = OpenApiApiLambda.Route.RouteKey()
+	component.BucketMediaName = graphStore.BucketMediaName
 
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
 		"endpoint":     args.DomainName,

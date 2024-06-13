@@ -1,24 +1,13 @@
 /// <reference path="./.sst/platform/config.d.ts" />
-import * as pulumi from '@pulumi/pulumi';
 import * as gotiac from '@gothub/pulumi-gotiac-aws';
 import * as fs from 'fs';
-import {
-    AWS_MAIL_REGION,
-    AWS_PROFILE,
-    AWS_REGION,
-    FILE_HOSTING_DOMAIN,
-    MAIL_DOMAIN,
-    parseEnv,
-} from '@gothub/typescript-util';
-import { FILE_HOSTING_BUCKET } from './env';
+import { AWS_MAIL_REGION, AWS_PROFILE, AWS_REGION, MAIL_DOMAIN, parseEnv } from '@gothub/typescript-util';
 
 const env = parseEnv({
     AWS_REGION,
     AWS_PROFILE,
     AWS_MAIL_REGION,
     MAIL_DOMAIN,
-    FILE_HOSTING_DOMAIN,
-    FILE_HOSTING_BUCKET,
 });
 
 export default $config({
@@ -36,11 +25,6 @@ export default $config({
         };
     },
     async run() {
-        const fileHosting = new gotiac.FileHosting('FileHosting', {
-            domain: env.FILE_HOSTING_DOMAIN,
-            bucketName: env.FILE_HOSTING_BUCKET,
-        });
-
         const mailDomain = new gotiac.MailDomain('MailDomain', {
             domain: env.MAIL_DOMAIN,
             region: env.AWS_MAIL_REGION,
@@ -62,11 +46,5 @@ export default $config({
         mailDomain.imapServer.apply((imapServer) => {
             fs.appendFileSync('.secrets.env', `export MAIL_IMAP_SERVER='${imapServer}'\n`);
         });
-
-        return {
-            url: pulumi.interpolate`https://${fileHosting.url}`,
-            privateKeyId: fileHosting.privateKeyId,
-            privateKeyParameterName: fileHosting.privateKeyParameterName,
-        };
     },
 });

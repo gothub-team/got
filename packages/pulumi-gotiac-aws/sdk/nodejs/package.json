@@ -1,0 +1,25 @@
+{
+  "name": "@gothub/pulumi-gotiac-aws",
+  "version": "${VERSION}",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@pulumi/aws": "^6.0.0",
+    "@pulumi/pulumi": "^3.42.0"
+  },
+  "devDependencies": {
+    "@gothub/typescript-util": "workspace:*",
+    "@types/node": "*",
+    "typescript": "*"
+  },
+  "pulumi": {
+    "resource": true,
+    "name": "gotiac",
+    "server": "github://api.github.com/gothub-team/got"
+  },
+  "trustedDependencies": [
+    "protobufjs"
+  ],
+  "main": "bin/index.js"
+}

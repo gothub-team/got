@@ -78,7 +78,7 @@ build_nodejs_sdk:: gen_nodejs_sdk
 		bun run prettier --write ./**/*.ts
 
 install_nodejs_sdk:: build_nodejs_sdk
-	bun link --cwd ${WORKING_DIR}/sdk/nodejs/bin
+#	bun link --cwd ${WORKING_DIR}/sdk/nodejs/bin
 
 # Python SDK
 
