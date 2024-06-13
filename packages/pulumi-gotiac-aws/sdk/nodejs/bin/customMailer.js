@@ -38,20 +38,32 @@ class CustomMailer extends pulumi.CustomResource {
         let resourceInputs = {};
         opts = opts || {};
         if (!opts.id) {
-            resourceInputs["codePath"] = undefined /*out*/;
-            resourceInputs["invokePullPolicyArn"] = undefined /*out*/;
-            resourceInputs["notificationsEmailAccount"] = undefined /*out*/;
-            resourceInputs["pullLambdaName"] = undefined /*out*/;
-            resourceInputs["runtime"] = undefined /*out*/;
-            resourceInputs["userPoolId"] = undefined /*out*/;
+            if ((!args || args.codePath === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'codePath'");
+            }
+            if ((!args || args.invokePullPolicyArn === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'invokePullPolicyArn'");
+            }
+            if ((!args || args.notificationsEmailAccount === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'notificationsEmailAccount'");
+            }
+            if ((!args || args.pullLambdaName === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'pullLambdaName'");
+            }
+            if ((!args || args.runtime === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'runtime'");
+            }
+            if ((!args || args.userPoolId === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'userPoolId'");
+            }
+            resourceInputs["codePath"] = args ? args.codePath : undefined;
+            resourceInputs["invokePullPolicyArn"] = args ? args.invokePullPolicyArn : undefined;
+            resourceInputs["notificationsEmailAccount"] = args ? args.notificationsEmailAccount : undefined;
+            resourceInputs["pullLambdaName"] = args ? args.pullLambdaName : undefined;
+            resourceInputs["runtime"] = args ? args.runtime : undefined;
+            resourceInputs["userPoolId"] = args ? args.userPoolId : undefined;
         }
         else {
-            resourceInputs["codePath"] = undefined /*out*/;
-            resourceInputs["invokePullPolicyArn"] = undefined /*out*/;
-            resourceInputs["notificationsEmailAccount"] = undefined /*out*/;
-            resourceInputs["pullLambdaName"] = undefined /*out*/;
-            resourceInputs["runtime"] = undefined /*out*/;
-            resourceInputs["userPoolId"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
         super(CustomMailer.__pulumiType, name, resourceInputs, opts);

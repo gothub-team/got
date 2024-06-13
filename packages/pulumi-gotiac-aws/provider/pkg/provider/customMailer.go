@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"encoding/base64"
 	"fmt"
 
 	"github.com/gothub-team/pulumi-awsworkmail/sdk/go/awsworkmail"
@@ -20,12 +21,27 @@ type CustomMailerArgs struct {
 	CodePath pulumi.StringInput `pulumi:"codePath"`
 	// The lambda runtime
 	Runtime pulumi.StringInput `pulumi:"runtime"`
-	// Notifications email account in the format of `$ echo "sender|host|user|password|port|secureFlag" | base64`
-	NotificationsEmailAccount pulumi.StringInput `pulumi:"notificationsEmailAccount"`
+	// Notifications email account
+	NotificationsEmailAccount NotificationsEmailAccount `pulumi:"notificationsEmailAccount"`
 	// The name of the pull lambda function that is used to pull message templates
 	PullLambdaName pulumi.StringInput `pulumi:"pullLambdaName"`
 	// The ARN of the pull lambda function
 	InvokePullPolicyArn pulumi.StringInput `pulumi:"invokePullPolicyArn"`
+}
+
+type NotificationsEmailAccount struct {
+	// Display name of the sender of the notifications emails.
+	Sender pulumi.StringInput
+	// SMTP host of the email server that sends notifications.
+	Host pulumi.StringInput
+	// SMTP username of the email server that sends notifications.
+	User pulumi.StringInput
+	// SMTP password of the email server that sends notifications.
+	Password pulumi.StringInput
+	// SMTP port of the email server that sends notifications.
+	Port pulumi.StringInput
+	// Flag that indicates if the email server uses secure connection.
+	SecureFlag pulumi.BoolInput
 }
 
 // The CustomMailer component resource.
@@ -47,8 +63,21 @@ func NewCustomMailer(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	// Base64 encode the NotificationsEmailAccount like sender|host|user|password|port|secureFlag
+	notificationsEmailAccount := pulumi.Sprintf(
+		"%s|%s|%s|%s|%s|%t",
+		args.NotificationsEmailAccount.Sender,
+		args.NotificationsEmailAccount.Host,
+		args.NotificationsEmailAccount.User,
+		args.NotificationsEmailAccount.Password,
+		args.NotificationsEmailAccount.Port,
+		args.NotificationsEmailAccount.SecureFlag,
+	).ApplyT(func(emailAccountString string) (string, error) {
+		return base64.StdEncoding.EncodeToString([]byte(emailAccountString)), nil
+	}).(pulumi.StringOutput)
+
 	ssmParameter, err := ssm.NewParameter(ctx, name+"-notifications-email-account", &ssm.ParameterArgs{
-		Value:       args.NotificationsEmailAccount,
+		Value:       notificationsEmailAccount,
 		Description: pulumi.String("The email account used for sending notifications"),
 		Type:        pulumi.String("SecureString"),
 	})

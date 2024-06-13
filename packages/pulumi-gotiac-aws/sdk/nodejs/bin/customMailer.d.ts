@@ -1,4 +1,5 @@
 import * as pulumi from '@pulumi/pulumi';
+import * as inputs from './types/input';
 export declare class CustomMailer extends pulumi.CustomResource {
     /**
      * Get an existing CustomMailer resource's state with the given name, ID, and optional extra
@@ -15,39 +16,37 @@ export declare class CustomMailer extends pulumi.CustomResource {
      */
     static isInstance(obj: any): obj is CustomMailer;
     /**
-     * The path to the .zip for the lambda code.
-     */
-    readonly codePath: pulumi.Output<string>;
-    /**
-     * The ARN of the pull lambda function.
-     */
-    readonly invokePullPolicyArn: pulumi.Output<string>;
-    /**
-     * Notifications email account in the format of `$ echo "sender|host|user|password|port|secureFlag" | base64`.
-     */
-    readonly notificationsEmailAccount: pulumi.Output<string>;
-    /**
-     * The name of the pull lambda function that is used to pull message templates.
-     */
-    readonly pullLambdaName: pulumi.Output<string>;
-    /**
-     * The lambda runtime.
-     */
-    readonly runtime: pulumi.Output<string>;
-    /**
-     * The ID of the cognito user pool that should be updated with the custom mailer.
-     */
-    readonly userPoolId: pulumi.Output<string>;
-    /**
      * Create a CustomMailer resource with the given unique name, arguments, and options.
      *
      * @param name The _unique_ name of the resource.
      * @param args The arguments to use to populate this resource's properties.
      * @param opts A bag of options that control this resource's behavior.
      */
-    constructor(name: string, args?: CustomMailerArgs, opts?: pulumi.CustomResourceOptions);
+    constructor(name: string, args: CustomMailerArgs, opts?: pulumi.CustomResourceOptions);
 }
 /**
  * The set of arguments for constructing a CustomMailer resource.
  */
-export interface CustomMailerArgs {}
+export interface CustomMailerArgs {
+    /**
+     * The path to the .zip for the lambda code.
+     */
+    codePath: pulumi.Input<string>;
+    /**
+     * The ARN of the pull lambda function.
+     */
+    invokePullPolicyArn: pulumi.Input<string>;
+    notificationsEmailAccount: pulumi.Input<inputs.NotificationsEmailAccountArgs>;
+    /**
+     * The name of the pull lambda function that is used to pull message templates.
+     */
+    pullLambdaName: pulumi.Input<string>;
+    /**
+     * The lambda runtime.
+     */
+    runtime: pulumi.Input<string>;
+    /**
+     * The ID of the cognito user pool that should be updated with the custom mailer.
+     */
+    userPoolId: pulumi.Input<string>;
+}
