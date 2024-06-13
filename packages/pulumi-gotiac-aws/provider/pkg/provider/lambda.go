@@ -1,6 +1,9 @@
 package provider
 
 import (
+	"strings"
+
+	"github.com/pulumi/pulumi-archive/sdk/go/archive"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/cloudwatch"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/iam"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/lambda"
@@ -128,12 +131,38 @@ func NewLambda(ctx *pulumi.Context,
 		memorySize = pulumi.Int(512)
 	}
 
+	SourceCodeHash := args.CodePath.ToStringOutput().ApplyT(func(s string) *string {
+		codeFile, err := archive.LookupFile(ctx, &archive.LookupFileArgs{
+			SourceFile: pulumi.StringRef(s),
+		}, nil)
+		if err != nil {
+			return nil
+		}
+
+		return &codeFile.OutputBase64sha256
+	}).(pulumi.StringPtrOutput)
+
+	zipArchive := args.CodePath.ToStringOutput().ApplyT(func(s string) pulumi.Archive {
+		zipPath := strings.Replace(s, ".js", ".zip", -1)
+		_, err := archive.LookupFile(ctx, &archive.LookupFileArgs{
+			Type:       "zip",
+			SourceFile: pulumi.StringRef(s),
+			OutputPath: zipPath,
+		}, nil)
+		if err != nil {
+			return nil
+		}
+
+		return pulumi.NewFileArchive(zipPath)
+	}).(pulumi.ArchiveOutput)
+
 	lambdaFunction, err := lambda.NewFunction(ctx, name, &lambda.FunctionArgs{
-		Code:    args.CodePath.ToStringOutput().ApplyT(func(s string) pulumi.Archive { return pulumi.NewFileArchive(s) }).(pulumi.ArchiveOutput),
-		Role:    iamRole.Arn,
-		Handler: args.HandlerPath,
-		Runtime: args.Runtime,
-		Timeout: pulumi.Int(30),
+		Code:           zipArchive,
+		SourceCodeHash: SourceCodeHash,
+		Role:           iamRole.Arn,
+		Handler:        args.HandlerPath,
+		Runtime:        args.Runtime,
+		Timeout:        pulumi.Int(30),
 		Environment: &lambda.FunctionEnvironmentArgs{
 			Variables: args.Environment,
 		},

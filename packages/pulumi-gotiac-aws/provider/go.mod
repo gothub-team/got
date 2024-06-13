@@ -10,6 +10,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/gothub-team/pulumi-awsworkmail/sdk v0.1.8
 	github.com/pkg/errors v0.9.1
+	github.com/pulumi/pulumi-archive/sdk v0.0.6
 	github.com/pulumi/pulumi-aws/sdk/v6 v6.39.1
 	github.com/pulumi/pulumi-random/sdk/v4 v4.16.2
 	github.com/pulumi/pulumi-tls/sdk/v4 v4.11.1

@@ -43,7 +43,7 @@ export default $config({
             domainName: env.GOT_API_DOMAIN,
             userPoolId: userPool.userPoolId,
             runtime: 'nodejs20.x',
-            codePath: path.join(process.cwd(), 'dist/lambda/zips'),
+            codePath: path.join(process.cwd(), 'dist/lambda'),
             forceStoreDestroy: true,
             fileHosting: {
                 domain: fileHosting.domain,
