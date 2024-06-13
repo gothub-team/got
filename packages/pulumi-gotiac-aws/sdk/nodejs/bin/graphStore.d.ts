@@ -12,6 +12,10 @@ export declare class GraphStore extends pulumi.ComponentResource {
     /**
      * The Name of the bucket for file storage.
      */
+    readonly bucketLogsName: pulumi.Output<string | undefined>;
+    /**
+     * The Name of the bucket for file storage.
+     */
     readonly bucketMediaName: pulumi.Output<string | undefined>;
     /**
      * The Name of the bucket for node storage.
@@ -38,6 +42,22 @@ export declare class GraphStore extends pulumi.ComponentResource {
      */
     readonly bucketRightsWriteName: pulumi.Output<string>;
     /**
+     * The ARN of the logs bucket read policy.
+     */
+    readonly logsBucketReadPolicyArn: pulumi.Output<string>;
+    /**
+     * The ARN of the logs bucket write policy.
+     */
+    readonly logsBucketWritePolicyArn: pulumi.Output<string>;
+    /**
+     * The ARN of the media bucket read policy.
+     */
+    readonly mediaBucketReadPolicyArn: pulumi.Output<string>;
+    /**
+     * The ARN of the media bucket write policy.
+     */
+    readonly mediaBucketWritePolicyArn: pulumi.Output<string>;
+    /**
      * The ARN of the storage read policy.
      */
     readonly storageReadPolicyArn: pulumi.Output<string>;
@@ -62,6 +82,10 @@ export interface GraphStoreArgs {
      * The bucket to be used for edge storage
      */
     bucketEdgesName?: pulumi.Input<string>;
+    /**
+     * The bucket to be used for log storage
+     */
+    bucketLogsName?: pulumi.Input<string>;
     /**
      * The bucket to be used for file storage
      */

@@ -28,6 +28,7 @@ class GraphStore extends pulumi.ComponentResource {
         opts = opts || {};
         if (!opts.id) {
             resourceInputs["bucketEdgesName"] = args ? args.bucketEdgesName : undefined;
+            resourceInputs["bucketLogsName"] = args ? args.bucketLogsName : undefined;
             resourceInputs["bucketMediaName"] = args ? args.bucketMediaName : undefined;
             resourceInputs["bucketNodesName"] = args ? args.bucketNodesName : undefined;
             resourceInputs["bucketReverseEdgesName"] = args ? args.bucketReverseEdgesName : undefined;
@@ -36,11 +37,16 @@ class GraphStore extends pulumi.ComponentResource {
             resourceInputs["bucketRightsReadName"] = args ? args.bucketRightsReadName : undefined;
             resourceInputs["bucketRightsWriteName"] = args ? args.bucketRightsWriteName : undefined;
             resourceInputs["forceDestroy"] = args ? args.forceDestroy : undefined;
+            resourceInputs["logsBucketReadPolicyArn"] = undefined /*out*/;
+            resourceInputs["logsBucketWritePolicyArn"] = undefined /*out*/;
+            resourceInputs["mediaBucketReadPolicyArn"] = undefined /*out*/;
+            resourceInputs["mediaBucketWritePolicyArn"] = undefined /*out*/;
             resourceInputs["storageReadPolicyArn"] = undefined /*out*/;
             resourceInputs["storageWritePolicyArn"] = undefined /*out*/;
         }
         else {
             resourceInputs["bucketEdgesName"] = undefined /*out*/;
+            resourceInputs["bucketLogsName"] = undefined /*out*/;
             resourceInputs["bucketMediaName"] = undefined /*out*/;
             resourceInputs["bucketNodesName"] = undefined /*out*/;
             resourceInputs["bucketReverseEdgesName"] = undefined /*out*/;
@@ -48,6 +54,10 @@ class GraphStore extends pulumi.ComponentResource {
             resourceInputs["bucketRightsOwnerName"] = undefined /*out*/;
             resourceInputs["bucketRightsReadName"] = undefined /*out*/;
             resourceInputs["bucketRightsWriteName"] = undefined /*out*/;
+            resourceInputs["logsBucketReadPolicyArn"] = undefined /*out*/;
+            resourceInputs["logsBucketWritePolicyArn"] = undefined /*out*/;
+            resourceInputs["mediaBucketReadPolicyArn"] = undefined /*out*/;
+            resourceInputs["mediaBucketWritePolicyArn"] = undefined /*out*/;
             resourceInputs["storageReadPolicyArn"] = undefined /*out*/;
             resourceInputs["storageWritePolicyArn"] = undefined /*out*/;
         }
