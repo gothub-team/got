@@ -26,7 +26,7 @@ export const ec2DescribeInstances = async (instanceIds: string[]): Promise<Insta
 
         return instances;
     } catch (err) {
-        console.log(err);
+        console.error(err);
         return [];
     }
 };

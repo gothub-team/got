@@ -22,7 +22,7 @@ export const ecsListTasks = async (clusterName: string, serviceName: string) => 
         const { taskArns = [] } = await client.send(command);
         return taskArns;
     } catch (err) {
-        console.log(err);
+        console.error(err);
         return [];
     }
 };
@@ -37,7 +37,7 @@ export const ecsDescribeTasks = async (clusterName: string, taskArns: string[]) 
         const { tasks = [] } = await client.send(command);
         return tasks;
     } catch (err) {
-        console.log(err);
+        console.error(err);
         return [];
     }
 };
@@ -52,7 +52,7 @@ export const ecsDescribeContainerInstances = async (clusterName: string, instanc
         const { containerInstances = [] } = await client.send(command);
         return containerInstances;
     } catch (err) {
-        console.log(err);
+        console.error(err);
         return [];
     }
 };

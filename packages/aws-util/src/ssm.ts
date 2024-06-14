@@ -15,7 +15,7 @@ export const ssmGetParameter = async (name: string, encrypted = false) => {
         const results = await client.send(command);
         return results.Parameter ? results.Parameter.Value : undefined;
     } catch (err) {
-        console.log(err);
+        console.error(err);
         return undefined;
     }
 };

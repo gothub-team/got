@@ -8,7 +8,7 @@ const createGetAccessKey = () => {
     return async () => {
         if (!promise) {
             promise = ssmGetParameter(CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER || 'CLOUDFRONT_ACCESS_KEY', true).catch(
-                console.log,
+                console.error,
             );
         }
         return promise;

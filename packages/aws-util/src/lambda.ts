@@ -23,7 +23,7 @@ export const invokeLambda = async <TBody, TRes>(functionName: string, body: TBod
         return JSON.parse(Decoder.decode(results.Payload)) as TRes;
     } catch (err) {
         // TODO: why not pass the error up?
-        console.log(err);
+        console.error(err);
         return undefined;
     }
 };
@@ -39,7 +39,7 @@ export const invokeLambdaEvent = async <TBody>(functionName: string, body: TBody
 
         return true;
     } catch (err) {
-        console.log(err);
+        console.error(err);
         return false;
     }
 };
