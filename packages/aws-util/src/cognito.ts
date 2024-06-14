@@ -1,4 +1,3 @@
-import { v4 } from 'uuid';
 import {
     AdminCreateUserCommand,
     AdminDeleteUserCommand,
@@ -18,11 +17,6 @@ import {
     type UserType,
 } from '@aws-sdk/client-cognito-identity-provider';
 import { AWS_REGION, CLIENT_ID, USER_POOL_ID } from './config.js';
-
-const generateTempPassword = () => {
-    const id = v4();
-    return id.replace(/-/g, '').slice(0, 16);
-};
 
 const USER_NOT_VERIFIED_ERROR = {
     name: 'UserNotVerifiedError',
@@ -94,8 +88,7 @@ export const cognitoAdminCreateUser = async (email: string, password: string) =>
     );
 };
 
-export const cognitoInviteUser = async (username: string, templateId = 'default', temporaryPassword?: string) => {
-    const password = temporaryPassword || generateTempPassword(); // TODO: This should probably be done outside
+export const cognitoInviteUser = async (username: string, password: string, templateId = 'default') => {
     const command = new AdminCreateUserCommand({
         UserPoolId: USER_POOL_ID,
         Username: username,

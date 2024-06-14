@@ -8,6 +8,7 @@ const client = new LambdaClient({
 
 const Decoder = new TextDecoder();
 
+// TODO: how to type this? usually our lambdas return HTTP like responses on invoke as well, but dont need to
 export const invokeLambda = async <TBody, TRes>(functionName: string, body: TBody) => {
     const command = new InvokeCommand({
         FunctionName: functionName,

@@ -8,9 +8,12 @@
     "main": "client-js/index.ts",
     "scripts": {
         "generate:client-js": "bun client-js/generate.ts",
+        "build": "bun ./esbuild.lambda.js",
         "lint": "eslint ."
     },
     "devDependencies": {
+        "@gothub/aws-util": "workspace:*",
+        "uuid": "^10.0.0",
         "@types/aws-lambda": "8.10.138",
         "@types/bun": "latest",
         "@types/ramda": "^0.29.12",
