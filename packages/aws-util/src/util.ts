@@ -1,11 +1,15 @@
 export const CORS_HEADERS = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': '*',
-    'Access-Control-Allow-Credentials': true,
+    'Access-Control-Allow-Credentials': 'true',
 };
 
-export const EMAIL_REGEX =
+const EMAIL_REGEX =
     /^(([^<>()[\]\\.,;:\s@"A-Z]+(\.[^<>()[\]\\.,;:\s@"A-Z]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-z\-0-9]+\.)+[a-z]{2,}))$/;
+const DIGITS_REGEX = /.*[0-9].*/;
+
+export const matchEmail = (input: string) => EMAIL_REGEX.exec(input)?.[0];
+export const matchDigits = (input: string) => DIGITS_REGEX.exec(input)?.[0];
 
 export const decodeBase64 = (base64: string) => Buffer.from(base64, 'base64').toString('utf-8');
 
