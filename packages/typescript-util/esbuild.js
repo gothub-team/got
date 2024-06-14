@@ -5,12 +5,17 @@ const { dtsPlugin } = require('esbuild-plugin-d.ts');
 
 // Function to recursively get all files in a directory
 function getAllFiles(dirPath, arrayOfFiles = []) {
-    const files = fs.readdirSync(dirPath);
+    const entries = fs.readdirSync(dirPath);
+
+    const dirs = entries.filter((file) => fs.statSync(`${dirPath}/${file}`).isDirectory());
+    const files = entries.filter((file) => !fs.statSync(`${dirPath}/${file}`).isDirectory());
+
+    dirs.forEach((dir) => {
+        arrayOfFiles = getAllFiles(`${dirPath}/${dir}`, arrayOfFiles);
+    });
 
     files.forEach((file) => {
-        if (fs.statSync(`${dirPath}/${file}`).isDirectory()) {
-            arrayOfFiles = getAllFiles(`${dirPath}/${file}`, arrayOfFiles);
-        } else if (file.endsWith('.js') && !file.endsWith('.spec.js')) {
+        if (file.endsWith('.js') && !file.endsWith('.spec.js')) {
             arrayOfFiles.push(path.join(dirPath, '/', file));
         } else if (file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts')) {
             arrayOfFiles.push(path.join(dirPath, '/', file));
