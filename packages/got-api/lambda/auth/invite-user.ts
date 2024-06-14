@@ -60,7 +60,7 @@ const handle = async ({ userEmail, body, asAdmin }: ValidationResult<Body>): Pro
     const res = await invokeLambda<typeof invokeBody, { body: string }>(PULL_LAMBDA_NAME, invokeBody);
     const identifierGraph = res?.body ? JSON.parse(res.body) : {};
     if (!identifierGraph?.rights?.[id]?.user?.[userEmail as string]?.admin) {
-        throw nodeForbidden('admin', id, userEmail as string);
+        return nodeForbidden(userEmail || '', 'admin', id);
     }
 
     const temporaryPassword = v4().replace(/-/g, '').slice(0, 16);

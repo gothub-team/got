@@ -8,7 +8,7 @@
     "main": "client-js/index.ts",
     "scripts": {
         "generate:client-js": "bun client-js/generate.ts",
-        "build:lambda": "bun ./esbuild.lambda.js",
+        "build": "bun ./esbuild.lambda.js",
         "lint": "eslint ."
     },
     "devDependencies": {

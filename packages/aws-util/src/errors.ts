@@ -14,7 +14,7 @@ export const forbidden = (err: Error | string): APIGatewayProxyResult => ({
 });
 
 export const nodeForbidden = (userEmail: string, rightType: string, nodeId: string) =>
-    `User ${userEmail} has no ${rightType} rights on node ${nodeId}`;
+    forbidden(`User ${userEmail} has no ${rightType} rights on node ${nodeId}`);
 
 export const badRequest = (err: Error | string): APIGatewayProxyResult => ({
     statusCode: 400,
