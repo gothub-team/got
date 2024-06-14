@@ -5,6 +5,10 @@ import {
     matchEmail,
     InvalidEmailError,
     cognitoInitiateAuthSrp,
+    UserNotFoundError,
+    InvalidSrpAError,
+    UserNotVerifiedError,
+    PasswordResetRequiredError,
 } from '@gothub/aws-util';
 import { type ValidationResult } from '@gothub/aws-util/src/validation';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
@@ -37,12 +41,27 @@ const handle = async ({ body }: ValidationResult<Body>): Promise<APIGatewayProxy
     if (matchEmail(email) !== email) {
         return InvalidEmailError;
     }
-    const result = await cognitoInitiateAuthSrp(email, srpA);
-    return {
-        statusCode: 200,
-        headers: CORS_HEADERS,
-        body: JSON.stringify(result),
-    };
+    try {
+        const result = await cognitoInitiateAuthSrp(email, srpA);
+        return {
+            statusCode: 200,
+            headers: CORS_HEADERS,
+            body: JSON.stringify(result),
+        };
+    } catch (err) {
+        switch ((err as Error).name) {
+            case 'InvalidParameterException':
+                return InvalidSrpAError;
+            case 'UserNotFoundException':
+                return UserNotFoundError;
+            case 'UserNotConfirmedException':
+                return UserNotVerifiedError;
+            case 'PasswordResetRequiredException':
+                return PasswordResetRequiredError;
+            default:
+                return internalServerError(err as Error);
+        }
+    }
 };
 
 export const handleHttp: APIGatewayProxyHandler = async (event) => {

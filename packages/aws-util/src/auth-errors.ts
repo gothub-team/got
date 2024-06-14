@@ -1,4 +1,4 @@
-import { badRequest } from './errors';
+import { badRequest, forbidden, notFound } from './errors';
 
 export const InvalidEmailError = badRequest({
     name: 'InvalidEmailError',
@@ -8,10 +8,10 @@ export const InvalidEmailError = badRequest({
 //     name: 'InvalidPasswordError',
 //     message: 'The password must contain at least 8 characters and at least 1 number.',
 // });
-// export const InvalidSrpAError = badRequest({
-//     name: 'InvalidSrpAError',
-//     message: 'The SRP A value must be a correctly calculated random hex hash based on big integers.',
-// });
+export const InvalidSrpAError = badRequest({
+    name: 'InvalidSrpAError',
+    message: 'The SRP A value must be a correctly calculated random hex hash based on big integers.',
+});
 // export const InvalidRefreshTokenError = badRequest({
 //     name: 'InvalidRefreshTokenError',
 //     message: 'Refresh token is invalid.',
@@ -25,14 +25,14 @@ export const InvalidEmailError = badRequest({
 //     message:
 //         'The verification code has exipired. Please retry via Reset Password Init (in case of pasword reset) or Register Verify Resend (in case of register).',
 // });
-// export const UserNotFoundError = badRequest({
-//     name: 'UserNotFoundError',
-//     message: 'No user was found under the given email or user ID.',
-// });
-// export const UserNotVerifiedError = badRequest({
-//     name: 'UserNotVerifiedError',
-//     message: 'The user must be verified with Register Verify operation.',
-// });
+export const UserNotFoundError = notFound({
+    name: 'UserNotFoundError',
+    message: 'No user was found under the given email or user ID.',
+});
+export const UserNotVerifiedError = forbidden({
+    name: 'UserNotVerifiedError',
+    message: 'The user must be verified with Register Verify operation.',
+});
 // export const UserExistsError = badRequest({
 //     name: 'UserExistsError',
 //     message: 'There is an existing user with the given email address.',
@@ -41,10 +41,10 @@ export const InvalidEmailError = badRequest({
 //     name: 'UserMissingPasswordChallengeError',
 //     message: 'The user must have an active require password change challenge.',
 // });
-// export const PasswordResetRequiredError = badRequest({
-//     name: 'PasswordResetRequiredError',
-//     message: 'The password must be reset.',
-// });
+export const PasswordResetRequiredError = forbidden({
+    name: 'PasswordResetRequiredError',
+    message: 'The password must be reset.',
+});
 // export const PasswordResetMissingParamError = badRequest({
 //     name: 'PasswordResetMissingParamError',
 //     message: 'Either a verification code or the users old password are required.',
