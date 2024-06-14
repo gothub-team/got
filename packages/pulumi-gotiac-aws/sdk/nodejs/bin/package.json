@@ -1,6 +1,6 @@
 {
   "name": "@gothub/pulumi-gotiac-aws",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "scripts": {
     "build": "tsc"
   },
@@ -16,7 +16,7 @@
   "pulumi": {
     "resource": true,
     "name": "gotiac",
-    "server": "github://api.github.com/gothub-team/got"
+    "server": "https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.1.8"
   },
   "trustedDependencies": [
     "protobufjs"
