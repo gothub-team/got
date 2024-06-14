@@ -1,6 +1,9 @@
 export { ApiArgs } from './api';
 export type Api = import('./api').Api;
 export declare const Api: typeof import('./api').Api;
+export { CustomMailerArgs } from './customMailer';
+export type CustomMailer = import('./customMailer').CustomMailer;
+export declare const CustomMailer: typeof import('./customMailer').CustomMailer;
 export { FileHostingArgs } from './fileHosting';
 export type FileHosting = import('./fileHosting').FileHosting;
 export declare const FileHosting: typeof import('./fileHosting').FileHosting;

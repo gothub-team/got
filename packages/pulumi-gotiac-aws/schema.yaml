@@ -23,6 +23,35 @@ types:
             - privateKeyId
             - privateKeyParameterName
             - bucketName
+    gotiac:index:NotificationsEmailAccount:
+        type: object
+        description: Email account that is used to send notifications emails.
+        properties:
+            sender:
+                type: string
+                description: Display name of the sender of the notifications emails.
+            host:
+                type: string
+                description: SMTP host of the email server that sends notifications.
+            user:
+                type: string
+                description: SMTP username of the email server that sends notifications.
+            password:
+                type: string
+                description: SMTP password of the email server that sends notifications.
+            port:
+                type: string
+                description: SMTP port of the email server that sends notifications.
+            secureFlag:
+                type: boolean
+                description: Flag that indicates if the email server uses secure connection.
+        required:
+            - sender
+            - host
+            - user
+            - password
+            - port
+            - secureFlag
 resources:
     gotiac:index:MailDomain:
         isComponent: true
@@ -223,6 +252,8 @@ resources:
                 type: string
             pushEndpoint:
                 type: string
+            pullLambdaName:
+                type: string
             pullInvokePolicyArn:
                 type: string
             pushInvokePolicyArn:
@@ -253,6 +284,7 @@ resources:
             - endpoint
             - pullEndpoint
             - pushEndpoint
+            - pullLambdaName
             - pullInvokePolicyArn
             - pushInvokePolicyArn
             - authLoginInitEndpoint
@@ -360,6 +392,33 @@ resources:
             - logsBucketWritePolicyArn
             - mediaBucketReadPolicyArn
             - mediaBucketWritePolicyArn
+    gotiac:index:CustomMailer:
+        isComponent: true
+        inputProperties:
+            userPoolId:
+                type: string
+                description: The ID of the cognito user pool that should be updated with the custom mailer.
+            codePath:
+                type: string
+                description: The path to the .zip for the lambda code.
+            runtime:
+                type: string
+                description: The lambda runtime.
+            notificationsEmailAccount:
+                $ref: '#/types/gotiac:index:NotificationsEmailAccount'
+            pullLambdaName:
+                type: string
+                description: The name of the pull lambda function that is used to pull message templates.
+            invokePullPolicyArn:
+                type: string
+                description: The ARN of the pull lambda function.
+        requiredInputs:
+            - userPoolId
+            - codePath
+            - runtime
+            - notificationsEmailAccount
+            - pullLambdaName
+            - invokePullPolicyArn
 language:
     csharp:
         packageReferences:

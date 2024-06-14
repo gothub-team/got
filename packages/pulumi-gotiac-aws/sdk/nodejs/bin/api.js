@@ -67,6 +67,7 @@ class Api extends pulumi.ComponentResource {
             resourceInputs["openApiEndpoint"] = undefined /*out*/;
             resourceInputs["pullEndpoint"] = undefined /*out*/;
             resourceInputs["pullInvokePolicyArn"] = undefined /*out*/;
+            resourceInputs["pullLambdaName"] = undefined /*out*/;
             resourceInputs["pushEndpoint"] = undefined /*out*/;
             resourceInputs["pushInvokePolicyArn"] = undefined /*out*/;
         }
@@ -85,6 +86,7 @@ class Api extends pulumi.ComponentResource {
             resourceInputs["openApiEndpoint"] = undefined /*out*/;
             resourceInputs["pullEndpoint"] = undefined /*out*/;
             resourceInputs["pullInvokePolicyArn"] = undefined /*out*/;
+            resourceInputs["pullLambdaName"] = undefined /*out*/;
             resourceInputs["pushEndpoint"] = undefined /*out*/;
             resourceInputs["pushInvokePolicyArn"] = undefined /*out*/;
         }

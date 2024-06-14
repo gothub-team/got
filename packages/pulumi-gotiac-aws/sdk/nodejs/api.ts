@@ -38,6 +38,7 @@ export class Api extends pulumi.ComponentResource {
     public readonly /*out*/ openApiEndpoint!: pulumi.Output<string>;
     public readonly /*out*/ pullEndpoint!: pulumi.Output<string>;
     public readonly /*out*/ pullInvokePolicyArn!: pulumi.Output<string>;
+    public readonly /*out*/ pullLambdaName!: pulumi.Output<string>;
     public readonly /*out*/ pushEndpoint!: pulumi.Output<string>;
     public readonly /*out*/ pushInvokePolicyArn!: pulumi.Output<string>;
 
@@ -92,6 +93,7 @@ export class Api extends pulumi.ComponentResource {
             resourceInputs['openApiEndpoint'] = undefined /*out*/;
             resourceInputs['pullEndpoint'] = undefined /*out*/;
             resourceInputs['pullInvokePolicyArn'] = undefined /*out*/;
+            resourceInputs['pullLambdaName'] = undefined /*out*/;
             resourceInputs['pushEndpoint'] = undefined /*out*/;
             resourceInputs['pushInvokePolicyArn'] = undefined /*out*/;
         } else {
@@ -109,6 +111,7 @@ export class Api extends pulumi.ComponentResource {
             resourceInputs['openApiEndpoint'] = undefined /*out*/;
             resourceInputs['pullEndpoint'] = undefined /*out*/;
             resourceInputs['pullInvokePolicyArn'] = undefined /*out*/;
+            resourceInputs['pullLambdaName'] = undefined /*out*/;
             resourceInputs['pushEndpoint'] = undefined /*out*/;
             resourceInputs['pushInvokePolicyArn'] = undefined /*out*/;
         }

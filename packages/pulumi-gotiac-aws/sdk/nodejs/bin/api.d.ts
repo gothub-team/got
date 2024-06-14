@@ -23,6 +23,7 @@ export declare class Api extends pulumi.ComponentResource {
     readonly openApiEndpoint: pulumi.Output<string>;
     readonly pullEndpoint: pulumi.Output<string>;
     readonly pullInvokePolicyArn: pulumi.Output<string>;
+    readonly pullLambdaName: pulumi.Output<string>;
     readonly pushEndpoint: pulumi.Output<string>;
     readonly pushInvokePolicyArn: pulumi.Output<string>;
     /**

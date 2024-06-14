@@ -2,12 +2,9 @@ import { describe, beforeAll, beforeEach, it, expect } from 'bun:test';
 import { type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import { createMailClient } from './shared/mail';
-import { GOT_API_URL, parseEnv } from '@gothub/typescript-util';
+import { GOT_API_URL, MAIL_IMAP_SERVER, MAIL_USERNAME, MAIL_USER_PW, parseEnv } from '@gothub/typescript-util';
 import {
     INVITE_USER_VALIDATION_VIEW,
-    MAIL_IMAP_SERVER,
-    MAIL_USERNAME,
-    MAIL_USER_PW,
     TEST_ADMIN_EMAIL,
     TEST_ADMIN_PW,
     TEST_USER_1_EMAIL,

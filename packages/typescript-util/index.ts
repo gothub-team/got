@@ -61,3 +61,30 @@ export const USER_POOL_ID = z.string().describe('Cognito user pool ID that autho
 export const AWS_MAIL_REGION = z.enum(awsRegions).describe('AWS region where the mail domain is hosted.');
 export const MAIL_DOMAIN = z.string().describe('Domain of the mail server.');
 export const FILE_HOSTING_DOMAIN = z.string().describe('Domain of the file hosting service.');
+export const MAIL_USERNAME = z
+    .string()
+    .describe('IMAP mailbox username to API test endpoints that send automatic emails.');
+export const MAIL_USER_PW = z
+    .string()
+    .describe('IMAP mailbox password to API test endpoints that send automatic emails.');
+export const MAIL_IMAP_SERVER = z
+    .string()
+    .describe('IMAP server of the mailbox that is used to test mail sending API endpoints.');
+
+export const NOTIFICATIONS_EMAIL_SENDER = z
+    .string()
+    .describe('Display name of the sender of the notifications emails.');
+export const NOTIFICATIONS_EMAIL_HOST = z.string().describe('SMTP host of the email server that sends notifications.');
+export const NOTIFICATIONS_EMAIL_USER = z
+    .string()
+    .describe('SMTP username of the email server that sends notifications.');
+export const NOTIFICATIONS_EMAIL_PASSWORD = z
+    .string()
+    .describe('SMTP password of the email server that sends notifications.');
+export const NOTIFICATIONS_EMAIL_PORT = z.string().describe('SMTP port of the email server that sends notifications.');
+export const NOTIFICATIONS_EMAIL_SECURE_FLAG = z
+    .string()
+    .toLowerCase()
+    .transform((value) => JSON.parse(value))
+    .pipe(z.boolean())
+    .describe('Flag that indicates if the email server uses secure connection.');

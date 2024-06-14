@@ -49,6 +49,7 @@ type Api struct {
 	Endpoint                         pulumi.StringOutput `pulumi:"endpoint"`
 	PullEndpoint                     pulumi.StringOutput `pulumi:"pullEndpoint"`
 	PushEndpoint                     pulumi.StringOutput `pulumi:"pushEndpoint"`
+	PullLambdaName                   pulumi.StringOutput `pulumi:"pullLambdaName"`
 	PullInvokePolicyArn              pulumi.StringOutput `pulumi:"pullInvokePolicyArn"`
 	PushInvokePolicyArn              pulumi.StringOutput `pulumi:"pushInvokePolicyArn"`
 	AuthLoginInitEndpoint            pulumi.StringOutput `pulumi:"authLoginInitEndpoint"`
@@ -318,7 +319,7 @@ func NewApi(ctx *pulumi.Context,
 
 		ssmGetAccessKeyParameterPolicy, err = iam.NewPolicy(ctx, name+"-ssm-get-parameter-policy", &iam.PolicyArgs{
 			Path:        pulumi.String("/"),
-			Description: pulumi.String("IAM policy for writing the got s3 storage"),
+			Description: pulumi.String("IAM policy for retrieving the cloudfront access key parameter"),
 			Policy: pulumi.Any(map[string]interface{}{
 				"Version": "2012-10-17",
 				"Statement": []map[string]interface{}{
@@ -757,6 +758,7 @@ func NewApi(ctx *pulumi.Context,
 	component.PullEndpoint = pullApiLambda.Route.RouteKey()
 	// component.PushFunction = pushLambda.Function
 	component.PushEndpoint = pushApiLambda.Route.RouteKey()
+	component.PullLambdaName = pullLambda.Name
 	component.PullInvokePolicyArn = pullLambdaInvokePolicy.Arn
 	component.PushInvokePolicyArn = pushLambdaInvokePolicy.Arn
 	component.AuthLoginInitEndpoint = AuthLoginInitApiLambda.Route.RouteKey()

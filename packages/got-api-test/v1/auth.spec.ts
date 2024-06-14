@@ -2,8 +2,8 @@ import { describe, beforeAll, it, expect } from 'bun:test';
 import { createApi, type GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import { createMailClient } from './shared/mail';
-import { GOT_API_URL, parseEnv } from '@gothub/typescript-util';
-import { MAIL_IMAP_SERVER, MAIL_USERNAME, MAIL_USER_PW, TEST_USER_1_EMAIL } from '../env';
+import { GOT_API_URL, MAIL_IMAP_SERVER, MAIL_USERNAME, MAIL_USER_PW, parseEnv } from '@gothub/typescript-util';
+import { TEST_USER_1_EMAIL } from '../env';
 
 export const match6Digits = (str: string) => str.match(/[0-9]{6}/)?.[0];
 

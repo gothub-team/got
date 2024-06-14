@@ -4,7 +4,19 @@ import * as pulumi from '@pulumi/pulumi';
 import * as gotiac from '@gothub/pulumi-gotiac-aws';
 import * as path from 'path';
 import * as fs from 'fs';
-import { AWS_PROFILE, AWS_REGION, FILE_HOSTING_DOMAIN, GOT_API_DOMAIN, parseEnv } from '@gothub/typescript-util';
+import {
+    AWS_PROFILE,
+    AWS_REGION,
+    FILE_HOSTING_DOMAIN,
+    GOT_API_DOMAIN,
+    NOTIFICATIONS_EMAIL_HOST,
+    NOTIFICATIONS_EMAIL_PASSWORD,
+    NOTIFICATIONS_EMAIL_PORT,
+    NOTIFICATIONS_EMAIL_SECURE_FLAG,
+    NOTIFICATIONS_EMAIL_SENDER,
+    NOTIFICATIONS_EMAIL_USER,
+    parseEnv,
+} from '@gothub/typescript-util';
 import { TEST_ADMIN_EMAIL, TEST_USER_1_EMAIL, TEST_USER_2_EMAIL } from '@gothub/got-api-test/env';
 
 const env = parseEnv({
@@ -15,6 +27,13 @@ const env = parseEnv({
     TEST_ADMIN_EMAIL,
     TEST_USER_1_EMAIL,
     TEST_USER_2_EMAIL,
+
+    NOTIFICATIONS_EMAIL_SENDER,
+    NOTIFICATIONS_EMAIL_HOST,
+    NOTIFICATIONS_EMAIL_USER,
+    NOTIFICATIONS_EMAIL_PASSWORD,
+    NOTIFICATIONS_EMAIL_PORT,
+    NOTIFICATIONS_EMAIL_SECURE_FLAG,
 });
 
 export default $config({
@@ -50,6 +69,22 @@ export default $config({
                 bucketName: fileHosting.bucketName,
                 privateKeyId: fileHosting.privateKeyId,
                 privateKeyParameterName: fileHosting.privateKeyParameterName,
+            },
+        });
+
+        new gotiac.CustomMailer('CustomMailer', {
+            userPoolId: userPool.userPoolId,
+            runtime: 'nodejs20.x',
+            codePath: path.join(process.cwd(), 'dist/lambda'),
+            invokePullPolicyArn: api.pullInvokePolicyArn,
+            pullLambdaName: api.pullLambdaName,
+            notificationsEmailAccount: {
+                sender: env.NOTIFICATIONS_EMAIL_SENDER,
+                host: env.NOTIFICATIONS_EMAIL_HOST,
+                user: env.NOTIFICATIONS_EMAIL_USER,
+                password: env.NOTIFICATIONS_EMAIL_PASSWORD,
+                port: env.NOTIFICATIONS_EMAIL_PORT,
+                secureFlag: env.NOTIFICATIONS_EMAIL_SECURE_FLAG,
             },
         });
 

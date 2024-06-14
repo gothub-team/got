@@ -23,3 +23,33 @@ export interface ApiFileHostingInputArgs {
      */
     privateKeyParameterName: pulumi.Input<string>;
 }
+
+/**
+ * Email account that is used to send notifications emails.
+ */
+export interface NotificationsEmailAccountArgs {
+    /**
+     * SMTP host of the email server that sends notifications.
+     */
+    host: pulumi.Input<string>;
+    /**
+     * SMTP password of the email server that sends notifications.
+     */
+    password: pulumi.Input<string>;
+    /**
+     * SMTP port of the email server that sends notifications.
+     */
+    port: pulumi.Input<string>;
+    /**
+     * Flag that indicates if the email server uses secure connection.
+     */
+    secureFlag: pulumi.Input<boolean>;
+    /**
+     * Display name of the sender of the notifications emails.
+     */
+    sender: pulumi.Input<string>;
+    /**
+     * SMTP username of the email server that sends notifications.
+     */
+    user: pulumi.Input<string>;
+}
