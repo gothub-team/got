@@ -9,7 +9,7 @@ import {
     validate,
 } from '@gothub/aws-util';
 import { type ValidationResult } from '@gothub/aws-util/src/validation';
-import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
+import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
 
 const AUTHENTICATED = false;
 
@@ -62,11 +62,11 @@ export const handleHttp: APIGatewayProxyHandler = async (event) => {
     }
 };
 
-export const handleInvoke: Handler = async ({ body }) => {
-    try {
-        const result = await handle(body as ValidationResult<Body>);
-        return result;
-    } catch (err) {
-        return internalServerError(err as Error);
-    }
-};
+// export const handleInvoke: Handler = async ({ body }) => {
+//     try {
+//         const result = await handle(body as ValidationResult<Body>);
+//         return result;
+//     } catch (err) {
+//         return internalServerError(err as Error);
+//     }
+// };
