@@ -95,7 +95,7 @@ const handle = async ({ body }: ValidationResult<Body>): Promise<APIGatewayProxy
             body: JSON.stringify(result),
         };
     } catch (err) {
-        switch (err.name) {
+        switch ((err as Error).name) {
             case 'CodeMismatchException':
                 return VerificationCodeMismatchError;
             case 'ExpiredCodeException':
@@ -105,7 +105,7 @@ const handle = async ({ body }: ValidationResult<Body>): Promise<APIGatewayProxy
             case 'UserNotFoundException':
                 return UserNotFoundError;
             default:
-                return internalServerError(err);
+                return internalServerError(err as Error);
         }
     }
 };

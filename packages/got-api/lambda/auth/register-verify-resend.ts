@@ -42,11 +42,11 @@ const handle = async ({ body }: ValidationResult<Body>): Promise<APIGatewayProxy
             body: JSON.stringify({ message: 'Success.' }),
         };
     } catch (err) {
-        switch (err.name) {
+        switch ((err as Error).name) {
             case 'UserNotFoundException':
                 return UserNotFoundError;
             default:
-                return internalServerError(err);
+                return internalServerError(err as Error);
         }
     }
 };

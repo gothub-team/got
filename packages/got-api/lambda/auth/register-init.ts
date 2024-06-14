@@ -52,13 +52,13 @@ const handle = async ({ body }: ValidationResult<Body>): Promise<APIGatewayProxy
             body: JSON.stringify({ message: 'User was created. Check email for verification.' }),
         };
     } catch (err) {
-        switch (err.name) {
+        switch ((err as Error).name) {
             case 'UsernameExistsException':
                 return UserExistsError;
             case 'InvalidPasswordException':
                 return InvalidPasswordError;
             default:
-                return internalServerError(err);
+                return internalServerError(err as Error);
         }
     }
 };
