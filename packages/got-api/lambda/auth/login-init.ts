@@ -59,6 +59,7 @@ const handle = async ({ body }: ValidationResult<Body>): Promise<APIGatewayProxy
             case 'PasswordResetRequiredException':
                 return PasswordResetRequiredError;
             default:
+                console.error(err);
                 return internalServerError(err as Error);
         }
     }
