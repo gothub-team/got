@@ -9,8 +9,8 @@ import {
     InvalidSrpAError,
     UserNotVerifiedError,
     PasswordResetRequiredError,
+    type ValidationResult,
 } from '@gothub/aws-util';
-import { type ValidationResult } from '@gothub/aws-util/src/validation';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
 
 const AUTHENTICATED = false;

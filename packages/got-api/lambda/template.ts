@@ -1,5 +1,4 @@
-import { CORS_HEADERS, internalServerError, validate } from '@gothub/aws-util';
-import { type ValidationResult } from '@gothub/aws-util/src/validation';
+import { CORS_HEADERS, internalServerError, validate, type ValidationResult } from '@gothub/aws-util';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
 
 const AUTHENTICATED = true;
