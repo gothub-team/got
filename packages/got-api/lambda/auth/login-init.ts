@@ -67,11 +67,18 @@ const handle = async ({ body }: ValidationResult<Body>): Promise<APIGatewayProxy
 export const handleHttp: APIGatewayProxyHandler = async (event) => {
     try {
         const validationResult = await validate<Body>(schema, event, { auth: AUTHENTICATED });
-        return await handle(validationResult);
+        const result = await handle(validationResult);
+        return result;
     } catch (err) {
         return internalServerError(err as Error);
     }
 };
 
-// export const handleInvoke: Handler = async ({ body }) =>
-//     handle(body as ValidationResult<Body>).catch(internalServerError);
+// export const handleInvoke: Handler = async ({ body }) => {
+//     try {
+//         const result = await handle(body as ValidationResult<Body>);
+//         return result;
+//     } catch (err) {
+//         return internalServerError(err as Error);
+//     }
+// };
