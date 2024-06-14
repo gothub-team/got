@@ -12,6 +12,7 @@
     },
     "devDependencies": {
         "@gothub/aws-util": "workspace:*",
+        "uuid": "^10.0.0",
         "@types/aws-lambda": "8.10.138",
         "@types/bun": "latest",
         "@types/ramda": "^0.29.12",

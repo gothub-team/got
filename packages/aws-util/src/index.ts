@@ -1,6 +1,7 @@
 export * from './auth-errors';
 export * from './cloudfront';
 export * from './cognito';
+export * from './config';
 export * from './ec2';
 export * from './ecs';
 export * from './email';
