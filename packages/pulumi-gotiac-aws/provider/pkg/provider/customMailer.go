@@ -107,48 +107,66 @@ func NewCustomMailer(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	callerIdentity, err := aws.GetCallerIdentity(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	allow := "Allow"
-	keyPolicy, err := iam.GetPolicyDocument(ctx, &iam.GetPolicyDocumentArgs{
-		Statements: []iam.GetPolicyDocumentStatement{
-			{
-				Effect: &allow,
-				Principals: []iam.GetPolicyDocumentStatementPrincipal{
-					{
-						Type: "AWS",
-						Identifiers: []string{
-							fmt.Sprintf("arn:aws:iam::%s:root", callerIdentity.AccountId),
+	KMS_KEY_ALIAS := "alias/got/custom-mailer"
+	var kmsKeyArn pulumi.StringOutput
+	existingKmsKey, err := kms.LookupKey(ctx, &kms.LookupKeyArgs{
+		KeyId: KMS_KEY_ALIAS,
+	})
+	if err == nil {
+		kmsKeyArn = pulumi.String(existingKmsKey.Arn).ToStringOutput()
+	} else {
+		callerIdentity, err := aws.GetCallerIdentity(ctx, nil)
+		if err != nil {
+			return nil, err
+		}
+		allow := "Allow"
+		keyPolicy, err := iam.GetPolicyDocument(ctx, &iam.GetPolicyDocumentArgs{
+			Statements: []iam.GetPolicyDocumentStatement{
+				{
+					Effect: &allow,
+					Principals: []iam.GetPolicyDocumentStatementPrincipal{
+						{
+							Type: "AWS",
+							Identifiers: []string{
+								fmt.Sprintf("arn:aws:iam::%s:root", callerIdentity.AccountId),
+							},
 						},
 					},
-				},
-				Actions: []string{
-					"kms:*",
-				},
-				Resources: []string{
-					"*",
+					Actions: []string{
+						"kms:*",
+					},
+					Resources: []string{
+						"*",
+					},
 				},
 			},
-		},
-	}, nil)
-	if err != nil {
-		return nil, err
-	}
+		}, nil)
+		if err != nil {
+			return nil, err
+		}
 
-	kmsKey, err := kms.NewKey(ctx, name+"CustomMailMessageKey", &kms.KeyArgs{
-		Policy: pulumi.String(keyPolicy.Json),
-	})
-	if err != nil {
-		return nil, err
+		kmsKey, err := kms.NewKey(ctx, name+"CustomMailMessageKey", &kms.KeyArgs{
+			Policy: pulumi.String(keyPolicy.Json),
+		}, pulumi.RetainOnDelete(true))
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = kms.NewAlias(ctx, name+"CustomMailMessageKeyAlias", &kms.AliasArgs{
+			Name:        pulumi.String(KMS_KEY_ALIAS),
+			TargetKeyId: kmsKey.Arn,
+		}, pulumi.RetainOnDelete(true))
+		if err != nil {
+			return nil, err
+		}
+
+		kmsKeyArn = kmsKey.Arn
 	}
 
 	pullMem := pulumi.Int(2048)
 	pullEnv := pulumi.StringMap{
 		"NOTIFICATIONS_EMAIL_ACCOUNT_PARAMETER_NAME": ssmParameter.Name,
-		"CUSTOM_MAIL_MESSAGE_KEY_ARN":                kmsKey.Arn,
+		"CUSTOM_MAIL_MESSAGE_KEY_ARN":                kmsKeyArn,
 		"PULL_LAMBDA_NAME":                           args.PullLambdaName,
 	}
 
@@ -164,7 +182,7 @@ func NewCustomMailer(ctx *pulumi.Context,
 						"kms:Decrypt",
 					},
 					"Resource": []interface{}{
-						kmsKey.Arn,
+						kmsKeyArn,
 					},
 				},
 			},
@@ -202,7 +220,7 @@ func NewCustomMailer(ctx *pulumi.Context,
 
 	customMailer, err := awsworkmail.NewCognitoEmailSender(ctx, "CognitoEmailSender", &awsworkmail.CognitoEmailSenderArgs{
 		UserPoolId: args.UserPoolId.ToStringOutput(),
-		KmsKeyArn:  kmsKey.Arn,
+		KmsKeyArn:  kmsKeyArn,
 		LambdaArn:  customMailerLambda.Arn,
 	})
 	if err != nil {
