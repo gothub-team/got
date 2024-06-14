@@ -7,11 +7,24 @@ import {
     cognitoInitiateAuthSrp,
 } from '@gothub/aws-util';
 import { type ValidationResult } from '@gothub/aws-util/src/validation';
-import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
+import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
 
 const AUTHENTICATED = false;
 
-export const schema = {};
+export const schema = {
+    type: 'object',
+    properties: {
+        email: {
+            type: 'string',
+            description: 'Email of the user to be logged in.',
+        },
+        srpA: {
+            type: 'string',
+            description: 'Client SRP A value that will be used to initiate an SRP auth process.',
+        },
+    },
+    required: ['email', 'srpA'],
+};
 
 export type Body = {
     email: string;
