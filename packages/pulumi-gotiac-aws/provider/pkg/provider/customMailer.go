@@ -203,7 +203,7 @@ func NewCustomMailer(ctx *pulumi.Context,
 			decryptKeyPolicy.Arn,
 		},
 		Environment: pullEnv,
-	})
+	}, pulumi.DependsOn([]pulumi.Resource{ssmGetNotificationsEmailAccountParameterPolicy, decryptKeyPolicy}))
 	if err != nil {
 		return nil, err
 	}
