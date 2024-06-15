@@ -43,7 +43,7 @@ func NewUserPool(ctx *pulumi.Context,
 			RequireSymbols:   pulumi.Bool(false),
 			RequireUppercase: pulumi.Bool(false),
 		},
-	})
+	}, pulumi.IgnoreChanges([]string{"passwordPolicy"}))
 	if err != nil {
 		return nil, err
 	}

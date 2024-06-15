@@ -753,7 +753,7 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
-	component.Endpoint = args.DomainName.ToStringOutput()
+	component.Endpoint = pulumi.Sprintf("https://%s/", args.DomainName.ToStringOutput())
 	// component.PullFunction = pullLambda.Function
 	component.PullEndpoint = pullApiLambda.Route.RouteKey()
 	// component.PushFunction = pushLambda.Function

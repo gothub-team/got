@@ -31,6 +31,7 @@ type FileHosting struct {
 	PrivateKeyParameterName pulumi.StringOutput `pulumi:"privateKeyParameterName"`
 	PrivateKeyId            pulumi.StringOutput `pulumi:"privateKeyId"`
 	BucketName              pulumi.StringOutput `pulumi:"bucketName"`
+	Url                     pulumi.StringOutput `pulumi:"url"`
 }
 
 // NewFileHosting creates a new FileHosting component resource.
@@ -351,12 +352,14 @@ func NewFileHosting(ctx *pulumi.Context,
 	component.PrivateKeyId = pulumi.StringOutput(publicKey.ID())
 	component.Domain = args.Domain.ToStringOutput()
 	component.BucketName = bucketName.ToStringOutput()
+	// component.Url = pulumi.Sprintf("https://%s/", args.Domain)
 
 	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
 		"domain":                  component.Domain,
 		"privateKeyParameterName": component.PrivateKeyParameterName,
 		"privateKeyId":            component.PrivateKeyId,
 		"bucketName":              component.BucketName,
+		// "url":                     component.Url,
 	}); err != nil {
 		return nil, err
 	}
