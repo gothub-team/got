@@ -27,9 +27,6 @@ class CustomMailer extends pulumi.ComponentResource {
         let resourceInputs = {};
         opts = opts || {};
         if (!opts.id) {
-            if ((!args || args.codePath === undefined) && !opts.urn) {
-                throw new Error("Missing required property 'codePath'");
-            }
             if ((!args || args.invokePullPolicyArn === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'invokePullPolicyArn'");
             }

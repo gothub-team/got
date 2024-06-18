@@ -22,7 +22,7 @@ export interface CustomMailerArgs {
     /**
      * The path to the .zip for the lambda code.
      */
-    codePath: pulumi.Input<string>;
+    codePath?: pulumi.Input<string>;
     /**
      * The ARN of the pull lambda function.
      */

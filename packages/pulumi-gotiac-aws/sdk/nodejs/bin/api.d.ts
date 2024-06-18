@@ -70,7 +70,7 @@ export interface ApiArgs {
     /**
      * The path to the directory containing the deployment packages.
      */
-    codePath: pulumi.Input<string>;
+    codePath?: pulumi.Input<string>;
     /**
      * Domain name of the got api.
      */

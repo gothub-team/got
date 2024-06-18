@@ -32,9 +32,6 @@ export class CustomMailer extends pulumi.ComponentResource {
         let resourceInputs: pulumi.Inputs = {};
         opts = opts || {};
         if (!opts.id) {
-            if ((!args || args.codePath === undefined) && !opts.urn) {
-                throw new Error("Missing required property 'codePath'");
-            }
             if ((!args || args.invokePullPolicyArn === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'invokePullPolicyArn'");
             }
@@ -70,7 +67,7 @@ export interface CustomMailerArgs {
     /**
      * The path to the .zip for the lambda code.
      */
-    codePath: pulumi.Input<string>;
+    codePath?: pulumi.Input<string>;
     /**
      * The ARN of the pull lambda function.
      */

@@ -242,7 +242,6 @@ resources:
         requiredInputs:
             - domainName
             - userPoolId
-            - codePath
             - runtime
         properties:
             endpoint:
@@ -414,7 +413,6 @@ resources:
                 description: The ARN of the pull lambda function.
         requiredInputs:
             - userPoolId
-            - codePath
             - runtime
             - notificationsEmailAccount
             - pullLambdaName
@@ -431,6 +429,7 @@ language:
         packageName: '@gothub/pulumi-gotiac-aws'
         dependencies:
             '@pulumi/aws': '^6.0.0'
+            '@gothub/got-api-lambda': 'workspace:*'
         devDependencies:
             typescript: '*'
             '@types/node': '*'

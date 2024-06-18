@@ -53,9 +53,6 @@ export class Api extends pulumi.ComponentResource {
         let resourceInputs: pulumi.Inputs = {};
         opts = opts || {};
         if (!opts.id) {
-            if ((!args || args.codePath === undefined) && !opts.urn) {
-                throw new Error("Missing required property 'codePath'");
-            }
             if ((!args || args.domainName === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'domainName'");
             }
@@ -155,7 +152,7 @@ export interface ApiArgs {
     /**
      * The path to the directory containing the deployment packages.
      */
-    codePath: pulumi.Input<string>;
+    codePath?: pulumi.Input<string>;
     /**
      * Domain name of the got api.
      */

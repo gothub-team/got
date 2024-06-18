@@ -18,7 +18,7 @@ type CustomMailerArgs struct {
 	// ID of the cognito user pool that should be updated with the custom mailer.
 	UserPoolId pulumi.StringInput `pulumi:"userPoolId"`
 	// The the path to the .zip for the lambda code
-	CodePath pulumi.StringInput `pulumi:"codePath"`
+	CodePath pulumi.StringPtrInput `pulumi:"codePath"`
 	// The lambda runtime
 	Runtime pulumi.StringInput `pulumi:"runtime"`
 	// Notifications email account
@@ -192,9 +192,17 @@ func NewCustomMailer(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	codePath := args.CodePath
+	if codePath == nil {
+		codePath, err = FindLambdaCodePath()
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	customMailerLambda, err := NewLambda(ctx, name+"EmailSenderLambda", &LambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/authMailMessage.js", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/authMailMessage.js", codePath),
 		HandlerPath: pulumi.String("authMailMessage.handleInvoke"),
 		MemorySize:  &pullMem,
 		PolicyArns: pulumi.StringArray{

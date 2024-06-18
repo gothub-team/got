@@ -145,12 +145,17 @@ jobs:
                   user: ${{ env.PYPI_USERNAME }}
                   password: ${{ env.PYPI_PASSWORD }}
                   packages_dir: ${{github.workspace}}/packages/pulumi-gotiac-aws/sdk/python/bin/dist
-            - if: ${{ matrix.language == 'nodejs' && env.PUBLISH_NPM == 'true' }}
-              uses: JS-DevTools/npm-publish@v1
-              with:
-                  access: 'public'
-                  token: ${{ env.NPM_TOKEN }}
-                  package: ${{github.workspace}}/packages/pulumi-gotiac-aws/sdk/nodejs/bin/package.json
+            - name: Install
+              if: ${{ matrix.language == 'nodejs' && env.PUBLISH_NPM == 'true' }}
+              shell: bash
+              run: pnpm install
+            - name: Publish
+              if: ${{ matrix.language == 'nodejs' && env.PUBLISH_NPM == 'true' }}
+              working-directory: ./packages/pulumi-gotiac-aws/sdk/nodejs/bin
+              shell: bash
+              run: pnpm publish --access public --no-git-checks
+              env:
+                  NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
             - if: ${{ matrix.language == 'dotnet' && env.PUBLISH_NUGET == 'true' }}
               name: publish nuget package
               run: |
