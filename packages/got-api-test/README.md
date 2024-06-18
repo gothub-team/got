@@ -184,7 +184,7 @@ export default $config({
         testUser1.password.apply((password) => {
             fs.appendFileSync(
                 '.test-users.env',
-                `export TEST_USER_1_PW='${password}'\n'`
+                `export TEST_USER_1_PW='${password}'\n`
             );
         });
         testUser2.password.apply((password) => {
