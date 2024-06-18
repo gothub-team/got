@@ -54,7 +54,7 @@ export function getVersion(): string {
 export function resourceOptsDefaults(): any {
     return {
         version: getVersion(),
-        pluginDownloadURL: 'https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.1.11',
+        pluginDownloadURL: 'https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.1.1',
     };
 }
 
