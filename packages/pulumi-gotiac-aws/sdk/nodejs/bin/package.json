@@ -1,26 +1,26 @@
 {
-    "name": "@gothub/pulumi-gotiac-aws",
-    "version": "0.1.9",
-    "scripts": {
-        "build": "tsc"
-    },
-    "dependencies": {
-        "@gothub/got-api-lambda": "workspace:*",
-        "@pulumi/aws": "^6.0.0",
-        "@pulumi/pulumi": "^3.42.0"
-    },
-    "devDependencies": {
-        "@gothub/typescript-util": "workspace:*",
-        "@types/node": "*",
-        "typescript": "*"
-    },
-    "pulumi": {
-        "resource": true,
-        "name": "gotiac",
-        "server": "https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.1.9"
-    },
-    "trustedDependencies": [
-        "protobufjs"
-    ],
-    "main": "index.js"
+  "name": "@gothub/pulumi-gotiac-aws",
+  "version": "0.1.10",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@gothub/got-api-lambda": "workspace:*",
+    "@pulumi/aws": "^6.0.0",
+    "@pulumi/pulumi": "^3.42.0"
+  },
+  "devDependencies": {
+    "@gothub/typescript-util": "workspace:*",
+    "@types/node": "*",
+    "typescript": "*"
+  },
+  "pulumi": {
+    "resource": true,
+    "name": "gotiac",
+    "server": "https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.1.10"
+  },
+  "trustedDependencies": [
+    "protobufjs"
+  ],
+  "main": "index.js"
 }
