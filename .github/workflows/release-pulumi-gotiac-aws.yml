@@ -68,7 +68,7 @@ jobs:
             fail-fast: true
             matrix:
                 version:
-                    - 'v0.1.10'
+                    - 'v0.1.11'
                 binary:
                     - pulumi-resource-gotiac
                 goversion:
@@ -114,6 +114,10 @@ jobs:
                   python-version: ${{matrix.pythonversion}}
             - name: Setup Bun
               uses: oven-sh/setup-bun@v1
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 9
             - name: Build binary
               working-directory: ./packages/pulumi-gotiac-aws
               run: make build_provider

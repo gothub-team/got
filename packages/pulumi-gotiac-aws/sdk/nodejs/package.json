@@ -17,7 +17,7 @@
   "pulumi": {
     "resource": true,
     "name": "gotiac",
-    "server": "https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.1.10"
+    "server": "https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.1.11"
   },
   "trustedDependencies": [
     "protobufjs"
