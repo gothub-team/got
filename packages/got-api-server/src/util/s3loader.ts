@@ -1,13 +1,42 @@
 /* eslint-disable prefer-template */
-import { s3get, s3head, loadQueue } from '@gothub/aws-util';
-import { FileStore } from '@gothub-team/api-core/src/store/file';
+import { s3get, s3head, loadQueue, s3listKeysPaged, substringToFirst } from '@gothub/aws-util';
 import { type EdgeWildcard, type FileHead, type FileRef, type Loader } from '../types/loader';
 import { type LoaderLog } from '../caches/logsCache';
-import { GraphStore } from '@gothub-team/api-core/src/store/graph';
 import { BUCKET_EDGES, BUCKET_MEDIA, BUCKET_NODES } from '../config';
 
 // TODO: maybe we could trial seperate queues for each bucket or request time?
 const { queueLoad } = loadQueue(200);
+
+const listNodes = async (wildcardPrefix: string) => s3listKeysPaged(BUCKET_NODES, wildcardPrefix);
+
+const listEdgeWildcard = async (fromId: string, edgeTypes: string) => {
+    const edgePrefix = substringToFirst(edgeTypes, '*');
+    const edgeKeys = await s3listKeysPaged(BUCKET_EDGES, `${fromId}/${edgePrefix}`);
+
+    const pattern = new RegExp(edgeTypes.replaceAll('*', '.*').replaceAll('/', '\\/'));
+
+    if (edgePrefix.length < edgeTypes.length - 2) {
+        return edgeKeys.filter((edgeKey) => edgeKey.match(pattern));
+    }
+
+    return edgeKeys;
+};
+
+const loadRef = async (refId: string) => {
+    const [, , prop] = refId.split('/');
+    const res = await s3get(BUCKET_MEDIA, refId);
+    const { fileKey = '' } = res ? (JSON.parse(res.toString()) as { fileKey: string }) : {};
+    return { prop, fileKey };
+};
+const listRefs = async (nodeId: string) => {
+    const keys = await s3listKeysPaged(BUCKET_MEDIA, `ref/${nodeId}`);
+
+    const promises = new Array(keys.length);
+    for (let i = 0; i < keys.length; i++) {
+        promises[i] = loadRef(keys[i]);
+    }
+    return Promise.all(promises);
+};
 
 export const s3loader: () => Loader = () => {
     let numNodes = 0;
@@ -36,11 +65,10 @@ export const s3loader: () => Loader = () => {
     const getFileHead = (fileKey: string): Promise<FileHead | false | undefined> =>
         queueLoad(() => s3head(BUCKET_MEDIA, fileKey) as Promise<FileHead | false | undefined>);
 
-    const getFileRefs = async (nodeId: string) =>
-        queueLoad(() => FileStore.listRefs(nodeId)) as Promise<Array<FileRef>>;
+    const getFileRefs = async (nodeId: string) => queueLoad(() => listRefs(nodeId)) as Promise<Array<FileRef>>;
 
     const getEdgesWildcard = async (nodeId: string, edgeType: string): Promise<Array<EdgeWildcard>> => {
-        const edgeKeys = (await queueLoad(() => GraphStore.list.edgeWildcard(nodeId, `${edgeType}/`))) as Array<string>;
+        const edgeKeys = (await queueLoad(() => listEdgeWildcard(nodeId, `${edgeType}/`))) as Array<string>;
 
         if (!edgeKeys) return [];
 
@@ -54,7 +82,7 @@ export const s3loader: () => Loader = () => {
     };
 
     const getNodesWildcard = async (wildcardPrefix: string): Promise<Array<string>> =>
-        queueLoad(() => GraphStore.list.node(wildcardPrefix)) as Promise<Array<string>>;
+        queueLoad(() => listNodes(wildcardPrefix)) as Promise<Array<string>>;
 
     const getLog = (): LoaderLog => {
         return {
