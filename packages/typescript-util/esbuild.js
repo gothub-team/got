@@ -35,6 +35,7 @@ const buildTs = async (options = {}) => {
     const entryFiles = getAllFiles('./src');
 
     // compile CJS
+    console.log('Compiling CJS...');
     await build({
         logLevel: 'info',
         bundle: false,
@@ -48,6 +49,7 @@ const buildTs = async (options = {}) => {
     });
 
     // compile minified CJS
+    console.log('Compiling minified CJS...');
     await build({
         logLevel: 'info',
         minify: true,
@@ -60,6 +62,7 @@ const buildTs = async (options = {}) => {
     });
 
     // compile minified bundle CJS
+    console.log('Compiling minified bundled CJS...');
     await build({
         logLevel: 'info',
         bundle: true,
@@ -74,6 +77,7 @@ const buildTs = async (options = {}) => {
     });
 
     // compile ESM with types
+    console.log('Compiling ESM...');
     await build({
         logLevel: 'info',
         bundle: false,
