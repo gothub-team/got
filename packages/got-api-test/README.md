@@ -228,7 +228,7 @@ export default $config({
             name: `info@your-domain.com`,
             emailPrefix: 'info',
             enabled: true, // When you enable a user, AWS charges 4 $ per month
-        });
+        }, { dependsOn: [mailDomain] });
 
         fs.writeFileSync('.secrets.env', '');
         user.password.apply((password) => {
