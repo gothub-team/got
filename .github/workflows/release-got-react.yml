@@ -51,12 +51,16 @@ jobs:
             - name: Install
               shell: bash
               run: pnpm install
-            - name: Build
+            - name: Build Core
               working-directory: ./packages/got-core
               shell: bash
               run: pnpm build
-            - name: Build
+            - name: Build Api
               working-directory: ./packages/got-api
+              shell: bash
+              run: pnpm build
+            - name: Build React
+              working-directory: ./packages/got-react
               shell: bash
               run: pnpm build
             - name: Publish
