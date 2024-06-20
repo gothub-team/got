@@ -29,11 +29,11 @@ const clean = (targetDir) => {
     fs.existsSync(targetDir) && fs.rmSync(targetDir, { recursive: true, force: true });
 };
 
-const buildTs = async () => {
-    const srcDir = './lambda/auth';
-    const targetDir = './dist/lambda/auth';
+const buildTs = async (options = {}) => {
+    const srcDir = options.srcDir || './src/handler';
+    const outDir = options.outDir || './dist/lambda';
 
-    clean(targetDir);
+    clean(outDir);
 
     const entryFiles = getAllFiles(srcDir);
     // compiled code
@@ -47,7 +47,7 @@ const buildTs = async () => {
         platform: 'node',
         format: 'cjs',
         entryPoints: entryFiles,
-        outdir: targetDir,
+        outdir: outDir,
     });
 };
 

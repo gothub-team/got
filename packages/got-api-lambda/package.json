@@ -6,10 +6,15 @@
         "lint": "eslint ."
     },
     "devDependencies": {
-        "@types/bun": "latest"
+        "@types/bun": "latest",
+        "@types/aws-lambda": "8.10.138",
+        "@gothub/typescript-util": "workspace:*"
     },
     "peerDependencies": {
         "typescript": "^5.0.0"
     },
-    "dependencies": {}
+    "dependencies": {
+        "@gothub/aws-util": "workspace:*",
+        "uuid": "^10.0.0"
+    }
 }
