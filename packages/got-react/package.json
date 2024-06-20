@@ -1,6 +1,6 @@
 {
     "name": "@gothub/got-react",
-    "version": "0.0.6",
+    "version": "0.0.1",
     "license": "MIT",
     "type": "module",
     "main": "dist/module/index.js",

@@ -1,5 +1,5 @@
 import type { Atom } from '@gothub-team/got-atom';
-import { createApi } from '@gothub/got-api';
+import { createApi, type SessionStore } from '@gothub/got-api';
 import { gotReducer, setup as setupCore, type GOT_ACTION, type State } from '@gothub/got-core';
 import type { StoreAPI } from '@gothub/got-core/dist/module/types/api';
 import { getLocalStorageSessionStore } from './util';
@@ -27,6 +27,7 @@ type SetupOptions = {
     onWarn?: (e: Error | string) => void;
     adminMode?: boolean;
     sessionExpireTime?: number;
+    sessionStore?: SessionStore;
 };
 
 export const setup = ({
@@ -39,6 +40,7 @@ export const setup = ({
     onWarn = (e: Error | string) => console.warn(e),
     adminMode = false,
     sessionExpireTime,
+    sessionStore,
 }: SetupOptions) => {
     let dispatch: (action: GOT_ACTION) => void;
     let getState: () => State;
@@ -62,7 +64,7 @@ export const setup = ({
     const api = createApi({
         host,
         adminMode,
-        sessionStore: getLocalStorageSessionStore(`got-auth_${host}`),
+        sessionStore: sessionStore || getLocalStorageSessionStore(`got-auth_${host}`),
         sessionExpireTime,
     });
 
