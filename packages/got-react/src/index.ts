@@ -53,12 +53,12 @@ export const setup = ({
         getState = reduxStore.getState as () => State;
     } else {
         onError('You must provide either a Redux store or an Atom');
-        return;
+        throw new Error('You must provide either a Redux store or an Atom');
     }
 
     if (!useSelector) {
         onError('You must provide a useSelector function');
-        return;
+        throw new Error('You must provide a useSelector function');
     }
 
     const api = createApi({
