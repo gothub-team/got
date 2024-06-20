@@ -1,4 +1,4 @@
-import { type GraphAssemblerLog } from '../caches/logsCache';
+import type { GraphAssemblerLog } from './logs';
 
 export type GraphAssembler = {
     writeNode: (id: string, data: string) => void;

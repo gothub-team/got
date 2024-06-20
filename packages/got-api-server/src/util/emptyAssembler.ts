@@ -1,5 +1,5 @@
-import { type GraphAssemblerLog } from '../caches/logsCache';
 import { type GraphAssembler } from '../types/graphAssembler';
+import type { GraphAssemblerLog } from '../types/logs';
 
 export const emptyAssembler = (): GraphAssembler => {
     const writeNode = () => {};
