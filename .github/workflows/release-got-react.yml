@@ -42,6 +42,8 @@ jobs:
               uses: pnpm/action-setup@v4
               with:
                   version: 9
+            - name: Setup Bun
+              uses: oven-sh/setup-bun@v1
             # - name: Set version to release tag
             #   working-directory: ./packages/got-react
             #   shell: bash
