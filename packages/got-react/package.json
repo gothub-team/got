@@ -1,6 +1,6 @@
 {
     "name": "@gothub/got-react",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "license": "MIT",
     "type": "module",
     "main": "dist/module/index.js",
@@ -12,7 +12,7 @@
     },
     "devDependencies": {
         "@gothub-team/got-atom": "^0.24.3",
-        "@gothub/typescript-util": "workspace:*",
+        "@gothub/typescript-util": "workspace:^",
         "@types/react": "^18.3.3"
     },
     "peerDependencies": {
@@ -20,8 +20,8 @@
         "typescript": "^5.0.0"
     },
     "dependencies": {
-        "@gothub/got-api": "workspace:*",
-        "@gothub/got-core": "workspace:*",
+        "@gothub/got-api": "workspace:^",
+        "@gothub/got-core": "workspace:^",
         "fast-deep-equal": "^3.1.3"
     }
 }
