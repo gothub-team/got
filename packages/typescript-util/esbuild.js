@@ -31,8 +31,8 @@ const clean = () => {
 
 const buildTs = async (options = {}) => {
     clean();
-
-    const entryFiles = getAllFiles('./src');
+    const srcDir = options.srcDir || './src';
+    const entryFiles = getAllFiles(srcDir);
 
     // compile CJS
     await build({
@@ -48,30 +48,32 @@ const buildTs = async (options = {}) => {
     });
 
     // compile minified CJS
-    await build({
-        logLevel: 'info',
-        minify: true,
-        treeShaking: true,
-        target: 'node18.0',
-        platform: 'node',
-        format: 'cjs',
-        entryPoints: entryFiles,
-        outdir: './dist/min',
-    });
+    options.minBundle &&
+        (await build({
+            logLevel: 'info',
+            minify: true,
+            treeShaking: true,
+            target: 'node18.0',
+            platform: 'node',
+            format: 'cjs',
+            entryPoints: entryFiles,
+            outdir: './dist/min',
+        }));
 
     // compile minified bundle CJS
-    await build({
-        logLevel: 'info',
-        bundle: true,
-        minify: true,
-        treeShaking: true,
-        target: 'node18.0',
-        platform: 'node',
-        format: 'cjs',
-        external: options?.min?.external || [],
-        entryPoints: ['./src/index.ts'],
-        outfile: './dist/min-bundle/index.js',
-    });
+    options.minBundle &&
+        (await build({
+            logLevel: 'info',
+            bundle: true,
+            minify: true,
+            treeShaking: true,
+            target: 'node18.0',
+            platform: 'node',
+            format: 'cjs',
+            external: options?.min?.external || [],
+            entryPoints: [path.join(srcDir, '/index.ts')],
+            outfile: './dist/min-bundle/index.js',
+        }));
 
     // compile ESM with types
     await build({

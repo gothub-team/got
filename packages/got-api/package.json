@@ -1,14 +1,14 @@
 {
     "name": "@gothub/got-api",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "license": "MIT",
     "type": "module",
-    "module": "client-js/index.ts",
-    "types": "client-js/index.ts",
-    "main": "client-js/index.ts",
+    "types": "dist/module/index.d.ts",
+    "main": "dist/module/index.js",
     "scripts": {
         "generate:client-js": "bun client-js/generate.ts",
-        "build": "bun ./esbuild.lambda.js",
+        "build:lambda": "bun ./esbuild.lambda.js",
+        "build": "bun ./esbuild.js",
         "lint": "eslint ."
     },
     "devDependencies": {
