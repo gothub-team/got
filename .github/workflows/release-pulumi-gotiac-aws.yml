@@ -68,7 +68,7 @@ jobs:
             fail-fast: true
             matrix:
                 version:
-                    - 'v0.1.8'
+                    - 'v0.1.13'
                 binary:
                     - pulumi-resource-gotiac
                 goversion:
@@ -114,6 +114,10 @@ jobs:
                   python-version: ${{matrix.pythonversion}}
             - name: Setup Bun
               uses: oven-sh/setup-bun@v1
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 9
             - name: Build binary
               working-directory: ./packages/pulumi-gotiac-aws
               run: make build_provider
@@ -145,12 +149,17 @@ jobs:
                   user: ${{ env.PYPI_USERNAME }}
                   password: ${{ env.PYPI_PASSWORD }}
                   packages_dir: ${{github.workspace}}/packages/pulumi-gotiac-aws/sdk/python/bin/dist
-            - if: ${{ matrix.language == 'nodejs' && env.PUBLISH_NPM == 'true' }}
-              uses: JS-DevTools/npm-publish@v1
-              with:
-                  access: 'public'
-                  token: ${{ env.NPM_TOKEN }}
-                  package: ${{github.workspace}}/packages/pulumi-gotiac-aws/sdk/nodejs/bin/package.json
+            - name: Install
+              if: ${{ matrix.language == 'nodejs' && env.PUBLISH_NPM == 'true' }}
+              shell: bash
+              run: pnpm install
+            - name: Publish
+              if: ${{ matrix.language == 'nodejs' && env.PUBLISH_NPM == 'true' }}
+              working-directory: ./packages/pulumi-gotiac-aws/sdk/nodejs/bin
+              shell: bash
+              run: pnpm publish --access public --no-git-checks
+              env:
+                  NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
             - if: ${{ matrix.language == 'dotnet' && env.PUBLISH_NUGET == 'true' }}
               name: publish nuget package
               run: |
@@ -169,6 +178,6 @@ jobs:
                     # - dotnet
                     # - go
                 nodeversion:
-                    - 14.x
+                    - 18.x
                 pythonversion:
                     - '3.9'

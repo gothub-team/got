@@ -260,7 +260,7 @@ export declare interface Session extends LoginVerifyOutput {
     refreshTokenExpires?: number;
 }
 export declare interface SessionStore {
-    getSession: () => Session | undefined;
+    getSession: () => Session | Promise<Session> | undefined;
     setSession: (session: Session) => void;
     removeSession: () => void;
 }
@@ -295,7 +295,9 @@ export const createApi = ({
     if (!host) throw new Error('Provide host argument to create API.');
     const _host = host.endsWith('/') ? host.substring(0, host.length - 1) : host;
 
-    const [_getLocalSession, _setLocalSession] = useState<Session | undefined>(getSession());
+    const getSesh = getSession();
+    const initialSession = getSesh && 'then' in getSesh ? undefined : getSesh;
+    const [_getLocalSession, _setLocalSession] = useState<Session | undefined>(initialSession);
     const [getAdminMode, setAdminMode] = useState(adminMode);
 
     const getIdToken = async () => {
@@ -303,6 +305,12 @@ export const createApi = ({
         if (idToken && isExpired(decodeJwt(idToken).exp)) {
             await refreshSession();
             return _getLocalSession()?.idToken;
+        }
+        if (!idToken) {
+            const session = await getSession();
+            if (!session) return;
+            _setLocalSession(session);
+            return session.idToken;
         }
         return idToken;
     };

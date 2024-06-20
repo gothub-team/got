@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/pulumi/pulumi/master/pkg/codegen/schema/pulumi.json
 ---
 name: gotiac
-pluginDownloadURL: https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.1.8
+pluginDownloadURL: https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.1.13
 types:
     gotiac:index:ApiFileHostingInput:
         type: object
@@ -242,7 +242,6 @@ resources:
         requiredInputs:
             - domainName
             - userPoolId
-            - codePath
             - runtime
         properties:
             endpoint:
@@ -414,7 +413,6 @@ resources:
                 description: The ARN of the pull lambda function.
         requiredInputs:
             - userPoolId
-            - codePath
             - runtime
             - notificationsEmailAccount
             - pullLambdaName
@@ -431,6 +429,7 @@ language:
         packageName: '@gothub/pulumi-gotiac-aws'
         dependencies:
             '@pulumi/aws': '^6.0.0'
+            '@gothub/got-api-lambda': 'workspace:*'
         devDependencies:
             typescript: '*'
             '@types/node': '*'

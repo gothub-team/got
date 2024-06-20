@@ -1,8 +1,8 @@
-name: release-got-core
+name: release-got-react
 on:
     push:
         tags:
-            - 'packages/got-core/v*.*.*'
+            - 'packages/got-react/v*.*.*'
             - '!v*.*.*-**'
 env:
     # THIS GITHUB_TOKEN IS A REQUIREMENT TO BE ABLE TO WRITE TO GH RELEASES
@@ -24,7 +24,7 @@ jobs:
             - name: Unshallow clone for tags
               run: git fetch --tags --force
             - name: Check worktree clean
-              working-directory: ./packages/got-core
+              working-directory: ./packages/got-react
               run: |
                   git update-index -q --refresh
                   if ! git diff-files --quiet; then
@@ -45,22 +45,26 @@ jobs:
             - name: Setup Bun
               uses: oven-sh/setup-bun@v1
             # - name: Set version to release tag
-            #   working-directory: ./packages/got-core
+            #   working-directory: ./packages/got-react
             #   shell: bash
             #   run: pnpm version from-git --no-commit-hooks --no-git-tag-version --allow-same-version
             - name: Install
               shell: bash
               run: pnpm install
-            - name: Build
+            - name: Build Core
               working-directory: ./packages/got-core
               shell: bash
               run: pnpm build
-            - name: Build
+            - name: Build Api
               working-directory: ./packages/got-api
               shell: bash
               run: pnpm build
+            - name: Build React
+              working-directory: ./packages/got-react
+              shell: bash
+              run: pnpm build
             - name: Publish
-              working-directory: ./packages/got-core
+              working-directory: ./packages/got-react
               shell: bash
               run: pnpm publish --access public --no-git-checks
               env:
@@ -70,6 +74,6 @@ jobs:
             #   with:
             #       commit_message: 'chore: release ${{ github.event.release.tag_name }}'
             #       branch: ${{ github.event.repository.default_branch }}
-            #       file_pattern: packages/got-core/package.json
+            #       file_pattern: packages/got-react/package.json
         strategy:
             fail-fast: true

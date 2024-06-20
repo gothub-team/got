@@ -2,7 +2,6 @@
 
 import * as pulumi from '@pulumi/pulumi';
 import * as gotiac from '@gothub/pulumi-gotiac-aws';
-import * as path from 'path';
 import * as fs from 'fs';
 import {
     AWS_PROFILE,
@@ -62,7 +61,6 @@ export default $config({
             domainName: env.GOT_API_DOMAIN,
             userPoolId: userPool.userPoolId,
             runtime: 'nodejs20.x',
-            codePath: path.join(process.cwd(), 'dist/lambda'),
             forceStoreDestroy: true,
             fileHosting: {
                 domain: fileHosting.domain,
@@ -75,7 +73,6 @@ export default $config({
         new gotiac.CustomMailer('CustomMailer', {
             userPoolId: userPool.userPoolId,
             runtime: 'nodejs20.x',
-            codePath: path.join(process.cwd(), 'dist/lambda'),
             invokePullPolicyArn: api.pullInvokePolicyArn,
             pullLambdaName: api.pullLambdaName,
             notificationsEmailAccount: {

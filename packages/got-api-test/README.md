@@ -184,7 +184,7 @@ export default $config({
         testUser1.password.apply((password) => {
             fs.appendFileSync(
                 '.test-users.env',
-                `export TEST_USER_1_PW='${password}'\n'`
+                `export TEST_USER_1_PW='${password}'\n`
             );
         });
         testUser2.password.apply((password) => {
@@ -228,7 +228,7 @@ export default $config({
             name: `info@your-domain.com`,
             emailPrefix: 'info',
             enabled: true, // When you enable a user, AWS charges 4 $ per month
-        });
+        }, { dependsOn: [mailDomain] });
 
         fs.writeFileSync('.secrets.env', '');
         user.password.apply((password) => {

@@ -31,8 +31,8 @@ const clean = () => {
 
 const buildTs = async (options = {}) => {
     clean();
-
-    const entryFiles = getAllFiles('./src');
+    const srcDir = options.srcDir || './src';
+    const entryFiles = getAllFiles(srcDir);
 
     // compile CJS
     console.log('Compiling CJS...');
@@ -48,33 +48,35 @@ const buildTs = async (options = {}) => {
         // outExtension: { '.js': '.cjs' },
     });
 
-    // compile minified CJS
-    console.log('Compiling minified CJS...');
-    await build({
-        logLevel: 'info',
-        minify: true,
-        treeShaking: true,
-        target: 'node18.0',
-        platform: 'node',
-        format: 'cjs',
-        entryPoints: entryFiles,
-        outdir: './dist/min',
-    });
+    if (options.minBundle) {
+        // compile minified CJS
+        console.log('Compiling minified CJS...');
+        await build({
+            logLevel: 'info',
+            minify: true,
+            treeShaking: true,
+            target: 'node18.0',
+            platform: 'node',
+            format: 'cjs',
+            entryPoints: entryFiles,
+            outdir: './dist/min',
+        });
 
-    // compile minified bundle CJS
-    console.log('Compiling minified bundled CJS...');
-    await build({
-        logLevel: 'info',
-        bundle: true,
-        minify: true,
-        treeShaking: true,
-        target: 'node18.0',
-        platform: 'node',
-        format: 'cjs',
-        external: options?.min?.external || [],
-        entryPoints: ['./src/index.ts'],
-        outfile: './dist/min-bundle/index.js',
-    });
+        // compile minified bundle CJS
+        console.log('Compiling minified bundled CJS...');
+        await build({
+            logLevel: 'info',
+            bundle: true,
+            minify: true,
+            treeShaking: true,
+            target: 'node18.0',
+            platform: 'node',
+            format: 'cjs',
+            external: options?.min?.external || [],
+            entryPoints: ['./src/index.ts'],
+            outfile: './dist/min-bundle/index.js',
+        });
+    }
 
     // compile ESM with types
     console.log('Compiling ESM...');

@@ -3,6 +3,9 @@ package provider
 import (
 	"errors"
 	"fmt"
+	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/gothub-team/got/packages/pulumi-gotiac-aws/provider/pkg/util"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/acm"
@@ -19,7 +22,7 @@ type ApiArgs struct {
 	DomainName pulumi.StringInput `pulumi:"domainName"`
 	UserPoolId pulumi.IDInput     `pulumi:"userPoolId"`
 	// The the path to the .zip for the lambda code
-	CodePath pulumi.StringInput `pulumi:"codePath"`
+	CodePath pulumi.StringPtrInput `pulumi:"codePath"`
 	// The lambda runtime
 	Runtime                  pulumi.StringInput   `pulumi:"runtime"`
 	ForceStoreDestroy        *pulumi.BoolInput    `pulumi:"forceStoreDestroy"`
@@ -355,6 +358,14 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	codePath := args.CodePath
+	if codePath == nil {
+		codePath, err = FindLambdaCodePath()
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	pullMem := pulumi.Int(2048)
 	pullEnv := pulumi.StringMap{
 		"BUCKET_NODES":                        graphStore.BucketNodesName,
@@ -372,7 +383,7 @@ func NewApi(ctx *pulumi.Context,
 
 	pullLambda, err := NewLambda(ctx, name+"PullInternal", &LambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/pull.js", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/pull.js", codePath),
 		HandlerPath: pulumi.String("pull.handleInvoke"),
 		MemorySize:  &pullMem,
 		PolicyArns: pulumi.StringArray{
@@ -410,7 +421,7 @@ func NewApi(ctx *pulumi.Context,
 
 	pullApiLambda, err := NewApiLambda(ctx, name+"PullApi", &ApiLambdaArgs{
 		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/pull.js", args.CodePath),
+		CodePath:     pulumi.Sprintf("%s/pull.js", codePath),
 		HandlerPath:  pulumi.String("pull.handleHttp"),
 		MemorySize:   &pullMem,
 		Method:       pulumi.String("POST"),
@@ -447,7 +458,7 @@ func NewApi(ctx *pulumi.Context,
 
 	pushLambda, err := NewLambda(ctx, name+"PushInternal", &LambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/push.js", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/push.js", codePath),
 		HandlerPath: pulumi.String("push.handleInvoke"),
 		MemorySize:  &pushMem,
 		PolicyArns: pulumi.StringArray{
@@ -488,7 +499,7 @@ func NewApi(ctx *pulumi.Context,
 
 	pushApiLambda, err := NewApiLambda(ctx, name+"PushApi", &ApiLambdaArgs{
 		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/push.js", args.CodePath),
+		CodePath:     pulumi.Sprintf("%s/push.js", codePath),
 		HandlerPath:  pulumi.String("push.handleHttp"),
 		MemorySize:   &pushMem,
 		Method:       pulumi.String("POST"),
@@ -516,7 +527,7 @@ func NewApi(ctx *pulumi.Context,
 
 	_, err = NewApiLambda(ctx, name+"CompleteUploadApi", &ApiLambdaArgs{
 		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/completeUpload.js", args.CodePath),
+		CodePath:     pulumi.Sprintf("%s/completeUpload.js", codePath),
 		HandlerPath:  pulumi.String("completeUpload.handleHttp"),
 		Method:       pulumi.String("POST"),
 		AuthorizerId: authorizer.ID(),
@@ -539,7 +550,7 @@ func NewApi(ctx *pulumi.Context,
 
 	_, err = NewApiLambda(ctx, name+"GetLogsApi", &ApiLambdaArgs{
 		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/get-logs.js", args.CodePath),
+		CodePath:     pulumi.Sprintf("%s/get-logs.js", codePath),
 		HandlerPath:  pulumi.String("get-logs.handleHttp"),
 		Method:       pulumi.String("POST"),
 		AuthorizerId: authorizer.ID(),
@@ -572,7 +583,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthLoginInitApiLambda, err := NewApiLambda(ctx, name+"AuthLoginInit", &ApiLambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/auth/login-init.js", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/auth/login-init.js", codePath),
 		HandlerPath: pulumi.String("login-init.handleHttp"),
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
@@ -590,7 +601,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthLoginVerifyApiLambda, err := NewApiLambda(ctx, name+"AuthLoginVerify", &ApiLambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/auth/login-verify.js", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/auth/login-verify.js", codePath),
 		HandlerPath: pulumi.String("login-verify.handleHttp"),
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
@@ -608,7 +619,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthLoginRefreshApiLambda, err := NewApiLambda(ctx, name+"AuthLoginRefresh", &ApiLambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/auth/login-refresh.js", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/auth/login-refresh.js", codePath),
 		HandlerPath: pulumi.String("login-refresh.handleHttp"),
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
@@ -626,7 +637,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthRegisterInitApiLambda, err := NewApiLambda(ctx, name+"AuthRegisterInit", &ApiLambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/auth/register-init.js", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/auth/register-init.js", codePath),
 		HandlerPath: pulumi.String("register-init.handleHttp"),
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
@@ -644,7 +655,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthRegisterVerifyApiLambda, err := NewApiLambda(ctx, name+"AuthRegisterVerify", &ApiLambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/auth/register-verify.js", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/auth/register-verify.js", codePath),
 		HandlerPath: pulumi.String("register-verify.handleHttp"),
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
@@ -662,7 +673,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthRegisterVerifyResendApiLambda, err := NewApiLambda(ctx, name+"AuthRegisterVerifyResend", &ApiLambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/auth/register-verify-resend.js", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/auth/register-verify-resend.js", codePath),
 		HandlerPath: pulumi.String("register-verify-resend.handleHttp"),
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
@@ -680,7 +691,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthResetPasswordInitApiLambda, err := NewApiLambda(ctx, name+"AuthResetPasswordInit", &ApiLambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/auth/reset-password-init.js", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/auth/reset-password-init.js", codePath),
 		HandlerPath: pulumi.String("reset-password-init.handleHttp"),
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
@@ -699,7 +710,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthResetPasswordVerifyApiLambda, err := NewApiLambda(ctx, name+"AuthResetPasswordVerify", &ApiLambdaArgs{
 		Runtime:     args.Runtime,
-		CodePath:    pulumi.Sprintf("%s/auth/reset-password-verify.js", args.CodePath),
+		CodePath:    pulumi.Sprintf("%s/auth/reset-password-verify.js", codePath),
 		HandlerPath: pulumi.String("reset-password-verify.handleHttp"),
 		MemorySize:  &AuthMem,
 		Method:      pulumi.String("POST"),
@@ -718,7 +729,7 @@ func NewApi(ctx *pulumi.Context,
 
 	AuthInviteUserApiLambda, err := NewApiLambda(ctx, name+"AuthInviteUser", &ApiLambdaArgs{
 		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/auth/invite-user.js", args.CodePath),
+		CodePath:     pulumi.Sprintf("%s/auth/invite-user.js", codePath),
 		HandlerPath:  pulumi.String("invite-user.handleHttp"),
 		MemorySize:   &AuthMem,
 		Method:       pulumi.String("POST"),
@@ -739,7 +750,7 @@ func NewApi(ctx *pulumi.Context,
 
 	OpenApiApiLambda, err := NewApiLambda(ctx, name+"OpenApi", &ApiLambdaArgs{
 		Runtime:      args.Runtime,
-		CodePath:     pulumi.Sprintf("%s/api.js", args.CodePath),
+		CodePath:     pulumi.Sprintf("%s/api.js", codePath),
 		HandlerPath:  pulumi.String("api.handleHttp"),
 		MemorySize:   &AuthMem,
 		Method:       pulumi.String("GET"),
@@ -782,4 +793,32 @@ func NewApi(ctx *pulumi.Context,
 	}
 
 	return component, nil
+}
+
+func FindLambdaCodePath() (pulumi.String, error) {
+	targetSegment := filepath.Join("node_modules", "@gothub", "got-api-lambda", "dist", "lambda")
+
+	// Get the current working directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Failed to get current working directory: %v", err)
+	}
+
+	for {
+		// Construct the full path to check
+		fullPath := filepath.Join(cwd, targetSegment)
+
+		// Check if the target directory exists
+		if _, err := os.Stat(fullPath); err == nil {
+			return pulumi.String(fullPath), nil
+		}
+
+		// Move up one directory level
+		parentDir := filepath.Dir(cwd)
+		if parentDir == cwd {
+			break
+		}
+		cwd = parentDir
+	}
+	return pulumi.String(""), errors.New("could not find lambda code path. Have you installed @gothub/got-api-lambda? Alternatively, you can specify the codePath in args")
 }
