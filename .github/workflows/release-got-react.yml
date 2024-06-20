@@ -52,6 +52,10 @@ jobs:
               shell: bash
               run: pnpm install
             - name: Build
+              working-directory: ./packages/got-core
+              shell: bash
+              run: pnpm build
+            - name: Build
               working-directory: ./packages/got-react
               shell: bash
               run: pnpm build
