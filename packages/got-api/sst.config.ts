@@ -88,7 +88,7 @@ export default $config({
         testResources({ userPool });
 
         return {
-            apiUrl: pulumi.interpolate`https://${api.endpoint}`,
+            apiUrl: api.endpoint,
             fileHostingUrl: pulumi.interpolate`https://${fileHosting.domain}`,
         };
     },
