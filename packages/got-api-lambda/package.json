@@ -3,7 +3,8 @@
     "version": "0.0.1",
     "type": "module",
     "scripts": {
-        "lint": "eslint ."
+        "lint": "eslint .",
+        "build": "bun esbuild.js"
     },
     "devDependencies": {
         "@types/bun": "latest",

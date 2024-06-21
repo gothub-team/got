@@ -1,8 +1,8 @@
 import { type DataCache } from './types/dataCache';
 import { type NodeView, type EdgeView, type View } from '@gothub/got-core';
-// import { withEdgeTypes, type WithEdgeTypes } from '../util/withEdgeTypes';
-// import { type Loader, type FileRef } from '../types/loader';
-// import { type Signer } from '../types/signer';
+import { withEdgeTypes, type WithEdgeTypes } from './util/withEdgeTypes';
+import { type Loader, type FileRef } from './types/loader';
+import { type Signer } from './types/signer';
 import { type GraphAssembler } from './types/graphAssembler';
 import { promiseManager } from './util/promiseManager';
 import { Log } from './types/logs';
@@ -12,8 +12,8 @@ const parseRole = (role: string, nodeId: string): string => role.replaceAll('$NO
 type Dependencies = {
     // existsCache: ExistsCache;
     dataCache: DataCache;
-    // loader: Loader;
-    // signer: Signer;
+    loader: Loader;
+    signer: Signer;
     graphAssembler: GraphAssembler;
 };
 
@@ -25,11 +25,11 @@ export const pull = async (
 ): Promise<[string, Log]> => {
     const start = performance.now();
 
-    // withEdgeTypes(view);
+    withEdgeTypes(view);
 
     const { addPromise, awaitPromises } = promiseManager();
 
-    const { existsCache, dataCache, signer, loader, graphAssembler } = dependencies;
+    const { dataCache, signer, loader, graphAssembler } = dependencies;
     const {
         writeNode,
         writeMetadata,
@@ -44,34 +44,39 @@ export const pull = async (
     const timeQueryEdge = 0;
     const timeLoadEdge = 0;
 
-    const nodeExists = existsCache.node.getNode;
-
-    const canUserRead = (nodeId: string) => existsCache.userRights.getRead(nodeId, userEmail);
-    const canUserAdmin = (nodeId: string) => existsCache.userRights.getAdmin(nodeId, userEmail);
-
-    const userHasRole = (role: string) => role === 'public' || canUserRead(role);
-
-    const canRoleRead = (nodeId: string, role: string) => existsCache.roleRights.getRead(nodeId, role);
-    const canRoleAdmin = (nodeId: string, role: string) => existsCache.roleRights.getAdmin(nodeId, role);
-
-    const canViewNode = (nodeId: string, asRole: string = 'user') => {
-        if (asAdmin) return nodeExists(nodeId);
-
-        if (asRole === 'user') {
-            return nodeExists(nodeId) && canUserRead(nodeId);
-        }
-
-        return nodeExists(nodeId) && userHasRole(asRole) && canRoleRead(nodeId, asRole);
+    const nodeExists = async (nodeId: string): Promise<boolean> => {
+        const data = await loader.getNode(nodeId);
+        return data != null;
     };
 
-    const canAdminNode = (nodeId: string, asRole: string = 'user') => {
+    const canUserRead = (nodeId: string): Promise<boolean> => loader.getRead(nodeId, 'user', userEmail);
+    const canUserWrite = (nodeId: string): Promise<boolean> => loader.getWrite(nodeId, 'user', userEmail);
+    const canUserAdmin = (nodeId: string): Promise<boolean> => loader.getAdmin(nodeId, 'user', userEmail);
+
+    const userHasRole = async (role: string) => role === 'public' || (await canUserRead(role));
+
+    const canRoleRead = (nodeId: string, role: string): Promise<boolean> => loader.getRead(nodeId, 'role', role);
+    const canRoleWrite = (nodeId: string, role: string): Promise<boolean> => loader.getWrite(nodeId, 'role', role);
+    const canRoleAdmin = (nodeId: string, role: string): Promise<boolean> => loader.getAdmin(nodeId, 'role', role);
+
+    const canViewNode = async (nodeId: string, asRole: string = 'user') => {
         if (asAdmin) return nodeExists(nodeId);
 
         if (asRole === 'user') {
-            return nodeExists(nodeId) && canUserAdmin(nodeId);
+            return (await nodeExists(nodeId)) && (await canUserRead(nodeId));
         }
 
-        return nodeExists(nodeId) && userHasRole(asRole) && canRoleAdmin(nodeId, asRole);
+        return (await nodeExists(nodeId)) && (await userHasRole(asRole)) && (await canRoleRead(nodeId, asRole));
+    };
+
+    const canAdminNode = async (nodeId: string, asRole: string = 'user') => {
+        if (asAdmin) return nodeExists(nodeId);
+
+        if (asRole === 'user') {
+            return (await nodeExists(nodeId)) && (await canUserAdmin(nodeId));
+        }
+
+        return (await nodeExists(nodeId)) && (await userHasRole(asRole)) && (await canRoleAdmin(nodeId, asRole));
     };
 
     type OnNodeData = (nodeId: string, data: string) => void | Promise<void>;
@@ -160,9 +165,11 @@ export const pull = async (
         }
     };
 
-    const loadRights = (nodeId: string) => {
-        const userRights = existsCache.userRights.listRights(nodeId);
-        const roleRights = existsCache.roleRights.listRights(nodeId);
+    const loadRights = async (nodeId: string) => {
+        const resMap = await loader.listRights(nodeId);
+
+        const userRights = resMap.get('user') as Map<string, unknown>;
+        const roleRights = resMap.get('role') as Map<string, unknown>;
 
         if (!userRights && !roleRights) return;
 
@@ -172,17 +179,17 @@ export const pull = async (
 
         writeRights(nodeId, rights);
     };
-    const loadPrincipalRights = (nodeId: string, role: string) => {
+    const loadPrincipalRights = async (nodeId: string, role: string) => {
         // at this point we know the user can read but has no admin rights
         if (role === 'user') {
-            const canWrite = existsCache.userRights.getWrite(nodeId, userEmail);
+            const canWrite = await canUserWrite(nodeId);
             if (canWrite) {
                 writeRights(nodeId, `{"user":{"${userEmail}":{"read":true,"write":true}}}`);
             } else {
                 writeRights(nodeId, `{"user":{"${userEmail}":{"read":true}}}`);
             }
         } else {
-            const canWrite = existsCache.roleRights.getWrite(nodeId, role);
+            const canWrite = await canRoleWrite(nodeId, role);
             if (canWrite) {
                 writeRights(nodeId, `{"role":{"${role}":{"read":true,"write":true}}}`);
             } else {
@@ -223,7 +230,7 @@ export const pull = async (
         }
     };
 
-    const queryNode = (nodeId: string, queryObject: NodeView | EdgeView, role: string) => {
+    const queryNode = async (nodeId: string, queryObject: NodeView | EdgeView, role: string) => {
         // const start = performance.now();
         const { include, edges } = queryObject;
 
@@ -232,23 +239,37 @@ export const pull = async (
             // timeQueryNode += performance.now() - start;
             for (let i = 0; i < edgeTypes.length; i++) {
                 const edgeType = edgeTypes[i];
-                queryEdges(nodeId, edgeType, edges[edgeType], role);
+                addPromise(queryEdges(nodeId, edgeType, edges[edgeType], role));
             }
         }
 
         // includes after edges, to queue edge loads first if needed
         if (include?.node) loadNode(nodeId, writeNode);
+        if (include?.files) addPromise(loadFilesAsync(nodeId, writeFiles));
         if (include?.rights) {
-            if (canAdminNode(nodeId, role)) {
-                loadRights(nodeId);
+            if (await canAdminNode(nodeId, role)) {
+                await loadRights(nodeId);
             } else {
-                loadPrincipalRights(nodeId, role);
+                await loadPrincipalRights(nodeId, role);
             }
         }
-        if (include?.files) addPromise(loadFilesAsync(nodeId, writeFiles));
     };
 
-    const queryEdges = (nodeId: string, edgeTypes: string, queryObject: EdgeView, _role: string) => {
+    const queryEdgesAsync = async (
+        queryObject: EdgeView,
+        role: string,
+        edgeTypes: string,
+        fromId: string,
+        fromType: string,
+        toType: string,
+        toId: string,
+    ) => {
+        if (await canViewNode(fromId, role)) {
+            addPromise(queryNode(fromId, queryObject, role));
+            queryEdge(fromId, edgeTypes, fromType, toType, toId, queryObject);
+        }
+    };
+    const queryEdges = async (nodeId: string, edgeTypes: string, queryObject: EdgeView, _role: string) => {
         if (edgeTypes.includes('*')) {
             addPromise(queryEdgesWildcardAsync(nodeId, edgeTypes, queryObject, _role));
             return;
@@ -256,53 +277,39 @@ export const pull = async (
 
         const { fromType, toType } = queryObject as WithEdgeTypes;
 
-        // const start = performance.now();
         if (queryObject.reverse) {
             const toId = nodeId;
-            const fromIds = existsCache.edgeReverse.listEdgeReverse(toId, edgeTypes);
+            const fromIds = await loader.getReverseEdges(toId, edgeTypes);
             if (fromIds == null) return;
 
             const fromIdsKeys = fromIds.keys();
-            // timeQueryEdge += performance.now() - start;
             for (const fromId of fromIdsKeys) {
                 const role = queryObject.role ? parseRole(queryObject.role, fromId) : _role;
-                if (canViewNode(fromId, role)) {
-                    queryNode(fromId, queryObject, role);
-                    queryEdge(fromId, edgeTypes, fromType, toType, toId, queryObject);
-                }
+                addPromise(queryEdgesAsync(queryObject, role, edgeTypes, fromId, fromType, toType, toId));
             }
         } else {
             const fromId = nodeId;
-            const toIds = existsCache.edge.listEdge(fromId, edgeTypes);
+            const toIds = await loader.getEdges(fromId, edgeTypes);
             if (toIds == null) return;
 
             const toIdsKeys = toIds.keys();
-            // timeQueryEdge += performance.now() - start;
             for (const toId of toIdsKeys) {
                 const role = queryObject.role ? parseRole(queryObject.role, toId) : _role;
-                if (canViewNode(toId, role)) {
-                    queryNode(toId, queryObject, role);
-                    queryEdge(fromId, edgeTypes, fromType, toType, toId, queryObject);
-                }
+                addPromise(queryEdgesAsync(queryObject, role, edgeTypes, fromId, fromType, toType, toId));
             }
         }
     };
 
     const queryEdgesWildcardAsync = async (nodeId: string, edgeTypes: string, queryObject: EdgeView, _role: string) => {
-        // const start = performance.now();
         if (queryObject.reverse) {
             throw new Error('Reverse wildcards are not supported');
         } else {
             const fromId = nodeId;
             const wildcardEdges = await loader.getEdgesWildcard(fromId, edgeTypes);
-            // timeQueryEdge += performance.now() - start;
             for (let i = 0; i < wildcardEdges.length; i++) {
                 const [fromType, toType, toId] = wildcardEdges[i];
                 const role = queryObject.role ? parseRole(queryObject.role, toId) : _role;
-                if (canViewNode(toId, role)) {
-                    queryNode(toId, queryObject, role);
-                    queryEdge(fromId, `${fromType}/${toType}`, fromType, toType, toId, queryObject);
-                }
+                addPromise(queryEdgesAsync(queryObject, role, `${fromType}/${toType}`, fromId, fromType, toType, toId));
             }
         }
     };
@@ -316,14 +323,12 @@ export const pull = async (
         queryObject: EdgeView,
     ) => {
         const { include, reverse } = queryObject;
-        // const start2 = performance.now();
         if (include?.edges && !include.metadata) {
             loadEdge(fromId, fromType, toType, toId);
         } else if (include?.edges && include.metadata) {
             loadMetadata(fromId, edgeTypes, fromType, toType, toId, writeMetadata);
         }
         reverse && loadEdgeReverse(fromId, fromType, toType, toId);
-        // timeLoadEdge += performance.now() - start2;
     };
 
     const fromNodeIdWildcard = (nodeId: string): string | undefined => {
@@ -341,12 +346,15 @@ export const pull = async (
         for (let i = 0; i < nodeIds.length; i++) {
             const nodeId = nodeIds[i];
             const role = queryObject.role ? parseRole(queryObject.role, nodeId) : 'user';
-            if (canViewNode(nodeId, role)) {
-                queryNode(nodeId, queryObject, role);
-            }
+            addPromise(queryNodeViewAsync(nodeId, queryObject, role));
         }
     };
 
+    const queryNodeViewAsync = async (nodeId: string, queryObject: EdgeView, role: string) => {
+        if (await canViewNode(nodeId, role)) {
+            return queryNode(nodeId, queryObject, role);
+        }
+    };
     const queryNodeView = () => {
         if (view == null) return;
         const nodeIds = Object.keys(view);
@@ -361,9 +369,8 @@ export const pull = async (
 
             const queryObject = view[nodeId];
             const role = queryObject.role ? parseRole(queryObject.role, nodeId) : 'user';
-            if (canViewNode(nodeId, role)) {
-                queryNode(nodeId, queryObject, role);
-            }
+
+            addPromise(queryNodeViewAsync(nodeId, queryObject, role));
         }
     };
 
