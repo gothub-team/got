@@ -80,7 +80,7 @@ export const pull = async (
     };
 
     type OnNodeData = (nodeId: string, data: string) => void | Promise<void>;
-    const loadNode = (nodeId: string, onData?: OnNodeData): string | Promise<string> => {
+    const loadNode = (nodeId: string, onData?: OnNodeData): string | null | Promise<string | null> => {
         const data = dataCache.nodes.getNode(nodeId);
         if (data != null) {
             onData && onData(nodeId, data);
@@ -90,7 +90,7 @@ export const pull = async (
         }
     };
 
-    const loadNodeAsync = async (nodeId: string, onData?: OnNodeData): Promise<string> => {
+    const loadNodeAsync = async (nodeId: string, onData?: OnNodeData): Promise<string | null> => {
         const cachedPromise = dataCache.nodes.getNodePromise(nodeId);
         if (cachedPromise != null) {
             const data = await cachedPromise;
@@ -98,13 +98,18 @@ export const pull = async (
             return data;
         } else {
             const promise = loader.getNode(nodeId);
-            dataCache.nodes.setNodePromise(nodeId, promise);
+            dataCache.nodes.setNodePromise(nodeId, promise as Promise<string>);
             const data = await promise;
-            dataCache.nodes.setNode(nodeId, data);
+            if (data !== null) {
+                dataCache.nodes.setNode(nodeId, data);
+                dataCache.nodes.removeNodePromise(nodeId);
+                onData && onData(nodeId, data);
+                return data;
+            }
             dataCache.nodes.removeNodePromise(nodeId);
-            onData && onData(nodeId, data);
-            return data;
         }
+
+        return null;
     };
 
     const loadEdge = (fromId: string, fromType: string, toType: string, toId: string) => {
@@ -231,12 +236,10 @@ export const pull = async (
     };
 
     const queryNode = async (nodeId: string, queryObject: NodeView | EdgeView, role: string) => {
-        // const start = performance.now();
         const { include, edges } = queryObject;
 
         if (edges) {
             const edgeTypes = Object.keys(edges);
-            // timeQueryNode += performance.now() - start;
             for (let i = 0; i < edgeTypes.length; i++) {
                 const edgeType = edgeTypes[i];
                 addPromise(queryEdges(nodeId, edgeType, edges[edgeType], role));
@@ -279,7 +282,7 @@ export const pull = async (
 
         if (queryObject.reverse) {
             const toId = nodeId;
-            const fromIds = await loader.getReverseEdges(toId, edgeTypes);
+            const fromIds = await loader.getReverseEdges(toId, `${toType}/${fromType}`);
             if (fromIds == null) return;
 
             const fromIdsKeys = fromIds.keys();
