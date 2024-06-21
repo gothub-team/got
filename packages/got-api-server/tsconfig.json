@@ -1,0 +1,5 @@
+{
+    "extends": "@gothub/typescript-util/tsconfig-frontend.json",
+    "include": ["**/*.ts", "../aws-util/src/loadQueue.ts"],
+    "exclude": ["**/*.spec.ts"]
+}
