@@ -1,8 +1,9 @@
 export const promiseManager = () => {
     let promises: Promise<unknown>[] = [];
 
-    const addPromise = (promise: Promise<void>) => {
+    const addPromise = <TRes>(promise: Promise<TRes>): Promise<TRes> => {
         promises.push(promise);
+        return promise;
     };
 
     const awaitPromises = async () => {

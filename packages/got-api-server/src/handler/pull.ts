@@ -75,27 +75,31 @@ export const pull = async (
         return nodeExists(nodeId) && userHasRole(asRole) && canRoleAdmin(nodeId, asRole);
     };
 
-    const loadNode = (nodeId: string) => {
+    type OnNodeData = (nodeId: string, data: string) => void | Promise<void>;
+    const loadNode = (nodeId: string, onData?: OnNodeData): string | Promise<string> => {
         const data = dataCache.nodes.getNode(nodeId);
         if (data != null) {
-            writeNode(nodeId, data);
+            onData && onData(nodeId, data);
+            return data;
         } else {
-            addPromise(loadNodeAsync(nodeId));
+            return addPromise(loadNodeAsync(nodeId, onData));
         }
     };
 
-    const loadNodeAsync = async (nodeId: string) => {
+    const loadNodeAsync = async (nodeId: string, onData?: OnNodeData): Promise<string> => {
         const cachedPromise = dataCache.nodes.getNodePromise(nodeId);
         if (cachedPromise != null) {
             const data = await cachedPromise;
-            writeNode(nodeId, data);
+            onData && onData(nodeId, data);
+            return data;
         } else {
             const promise = loader.getNode(nodeId);
             dataCache.nodes.setNodePromise(nodeId, promise);
             const data = await promise;
             dataCache.nodes.setNode(nodeId, data);
             dataCache.nodes.removeNodePromise(nodeId);
-            writeNode(nodeId, data);
+            onData && onData(nodeId, data);
+            return data;
         }
     };
 
@@ -115,15 +119,45 @@ export const pull = async (
         writeEdgeReverse(fromId, fromType, toType, toId);
     };
 
-    const loadMetadata = (fromId: string, edgeTypes: string, fromType: string, toType: string, toId: string) => {
+    type OnMetadataData = (fromId: string, edgeTypes: string, fromType: string, toType: string, toId: string) => void;
+    const loadMetadata = (
+        fromId: string,
+        edgeTypes: string,
+        fromType: string,
+        toType: string,
+        toId: string,
+        onData?: OnMetadataData,
+    ) => {
         if (!fromType || !toType) {
             console.log('LOADMETADATA:: Invalid edge key', `${fromId}/${fromType}/${toType}/${toId}`);
         }
         const data = dataCache.metadata.getMetadata(fromId, edgeTypes, toId);
         if (data != null) {
-            writeMetadata(fromId, fromType, toType, toId, data);
+            onData && onData(fromId, fromType, toType, toId, data);
         } else {
             addPromise(loadMetadataAsync(fromId, edgeTypes, fromType, toType, toId));
+        }
+    };
+
+    const loadMetadataAsync = async (
+        fromId: string,
+        edgeTypes: string,
+        fromType: string,
+        toType: string,
+        toId: string,
+        onData?: OnMetadataData,
+    ) => {
+        const cachedPromise = dataCache.metadata.getMetadataPromise(fromId, edgeTypes, toId);
+        if (cachedPromise != null) {
+            const data = await cachedPromise;
+            onData && onData(fromId, fromType, toType, toId, data);
+        } else {
+            const promise = loader.getMetadata(fromId, edgeTypes, toId); // do a thing
+            dataCache.metadata.setMetadataPromise(fromId, edgeTypes, toId, promise);
+            const data = await promise;
+            dataCache.metadata.setMetadata(fromId, edgeTypes, toId, data);
+            dataCache.metadata.removeMetadataPromise(fromId, edgeTypes, toId);
+            onData && onData(fromId, fromType, toType, toId, data);
         }
     };
 
@@ -158,7 +192,8 @@ export const pull = async (
         }
     };
 
-    const loadFileAsync = async (nodeId: string, { fileKey, prop }: FileRef) => {
+    type OnFileData = (nodeId: string, prop: string, data: string) => void;
+    const loadFileAsync = async (nodeId: string, { fileKey, prop }: FileRef, onData?: OnFileData) => {
         const fileHead = await loader.getFileHead(fileKey);
 
         if (!fileHead) return;
@@ -166,7 +201,7 @@ export const pull = async (
 
         const urlObject = dataCache.urls.getUrl(fileKey, etag);
         if (urlObject && urlObject.expire > Date.now()) {
-            writeFiles(nodeId, prop, JSON.stringify({ etag, contentType, modifiedDate, url: urlObject.url }));
+            onData && onData(nodeId, prop, JSON.stringify({ etag, contentType, modifiedDate, url: urlObject.url }));
             return;
         } else {
             dataCache.urls.removeUrl(fileKey, etag);
@@ -174,43 +209,18 @@ export const pull = async (
             const twelveHours = 1000 * 60 * 60 * 12;
             dataCache.urls.setUrl(fileKey, etag, { url, expire: Date.now() + twelveHours });
 
-            writeFiles(nodeId, prop, JSON.stringify({ etag, contentType, modifiedDate, url }));
+            onData && onData(nodeId, prop, JSON.stringify({ etag, contentType, modifiedDate, url }));
         }
     };
 
-    const loadFilesAsync = async (nodeId: string) => {
+    const loadFilesAsync = async (nodeId: string, onData?: OnFileData) => {
         const fileRefs = await loader.getFileRefs(nodeId);
 
         if (!fileRefs) return;
 
         for (let i = 0; i < fileRefs.length; i++) {
             const fileRef = fileRefs[i];
-            addPromise(loadFileAsync(nodeId, fileRef));
-        }
-    };
-
-    const loadMetadataAsync = async (
-        fromId: string,
-        edgeTypes: string,
-        fromType: string,
-        toType: string,
-        toId: string,
-    ) => {
-        // if (!fromType || !toType) {
-        //     console.log('LOADMETADATAASYNC:: Invalid edge key', `${fromId}/${fromType}/${toType}/${toId}`);
-        // }
-
-        const cachedPromise = dataCache.metadata.getMetadataPromise(fromId, edgeTypes, toId);
-        if (cachedPromise != null) {
-            const data = await cachedPromise;
-            writeMetadata(fromId, fromType, toType, toId, data);
-        } else {
-            const promise = loader.getMetadata(fromId, edgeTypes, toId); // do a thing
-            dataCache.metadata.setMetadataPromise(fromId, edgeTypes, toId, promise);
-            const data = await promise;
-            dataCache.metadata.setMetadata(fromId, edgeTypes, toId, data);
-            dataCache.metadata.removeMetadataPromise(fromId, edgeTypes, toId);
-            writeMetadata(fromId, fromType, toType, toId, data);
+            addPromise(loadFileAsync(nodeId, fileRef, onData));
         }
     };
 
@@ -228,7 +238,7 @@ export const pull = async (
         }
 
         // includes after edges, to queue edge loads first if needed
-        if (include?.node) loadNode(nodeId);
+        if (include?.node) loadNode(nodeId, writeNode);
         if (include?.rights) {
             if (canAdminNode(nodeId, role)) {
                 loadRights(nodeId);
@@ -236,7 +246,7 @@ export const pull = async (
                 loadPrincipalRights(nodeId, role);
             }
         }
-        if (include?.files) addPromise(loadFilesAsync(nodeId));
+        if (include?.files) addPromise(loadFilesAsync(nodeId, writeFiles));
     };
 
     const queryEdges = (nodeId: string, edgeTypes: string, queryObject: EdgeView, _role: string) => {
@@ -311,7 +321,7 @@ export const pull = async (
         if (include?.edges && !include.metadata) {
             loadEdge(fromId, fromType, toType, toId);
         } else if (include?.edges && include.metadata) {
-            loadMetadata(fromId, edgeTypes, fromType, toType, toId);
+            loadMetadata(fromId, edgeTypes, fromType, toType, toId, writeMetadata);
         }
         reverse && loadEdgeReverse(fromId, fromType, toType, toId);
         // timeLoadEdge += performance.now() - start2;
