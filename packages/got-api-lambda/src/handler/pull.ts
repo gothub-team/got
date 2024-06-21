@@ -95,18 +95,17 @@ export type Body = View;
 const handle = async ({ userEmail, asAdmin, asRole, body }: ValidationResult<Body>): Promise<APIGatewayProxyResult> => {
     const signer: Signer = await cfSigner();
     // TODO: fix useremail thingies
-    const result = await pull(body, userEmail || '', asAdmin, {
+    const [result] = await pull(body, userEmail || '', asAdmin, {
         dataCache: createDataCache(),
         graphAssembler: graphAssembler(),
         loader: s3loader(),
         signer,
     });
-    const pullRes = JSON.stringify(result);
 
     return {
         statusCode: 200,
         headers: CORS_HEADERS,
-        body: pullRes,
+        body: result,
     };
 };
 

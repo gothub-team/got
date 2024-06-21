@@ -59,7 +59,7 @@ export const s3loader: () => Loader = () => {
         numNodes += 1;
         const data = (await queueLoad(() => s3get(BUCKET_NODES, nodeId))) as string | null;
         if (data == null) {
-            throw new Error('Node not found');
+            return null; // TODO: how is this null handled when coming from cache etc.
         }
         return data.toString();
     };
