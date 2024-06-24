@@ -1,9 +1,14 @@
 {
     "name": "@gothub/typescript-util",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "license": "MIT",
     "type": "module",
-    "devDependencies": {
+    "devDependencies": {},
+    "peerDependencies": {
+        "typescript": "^5.5.2"
+    },
+    "dependencies": {
+        "zod": "^3.23.8",
         "@eslint/js": "^9.1.1",
         "@types/bun": "latest",
         "eslint": "^9.1.1",
@@ -12,11 +17,5 @@
         "typescript-eslint": "^7.7.1",
         "esbuild": "^0.21.4",
         "esbuild-plugin-d.ts": "^1.2.3"
-    },
-    "peerDependencies": {
-        "typescript": "^5.0.0"
-    },
-    "dependencies": {
-        "zod": "^3.23.8"
     }
 }
