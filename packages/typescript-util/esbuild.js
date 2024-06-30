@@ -86,7 +86,6 @@ const buildTs = async (options = {}) => {
         target: 'node18.0',
         platform: 'node',
         format: 'esm',
-        outExtension: { '.js': '.cjs' },
         external: options?.esm?.external || [],
         entryPoints: entryFiles,
         outdir: './dist/module',
