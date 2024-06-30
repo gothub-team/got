@@ -1,3 +1,3 @@
 import build from '@gothub/typescript-util/esbuild.js';
 
-build({ srcDir: './client-js' });
+build({ srcDir: './client-js', minBundle: true });

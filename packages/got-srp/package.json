@@ -1,0 +1,23 @@
+{
+    "name": "@gothub/got-srp",
+    "version": "0.0.13",
+    "license": "MIT",
+    "type": "module",
+    "types": "dist/module/index.d.ts",
+    "main": "dist/module/index.js",
+    "module": "dist/module/index.js",
+    "browser": "dist/module/index-browser.js",
+    "scripts": {
+        "generate:client-js": "bun client-js/generate.ts",
+        "build:lambda": "bun ./esbuild.lambda.js",
+        "build": "bun ./esbuild.js",
+        "lint": "eslint ."
+    },
+    "devDependencies": {
+        "@gothub/typescript-util": "workspace:*"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {}
+}
