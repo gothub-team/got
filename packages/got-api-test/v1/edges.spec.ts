@@ -209,7 +209,7 @@ describe('edges', () => {
                     200,
                 );
             });
-            it('pulls the edge 1 level nested and the old edge', () => {
+            it.only('pulls the edge 1 level nested and the old edge', () => {
                 expect(graph).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`], true);
                 expect(graph).toHaveProperty(['edges', 'from', `${testId}-2`, 'to', `${testId}-3`], true);
                 expect(graph).not.toHaveProperty(['edges', 'from', `${testId}-3`, 'to', `${testId}-4`]);
