@@ -15,10 +15,7 @@ const { crypto } = window;
  *
  * @returns A triple (g, x, y), such that ax + by = g = gcd(a, b).
  */
-export function eGcd(a: bigint | number, b: bigint | number) {
-    if (typeof a === 'number') a = BigInt(a);
-    if (typeof b === 'number') b = BigInt(b);
-
+export function eGcd(a: bigint, b: bigint) {
     if (a <= 0n || b <= 0n) throw new RangeError('a and b MUST be > 0'); // a and b MUST be positive
 
     let x = 0n;
@@ -59,10 +56,7 @@ export function eGcd(a: bigint | number, b: bigint | number) {
  *
  * @returns A bigint with the smallest positive representation of a modulo n
  */
-export function toZn(a: bigint | number, n: bigint | number): bigint {
-    if (typeof a === 'number') a = BigInt(a);
-    if (typeof n === 'number') n = BigInt(n);
-
+export function toZn(a: bigint, n: bigint): bigint {
     if (n <= 0n) {
         throw new RangeError('n must be > 0');
     }
@@ -82,7 +76,7 @@ export function toZn(a: bigint | number, n: bigint | number): bigint {
  *
  * @returns The inverse modulo n
  */
-export function modInv(a: bigint | number, n: bigint | number) {
+export function modInv(a: bigint, n: bigint) {
     const egcd = eGcd(toZn(a, n), n);
     if (egcd.g !== 1n) {
         throw new RangeError(`${a.toString()} does not have inverse modulo ${n.toString()}`); // modular inverse does not exist
@@ -98,9 +92,7 @@ export function modInv(a: bigint | number, n: bigint | number) {
  *
  * @returns The absolute value of a
  */
-export function abs(a: bigint) {
-    return a >= 0 ? a : -a;
-}
+export const absBigInt = (a: bigint) => (a < 0n ? -a : a);
 
 /**
  * Modular exponentiation b**e mod n. Currently using the right-to-left binary method
@@ -114,11 +106,7 @@ export function abs(a: bigint) {
  *
  * @returns b**e mod n
  */
-export function modPow(b: bigint | number, e: bigint | number, n: bigint | number): bigint {
-    if (typeof b === 'number') b = BigInt(b);
-    if (typeof e === 'number') e = BigInt(e);
-    if (typeof n === 'number') n = BigInt(n);
-
+export function modPow(b: bigint, e: bigint, n: bigint): bigint {
     if (n <= 0n) {
         throw new RangeError('n must be > 0');
     } else if (n === 1n) {
@@ -128,7 +116,7 @@ export function modPow(b: bigint | number, e: bigint | number, n: bigint | numbe
     b = toZn(b, n);
 
     if (e < 0n) {
-        return modInv(modPow(b, abs(e), n), n);
+        return modInv(modPow(b, absBigInt(e), n), n);
     }
 
     let r = 1n;
@@ -146,7 +134,7 @@ export function modPow(b: bigint | number, e: bigint | number, n: bigint | numbe
  * Returns a Buffer with a sequence of random nBytes
  *
  * @param {number} nBytes
- * @returns {Buffer} fixed-length sequence of random bytes
+ * @returns {string} fixed-length hex sequence of random bytes
  */
 function randomBytes(nBytes: number) {
     return bytesToHex(crypto.getRandomValues(new Uint8Array(nBytes)));
@@ -178,7 +166,7 @@ const initN =
 export const useSrp = async () => {
     const N = BigInt(`0x${initN}`);
     const g = BigInt('0x2');
-    const k = BigInt(`0x${await hexHash(`${padHex(N)}${padHex(g)}`)}`, 16);
+    const k = BigInt(`0x${await hexHash(`${padHex(N)}${padHex(g)}`)}`);
     const smallAValue = generateRandomSmallA();
     const largeAValue = await calculateA({ smallAValue, g, N });
     const infoBits = bufferFrom('Caldera Derived Key', 'utf8');
@@ -257,7 +245,7 @@ const calculateSignature =
         const usernamePassword = `${poolname}${userId}:${password}`;
         const usernamePasswordHash = await hash(usernamePassword);
 
-        const xValue = BigInt(`0x${await hexHash(padHex(_salt) + usernamePasswordHash)}`, 16);
+        const xValue = BigInt(`0x${await hexHash(padHex(_salt) + usernamePasswordHash)}`);
         const sValue = await calculateS({
             N,
             g,
@@ -356,7 +344,7 @@ const calculateA = async ({
  */
 const generateRandomSmallA = () => {
     // This will be interpreted as a postive 128-bit integer
-    const hexRandom = randomBytes(128).toString('hex');
+    const hexRandom = randomBytes(128);
 
     const randomBigInt = BigInt(`0x${hexRandom}`);
 
@@ -392,7 +380,7 @@ const calculateS = ({
     xValue: bigint;
     serverBValue: bigint;
     UValue: bigint;
-}) =>
+}): Promise<bigint> =>
     new Promise((resolve) => {
         const gModPowXN = modPow(g, xValue, N);
         const intValue2 = serverBValue - k * gModPowXN;
@@ -408,7 +396,7 @@ const calculateS = ({
  * @returns {BigInt} Computed U value.
  * @private
  */
-const calculateU = async (A, B) => {
+const calculateU = async (A: bigint, B: bigint) => {
     const UHexHash = await hexHash(padHex(A) + padHex(B));
     const finalU = BigInt(`0x${UHexHash}`);
 
@@ -449,7 +437,7 @@ const padHex = (bigInt: bigint) => {
     const isNegative = bigInt < 0n;
 
     // Get a hex string for abs(bigInt)
-    let hexStr = BigMath.abs(bigInt).toString(16);
+    let hexStr = absBigInt(bigInt).toString(16);
 
     // Pad hex to even length if needed
     hexStr = hexStr.length % 2 !== 0 ? `0${hexStr}` : hexStr;
@@ -488,13 +476,9 @@ const padHex = (bigInt: bigint) => {
     return hexStr;
 };
 
-const BigMath = {
-    abs: (x) => (x < 0n ? -x : x),
-};
-
-const hmacSha256 = async (buf: Buffer, key: crypto.CryptoKey) => {
+const hmacSha256 = async (buf: Buffer | Uint8Array, key: crypto.CryptoKey) => {
     const message =
-        buf instanceof Uint8Array || (typeof Buffer !== 'undefined' && buf instanceof Buffer)
+        buf instanceof Uint8Array || (typeof Buffer !== 'undefined' && (buf as any) instanceof Buffer)
             ? buf
             : new TextEncoder().encode(buf);
     const sig = await crypto.subtle.sign('HMAC', key, message);
@@ -507,12 +491,12 @@ const hmacSha256 = async (buf: Buffer, key: crypto.CryptoKey) => {
  * @returns {String} Hex-encoded hash.
  * @private
  */
-const hash = async (buf: any) => {
+const hash = async (buf: Buffer | Uint8Array | string) => {
     const message =
-        buf instanceof Uint8Array || (typeof Buffer !== 'undefined' && buf instanceof Buffer)
+        buf instanceof Uint8Array || (typeof Buffer !== 'undefined' && (buf as any) instanceof Buffer)
             ? buf
             : new TextEncoder().encode(buf);
-    const result = await crypto.subtle.digest('SHA-256', message);
+    const result = await crypto.subtle.digest('SHA-256', message as Buffer | Uint8Array);
     return bytesToHex(new Uint8Array(result));
 };
 
@@ -528,7 +512,6 @@ const hexHash = (hexStr: string) => hash(bufferFrom(hexStr, 'hex'));
 const HEX_STRINGS = '0123456789abcdef';
 const bytesToHex = (bytes: Uint8Array) =>
     Array.from(bytes || [])
-        // eslint-disable-next-line no-bitwise
         .map((b) => HEX_STRINGS[b >> 4] + HEX_STRINGS[b & 15])
         .join('');
 
@@ -559,12 +542,12 @@ const bytesToBase64 = (bytes: Uint8Array) => {
     return result;
 };
 
-const bufferFrom = (input: string, encoding: string) => Buffer.from(input, encoding);
+const bufferFrom = (input: string, encoding: BufferEncoding) => Buffer.from(input, encoding);
 const bufferConcat = (arrays: Buffer[]) => {
     const flatNumberArray = arrays.reduce((acc, curr) => {
         acc.push(...curr);
         return acc;
-    }, []);
+    }, [] as number[]);
 
     return new Uint8Array(flatNumberArray);
 };

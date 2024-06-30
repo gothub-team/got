@@ -14,6 +14,7 @@
         "lint": "eslint ."
     },
     "devDependencies": {
+        "crypto": "^1.0.1",
         "@gothub/typescript-util": "workspace:*"
     },
     "peerDependencies": {
