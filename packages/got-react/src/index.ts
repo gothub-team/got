@@ -2,9 +2,9 @@ import type { Atom } from '@gothub-team/got-atom';
 import { createApi, type SessionStore } from '@gothub/got-api';
 import { gotReducer, setup as setupCore, type GOT_ACTION, type State } from '@gothub/got-core';
 import type { StoreAPI } from '@gothub/got-core/dist/module/types/api';
-import { getLocalStorageSessionStore } from './util';
-import { configureUseGraph } from './createUseGraph';
-import { configureUseCurriedGraph } from './createUseCurriedGraph';
+import { getLocalStorageSessionStore } from './util.js';
+import { configureUseGraph } from './createUseGraph.js';
+import { configureUseCurriedGraph } from './createUseCurriedGraph.js';
 
 export declare interface ReduxStore {
     /**

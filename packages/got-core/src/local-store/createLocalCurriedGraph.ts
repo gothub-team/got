@@ -1,11 +1,11 @@
-import { getEmptyStore, gotReducer } from '../reducer/reducer';
-import { configureCreateCurriedGraph } from '../store/createCurriedGraph';
-import { createCurriedStore } from '../store/curried';
-import { type ErrorHandlers, createErrorHandledStore } from '../store/errorHandling';
+import { getEmptyStore, gotReducer } from '../reducer/reducer.js';
+import { configureCreateCurriedGraph } from '../store/createCurriedGraph.js';
+import { createCurriedStore } from '../store/curried.js';
+import { type ErrorHandlers, createErrorHandledStore } from '../store/errorHandling.js';
 import type { Selector } from '../store/store';
-import { type GOT_ACTION } from '../types/actions';
-import { type StoreAPI } from '../types/api';
-import { type State } from '../types/state';
+import type { GOT_ACTION } from '../types/actions';
+import type { StoreAPI } from '../types/api';
+import type { State } from '../types/state';
 
 export const configureCreateLocalCurriedGraph = (api: StoreAPI, options: ErrorHandlers) => {
     /**

@@ -3,6 +3,7 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier';
+import { rules as importRules } from 'eslint-plugin-import';
 
 export default tseslint.config(eslint.configs.recommended, ...tseslint.configs.recommended, prettier, {
     rules: {
@@ -16,5 +17,11 @@ export default tseslint.config(eslint.configs.recommended, ...tseslint.configs.r
                 fixStyle: 'inline-type-imports',
             },
         ],
+        'import/extensions': ['error', 'ignorePackages'],
+    },
+    plugins: {
+        import: {
+            rules: importRules,
+        },
     },
 });

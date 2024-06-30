@@ -12,7 +12,7 @@ import {
 } from '@gothub/got-core';
 import equals from 'fast-deep-equal';
 import { useCallback, useMemo, useRef } from 'react';
-import { useEqualRef } from './util';
+import { useEqualRef } from './util.js';
 import type { ViewResult } from '@gothub/got-core/dist/module/types/ViewResult';
 
 let fnEquals = equals;
