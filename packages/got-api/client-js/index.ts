@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import { useSrp } from '@gothub-team/got-srp';
+import { useSrp } from '@gothub/got-srp';
 import {
     createLowApi,
     type GotLowApi,
@@ -65,7 +65,7 @@ export declare interface GotApi extends GotLowApi {
     push: (input: PushBody, asRole?: string) => Promise<PushResult>;
     /**
      * This operation is a convenience function that combines loginInit and loginVerify.
-     * It establishes an SRP session using `@gothub-team/got-srp` and computes the signature
+     * It establishes an SRP session using `@gothub/got-srp` and computes the signature
      * on the client side using the specified password. If verification is successful, it
      * returns all authentication tokens.
      *
@@ -146,7 +146,7 @@ export declare interface GotApi extends GotLowApi {
     /**
      * TODO: Implement this operation.
      * This operation is a convenience function that combines loginInit and passwordChallengeVerify.
-     * It establishes an SRP session using `@gothub-team/got-srp` and computes the signature
+     * It establishes an SRP session using `@gothub/got-srp` and computes the signature
      * on the client side using the specified password. If the new password challenge is required,
      * the users password will be changed to the new password.
      *
@@ -359,14 +359,7 @@ export const createApi = ({
                 srpA,
             });
 
-            const { signature, timestamp } = await getSignature({
-                poolname,
-                userId,
-                password,
-                srpB,
-                secretBlock,
-                salt,
-            });
+            const { signature, timestamp } = await getSignature(poolname, userId, password, srpB, secretBlock, salt);
 
             const result = await api.loginVerify({
                 userId,
