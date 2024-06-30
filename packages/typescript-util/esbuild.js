@@ -73,7 +73,7 @@ const buildTs = async (options = {}) => {
             platform: 'node',
             format: 'cjs',
             external: options?.min?.external || [],
-            entryPoints: ['./src/index.ts'],
+            entryPoints: [`${srcDir}/index.ts`],
             outfile: './dist/min-bundle/index.js',
         });
     }
