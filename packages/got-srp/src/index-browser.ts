@@ -168,7 +168,7 @@ export const useSrp = async () => {
     const g = BigInt('0x2');
     const k = BigInt(`0x${await hexHash(`${padHex(N)}${padHex(g)}`)}`);
     const smallAValue = generateRandomSmallA();
-    const largeAValue = await calculateA({ smallAValue, g, N });
+    const largeAValue = await calculateA(N, g, smallAValue);
     const infoBits = bufferFrom('Caldera Derived Key', 'utf8');
     return {
         srpA: largeAValue.toString(16),
@@ -226,11 +226,7 @@ const calculateSignature =
 
         const xValue = BigInt(`0x${await hexHash(padHex(_salt) + usernamePasswordHash)}`);
         const sValue = await calculateS(N, g, k, smallAValue, UValue, xValue, serverBValue);
-        const hkdf = await computehkdf({
-            ikm: bufferFrom(padHex(sValue), 'hex'),
-            salt: bufferFrom(padHex(UValue), 'hex'),
-            infoBits,
-        });
+        const hkdf = await computehkdf(bufferFrom(padHex(sValue), 'hex'), bufferFrom(padHex(UValue), 'hex'), infoBits);
 
         const timestamp = getTimestamp();
         const message = bufferConcat([
@@ -251,18 +247,14 @@ const calculateSignature =
  * @returns {Buffer} Strong key material.
  * @private
  */
-const computehkdf = async ({
+const computehkdf = async (
     /** @property {Buffer} ikm Input key material. */
-    ikm,
+    ikm: Buffer,
     /** @property {Buffer} salt Salt value. */
-    salt,
+    salt: Buffer,
     /** @property {Buffer} infoBits Info bits value. */
-    infoBits,
-}: {
-    ikm: Buffer;
-    salt: Buffer;
-    infoBits: Buffer;
-}) => {
+    infoBits: Buffer,
+) => {
     // First set up our initial key
     const key = await crypto.subtle.importKey('raw', ikm, { name: 'HKDF' }, false, ['deriveKey', 'deriveBits']);
 
@@ -288,18 +280,14 @@ const computehkdf = async ({
  * @param {Object} input input object.
  * @returns {BigInt} Large A value
  */
-const calculateA = async ({
+const calculateA = async (
     /** @property {BigInt} N Global N constant. */
-    N,
+    N: bigint,
     /** @property {BigInt} g Global g constant. */
-    g,
+    g: bigint,
     /** @property {BigInt} smallAValue Randomly generated small A. */
-    smallAValue,
-}: {
-    N: bigint;
-    g: bigint;
-    smallAValue: bigint;
-}): Promise<bigint> =>
+    smallAValue: bigint,
+): Promise<bigint> =>
     new Promise((resolve, reject) => {
         const A = modPow(g, smallAValue, N);
         if (A % N === 0n) {
