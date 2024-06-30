@@ -170,14 +170,7 @@ export const useSrp = async () => {
     const infoBits = bufferFrom('Caldera Derived Key', 'utf8');
     return {
         srpA: largeAValue.toString(16),
-        getSignature: calculateSignature({
-            N,
-            g,
-            k,
-            smallAValue,
-            largeAValue,
-            infoBits,
-        }),
+        getSignature: calculateSignature(N, g, k, smallAValue, largeAValue, infoBits),
     };
 };
 
@@ -185,48 +178,34 @@ export const useSrp = async () => {
  * Calculates the signature
  */
 const calculateSignature =
-    ({
+    (
         /** @property {BigInt} N Global N constant. */
-        N,
+        N: bigint,
         /** @property {BigInt} g Global g constant. */
-        g,
+        g: bigint,
         /** @property {BigInt} k Global k constant. */
-        k,
-        /** @property {Buffer} infoBits Info bits value. */
-        infoBits,
+        k: bigint,
         /** @property {BigInt} smallAValue Randomly generated small A. */
-        smallAValue,
+        smallAValue: bigint,
         /** @property {BigInt} largeAValue Large A value based on smallAValue. */
-        largeAValue,
-    }: {
-        N: bigint;
-        g: bigint;
-        k: bigint;
-        infoBits: Buffer;
-        smallAValue: bigint;
-        largeAValue: bigint;
-    }) =>
-    async ({
+        largeAValue: bigint,
+        /** @property {Buffer} infoBits Info bits value. */
+        infoBits: Buffer,
+    ) =>
+    async (
         /** @property {String} poolname Cognito User Pool Name. */
-        poolname,
+        poolname: string,
         /** @property {String} userId Cognito User ID. */
-        userId,
+        userId: string,
         /** @property {String} password Password. */
-        password,
+        password: string,
         /** @property {String} srpB Server B value. */
-        srpB,
+        srpB: string,
         /** @property {String} secretBlock Server secret block. */
-        secretBlock,
+        secretBlock: string,
         /** @property {String} salt Salt value. */
-        salt,
-    }: {
-        poolname: string;
-        userId: string;
-        password: string;
-        srpB: string;
-        secretBlock: string;
-        salt: string;
-    }) => {
+        salt: string,
+    ) => {
         const serverBValue = BigInt(`0x${srpB}`);
         const _salt = BigInt(`0x${salt}`);
 
@@ -244,15 +223,7 @@ const calculateSignature =
         const usernamePasswordHash = await hash(usernamePassword);
 
         const xValue = BigInt(`0x${await hexHash(padHex(_salt) + usernamePasswordHash)}`);
-        const sValue = await calculateS({
-            N,
-            g,
-            k,
-            smallAValue,
-            UValue,
-            xValue,
-            serverBValue,
-        });
+        const sValue = await calculateS(N, g, k, smallAValue, UValue, xValue, serverBValue);
         const hkdf = await computehkdf({
             ikm: bufferFrom(padHex(sValue), 'hex'),
             salt: bufferFrom(padHex(UValue), 'hex'),
@@ -355,30 +326,22 @@ const generateRandomSmallA = () => {
  * Calculates the S value used in getPasswordAuthenticationKey
  * @returns {void}
  */
-const calculateS = ({
+const calculateS = (
     /** @property {BigInt} N Global N constant. */
-    N,
+    N: bigint,
     /** @property {BigInt} g Global g constant. */
-    g,
+    g: bigint,
     /** @property {BigInt} k Global k constant. */
-    k,
+    k: bigint,
     /** @property {BigInt} smallAValue Randomly generated small A. */
-    smallAValue,
+    smallAValue: bigint,
     /** @property {BigInt} xValue Salted password hash value. */
-    xValue,
+    xValue: bigint,
     /** @property {BigInt} serverBValue Server B value. */
-    serverBValue,
+    serverBValue: bigint,
     /** @property {BigInt} serverBValue Server B value. */
-    UValue,
-}: {
-    N: bigint;
-    g: bigint;
-    k: bigint;
-    smallAValue: bigint;
-    xValue: bigint;
-    serverBValue: bigint;
-    UValue: bigint;
-}): Promise<bigint> =>
+    UValue: bigint,
+): Promise<bigint> =>
     new Promise((resolve) => {
         const gModPowXN = modPow(g, xValue, N);
         const intValue2 = serverBValue - k * gModPowXN;

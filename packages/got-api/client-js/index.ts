@@ -359,14 +359,7 @@ export const createApi = ({
                 srpA,
             });
 
-            const { signature, timestamp } = await getSignature({
-                poolname,
-                userId,
-                password,
-                srpB,
-                secretBlock,
-                salt,
-            });
+            const { signature, timestamp } = await getSignature(poolname, userId, password, srpB, secretBlock, salt);
 
             const result = await api.loginVerify({
                 userId,
