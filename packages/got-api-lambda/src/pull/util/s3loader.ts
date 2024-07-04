@@ -139,19 +139,19 @@ export const s3loader: () => Loader = () => {
         for (let i = 0; i < readRights.length; i++) {
             const [, principalType, principal] = readRights[i].split('/');
             if (principalType === 'user' || principalType === 'role') {
-                assocMap3(principalType, principal, 'read', true, res);
+                assocMap3(principalType, principal, 'read', 'true', res);
             }
         }
         for (let i = 0; i < writeRights.length; i++) {
             const [, principalType, principal] = writeRights[i].split('/');
             if (principalType === 'user' || principalType === 'role') {
-                assocMap3(principalType, principal, 'write', true, res);
+                assocMap3(principalType, principal, 'write', 'true', res);
             }
         }
         for (let i = 0; i < adminRights.length; i++) {
             const [, principalType, principal] = adminRights[i].split('/');
             if (principalType === 'user' || principalType === 'role') {
-                assocMap3(principalType, principal, 'admin', true, res);
+                assocMap3(principalType, principal, 'admin', 'true', res);
             }
         }
 
