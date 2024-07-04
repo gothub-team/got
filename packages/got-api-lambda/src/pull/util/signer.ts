@@ -1,9 +1,14 @@
-import { CLOUDFRONT_ACCESS_KEY_ID, MEDIA_DOMAIN, ssmGetParameter } from '@gothub/aws-util';
+import {
+    CLOUDFRONT_ACCESS_KEY_ID,
+    CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER,
+    MEDIA_DOMAIN,
+    ssmGetParameter,
+} from '@gothub/aws-util';
 import { getSignedUrl } from '@aws-sdk/cloudfront-signer';
 import type { Signer } from '../types/signer';
 
 export const cfSigner = async (): Promise<Signer> => {
-    const CLOUDFRONT_ACCESS_KEY = await ssmGetParameter('CLOUDFRONT_ACCESS_KEY', true);
+    const CLOUDFRONT_ACCESS_KEY = await ssmGetParameter(CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER, true);
     const oneDay = 1 * 24 * 60 * 60 * 1000;
 
     const getUrl = (fileKey: string, etag: string): string => `https://${MEDIA_DOMAIN}/${fileKey}?etag=${etag}`;
