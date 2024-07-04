@@ -128,7 +128,7 @@ export const pull = async (
         writeEdgeReverse(fromId, fromType, toType, toId);
     };
 
-    type OnMetadataData = (fromId: string, edgeTypes: string, fromType: string, toType: string, toId: string) => void;
+    type OnMetadataData = (fromId: string, fromType: string, toType: string, toId: string, data: string) => void;
     const loadMetadata = (
         fromId: string,
         edgeTypes: string,
@@ -144,7 +144,7 @@ export const pull = async (
         if (data != null) {
             onData && onData(fromId, fromType, toType, toId, data);
         } else {
-            addPromise(loadMetadataAsync(fromId, edgeTypes, fromType, toType, toId));
+            addPromise(loadMetadataAsync(fromId, edgeTypes, fromType, toType, toId, onData));
         }
     };
 
