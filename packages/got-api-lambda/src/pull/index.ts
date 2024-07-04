@@ -267,8 +267,8 @@ export const pull = async (
         toType: string,
         toId: string,
     ) => {
-        if (await canViewNode(fromId, role)) {
-            addPromise(queryNode(fromId, queryObject, role));
+        if (queryObject.reverse ? await canViewNode(fromId, role) : await canViewNode(toId, role)) {
+            addPromise(queryNode(toId, queryObject, role));
             queryEdge(fromId, edgeTypes, fromType, toType, toId, queryObject);
         }
     };
