@@ -262,13 +262,14 @@ export const pull = async (
         queryObject: EdgeView,
         role: string,
         edgeTypes: string,
+        nodeId: string,
         fromId: string,
         fromType: string,
         toType: string,
         toId: string,
     ) => {
-        if (queryObject.reverse ? await canViewNode(fromId, role) : await canViewNode(toId, role)) {
-            addPromise(queryNode(toId, queryObject, role));
+        if (await canViewNode(nodeId, role)) {
+            addPromise(queryNode(nodeId, queryObject, role));
             queryEdge(fromId, edgeTypes, fromType, toType, toId, queryObject);
         }
     };
@@ -288,7 +289,7 @@ export const pull = async (
             const fromIdsKeys = fromIds.keys();
             for (const fromId of fromIdsKeys) {
                 const role = queryObject.role ? parseRole(queryObject.role, fromId) : _role;
-                addPromise(queryEdgesAsync(queryObject, role, edgeTypes, fromId, fromType, toType, toId));
+                addPromise(queryEdgesAsync(queryObject, role, edgeTypes, fromId, fromId, fromType, toType, toId));
             }
         } else {
             const fromId = nodeId;
@@ -298,7 +299,7 @@ export const pull = async (
             const toIdsKeys = toIds.keys();
             for (const toId of toIdsKeys) {
                 const role = queryObject.role ? parseRole(queryObject.role, toId) : _role;
-                addPromise(queryEdgesAsync(queryObject, role, edgeTypes, fromId, fromType, toType, toId));
+                addPromise(queryEdgesAsync(queryObject, role, edgeTypes, toId, fromId, fromType, toType, toId));
             }
         }
     };
@@ -312,7 +313,9 @@ export const pull = async (
             for (let i = 0; i < wildcardEdges.length; i++) {
                 const [fromType, toType, toId] = wildcardEdges[i];
                 const role = queryObject.role ? parseRole(queryObject.role, toId) : _role;
-                addPromise(queryEdgesAsync(queryObject, role, `${fromType}/${toType}`, fromId, fromType, toType, toId));
+                addPromise(
+                    queryEdgesAsync(queryObject, role, `${fromType}/${toType}`, toId, fromId, fromType, toType, toId),
+                );
             }
         }
     };
