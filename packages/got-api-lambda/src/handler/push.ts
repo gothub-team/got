@@ -297,7 +297,6 @@ export const handleHttp: APIGatewayProxyHandler = async (event) => {
     try {
         const validationResult = await validate<Body>(schema, event, { auth: AUTHENTICATED });
         const result = await handle(validationResult);
-        console.log(result);
         return result;
     } catch (err) {
         console.log(err);

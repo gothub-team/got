@@ -76,8 +76,10 @@ export const s3loader: () => Loader = () => {
         const data = (await queueLoad(() => s3get(BUCKET_EDGES, fromId + '/' + edgeTypes + '/' + toId))) as
             | string
             | null;
-        if (data == null) {
+        if (data === null) {
             return 'true';
+        } else if (data === undefined) {
+            return ''; // TODO: this differs from the pull s3loader
         }
         return data.toString();
     };

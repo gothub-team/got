@@ -1,6 +1,6 @@
 import { type DataCache } from './types/dataCache';
-import { type NodeView, type EdgeView, type View, Graph, Node } from '@gothub/got-core';
-import { type Loader, type FileRef } from './types/loader';
+import { Graph, Node, forEachObjDepth, Metadata } from '@gothub/got-core';
+import { type Loader } from './types/loader';
 import { type GraphAssembler } from './types/graphAssembler';
 import { promiseManager } from './util/promiseManager';
 import { Log } from './types/logs';
@@ -30,7 +30,6 @@ export const push = async (
     const {
         writeNode,
         writeMetadata,
-        writeEdgeReverse,
         writeRights,
         writeFiles,
         getGraphJson,
@@ -39,11 +38,9 @@ export const push = async (
     const {
         writeNode: writeNodeChangelog,
         writeMetadata: writeMetadataChangelog,
-        writeEdgeReverse: writeEdgeReverseChangelog,
         writeRightsAtomic: writeRightsChangelog,
         writeFiles: writeFilesChangelog,
         getGraphJson: getGraphJsonChangelog,
-        // getLog: getLogGraphAssembler,
     } = changelogAssembler;
 
     const timeQueryNode = 0;
@@ -223,7 +220,88 @@ export const push = async (
         return Promise.all(promises);
     };
 
+    const updateMetadata = async (
+        fromId: string,
+        fromType: string,
+        toType: string,
+        toId: string,
+        metadata: Metadata | boolean,
+    ) => {
+        const metadataJson = await loader.getMetadata(fromId, `${fromType}/${toType}`, toId);
+        console.log(`${fromId} ${fromType} ${toType} ${toId} metadataJson: ${metadataJson}`);
+
+        if (!metadataJson && metadata) {
+            console.log(`create edge from ${fromId} ${fromType} ${toType} ${toId}`);
+            await writer.setMetadata(fromId, `${fromType}/${toType}`, toId, metadata);
+            await writer.setReverseEdge(toId, `${toType}/${fromType}`, fromId, true);
+            writeMetadataChangelog(fromId, fromType, toType, toId, `{"old":null,"new":${JSON.stringify(metadata)}}`);
+        } else if (metadataJson && !metadata) {
+            console.log(`delete edge from ${fromId} ${fromType} ${toType} ${toId}`);
+            await writer.setMetadata(fromId, `${fromType}/${toType}`, toId, false);
+            await writer.setReverseEdge(toId, `${toType}/${fromType}`, fromId, false);
+            writeMetadataChangelog(fromId, fromType, toType, toId, `{"old":${metadataJson},"new":null}`);
+        } else if (metadataJson && metadata) {
+            console.log(`update edge from ${fromId} ${fromType} ${toType} ${toId}`);
+            const oldMetadata = JSON.parse(metadataJson);
+            const newMetadata = { ...oldMetadata, ...metadata };
+            const keys = Object.keys(newMetadata);
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
+                if (metadata[key] === null) {
+                    delete newMetadata[key];
+                }
+            }
+            await writer.setMetadata(fromId, `${fromType}/${toType}`, toId, newMetadata);
+            writeMetadataChangelog(
+                fromId,
+                fromType,
+                toType,
+                toId,
+                `{"old":${metadataJson},"new":${JSON.stringify(newMetadata)}}`,
+            );
+        }
+    };
+
+    const updateEdgesAsync = async (
+        fromId: string,
+        fromType: string,
+        toType: string,
+        toId: string,
+        metadata: Metadata | boolean,
+    ) => {
+        console.log(`Attempting update edge ${fromId} ${fromType} ${toType} ${toId}`);
+        const canWriteFrom = canWriteNode(fromId);
+        const canWriteTo = canWriteNode(toId);
+        const canWrite = (await canWriteFrom) && (await canWriteTo);
+
+        if (canWrite) {
+            await updateMetadata(fromId, fromType, toType, toId, metadata);
+            writeMetadata(fromId, fromType, toType, toId, '{"statusCode":200}');
+        } else {
+            writeMetadata(fromId, fromType, toType, toId, '{"statusCode":403}');
+        }
+    };
+    const updateEdges = (): Promise<unknown> | void => {
+        const edges = graph.edges;
+        if (!edges) return;
+
+        const promises: Promise<unknown>[] = [];
+
+        forEachObjDepth(
+            edges,
+            (val: Metadata | boolean, path: string[]) => {
+                const [fromType, fromId, toType, toId] = path;
+                promises.push(updateEdgesAsync(fromId, fromType, toType, toId, val));
+            },
+            4,
+        );
+
+        return Promise.all(promises);
+    };
+
     await updateNodes();
+    await updateEdges();
+
     await awaitPromises();
     const res = getGraphJson();
     const log: Log = {
