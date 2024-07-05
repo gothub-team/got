@@ -5,6 +5,7 @@ import { type GraphAssembler } from './types/graphAssembler';
 import { promiseManager } from './util/promiseManager';
 import { Log } from './types/logs';
 import { Writer } from './types/writer';
+import { stringify } from '@gothub/aws-util';
 
 type Dependencies = {
     // existsCache: ExistsCache;
@@ -30,7 +31,8 @@ export const push = async (
     const {
         writeNode,
         writeMetadata,
-        writeRightsAtomic: writeRights,
+        writePrincipalRight: writePrincipalRight,
+        writeInheritRight,
         writeFiles,
         getGraphJson,
         getLog: getLogGraphAssembler,
@@ -38,7 +40,7 @@ export const push = async (
     const {
         writeNode: writeNodeChangelog,
         writeMetadata: writeMetadataChangelog,
-        writeRightsAtomic: writeRightsChangelog,
+        writePrincipalRight: writeRightsChangelog,
         writeFiles: writeFilesChangelog,
         getGraphJson: getGraphJsonChangelog,
     } = changelogAssembler;
@@ -51,8 +53,6 @@ export const push = async (
         const data = await loader.getNode(nodeId);
         return data != null;
     };
-
-    const nodeOwned = async (nodeId: string): Promise<boolean> => {};
 
     const canUserRead = (nodeId: string): Promise<boolean> => loader.getRead(nodeId, 'user', userEmail);
     const canUserWrite = (nodeId: string): Promise<boolean> => loader.getWrite(nodeId, 'user', userEmail);
@@ -294,6 +294,87 @@ export const push = async (
         return Promise.all(promises);
     };
 
+    const inheritPrincipalRights = (
+        fromRights: Map<string, Map<string, string>> | undefined,
+        toRights: Map<string, Map<string, string>> | undefined,
+        principalType: string,
+        toId: string,
+    ): Promise<unknown> => {
+        const promises: Promise<unknown>[] = [];
+        // new set from keys of from and to user rights
+        const users = new Set<string>();
+        if (fromRights) {
+            for (const user of fromRights.keys()) {
+                users.add(user);
+            }
+        }
+        if (toRights) {
+            for (const user of toRights.keys()) {
+                users.add(user);
+            }
+        }
+
+        for (const user of users) {
+            const readFrom = fromRights?.get(user)?.get('read') === 'true';
+            const readTo = toRights?.get(user)?.get('read') === 'true';
+            if (readFrom !== readTo) {
+                promises.push(updateReadRight(toId, principalType, user, readFrom));
+            }
+
+            const writeFrom = fromRights?.get(user)?.get('write') === 'true';
+            const writeTo = toRights?.get(user)?.get('write') === 'true';
+            if (writeFrom !== writeTo) {
+                promises.push(updateWriteRight(toId, principalType, user, writeFrom));
+            }
+
+            const adminFrom = fromRights?.get(user)?.get('admin') === 'true';
+            const adminTo = toRights?.get(user)?.get('admin') === 'true';
+            if (adminFrom !== adminTo) {
+                promises.push(updateAdminRight(toId, principalType, user, adminFrom));
+            }
+        }
+
+        return Promise.all(promises);
+    };
+
+    const inheritRigthsAsync = async (fromId: string, toId: string) => {
+        const canAdmin = await canAdminNode(toId);
+
+        if (canAdmin) {
+            const fromRights = await loader.listRights(fromId);
+            const userRightsFrom = fromRights.get('user') as Map<string, Map<string, string>> | undefined;
+            const roleRightsFrom = fromRights.get('role') as Map<string, Map<string, string>> | undefined;
+
+            const toRights = await loader.listRights(toId);
+            const userRightsTo = toRights.get('user') as Map<string, Map<string, string>> | undefined;
+            const roleRightsTo = toRights.get('role') as Map<string, Map<string, string>> | undefined;
+
+            await inheritPrincipalRights(userRightsFrom, userRightsTo, 'user', toId);
+            await inheritPrincipalRights(roleRightsFrom, roleRightsTo, 'role', toId);
+
+            writeInheritRight(toId, '{"statusCode":200}');
+        } else {
+            writeInheritRight(toId, '{"statusCode":403}');
+        }
+    };
+    const inheritRights = (): Promise<unknown> | void => {
+        const rights = graph.rights;
+        if (!rights) return;
+
+        const nodeIds = Object.keys(rights);
+
+        const promises: Promise<unknown>[] = [];
+        for (let i = 0; i < nodeIds.length; i++) {
+            const nodeId = nodeIds[i];
+            const fromId = rights[nodeId]?.inherit?.from;
+            if (!fromId) continue;
+
+            promises.push(inheritRigthsAsync(fromId, nodeId));
+        }
+
+        return Promise.all(promises);
+    };
+
     const updateRightAsync = async (
         nodeId: string,
         principalType: string,
@@ -309,7 +390,7 @@ export const push = async (
             await updateAdminRight(nodeId, principalType, principal, val);
         }
 
-        writeRights(nodeId, principalType, principal, right, '{"statusCode":200}');
+        writePrincipalRight(nodeId, principalType, principal, right, '{"statusCode":200}');
     };
 
     // TODO: maybe split this before into user and roles, so no check and cheaper map
@@ -335,7 +416,7 @@ export const push = async (
                 (val: boolean, path: string[]) => {
                     const [principalType, principal, right] = path;
                     if (principalType !== 'user' && principalType !== 'role') return;
-                    writeRights(nodeId, principalType, principal, right, '{"statusCode":403}');
+                    writePrincipalRight(nodeId, principalType, principal, right, '{"statusCode":403}');
                 },
                 3,
             );
@@ -359,6 +440,7 @@ export const push = async (
 
     await updateNodes();
     await updateEdges();
+    await inheritRights();
     await updateRights();
 
     await awaitPromises();

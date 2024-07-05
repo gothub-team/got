@@ -11,6 +11,7 @@ import {
 import { Writer } from '../types/writer';
 import { Metadata, Node } from '@gothub/got-core';
 
+// TODO: load queue for s3?
 export const s3writer: () => Writer = () => {
     const setNode = async (nodeId: string, data: Node | null) => {
         if (data === null) {

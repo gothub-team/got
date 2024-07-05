@@ -35,7 +35,7 @@ export const graphAssembler = (): GraphAssembler => {
         rights.set(id, data);
     };
 
-    const writeRightsAtomic = (
+    const writePrincipalRight = (
         id: string,
         principalType: string,
         principal: string,
@@ -43,6 +43,10 @@ export const graphAssembler = (): GraphAssembler => {
         data: string,
     ) => {
         assocMap4(id, principalType, principal, rightType, data, rights);
+    };
+
+    const writeInheritRight = (id: string, data: string) => {
+        assocMap2(id, 'inherit', data, rights);
     };
 
     const writeFiles = (id: string, prop: string, data: string) => {
@@ -90,7 +94,8 @@ export const graphAssembler = (): GraphAssembler => {
         writeMetadata,
         writeEdgeReverse,
         writeRights,
-        writeRightsAtomic,
+        writePrincipalRight,
+        writeInheritRight,
         writeFiles,
         getGraphJson,
         getLog,
