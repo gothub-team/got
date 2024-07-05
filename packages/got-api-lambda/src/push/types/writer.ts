@@ -8,4 +8,6 @@ export type Writer = {
     setWrite: (nodeId: string, principalType: string, principal: string, right: boolean) => Promise<void>;
     setAdmin: (nodeId: string, principalType: string, principal: string, right: boolean) => Promise<void>;
     setOwner: (nodeId: string, principal: string | null) => Promise<void>;
+    setFileRef: (nodeId: string, prop: string, fileRef: { fileKey: string } | null) => Promise<void>;
+    setUploadId: (uploadId: string, fileKey: string | null) => Promise<void>;
 };

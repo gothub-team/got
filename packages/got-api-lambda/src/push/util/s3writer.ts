@@ -1,6 +1,7 @@
 import { s3delete, s3put } from '@gothub/aws-util';
 import {
     BUCKET_EDGES,
+    BUCKET_MEDIA,
     BUCKET_NODES,
     BUCKET_OWNERS,
     BUCKET_REVERSE_EDGES,
@@ -53,6 +54,23 @@ export const s3writer: () => Writer = () => {
         return s3put(BUCKET_OWNERS, `${nodeId}/owner/${principal}`, true);
     };
 
+    const setFileRef = async (nodeId: string, prop: string, fileRef: { fileKey: string } | null) => {
+        const refId = `ref/${nodeId}/${prop}`;
+        if (fileRef === null) {
+            return s3delete(BUCKET_MEDIA, refId);
+        } else {
+            return s3put(BUCKET_MEDIA, refId, fileRef);
+        }
+    };
+
+    const setUploadId = async (uploadId: string, fileKey: string | null) => {
+        if (fileKey === null) {
+            return s3delete(BUCKET_MEDIA, `uploads/${uploadId}`);
+        } else {
+            return s3put(BUCKET_MEDIA, `uploads/${uploadId}`, { fileKey });
+        }
+    };
+
     return {
         setNode,
         setMetadata,
@@ -61,5 +79,7 @@ export const s3writer: () => Writer = () => {
         setWrite: setRight(BUCKET_RIGHTS_WRITE),
         setAdmin: setRight(BUCKET_RIGHTS_ADMIN),
         setOwner,
+        setFileRef,
+        setUploadId,
     };
 };

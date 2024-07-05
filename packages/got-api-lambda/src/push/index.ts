@@ -1,17 +1,20 @@
 import { type DataCache } from './types/dataCache';
-import { Graph, Node, forEachObjDepth, Metadata } from '@gothub/got-core';
+import { Graph, Node, forEachObjDepth, Metadata, UploadNodeFileView, NodeFilesView } from '@gothub/got-core';
 import { type Loader } from './types/loader';
 import { type GraphAssembler } from './types/graphAssembler';
 import { promiseManager } from './util/promiseManager';
 import { Log } from './types/logs';
 import { Writer } from './types/writer';
-import { stringify } from '@gothub/aws-util';
+import { MEDIA_DOMAIN, s3putMultipartSignedUrls, sha256 } from '@gothub/aws-util';
+import { BUCKET_MEDIA } from './config';
+import { Signer } from './types/signer';
 
 type Dependencies = {
     // existsCache: ExistsCache;
     dataCache: DataCache;
     loader: Loader;
     writer: Writer;
+    signer: Signer;
     graphAssembler: GraphAssembler;
     changelogAssembler: GraphAssembler;
 };
@@ -25,9 +28,9 @@ export const push = async (
 ): Promise<[string, Log]> => {
     const start = performance.now();
 
-    const { addPromise, awaitPromises } = promiseManager();
+    const { awaitPromises } = promiseManager();
 
-    const { dataCache, signer, loader, writer, graphAssembler, changelogAssembler } = dependencies;
+    const { signer, loader, writer, graphAssembler, changelogAssembler } = dependencies;
     const {
         writeNode,
         writeMetadata,
@@ -60,19 +63,19 @@ export const push = async (
 
     const userHasRole = async (role: string) => role === 'public' || (await canUserRead(role));
 
-    const canRoleRead = (nodeId: string, role: string): Promise<boolean> => loader.getRead(nodeId, 'role', role);
+    // const canRoleRead = (nodeId: string, role: string): Promise<boolean> => loader.getRead(nodeId, 'role', role);
     const canRoleWrite = (nodeId: string, role: string): Promise<boolean> => loader.getWrite(nodeId, 'role', role);
     const canRoleAdmin = (nodeId: string, role: string): Promise<boolean> => loader.getAdmin(nodeId, 'role', role);
 
-    const canViewNode = async (nodeId: string) => {
-        if (asAdmin) return nodeExists(nodeId);
+    // const canViewNode = async (nodeId: string) => {
+    //     if (asAdmin) return nodeExists(nodeId);
 
-        if (asRole === 'user') {
-            return (await nodeExists(nodeId)) && (await canUserRead(nodeId));
-        }
+    //     if (asRole === 'user') {
+    //         return (await nodeExists(nodeId)) && (await canUserRead(nodeId));
+    //     }
 
-        return (await nodeExists(nodeId)) && (await userHasRole(asRole)) && (await canRoleRead(nodeId, asRole));
-    };
+    //     return (await nodeExists(nodeId)) && (await userHasRole(asRole)) && (await canRoleRead(nodeId, asRole));
+    // };
     const canWriteNode = async (nodeId: string) => {
         if (asAdmin) return nodeExists(nodeId);
 
@@ -422,7 +425,7 @@ export const push = async (
             );
         }
     };
-    const updateRights = () => {
+    const updateRights = (): Promise<unknown> | void => {
         const rights = graph.rights;
         if (!rights) return;
 
@@ -438,12 +441,119 @@ export const push = async (
         return Promise.all(promises);
     };
 
+    const updateFileRef = async (nodeId: string, prop: string, fileKey: string | null) => {
+        const fileRef = await loader.getFileRef(nodeId, prop);
+
+        if (!fileRef && fileKey) {
+            const newFileRef = { fileKey };
+            await writer.setFileRef(nodeId, prop, newFileRef);
+            writeFilesChangelog(nodeId, prop, `{"old":null,"new":${JSON.stringify(newFileRef)}}`);
+        } else if (fileRef && !fileKey) {
+            await writer.setFileRef(nodeId, prop, null);
+            writeFilesChangelog(nodeId, prop, `{"old":${JSON.stringify(fileRef)},"new":null}`);
+        } else if (fileRef && fileKey) {
+            const newFileRef = { fileKey };
+            await writer.setFileRef(nodeId, prop, newFileRef);
+            writeFilesChangelog(nodeId, prop, `{"old":${JSON.stringify(fileRef)},"new":${JSON.stringify(newFileRef)}}`);
+        }
+    };
+
+    const putFile = async (nodeId: string, prop: string, fileMetadata: UploadNodeFileView) => {
+        const { filename, contentType, fileSize, partSize = 5242880 } = fileMetadata;
+        const fileKey = `file/${sha256(`${nodeId}/${prop}`)}/${filename}`;
+
+        await updateFileRef(nodeId, prop, fileKey);
+
+        // TODO: update file metadata
+        // const newMetadata = {
+        //     nodeId,
+        //     prop,
+        //     filename,
+        //     contentType,
+        //     fileSize,
+        // };
+
+        if (fileSize > partSize) {
+            // multipart upload
+            const multipartUpload = await s3putMultipartSignedUrls(BUCKET_MEDIA, fileKey, {
+                contentType,
+                fileSize,
+                partSize,
+            });
+
+            if (!multipartUpload) {
+                writeFiles(nodeId, prop, '{"statusCode":500}');
+                return;
+            }
+
+            const { uploadUrls, uploadId } = multipartUpload;
+            await writer.setUploadId(uploadId, fileKey);
+            writeFiles(
+                nodeId,
+                prop,
+                `{"statusCode":200,"uploadId":"${uploadId}","uploadUrls":${JSON.stringify(uploadUrls)}}`,
+            );
+        } else {
+            const uploadUrl = signer.signUrl(`https://${MEDIA_DOMAIN}/${fileKey}`); // TODO: move to signer
+            writeFiles(nodeId, prop, `{"statusCode":200,"uploadUrls":["${uploadUrl}"]}`);
+        }
+    };
+
+    const removeFile = async (nodeId: string, prop: string) => {
+        await updateFileRef(nodeId, prop, null);
+    };
+
+    const updateFilesAsync = async (nodeId: string, files: NodeFilesView<UploadNodeFileView>) => {
+        const canWrite = await canWriteNode(nodeId);
+
+        if (canWrite) {
+            const propNames = Object.keys(files);
+            const promises: Promise<unknown>[] = new Array(propNames.length);
+            for (let i = 0; i < propNames.length; i++) {
+                const propName = propNames[i];
+                const data = files[propName];
+                if (data) {
+                    promises.push(putFile(nodeId, propName, data));
+                } else {
+                    promises.push(removeFile(nodeId, propName));
+                }
+            }
+
+            await Promise.all(promises);
+        } else {
+            const propNames = Object.keys(files);
+            for (let i = 0; i < propNames.length; i++) {
+                writeFiles(nodeId, propNames[i], '{"statusCode":403}');
+            }
+        }
+    };
+    const updateFiles = (): Promise<unknown> | void => {
+        const files = graph.files;
+        if (!files) return;
+
+        const nodeIds = Object.keys(files);
+        const promises: Promise<unknown>[] = new Array(nodeIds.length);
+        for (let i = 0; i < nodeIds.length; i++) {
+            const nodeId = nodeIds[i];
+            const filesObj = files[nodeId] as NodeFilesView<UploadNodeFileView> | undefined;
+
+            if (!filesObj) continue;
+            promises[i] = updateFilesAsync(nodeId, filesObj);
+        }
+
+        return Promise.all(promises);
+    };
+
     await updateNodes();
     await updateEdges();
     await inheritRights();
     await updateRights();
+    await updateFiles();
 
     await awaitPromises();
+
+    // TODO write changelog
+
     const res = getGraphJson();
     const log: Log = {
         graphAssembler: getLogGraphAssembler(),

@@ -87,7 +87,24 @@ export const s3loader: () => Loader = () => {
     const getFileHead = (fileKey: string): Promise<FileHead | false | undefined> =>
         queueLoad(() => s3head(BUCKET_MEDIA, fileKey) as Promise<FileHead | false | undefined>);
 
+    const getFileRef = async (nodeId: string, prop: string): Promise<FileRef | null> => {
+        const refId = `ref/${nodeId}/${prop}`;
+        const res = await s3get(BUCKET_MEDIA, refId);
+        if (!res) return null;
+
+        const { fileKey = '' } = JSON.parse(res.toString()) as { fileKey: string };
+        return { prop, fileKey };
+    };
+
     const getFileRefs = async (nodeId: string) => queueLoad(() => listRefs(nodeId)) as Promise<Array<FileRef>>;
+
+    const getUpload = async (uploadId: string) => {
+        const res = await s3get(BUCKET_MEDIA, `uploads/${uploadId}`);
+        if (!res) return null;
+
+        const { fileKey = '' } = JSON.parse(res.toString()) as { fileKey: string };
+        return fileKey;
+    };
 
     const getEdgesWildcard = async (nodeId: string, edgeType: string): Promise<Array<EdgeWildcard>> => {
         const edgeKeys = (await queueLoad(() => listEdgeWildcard(nodeId, `${edgeType}/`))) as Array<string>;
@@ -181,7 +198,9 @@ export const s3loader: () => Loader = () => {
         getAdmin: configureGetRight(BUCKET_RIGHTS_ADMIN),
         getMetadata,
         getFileHead,
+        getFileRef,
         getFileRefs,
+        getUpload,
         getEdges,
         getReverseEdges,
         getEdgesWildcard,

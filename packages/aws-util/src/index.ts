@@ -8,6 +8,7 @@ export * from './ec2';
 export * from './ecs';
 export * from './email';
 export * from './errors';
+export * from './hash';
 export * from './lambda';
 export * from './loadQueue';
 export * from './s3';

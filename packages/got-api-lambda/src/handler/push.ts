@@ -4,6 +4,7 @@ import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws
 import { push } from '../push';
 import { s3loader } from '../push/util/s3loader';
 import { s3writer } from '../push/util/s3writer';
+import { cfSigner } from '../push/util/signer';
 import { graphAssembler } from '../push/util/graphAssembler';
 import { createDataCache } from '../push/caches/dataCache';
 
@@ -278,12 +279,14 @@ export type Body = Graph;
 
 const handle = async ({ userEmail, asAdmin, asRole, body }: ValidationResult<Body>): Promise<APIGatewayProxyResult> => {
     // TODO: fix useremail thingies
+    const signer = await cfSigner();
     const [result] = await push(body, userEmail || '', asRole || 'user', asAdmin, {
         dataCache: createDataCache(),
         graphAssembler: graphAssembler(),
         changelogAssembler: graphAssembler(),
         loader: s3loader(),
         writer: s3writer(),
+        signer,
     });
 
     return {
