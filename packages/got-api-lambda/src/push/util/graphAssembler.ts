@@ -35,6 +35,16 @@ export const graphAssembler = (): GraphAssembler => {
         rights.set(id, data);
     };
 
+    const writeRightsAtomic = (
+        id: string,
+        principalType: string,
+        principal: string,
+        rightType: string,
+        data: string,
+    ) => {
+        assocMap4(id, principalType, principal, rightType, data, rights);
+    };
+
     const writeFiles = (id: string, prop: string, data: string) => {
         assocMap2(id, prop, data, files);
     };
@@ -80,6 +90,7 @@ export const graphAssembler = (): GraphAssembler => {
         writeMetadata,
         writeEdgeReverse,
         writeRights,
+        writeRightsAtomic,
         writeFiles,
         getGraphJson,
         getLog,

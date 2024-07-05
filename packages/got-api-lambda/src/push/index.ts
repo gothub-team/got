@@ -40,7 +40,7 @@ export const push = async (
         writeNode: writeNodeChangelog,
         writeMetadata: writeMetadataChangelog,
         writeEdgeReverse: writeEdgeReverseChangelog,
-        writeRights: writeRightsChangelog,
+        writeRightsAtomic: writeRightsChangelog,
         writeFiles: writeFilesChangelog,
         getGraphJson: getGraphJsonChangelog,
         // getLog: getLogGraphAssembler,
@@ -118,10 +118,10 @@ export const push = async (
         if (!!exists !== right) {
             if (right) {
                 await writer.setRead(nodeId, principalType, principal, true);
-                // TODO: add to changelog
+                writeRightsChangelog(nodeId, principalType, principal, 'read', 'true');
             } else {
                 await writer.setRead(nodeId, principalType, principal, false);
-                // TODO: add to changelog
+                writeRightsChangelog(nodeId, principalType, principal, 'read', 'false');
             }
         }
     };
@@ -130,10 +130,10 @@ export const push = async (
         if (!!exists !== right) {
             if (right) {
                 await writer.setWrite(nodeId, principalType, principal, true);
-                // TODO: add to changelog
+                writeRightsChangelog(nodeId, principalType, principal, 'write', 'true');
             } else {
                 await writer.setWrite(nodeId, principalType, principal, false);
-                // TODO: add to changelog
+                writeRightsChangelog(nodeId, principalType, principal, 'write', 'false');
             }
         }
     };
@@ -142,26 +142,26 @@ export const push = async (
         if (!!exists !== right) {
             if (right) {
                 await writer.setAdmin(nodeId, principalType, principal, true);
-                // TODO: add to changelog
+                writeRightsChangelog(nodeId, principalType, principal, 'admin', 'true');
             } else {
                 await writer.setAdmin(nodeId, principalType, principal, false);
-                // TODO: add to changelog
+                writeRightsChangelog(nodeId, principalType, principal, 'admin', 'false');
             }
         }
     };
     const updateOwner = async (nodeId: string, principal: string) => {
         return writer.setOwner(nodeId, principal);
-        // TODO: add to changelog
+        // TODO: add to changelog? owner log was previously not created
     };
 
     const updateNode = async (nodeId: string, node: Node | null) => {
         const nodeJSON = await loader.getNode(nodeId);
         if (!nodeJSON && node) {
             await writer.setNode(nodeId, node);
-            // TODO: add to changelog
+            writeNodeChangelog(nodeId, `{"old":null,"new":${JSON.stringify(node)}}`);
         } else if (nodeJSON && !node) {
             await writer.setNode(nodeId, null);
-            // TODO: add to changelog
+            writeNodeChangelog(nodeId, `{"old":${nodeJSON},"new":null}`);
         } else if (nodeJSON && node) {
             const oldNode = JSON.parse(nodeJSON);
             const newNode = { ...oldNode, ...node };
@@ -173,11 +173,10 @@ export const push = async (
                 }
             }
             await writer.setNode(nodeId, newNode);
-            // TODO: add to changelog
+            writeNodeChangelog(nodeId, `{"old":${nodeJSON},"new":${JSON.stringify(newNode)}}`);
         }
     };
 
-    // TODO: this was split in the old implementation
     const createNode = async (nodeId: string, node: Node) => {
         const principalType = asRole === 'user' ? 'user' : 'role';
         const principal = asRole === 'user' ? userEmail : asRole;
@@ -204,17 +203,6 @@ export const push = async (
             writeNode(nodeId, '{"statusCode":200}');
             return;
         }
-
-        console.log(
-            'node',
-            node,
-            'owned',
-            await loader.ownerExists(nodeId),
-            'canWriteScope',
-            await canWriteScope(nodeId),
-            'canWrite',
-            canWrite,
-        );
 
         writeNode(nodeId, '{"statusCode":403}');
         return;
