@@ -30,7 +30,7 @@ export const push = async (
     const {
         writeNode,
         writeMetadata,
-        writeRights,
+        writeRightsAtomic: writeRights,
         writeFiles,
         getGraphJson,
         getLog: getLogGraphAssembler,
@@ -77,10 +77,10 @@ export const push = async (
         if (asAdmin) return nodeExists(nodeId);
 
         if (asRole === 'user') {
-            return (await nodeExists(nodeId)) && (await canUserRead(nodeId));
+            return (await nodeExists(nodeId)) && (await canUserWrite(nodeId));
         }
 
-        return (await nodeExists(nodeId)) && (await userHasRole(asRole)) && (await canRoleRead(nodeId, asRole));
+        return (await nodeExists(nodeId)) && (await userHasRole(asRole)) && (await canRoleWrite(nodeId, asRole));
     };
 
     const canAdminNode = async (nodeId: string) => {
@@ -228,20 +228,16 @@ export const push = async (
         metadata: Metadata | boolean,
     ) => {
         const metadataJson = await loader.getMetadata(fromId, `${fromType}/${toType}`, toId);
-        console.log(`${fromId} ${fromType} ${toType} ${toId} metadataJson: ${metadataJson}`);
 
         if (!metadataJson && metadata) {
-            console.log(`create edge from ${fromId} ${fromType} ${toType} ${toId}`);
             await writer.setMetadata(fromId, `${fromType}/${toType}`, toId, metadata);
             await writer.setReverseEdge(toId, `${toType}/${fromType}`, fromId, true);
             writeMetadataChangelog(fromId, fromType, toType, toId, `{"old":null,"new":${JSON.stringify(metadata)}}`);
         } else if (metadataJson && !metadata) {
-            console.log(`delete edge from ${fromId} ${fromType} ${toType} ${toId}`);
             await writer.setMetadata(fromId, `${fromType}/${toType}`, toId, false);
             await writer.setReverseEdge(toId, `${toType}/${fromType}`, fromId, false);
             writeMetadataChangelog(fromId, fromType, toType, toId, `{"old":${metadataJson},"new":null}`);
         } else if (metadataJson && metadata) {
-            console.log(`update edge from ${fromId} ${fromType} ${toType} ${toId}`);
             const oldMetadata = JSON.parse(metadataJson);
             const newMetadata = { ...oldMetadata, ...metadata };
             const keys = Object.keys(newMetadata);
@@ -269,7 +265,6 @@ export const push = async (
         toId: string,
         metadata: Metadata | boolean,
     ) => {
-        console.log(`Attempting update edge ${fromId} ${fromType} ${toType} ${toId}`);
         const canWriteFrom = canWriteNode(fromId);
         const canWriteTo = canWriteNode(toId);
         const canWrite = (await canWriteFrom) && (await canWriteTo);
@@ -299,8 +294,72 @@ export const push = async (
         return Promise.all(promises);
     };
 
+    const updateRightAsync = async (
+        nodeId: string,
+        principalType: string,
+        principal: string,
+        right: string,
+        val: boolean,
+    ) => {
+        if (right === 'read') {
+            await updateReadRight(nodeId, principalType, principal, val);
+        } else if (right === 'write') {
+            await updateWriteRight(nodeId, principalType, principal, val);
+        } else if (right === 'admin') {
+            await updateAdminRight(nodeId, principalType, principal, val);
+        }
+
+        writeRights(nodeId, principalType, principal, right, '{"statusCode":200}');
+    };
+
+    // TODO: maybe split this before into user and roles, so no check and cheaper map
+    const updateRightsAsync = async (nodeId: string, rightsObject: Record<string, unknown>) => {
+        const canAdmin = await canAdminNode(nodeId);
+
+        if (canAdmin) {
+            const promises: Promise<unknown>[] = [];
+            forEachObjDepth(
+                rightsObject,
+                (val: boolean, path: string[]) => {
+                    const [principalType, principal, right] = path;
+                    if (principalType !== 'user' && principalType !== 'role') return;
+                    promises.push(updateRightAsync(nodeId, principalType, principal, right, val));
+                },
+                3,
+            );
+
+            await Promise.all(promises);
+        } else {
+            forEachObjDepth(
+                rightsObject,
+                (val: boolean, path: string[]) => {
+                    const [principalType, principal, right] = path;
+                    if (principalType !== 'user' && principalType !== 'role') return;
+                    writeRights(nodeId, principalType, principal, right, '{"statusCode":403}');
+                },
+                3,
+            );
+        }
+    };
+    const updateRights = () => {
+        const rights = graph.rights;
+        if (!rights) return;
+
+        const nodeIds = Object.keys(rights);
+
+        const promises: Promise<unknown>[] = [];
+        for (let i = 0; i < nodeIds.length; i++) {
+            const nodeId = nodeIds[i];
+            const nodeRights = rights[nodeId];
+            promises.push(updateRightsAsync(nodeId, nodeRights));
+        }
+
+        return Promise.all(promises);
+    };
+
     await updateNodes();
     await updateEdges();
+    await updateRights();
 
     await awaitPromises();
     const res = getGraphJson();
