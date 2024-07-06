@@ -5,6 +5,16 @@
     "type": "module",
     "types": "dist/module/index.d.ts",
     "main": "dist/module/index.js",
+    "exports": {
+        ".": {
+            "types": "./dist/module/index.d.ts",
+            "default": "./dist/module/index.js"
+        },
+        "./next": {
+            "types": "./dist/module/next/index.d.ts",
+            "default": "./dist/module/next/index.js"
+        }
+    },
     "scripts": {
         "generate:client-js": "bun client-js/generate.ts",
         "build:lambda": "bun ./esbuild.lambda.js",

@@ -1,5 +1,6 @@
 import type { Atom } from '@gothub-team/got-atom';
 import { createApi, type SessionStore } from '@gothub/got-api';
+import {} from '@gothub/got-api/next';
 import { gotReducer, setup as setupCore, type GOT_ACTION, type State } from '@gothub/got-core';
 import type { StoreAPI } from '@gothub/got-core/dist/module/types/api';
 import { getLocalStorageSessionStore } from './util.js';
