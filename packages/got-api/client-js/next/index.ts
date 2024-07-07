@@ -1,11 +1,5 @@
 import { useSrp } from '@gothub-team/got-srp';
-import {
-    createLowApi,
-    type CreateLowApiOtions,
-    type GotLowApi,
-    type InviteUserInput,
-    type LoginVerifyOutput,
-} from '../api.js';
+import { createLowApi, type GotLowApi, type InviteUserInput, type LoginVerifyOutput } from '../api.js';
 import { post, put } from '../fetch.js';
 import type { PushBody, PushResult } from '@gothub/got-core';
 
@@ -139,24 +133,23 @@ export type CreateApiOptions = {
      */
     adminMode?: boolean;
     /**
-     * Function to get the ID token which is used with all API requests that require authentication.
+     * Id token that is used to execute authenticated API calls.
      */
-    getIdToken: CreateLowApiOtions['getIdToken'];
+    idToken?: string;
 };
-export const createApi = ({ host, adminMode = false, getIdToken }: CreateApiOptions): GotApi => {
+export const createApi = ({ host, adminMode = false, idToken }: CreateApiOptions): GotApi => {
     if (!host) throw new Error('Provide host argument to create API.');
     const _host = host.endsWith('/') ? host.substring(0, host.length - 1) : host;
 
     const api = createLowApi({
         host: _host,
-        getIdToken,
+        getIdToken: async () => idToken,
         getAdminMode: () => adminMode,
     });
 
     return {
         ...api,
-        push: async (body: PushBody, asRole?: string) =>
-            post(`${host}/push`, body, await getIdToken(), adminMode, asRole),
+        push: async (body: PushBody, asRole?: string) => post(`${host}/push`, body, idToken, adminMode, asRole),
         login: async ({ email, password }: LoginInput) => {
             const { srpA, getSignature } = await useSrp();
 
