@@ -1,6 +1,6 @@
 import { CORS_HEADERS, internalServerError, validate, type ValidationResult } from '@gothub/aws-util';
 import { Graph } from '@gothub/got-core';
-import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
+import type { APIGatewayProxyHandler, APIGatewayProxyResult, Context, Handler } from 'aws-lambda';
 import { push } from '../push';
 import { s3loader } from '../push/util/s3loader';
 import { s3writer } from '../push/util/s3writer';
@@ -277,17 +277,23 @@ export const schema = {
 
 export type Body = Graph;
 
-const handle = async ({ userEmail, asAdmin, asRole, body }: ValidationResult<Body>): Promise<APIGatewayProxyResult> => {
+const handle = async (
+    { userEmail, asAdmin, asRole, body }: ValidationResult<Body>,
+    context: Context,
+): Promise<APIGatewayProxyResult> => {
     // TODO: fix useremail thingies
     const signer = await cfSigner();
-    const [result] = await push(body, userEmail || '', asRole || 'user', asAdmin, {
+    const writer = s3writer();
+    const [result, changelog] = await push(body, userEmail || '', asRole || 'user', asAdmin, {
         dataCache: createDataCache(),
         graphAssembler: graphAssembler(),
         changelogAssembler: graphAssembler(),
         loader: s3loader(),
-        writer: s3writer(),
+        writer: writer,
         signer,
     });
+
+    await writer.setPushLog(userEmail || '', context.awsRequestId, changelog);
 
     return {
         statusCode: 200,
@@ -296,10 +302,10 @@ const handle = async ({ userEmail, asAdmin, asRole, body }: ValidationResult<Bod
     };
 };
 
-export const handleHttp: APIGatewayProxyHandler = async (event) => {
+export const handleHttp: APIGatewayProxyHandler = async (event, context) => {
     try {
         const validationResult = await validate<Body>(schema, event, { auth: AUTHENTICATED });
-        const result = await handle(validationResult);
+        const result = await handle(validationResult, context);
         return result;
     } catch (err) {
         console.log(err);
@@ -307,9 +313,9 @@ export const handleHttp: APIGatewayProxyHandler = async (event) => {
     }
 };
 
-export const handleInvoke: Handler = async ({ body }) => {
+export const handleInvoke: Handler = async ({ body }, context) => {
     try {
-        const result = await handle(body as ValidationResult<Body>);
+        const result = await handle(body as ValidationResult<Body>, context);
         return result;
     } catch (err) {
         return internalServerError(err as Error);

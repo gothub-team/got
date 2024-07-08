@@ -25,7 +25,7 @@ export const push = async (
     asRole: string,
     asAdmin: boolean,
     dependencies: Dependencies,
-): Promise<[string, Log]> => {
+): Promise<[string, string, Log]> => {
     const start = performance.now();
 
     const { awaitPromises } = promiseManager();
@@ -579,8 +579,10 @@ export const push = async (
     await awaitPromises();
 
     // TODO write changelog
+    await writer.setPushLog(userEmail, 'requestId', getGraphJsonChangelog());
 
     const res = getGraphJson();
+    const changelog = getGraphJsonChangelog();
     const log: Log = {
         graphAssembler: getLogGraphAssembler(),
         loader: loader.getLog(),
@@ -593,5 +595,5 @@ export const push = async (
             timeLoadEdge,
         },
     };
-    return [res, log];
+    return [res, changelog, log];
 };

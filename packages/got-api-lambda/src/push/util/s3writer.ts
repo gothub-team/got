@@ -1,6 +1,7 @@
 import { s3delete, s3put } from '@gothub/aws-util';
 import {
     BUCKET_EDGES,
+    BUCKET_LOGS,
     BUCKET_MEDIA,
     BUCKET_NODES,
     BUCKET_OWNERS,
@@ -71,6 +72,13 @@ export const s3writer: () => Writer = () => {
         }
     };
 
+    const setPushLog = async (userEmail: string, requestId: string, changeset: string) => {
+        const timestamp = new Date().toISOString();
+        const logEntry = `{"userEmail":"${userEmail}","timestamp":"${timestamp}","requestId":"${requestId}","changeset":${changeset}}`;
+        const logKey = `push/${userEmail}/${timestamp}/${requestId}`;
+        await s3put(BUCKET_LOGS, logKey, logEntry);
+    };
+
     return {
         setNode,
         setMetadata,
@@ -81,5 +89,6 @@ export const s3writer: () => Writer = () => {
         setOwner,
         setFileRef,
         setUploadId,
+        setPushLog,
     };
 };

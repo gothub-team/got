@@ -10,4 +10,5 @@ export type Writer = {
     setOwner: (nodeId: string, principal: string | null) => Promise<void>;
     setFileRef: (nodeId: string, prop: string, fileRef: { fileKey: string } | null) => Promise<void>;
     setUploadId: (uploadId: string, fileKey: string | null) => Promise<void>;
+    setPushLog: (userEmail: string, requestId: string, changeset: string) => Promise<void>;
 };
