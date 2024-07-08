@@ -395,33 +395,60 @@ export const push = async (
         writePrincipalRight(nodeId, principalType, principal, right, '{"statusCode":200}');
     };
 
-    // TODO: maybe split this before into user and roles, so no check and cheaper map
     const updateRightsAsync = async (nodeId: string, rightsObject: Record<string, unknown>) => {
         const canAdmin = await canAdminNode(nodeId);
 
         if (canAdmin) {
             const promises: Promise<unknown>[] = [];
-            forEachObjDepth(
-                rightsObject,
-                (val: boolean, path: string[]) => {
-                    const [principalType, principal, right] = path;
-                    if (principalType !== 'user' && principalType !== 'role') return;
-                    promises.push(updateRightAsync(nodeId, principalType, principal, right, val));
-                },
-                3,
-            );
+            const userObj = rightsObject.user as Record<string, Record<string, boolean>> | undefined;
+            if (userObj) {
+                forEachObjDepth(
+                    userObj,
+                    (val: boolean, path: string[]) => {
+                        const [principal, right] = path;
+                        promises.push(updateRightAsync(nodeId, 'user', principal, right, val));
+                    },
+                    2,
+                );
+            }
+
+            const roleObj = rightsObject.role as Record<string, Record<string, boolean>> | undefined;
+            if (roleObj) {
+                forEachObjDepth(
+                    roleObj,
+                    (val: boolean, path: string[]) => {
+                        const [principal, right] = path;
+                        promises.push(updateRightAsync(nodeId, 'role', principal, right, val));
+                    },
+                    2,
+                );
+            }
 
             await Promise.all(promises);
         } else {
-            forEachObjDepth(
-                rightsObject,
-                (val: boolean, path: string[]) => {
-                    const [principalType, principal, right] = path;
-                    if (principalType !== 'user' && principalType !== 'role') return;
-                    writePrincipalRight(nodeId, principalType, principal, right, '{"statusCode":403}');
-                },
-                3,
-            );
+            const userObj = rightsObject.user as Record<string, Record<string, boolean>> | undefined;
+            if (userObj) {
+                forEachObjDepth(
+                    userObj,
+                    (val: boolean, path: string[]) => {
+                        const [principal, right] = path;
+                        writePrincipalRight(nodeId, 'user', principal, right, '{"statusCode":403}');
+                    },
+                    2,
+                );
+            }
+
+            const roleObj = rightsObject.role as Record<string, Record<string, boolean>> | undefined;
+            if (roleObj) {
+                forEachObjDepth(
+                    roleObj,
+                    (val: boolean, path: string[]) => {
+                        const [principal, right] = path;
+                        writePrincipalRight(nodeId, 'role', principal, right, '{"statusCode":403}');
+                    },
+                    2,
+                );
+            }
         }
     };
     const updateRights = (): Promise<unknown> | void => {
