@@ -8,7 +8,7 @@ import {
     NodeFilesView,
     mergeGraphObjRight,
 } from '@gothub/got-core';
-import { type Loader } from './types/loader';
+import { FileMetadata, type Loader } from './types/loader';
 import { type GraphAssembler } from './types/graphAssembler';
 import { promiseManager } from './util/promiseManager';
 import { Log } from './types/logs';
@@ -492,20 +492,31 @@ export const push = async (
         }
     };
 
+    const updateFileMetadata = async (fileKey: string, metadata: FileMetadata) => {
+        const oldMetadata = await loader.getFileMetadata(fileKey);
+
+        if (!oldMetadata && metadata) {
+            await writer.setFileMetadata(fileKey, metadata);
+        } else if (oldMetadata && !metadata) {
+            await writer.setFileMetadata(fileKey, null);
+        } else if (oldMetadata && metadata) {
+            const newMetadata = mergeGraphObjRight(oldMetadata, metadata);
+            await writer.setFileMetadata(fileKey, newMetadata);
+        }
+    };
+
     const putFile = async (nodeId: string, prop: string, fileMetadata: UploadNodeFileView) => {
         const { filename, contentType, fileSize, partSize = 5242880 } = fileMetadata;
         const fileKey = `file/${sha256(`${nodeId}/${prop}`)}/${filename}`;
 
         await updateFileRef(nodeId, prop, fileKey);
-
-        // TODO: update file metadata
-        // const newMetadata = {
-        //     nodeId,
-        //     prop,
-        //     filename,
-        //     contentType,
-        //     fileSize,
-        // };
+        await updateFileMetadata(fileKey, {
+            nodeId,
+            prop,
+            filename,
+            contentType,
+            fileSize,
+        });
 
         if (fileSize > partSize) {
             // multipart upload
@@ -535,6 +546,7 @@ export const push = async (
 
     const removeFile = async (nodeId: string, prop: string) => {
         await updateFileRef(nodeId, prop, null);
+        // TODO: remove file metadata?
     };
 
     const updateFilesAsync = async (nodeId: string, files: NodeFilesView<UploadNodeFileView>) => {

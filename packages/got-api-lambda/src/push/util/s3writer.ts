@@ -64,6 +64,14 @@ export const s3writer: () => Writer = () => {
         }
     };
 
+    const setFileMetadata = async (fileKey: string, metadata: Metadata | null) => {
+        if (metadata === null) {
+            return s3delete(BUCKET_MEDIA, `metadata/${fileKey}`);
+        } else {
+            return s3put(BUCKET_MEDIA, `metadata/${fileKey}`, metadata);
+        }
+    };
+
     const setUploadId = async (uploadId: string, fileKey: string | null) => {
         if (fileKey === null) {
             return s3delete(BUCKET_MEDIA, `uploads/${uploadId}`);
@@ -88,6 +96,7 @@ export const s3writer: () => Writer = () => {
         setAdmin: setRight(BUCKET_RIGHTS_ADMIN),
         setOwner,
         setFileRef,
+        setFileMetadata,
         setUploadId,
         setPushLog,
     };

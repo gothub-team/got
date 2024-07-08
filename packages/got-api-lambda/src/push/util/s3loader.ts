@@ -1,6 +1,6 @@
 /* eslint-disable prefer-template */
 import { s3get, s3head, loadQueue, s3listKeysPaged, substringToFirst, assocMap3 } from '@gothub/aws-util';
-import { type EdgeWildcard, type FileHead, type FileRef, type Loader } from '../types/loader';
+import { FileMetadata, type EdgeWildcard, type FileHead, type FileRef, type Loader } from '../types/loader';
 import {
     BUCKET_EDGES,
     BUCKET_MEDIA,
@@ -97,6 +97,14 @@ export const s3loader: () => Loader = () => {
     };
 
     const getFileRefs = async (nodeId: string) => queueLoad(() => listRefs(nodeId)) as Promise<Array<FileRef>>;
+
+    const getFileMetadata = async (fileKey: string): Promise<FileMetadata | null> => {
+        const metadataKey = `metadata/${fileKey}`;
+        const res = await s3get(BUCKET_MEDIA, metadataKey);
+        if (!res) return null;
+
+        return JSON.parse(res.toString()) as FileMetadata;
+    };
 
     const getUpload = async (uploadId: string) => {
         const res = await s3get(BUCKET_MEDIA, `uploads/${uploadId}`);
@@ -200,6 +208,7 @@ export const s3loader: () => Loader = () => {
         getFileHead,
         getFileRef,
         getFileRefs,
+        getFileMetadata,
         getUpload,
         getEdges,
         getReverseEdges,
