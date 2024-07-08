@@ -1,5 +1,13 @@
 import { type DataCache } from './types/dataCache';
-import { Graph, Node, forEachObjDepth, Metadata, UploadNodeFileView, NodeFilesView } from '@gothub/got-core';
+import {
+    Graph,
+    Node,
+    forEachObjDepth,
+    Metadata,
+    UploadNodeFileView,
+    NodeFilesView,
+    mergeGraphObjRight,
+} from '@gothub/got-core';
 import { type Loader } from './types/loader';
 import { type GraphAssembler } from './types/graphAssembler';
 import { promiseManager } from './util/promiseManager';
@@ -113,6 +121,18 @@ export const push = async (
         return !scope || (await canWriteNode(nodeId));
     };
 
+    const removeNulls = <TObj extends Record<string, unknown>>(obj: TObj): TObj => {
+        const keys = Object.keys(obj);
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            if (obj[key] === null) {
+                delete obj[key];
+            }
+        }
+
+        return obj;
+    };
+
     const updateReadRight = async (nodeId: string, principalType: string, principal: string, right: boolean) => {
         const exists = await loader.getRead(nodeId, principalType, principal);
         if (!!exists !== right) {
@@ -164,14 +184,8 @@ export const push = async (
             writeNodeChangelog(nodeId, `{"old":${nodeJSON},"new":null}`);
         } else if (nodeJSON && node) {
             const oldNode = JSON.parse(nodeJSON);
-            const newNode = { ...oldNode, ...node };
-            const keys = Object.keys(newNode);
-            for (let i = 0; i < keys.length; i++) {
-                const key = keys[i];
-                if (node[key] === null) {
-                    delete newNode[key];
-                }
-            }
+            const newNode = mergeGraphObjRight(oldNode, node);
+            typeof newNode === 'object' && removeNulls(newNode);
             await writer.setNode(nodeId, newNode);
             writeNodeChangelog(nodeId, `{"old":${nodeJSON},"new":${JSON.stringify(newNode)}}`);
         }
@@ -240,15 +254,9 @@ export const push = async (
             await writer.setReverseEdge(toId, `${toType}/${fromType}`, fromId, false);
             writeMetadataChangelog(fromId, fromType, toType, toId, `{"old":${metadataJson},"new":null}`);
         } else if (metadataJson && metadata) {
-            const oldMetadata = JSON.parse(metadataJson);
-            const newMetadata = { ...oldMetadata, ...metadata };
-            const keys = Object.keys(newMetadata);
-            for (let i = 0; i < keys.length; i++) {
-                const key = keys[i];
-                if (metadata[key] === null) {
-                    delete newMetadata[key];
-                }
-            }
+            const oldMetadata = JSON.parse(metadataJson) as Metadata;
+            const newMetadata = mergeGraphObjRight(oldMetadata, metadata);
+            typeof newMetadata === 'object' && removeNulls(newMetadata);
             await writer.setMetadata(fromId, `${fromType}/${toType}`, toId, newMetadata);
             writeMetadataChangelog(
                 fromId,
