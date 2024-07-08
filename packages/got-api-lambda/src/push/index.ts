@@ -190,16 +190,15 @@ export const push = async (
     };
 
     const updateNodesAsync = async (nodeId: string, node: Node | false) => {
-        // TODO: maybe check for write first before checking owner every time?
-        if (node && !(await loader.ownerExists(nodeId)) && (await canWriteScope(nodeId))) {
-            await createNode(nodeId, node);
+        const canWrite = await canWriteNode(nodeId);
+        if (canWrite) {
+            await updateNode(nodeId, node ? node : null);
             writeNode(nodeId, '{"statusCode":200}');
             return;
         }
 
-        const canWrite = await canWriteNode(nodeId);
-        if (canWrite) {
-            await updateNode(nodeId, node ? node : null);
+        if (node && (await canWriteScope(nodeId)) && !(await loader.ownerExists(nodeId))) {
+            await createNode(nodeId, node);
             writeNode(nodeId, '{"statusCode":200}');
             return;
         }
