@@ -1,11 +1,5 @@
 import { loadQueue, substringToFirst, assocMap3, fsget, fsexist, fslist } from '@gothub/aws-util';
-import {
-    //FileMetadata,
-    type EdgeWildcard,
-    type FileHead,
-    type FileRef,
-    type Loader,
-} from '../types/loader';
+import { type EdgeWildcard, type FileHead, type FileRef, type Loader } from '../types/loader';
 import type { LoaderLog } from '../types/logs';
 import {
     DIR_EDGES,
@@ -21,14 +15,15 @@ import {
 // TODO: maybe we could trial seperate queues for each bucket or request time?
 const { queueLoad } = loadQueue(200);
 
-const listNodes = async (wildcardPrefix: string) => fslist(`${DIR_NODES}/${wildcardPrefix}`);
+const listNodes = async (wildcardPrefix: string) => fslist(DIR_NODES, `${DIR_NODES}/${wildcardPrefix}`);
 
-const listEdge = async (fromId: string, edgeTypes: string) => fslist(`${DIR_EDGES}/${fromId}/${edgeTypes}/`);
-const listReverseEdge = async (toId: string, edgeTypes: string) => fslist(`${DIR_REVERSE_EDGES}/${toId}/${edgeTypes}/`);
+const listEdge = async (fromId: string, edgeTypes: string) => fslist(DIR_EDGES, `${DIR_EDGES}/${fromId}/${edgeTypes}/`);
+const listReverseEdge = async (toId: string, edgeTypes: string) =>
+    fslist(DIR_REVERSE_EDGES, `${DIR_REVERSE_EDGES}/${toId}/${edgeTypes}/`);
 
 const listEdgeWildcard = async (fromId: string, edgeTypes: string) => {
     const edgePrefix = substringToFirst(edgeTypes, '*');
-    const edgeKeys = await fslist(`${DIR_EDGES}/${fromId}/${edgePrefix}`);
+    const edgeKeys = await fslist(DIR_EDGES, `${DIR_EDGES}/${fromId}/${edgePrefix}`);
 
     const pattern = new RegExp(edgeTypes.replaceAll('*', '.*').replaceAll('/', '\\/'));
 
@@ -46,7 +41,7 @@ const loadRef = async (refId: string) => {
     return { prop, fileKey };
 };
 const listRefs = async (nodeId: string) => {
-    const keys = await fslist(`${DIR_MEDIA}/ref/${nodeId}/`);
+    const keys = await fslist(DIR_MEDIA, `${DIR_MEDIA}/ref/${nodeId}/`);
 
     const promises = new Array(keys.length);
     for (let i = 0; i < keys.length; i++) {
@@ -148,9 +143,9 @@ export const efsloader: () => Loader = () => {
         queueLoad(() => listNodes(wildcardPrefix)) as Promise<Array<string>>;
 
     const listRights = async (nodeId: string) => {
-        const readRightsPromise = queueLoad(() => fslist(`${DIR_RIGHTS_READ}/${nodeId}/`));
-        const writeRightsPromise = queueLoad(() => fslist(`${DIR_RIGHTS_WRITE}/${nodeId}/`));
-        const adminRightsPromise = queueLoad(() => fslist(`${DIR_RIGHTS_ADMIN}/${nodeId}/`));
+        const readRightsPromise = queueLoad(() => fslist(DIR_RIGHTS_READ, `${DIR_RIGHTS_READ}/${nodeId}/`));
+        const writeRightsPromise = queueLoad(() => fslist(DIR_RIGHTS_WRITE, `${DIR_RIGHTS_WRITE}/${nodeId}/`));
+        const adminRightsPromise = queueLoad(() => fslist(DIR_RIGHTS_ADMIN, `${DIR_RIGHTS_ADMIN}/${nodeId}/`));
 
         const readRights = await readRightsPromise;
         const writeRights = await writeRightsPromise;
@@ -180,7 +175,7 @@ export const efsloader: () => Loader = () => {
     };
 
     const ownerExists = async (nodeId: string) => {
-        const owners = await queueLoad(() => fslist(`${DIR_OWNERS}/${nodeId}/`));
+        const owners = await queueLoad(() => fslist(DIR_OWNERS, `${DIR_OWNERS}/${nodeId}/`));
         return owners && owners.length > 0;
     };
 

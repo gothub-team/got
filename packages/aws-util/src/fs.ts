@@ -44,7 +44,7 @@ export const fsdelete = async (path: string) => {
     }
 };
 
-const fslistRecursive = async (path: string) => {
+const fslistRecursive = async (location: string, path: string) => {
     try {
         const items = await readdir(path, { recursive: true, withFileTypes: true });
 
@@ -52,7 +52,7 @@ const fslistRecursive = async (path: string) => {
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
             if (item.isFile()) {
-                files.push(item.name);
+                files.push(item.name.replace(`${location}/`, ''));
             }
         }
 
@@ -62,12 +62,12 @@ const fslistRecursive = async (path: string) => {
     }
 };
 
-export const fslist = async (path: string) => {
+export const fslist = async (location: string, path: string) => {
     const basePath = path.split('/').slice(0, -1).join('/');
     const wildcard = path.split('/').pop();
 
     if (!wildcard) {
-        return fslistRecursive(basePath);
+        return fslistRecursive(location, basePath);
     }
 
     try {
@@ -80,9 +80,9 @@ export const fslist = async (path: string) => {
             const item = items[i];
             if (item.name.startsWith(path)) {
                 if (item.isFile()) {
-                    files.push(item.name);
+                    files.push(item.name.replace(`${location}/`, ''));
                 } else if (item.isDirectory()) {
-                    promises.push(fslistRecursive(`${basePath}/${item.name}`));
+                    promises.push(fslistRecursive(location, `${basePath}/${item.name}`));
                 }
             }
         }
