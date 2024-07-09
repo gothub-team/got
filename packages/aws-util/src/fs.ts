@@ -71,7 +71,7 @@ export const fslist = async (location: string, path: string) => {
     }
 
     try {
-        const items = await readdir(`${location}/${basePath}`, { withFileTypes: true });
+        const items = await readdir(basePath ? `${location}/${basePath}` : location, { withFileTypes: true });
 
         const files = [];
         const promises = [];
@@ -80,9 +80,10 @@ export const fslist = async (location: string, path: string) => {
             const item = items[i];
             if (item.name.startsWith(wildcard)) {
                 if (item.isFile()) {
-                    files.push(`${item.parentPath.replace(`${location}/`, '')}/${item.name}`);
+                    const dir = item.parentPath.replace(`${location}`, '');
+                    files.push(dir ? `${dir}/${item.name}` : item.name);
                 } else if (item.isDirectory()) {
-                    promises.push(fslistRecursive(location, `${basePath}/${item.name}`));
+                    promises.push(fslistRecursive(location, `${item.parentPath}/${item.name}`));
                 }
             }
         }
