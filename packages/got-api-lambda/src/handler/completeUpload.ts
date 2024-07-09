@@ -6,9 +6,9 @@ import {
     type ValidationResult,
 } from '@gothub/aws-util';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
-import { s3loader } from '../push/util/s3loader';
-import { s3writer } from '../push/util/s3writer';
 import { BUCKET_MEDIA } from '../push/config';
+import { efsloader } from '../push/util/efsloader';
+import { efswriter } from '../push/util/efswriter';
 // TODO: we are currently importing utils from push
 
 const AUTHENTICATED = true;
@@ -39,8 +39,8 @@ export type Body = {
 
 const handle = async ({ body }: ValidationResult<Body>): Promise<APIGatewayProxyResult> => {
     const { uploadId, partEtags } = body;
-    const loader = s3loader();
-    const writer = s3writer();
+    const loader = efsloader();
+    const writer = efswriter();
 
     const fileKey = await loader.getUpload(uploadId);
     if (!fileKey) {

@@ -24651,12 +24651,7 @@ var efsloader = () => {
     }
     return data;
   };
-  const getFileHead = async (fileKey) => queueLoad(async () => {
-    console.log("loading file head");
-    const res = await s3head(BUCKET_MEDIA, fileKey);
-    console.log("loaded file head");
-    return res;
-  });
+  const getFileHead = async (fileKey) => queueLoad(() => s3head(BUCKET_MEDIA, fileKey));
   const getFileRefs = async (nodeId) => queueLoad(() => listRefs(nodeId));
   const getEdgesWildcard = async (nodeId, edgeType) => {
     const edgeKeys = await queueLoad(() => listEdgeWildcard(nodeId, `${edgeType}/`));

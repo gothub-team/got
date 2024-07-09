@@ -184,7 +184,7 @@ func NewApi(ctx *pulumi.Context,
 				{
 					"Sid": "Allow-access-to-VPCE",
 					"Effect": "Allow",
-					"Action": ["s3:GetObject","s3:GetObjectVersion"],
+					"Action": ["s3:GetObject","s3:GetObjectVersion", "s3:PutObject"],
 					"Principal": "*",
 					"Resource": "*"
 				}
@@ -685,6 +685,14 @@ func NewApi(ctx *pulumi.Context,
 		ExecutionArn: api.ExecutionArn,
 		RoutePath:    pulumi.String("/media/complete-upload"),
 		Environment:  completeUploadEnv,
+		VpcConfig: &lambda.FunctionVpcConfigArgs{
+			SubnetIds:        pulumi.StringArray{subnet.ID()},
+			SecurityGroupIds: pulumi.StringArray{vpc.DefaultSecurityGroupId},
+		},
+		FileSystemConfig: &lambda.FunctionFileSystemConfigArgs{
+			Arn:            accessPoint.Arn,
+			LocalMountPath: pulumi.String("/mnt/efs"),
+		},
 	})
 	if err != nil {
 		return nil, err

@@ -23857,6 +23857,89 @@ var readdir = (0, import_util2.promisify)(import_fs.default.readdir);
 var mkdir = (0, import_util2.promisify)(import_fs.default.mkdir);
 var writeFile = (0, import_util2.promisify)(import_fs.default.writeFile);
 var rm = (0, import_util2.promisify)(import_fs.default.rm);
+var fsexist = async (path) => {
+  try {
+    await access(path, import_fs.default.constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+};
+var fsget = async (path) => {
+  try {
+    const res = await readFile(path, "utf8");
+    return res;
+  } catch {
+    return null;
+  }
+};
+var fsput = async (path, data) => {
+  const dir = path.split("/").slice(0, -1).join("/");
+  try {
+    await writeFile(path, data, "utf8");
+  } catch {
+    await mkdir(dir, { recursive: true });
+    await writeFile(path, data, "utf8");
+  }
+};
+var fsdelete = async (path) => {
+  try {
+    await rm(path);
+  } catch {
+  }
+};
+var fslistRecursive = async (location, path) => {
+  try {
+    const items = await readdir(`${location}/${path}`, { recursive: true, withFileTypes: true });
+    const files = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.isFile()) {
+        files.push(`${item.parentPath.replace(`${location}/`, "")}/${item.name}`);
+      }
+    }
+    return files;
+  } catch {
+    return [];
+  }
+};
+var fslist = async (location, path) => {
+  const basePath = path.split("/").slice(0, -1).join("/");
+  const wildcard = path.split("/").pop();
+  if (!wildcard) {
+    return fslistRecursive(location, basePath);
+  }
+  console.log("wildcard mode", path, `${location}/${basePath}`, wildcard);
+  try {
+    const items = await readdir(basePath ? `${location}/${basePath}` : location, { withFileTypes: true });
+    const files = [];
+    const promises = [];
+    console.log(
+      "found items",
+      items.map((i) => `${i.parentPath}/${i.name}`)
+    );
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.name.startsWith(wildcard)) {
+        if (item.isFile()) {
+          const dir = item.parentPath.replace(`${location}`, "");
+          files.push(dir ? `${dir}/${item.name}` : item.name);
+        } else if (item.isDirectory()) {
+          console.log("found directory", `${item.parentPath}/${item.name}`);
+          promises.push(fslistRecursive(location, `${item.parentPath}/${item.name}`));
+        }
+      }
+    }
+    const nestedFiles = await Promise.all(promises);
+    for (let i = 0; i < nestedFiles.length; i++) {
+      files.push(...nestedFiles[i]);
+    }
+    console.log("found matching files", files);
+    return files;
+  } catch {
+    return [];
+  }
+};
 
 // ../aws-util/dist/module/hash.js
 var import_crypto = require("crypto");
@@ -23915,27 +23998,6 @@ var client6 = new import_client_s3.S3Client({
   region: AWS_REGION,
   apiVersion: "latest"
 });
-var streamToBuffer = (stream) => new Promise((resolve, reject) => {
-  const chunks = [];
-  stream.on("data", (chunk) => chunks.push(chunk));
-  stream.on("error", reject);
-  stream.on("end", () => resolve(Buffer.concat(chunks)));
-});
-var s3put = async (bucket, key, data) => {
-  const Body = data ? Buffer.from(JSON.stringify(data)) : void 0;
-  const command = new import_client_s3.PutObjectCommand({
-    Bucket: bucket,
-    Key: key,
-    Body
-  });
-  try {
-    await client6.send(command);
-    return void 0;
-  } catch (err) {
-    console.error(err);
-    return void 0;
-  }
-};
 var s3completeMultipartUpload = async (bucket, key, { uploadId, partEtags }) => {
   const command = new import_client_s3.CompleteMultipartUploadCommand({
     Bucket: bucket,
@@ -23956,30 +24018,6 @@ var s3completeMultipartUpload = async (bucket, key, { uploadId, partEtags }) => 
     throw err;
   }
 };
-var s3get = async (bucket, key) => {
-  const command = new import_client_s3.GetObjectCommand({
-    Bucket: bucket,
-    Key: key
-  });
-  try {
-    const results = await client6.send(command);
-    return results.Body ? streamToBuffer(results.Body) : null;
-  } catch (err) {
-    return void 0;
-  }
-};
-var s3delete = async (bucket, key) => {
-  const command = new import_client_s3.DeleteObjectCommand({
-    Bucket: bucket,
-    Key: key
-  });
-  try {
-    await client6.send(command);
-    return void 0;
-  } catch (err) {
-    return void 0;
-  }
-};
 var s3head = async (bucket, key) => {
   const command = new import_client_s3.HeadObjectCommand({
     Bucket: bucket,
@@ -23997,43 +24035,6 @@ var s3head = async (bucket, key) => {
   } catch (err) {
     return false;
   }
-};
-var s3listPaged = (bucket, prefix) => ({
-  subscribe: (subscriber) => {
-    try {
-      const _FETCH_PAGE = async (continuationToken) => {
-        const command = new import_client_s3.ListObjectsV2Command({
-          Bucket: bucket,
-          Prefix: prefix,
-          ContinuationToken: continuationToken
-        });
-        const ContinuationToken = await client6.send(command).then(({ Contents, NextContinuationToken }) => {
-          subscriber.next(Contents || []);
-          return NextContinuationToken;
-        });
-        ContinuationToken ? _FETCH_PAGE(ContinuationToken) : subscriber.complete();
-      };
-      _FETCH_PAGE();
-    } catch (err) {
-      subscriber.error(err);
-    }
-  }
-});
-var s3mapListKeysPaged = async (bucket, prefix, fnMap) => new Promise((resolve, reject) => {
-  s3listPaged(bucket, prefix).subscribe({
-    next: (arr) => arr.forEach(({ Key, ETag }) => {
-      Key && ETag && fnMap(Key, ETag);
-    }),
-    complete: () => resolve(true),
-    error: (err) => reject(err)
-  });
-});
-var s3listKeysPaged = async (bucket, prefix) => {
-  const records = [];
-  await s3mapListKeysPaged(bucket, prefix, (key) => {
-    records.push(key);
-  });
-  return records;
 };
 
 // ../aws-util/dist/module/validation.js
@@ -24090,14 +24091,14 @@ var DIR_OWNERS = `${EFS_MOUNT}/owners`;
 var DIR_MEDIA = `${EFS_MOUNT}/media`;
 var DIR_LOGS = `${EFS_MOUNT}/logs`;
 
-// src/push/util/s3loader.ts
+// src/push/util/efsloader.ts
 var { queueLoad } = loadQueue(200);
-var listNodes = async (wildcardPrefix) => s3listKeysPaged(BUCKET_NODES, wildcardPrefix);
-var listEdge = async (fromId, edgeTypes) => s3listKeysPaged(BUCKET_EDGES, `${fromId}/${edgeTypes}/`);
-var listReverseEdge = async (toId, edgeTypes) => s3listKeysPaged(BUCKET_REVERSE_EDGES, `${toId}/${edgeTypes}/`);
+var listNodes = async (wildcardPrefix) => fslist(DIR_NODES, `${wildcardPrefix}`);
+var listEdge = async (fromId, edgeTypes) => fslist(DIR_EDGES, `${fromId}/${edgeTypes}/`);
+var listReverseEdge = async (toId, edgeTypes) => fslist(DIR_REVERSE_EDGES, `${toId}/${edgeTypes}/`);
 var listEdgeWildcard = async (fromId, edgeTypes) => {
   const edgePrefix = substringToFirst(edgeTypes, "*");
-  const edgeKeys = await s3listKeysPaged(BUCKET_EDGES, `${fromId}/${edgePrefix}`);
+  const edgeKeys = await fslist(DIR_EDGES, `${fromId}/${edgePrefix}`);
   const pattern = new RegExp(edgeTypes.replaceAll("*", ".*").replaceAll("/", "\\/"));
   if (edgePrefix.length < edgeTypes.length - 2) {
     return edgeKeys.filter((edgeKey) => edgeKey.match(pattern));
@@ -24106,63 +24107,56 @@ var listEdgeWildcard = async (fromId, edgeTypes) => {
 };
 var loadRef = async (refId) => {
   const [, , prop] = refId.split("/");
-  const res = await s3get(BUCKET_MEDIA, refId);
-  const { fileKey = "" } = res ? JSON.parse(res.toString()) : {};
+  const res = await fsget(`${DIR_MEDIA}/${refId}`);
+  const { fileKey = "" } = res ? JSON.parse(res) : {};
   return { prop, fileKey };
 };
 var listRefs = async (nodeId) => {
-  const keys = await s3listKeysPaged(BUCKET_MEDIA, `ref/${nodeId}`);
+  const keys = await fslist(DIR_MEDIA, `ref/${nodeId}/`);
   const promises = new Array(keys.length);
   for (let i = 0; i < keys.length; i++) {
     promises[i] = loadRef(keys[i]);
   }
   return Promise.all(promises);
 };
-var s3loader = () => {
+var efsloader = () => {
   let numNodes = 0;
   let numMetadata = 0;
   const numFiles = 0;
   const getNode = async (nodeId) => {
     numNodes += 1;
-    const data = await queueLoad(() => s3get(BUCKET_NODES, nodeId));
-    if (data == null) {
-      return null;
-    }
-    return data.toString();
+    return queueLoad(async () => fsget(`${DIR_NODES}/${nodeId}`));
   };
-  const configureGetRight = (bucketName) => async (nodeId, principalType, principal) => {
-    const head = await queueLoad(() => s3head(bucketName, `${nodeId}/${principalType}/${principal}`));
-    return !!head;
+  const configureGetRight = (dirName) => (nodeId, principalType, principal) => {
+    return queueLoad(async () => fsexist(`${dirName}/${nodeId}/${principalType}/${principal}`));
   };
   const getMetadata = async (fromId, edgeTypes, toId) => {
     numMetadata += 1;
-    const data = await queueLoad(() => s3get(BUCKET_EDGES, fromId + "/" + edgeTypes + "/" + toId));
-    if (data === null) {
-      return "true";
-    } else if (data === void 0) {
+    const data = await queueLoad(() => fsget(`${DIR_EDGES}/${fromId}/${edgeTypes}/${toId}`));
+    if (data == null) {
       return "";
     }
-    return data.toString();
+    return data;
   };
-  const getFileHead = (fileKey) => queueLoad(() => s3head(BUCKET_MEDIA, fileKey));
+  const getFileHead = async (fileKey) => queueLoad(() => s3head(BUCKET_MEDIA, fileKey));
   const getFileRef = async (nodeId, prop) => {
     const refId = `ref/${nodeId}/${prop}`;
-    const res = await s3get(BUCKET_MEDIA, refId);
+    const res = await fsget(`${DIR_MEDIA}/${refId}`);
     if (!res) return null;
-    const { fileKey = "" } = JSON.parse(res.toString());
+    const { fileKey = "" } = JSON.parse(res);
     return { prop, fileKey };
   };
   const getFileRefs = async (nodeId) => queueLoad(() => listRefs(nodeId));
   const getFileMetadata = async (fileKey) => {
     const metadataKey = `metadata/${fileKey}`;
-    const res = await s3get(BUCKET_MEDIA, metadataKey);
+    const res = await fsget(`${DIR_MEDIA}/${metadataKey}`);
     if (!res) return null;
-    return JSON.parse(res.toString());
+    return JSON.parse(res);
   };
   const getUpload = async (uploadId) => {
-    const res = await s3get(BUCKET_MEDIA, `uploads/${uploadId}`);
+    const res = await fsget(`${DIR_MEDIA}/uploads/${uploadId}`);
     if (!res) return null;
-    const { fileKey = "" } = JSON.parse(res.toString());
+    const { fileKey = "" } = JSON.parse(res);
     return fileKey;
   };
   const getEdgesWildcard = async (nodeId, edgeType) => {
@@ -24195,9 +24189,9 @@ var s3loader = () => {
   };
   const getNodesWildcard = async (wildcardPrefix) => queueLoad(() => listNodes(wildcardPrefix));
   const listRights = async (nodeId) => {
-    const readRightsPromise = queueLoad(() => s3listKeysPaged(BUCKET_RIGHTS_READ, `${nodeId}/`));
-    const writeRightsPromise = queueLoad(() => s3listKeysPaged(BUCKET_RIGHTS_WRITE, `${nodeId}/`));
-    const adminRightsPromise = queueLoad(() => s3listKeysPaged(BUCKET_RIGHTS_ADMIN, `${nodeId}/`));
+    const readRightsPromise = queueLoad(() => fslist(DIR_RIGHTS_READ, `${nodeId}/`));
+    const writeRightsPromise = queueLoad(() => fslist(DIR_RIGHTS_WRITE, `${nodeId}/`));
+    const adminRightsPromise = queueLoad(() => fslist(DIR_RIGHTS_ADMIN, `${nodeId}/`));
     const readRights = await readRightsPromise;
     const writeRights = await writeRightsPromise;
     const adminRights = await adminRightsPromise;
@@ -24223,7 +24217,7 @@ var s3loader = () => {
     return res;
   };
   const ownerExists = async (nodeId) => {
-    const owners = await queueLoad(() => s3listKeysPaged(BUCKET_OWNERS, `${nodeId}/`));
+    const owners = await queueLoad(() => fslist(DIR_OWNERS, `${nodeId}/`));
     return owners && owners.length > 0;
   };
   const getLog = () => {
@@ -24235,9 +24229,10 @@ var s3loader = () => {
   };
   return {
     getNode,
-    getRead: configureGetRight(BUCKET_RIGHTS_READ),
-    getWrite: configureGetRight(BUCKET_RIGHTS_WRITE),
-    getAdmin: configureGetRight(BUCKET_RIGHTS_ADMIN),
+    getRead: configureGetRight(DIR_RIGHTS_READ),
+    getWrite: configureGetRight(DIR_RIGHTS_WRITE),
+    getAdmin: configureGetRight(DIR_RIGHTS_ADMIN),
+    ownerExists,
     getMetadata,
     getFileHead,
     getFileRef,
@@ -24249,83 +24244,81 @@ var s3loader = () => {
     getEdgesWildcard,
     getNodesWildcard,
     listRights,
-    ownerExists,
     getLog
   };
 };
 
-// src/push/util/s3writer.ts
-var s3writer = () => {
+// src/push/util/efswriter.ts
+var efswriter = () => {
   const setNode = async (nodeId, data) => {
     if (data === null) {
-      return s3delete(BUCKET_NODES, nodeId);
+      return fsdelete(`/mnt/efs/nodes/${nodeId}`);
     } else {
-      return s3put(BUCKET_NODES, nodeId, data);
+      return fsput(`${DIR_NODES}/${nodeId}`, JSON.stringify(data));
     }
   };
   const setMetadata = async (fromId, edgeTypes, toId, data) => {
     if (!data) {
-      return s3delete(BUCKET_EDGES, `${fromId}/${edgeTypes}/${toId}`);
+      return fsdelete(`${DIR_EDGES}/${fromId}/${edgeTypes}/${toId}`);
     } else {
-      return s3put(BUCKET_EDGES, `${fromId}/${edgeTypes}/${toId}`, data);
+      return fsput(`${DIR_EDGES}/${fromId}/${edgeTypes}/${toId}`, JSON.stringify(data));
     }
   };
   const setReverseEdge = async (toId, edgeTypes, fromId, data) => {
-    if (data) {
-      return s3put(BUCKET_REVERSE_EDGES, `${toId}/${edgeTypes}/${fromId}`, true);
+    if (!data) {
+      return fsdelete(`${DIR_REVERSE_EDGES}/${toId}/${edgeTypes}/${fromId}`);
     } else {
-      return s3delete(BUCKET_REVERSE_EDGES, `${toId}/${edgeTypes}/${fromId}`);
+      return fsput(`${DIR_REVERSE_EDGES}/${toId}/${edgeTypes}/${fromId}`, "true");
     }
   };
-  const setRight = (rightBucket) => async (nodeId, principalType, principal, right) => {
-    const rightKey = `${nodeId}/${principalType}/${principal}`;
-    if (right) {
-      return s3put(rightBucket, rightKey, true);
+  const setRight = (dirName) => async (nodeId, principalType, principal, right) => {
+    if (!right) {
+      return fsdelete(`${dirName}/${nodeId}/${principalType}/${principal}`);
     } else {
-      return s3delete(rightBucket, rightKey);
+      return fsput(`${dirName}/${nodeId}/${principalType}/${principal}`, "true");
     }
   };
   const setOwner = async (nodeId, principal) => {
     if (principal === null) {
       throw new Error("Cannot set owner to null");
     }
-    return s3put(BUCKET_OWNERS, `${nodeId}/owner/${principal}`, true);
+    return fsput(`${DIR_OWNERS}/${nodeId}/${principal}`, "true");
   };
   const setFileRef = async (nodeId, prop, fileRef) => {
     const refId = `ref/${nodeId}/${prop}`;
     if (fileRef === null) {
-      return s3delete(BUCKET_MEDIA, refId);
+      return fsdelete(`${DIR_MEDIA}/${refId}`);
     } else {
-      return s3put(BUCKET_MEDIA, refId, fileRef);
+      return fsput(`${DIR_MEDIA}/${refId}`, JSON.stringify(fileRef));
     }
   };
   const setFileMetadata = async (fileKey, metadata) => {
     if (metadata === null) {
-      return s3delete(BUCKET_MEDIA, `metadata/${fileKey}`);
+      return fsdelete(`${DIR_MEDIA}/metadata/${fileKey}`);
     } else {
-      return s3put(BUCKET_MEDIA, `metadata/${fileKey}`, metadata);
+      return fsput(`${DIR_MEDIA}/metadata/${fileKey}`, JSON.stringify(metadata));
     }
   };
   const setUploadId = async (uploadId, fileKey) => {
     if (fileKey === null) {
-      return s3delete(BUCKET_MEDIA, `uploads/${uploadId}`);
+      return fsdelete(`${DIR_MEDIA}/uploads/${uploadId}`);
     } else {
-      return s3put(BUCKET_MEDIA, `uploads/${uploadId}`, { fileKey });
+      return fsput(`${DIR_MEDIA}/uploads/${uploadId}`, `{"fileKey":"${fileKey}"}`);
     }
   };
   const setPushLog = async (userEmail, requestId, changeset) => {
     const timestamp = (/* @__PURE__ */ new Date()).toISOString();
     const logEntry = `{"userEmail":"${userEmail}","timestamp":"${timestamp}","requestId":"${requestId}","changeset":${changeset}}`;
     const logKey = `push/${userEmail}/${timestamp}/${requestId}`;
-    await s3put(BUCKET_LOGS, logKey, logEntry);
+    await fsput(`${DIR_LOGS}/${logKey}`, logEntry);
   };
   return {
     setNode,
     setMetadata,
     setReverseEdge,
-    setRead: setRight(BUCKET_RIGHTS_READ),
-    setWrite: setRight(BUCKET_RIGHTS_WRITE),
-    setAdmin: setRight(BUCKET_RIGHTS_ADMIN),
+    setRead: setRight(DIR_RIGHTS_READ),
+    setWrite: setRight(DIR_RIGHTS_WRITE),
+    setAdmin: setRight(DIR_RIGHTS_ADMIN),
     setOwner,
     setFileRef,
     setFileMetadata,
@@ -24356,8 +24349,8 @@ var schema = {
 };
 var handle = async ({ body }) => {
   const { uploadId, partEtags } = body;
-  const loader = s3loader();
-  const writer = s3writer();
+  const loader = efsloader();
+  const writer = efswriter();
   const fileKey = await loader.getUpload(uploadId);
   if (!fileKey) {
     return {
