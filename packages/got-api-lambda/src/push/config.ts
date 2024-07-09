@@ -19,6 +19,7 @@ export const DIR_RIGHTS_WRITE = `${EFS_MOUNT}/rights-write`;
 export const DIR_RIGHTS_ADMIN = `${EFS_MOUNT}/rights-admin`;
 export const DIR_OWNERS = `${EFS_MOUNT}/owners`;
 export const DIR_MEDIA = `${EFS_MOUNT}/media`;
+export const DIR_LOGS = `${EFS_MOUNT}/logs`;
 
 export const PrincipalType = {
     USER: 'user',

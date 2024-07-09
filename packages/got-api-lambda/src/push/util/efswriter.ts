@@ -1,46 +1,50 @@
 import { Writer } from '../types/writer';
 import { Metadata, Node } from '@gothub/got-core';
-import { mkdirSync, writeFileSync, rmSync } from 'fs';
+import { fsput, fsdelete } from '@gothub/aws-util';
+import {
+    DIR_EDGES,
+    DIR_LOGS,
+    DIR_MEDIA,
+    DIR_NODES,
+    DIR_OWNERS,
+    DIR_REVERSE_EDGES,
+    DIR_RIGHTS_ADMIN,
+    DIR_RIGHTS_READ,
+    DIR_RIGHTS_WRITE,
+} from '../config';
 
-// TODO: load queue for s3?
 export const efswriter: () => Writer = () => {
     const setNode = async (nodeId: string, data: Node | null) => {
         if (data === null) {
-            return rmSync(`/mnt/efs/nodes/${nodeId}`);
+            return fsdelete(`/mnt/efs/nodes/${nodeId}`);
         } else {
-            console.log('Creating directory', `/mnt/efs/nodes`);
-            await mkdirSync(`/mnt/efs/nodes`, { recursive: true });
-            console.log('Creating file', `/mnt/efs/nodes/${nodeId}`);
-            return writeFileSync(`/mnt/efs/nodes/${nodeId}`, JSON.stringify(data));
+            return fsput(`${DIR_NODES}/${nodeId}`, JSON.stringify(data));
         }
     };
 
     const setMetadata = async (fromId: string, edgeTypes: string, toId: string, data: Metadata | boolean) => {
-        // if (!data) {
-        //     return s3delete(BUCKET_EDGES, `${fromId}/${edgeTypes}/${toId}`);
-        // } else {
-        //     return s3put(BUCKET_EDGES, `${fromId}/${edgeTypes}/${toId}`, data);
-        // }
+        if (!data) {
+            return fsdelete(`${DIR_EDGES}/${fromId}/${edgeTypes}/${toId}`);
+        } else {
+            return fsput(`${DIR_EDGES}/${fromId}/${edgeTypes}/${toId}`, JSON.stringify(data));
+        }
     };
 
     const setReverseEdge = async (toId: string, edgeTypes: string, fromId: string, data: boolean) => {
-        // if (data) {
-        //     return s3put(BUCKET_REVERSE_EDGES, `${toId}/${edgeTypes}/${fromId}`, true);
-        // } else {
-        //     return s3delete(BUCKET_REVERSE_EDGES, `${toId}/${edgeTypes}/${fromId}`);
-        // }
+        if (!data) {
+            return fsdelete(`${DIR_REVERSE_EDGES}/${toId}/${edgeTypes}/${fromId}`);
+        } else {
+            return fsput(`${DIR_REVERSE_EDGES}/${toId}/${edgeTypes}/${fromId}`, 'true');
+        }
     };
 
     const setRight =
         (dirName: string) => async (nodeId: string, principalType: string, principal: string, right: boolean) => {
             // const rightKey = `${nodeId}/${principalType}/${principal}`;
-            if (right) {
-                console.log('Creating directory', `/mnt/efs/${dirName}/${nodeId}/${principalType}`);
-                await mkdirSync(`/mnt/efs/${dirName}/${nodeId}/${principalType}`, { recursive: true });
-                console.log('Creating file', `/mnt/efs/${dirName}/${nodeId}/${principalType}/${principal}`);
-                return writeFileSync(`/mnt/efs/${dirName}/${nodeId}/${principalType}/${principal}`, 'true');
+            if (!right) {
+                return fsdelete(`${dirName}/${nodeId}/${principalType}/${principal}`);
             } else {
-                return rmSync(`/mnt/efs/${dirName}/${nodeId}/${principalType}/${principal}`);
+                return fsput(`${dirName}/${nodeId}/${principalType}/${principal}`, 'true');
             }
         };
     const setOwner = async (nodeId: string, principal: string | null) => {
@@ -48,49 +52,48 @@ export const efswriter: () => Writer = () => {
             throw new Error('Cannot set owner to null');
         }
 
-        await mkdirSync(`/mnt/efs/owners/${nodeId}`, { recursive: true });
-        return writeFileSync(`/mnt/efs/owners/${nodeId}/${principal}`, 'true');
+        return fsput(`${DIR_OWNERS}/${nodeId}/${principal}`, 'true');
     };
 
     const setFileRef = async (nodeId: string, prop: string, fileRef: { fileKey: string } | null) => {
-        // const refId = `ref/${nodeId}/${prop}`;
-        // if (fileRef === null) {
-        //     return s3delete(BUCKET_MEDIA, refId);
-        // } else {
-        //     return s3put(BUCKET_MEDIA, refId, fileRef);
-        // }
+        const refId = `ref/${nodeId}/${prop}`;
+        if (fileRef === null) {
+            return fsdelete(`${DIR_MEDIA}/${refId}`);
+        } else {
+            return fsput(`${DIR_MEDIA}/${refId}`, JSON.stringify(fileRef));
+        }
     };
 
     const setFileMetadata = async (fileKey: string, metadata: Metadata | null) => {
-        // if (metadata === null) {
-        //     return s3delete(BUCKET_MEDIA, `metadata/${fileKey}`);
-        // } else {
-        //     return s3put(BUCKET_MEDIA, `metadata/${fileKey}`, metadata);
-        // }
+        if (metadata === null) {
+            return fsdelete(`${DIR_MEDIA}/metadata/${fileKey}`);
+        } else {
+            return fsput(`${DIR_MEDIA}/metadata/${fileKey}`, JSON.stringify(metadata));
+        }
     };
 
     const setUploadId = async (uploadId: string, fileKey: string | null) => {
-        // if (fileKey === null) {
-        //     return s3delete(BUCKET_MEDIA, `uploads/${uploadId}`);
-        // } else {
-        //     return s3put(BUCKET_MEDIA, `uploads/${uploadId}`, { fileKey });
-        // }
+        if (fileKey === null) {
+            return fsdelete(`${DIR_MEDIA}/uploads/${uploadId}`);
+        } else {
+            return fsput(`${DIR_MEDIA}/uploads/${uploadId}`, `{"fileKey":"${fileKey}"}`);
+        }
     };
 
     const setPushLog = async (userEmail: string, requestId: string, changeset: string) => {
-        // const timestamp = new Date().toISOString();
-        // const logEntry = `{"userEmail":"${userEmail}","timestamp":"${timestamp}","requestId":"${requestId}","changeset":${changeset}}`;
-        // const logKey = `push/${userEmail}/${timestamp}/${requestId}`;
-        // await s3put(BUCKET_LOGS, logKey, logEntry);
+        const timestamp = new Date().toISOString();
+        const logEntry = `{"userEmail":"${userEmail}","timestamp":"${timestamp}","requestId":"${requestId}","changeset":${changeset}}`;
+        const logKey = `push/${userEmail}/${timestamp}/${requestId}`;
+        await fsput(`${DIR_LOGS}/${logKey}`, logEntry);
     };
 
     return {
         setNode,
         setMetadata,
         setReverseEdge,
-        setRead: setRight('rights-read'),
-        setWrite: setRight('rights-write'),
-        setAdmin: setRight('rights-admin'),
+        setRead: setRight(DIR_RIGHTS_READ),
+        setWrite: setRight(DIR_RIGHTS_WRITE),
+        setAdmin: setRight(DIR_RIGHTS_ADMIN),
         setOwner,
         setFileRef,
         setFileMetadata,

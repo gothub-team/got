@@ -1,5 +1,5 @@
 import { promises } from 'fs';
-const { readdir, exists, readFile, mkdir, writeFile } = promises;
+const { exists, readFile, readdir, mkdir, writeFile, rm } = promises;
 
 export const fsexist = exists;
 
@@ -17,6 +17,12 @@ export const fsput = async (path: string, data: string) => {
         await mkdir(dir, { recursive: true });
     }
     return writeFile(path, data, 'utf8');
+};
+
+export const fsdelete = async (path: string) => {
+    if (await exists(path)) {
+        return rm(path);
+    }
 };
 
 const fslistRecursive = async (path: string) => {
