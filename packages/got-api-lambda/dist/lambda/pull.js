@@ -23856,16 +23856,24 @@ var import_nodemailer = __toESM(require_nodemailer(), 1);
 // ../aws-util/dist/module/fs.js
 var import_fs = __toESM(require("fs"), 1);
 var import_util2 = require("util");
-var exists = (0, import_util2.promisify)(import_fs.default.exists);
+var access = (0, import_util2.promisify)(import_fs.default.access);
 var readFile = (0, import_util2.promisify)(import_fs.default.readFile);
 var readdir = (0, import_util2.promisify)(import_fs.default.readdir);
 var mkdir = (0, import_util2.promisify)(import_fs.default.mkdir);
 var writeFile = (0, import_util2.promisify)(import_fs.default.writeFile);
 var rm = (0, import_util2.promisify)(import_fs.default.rm);
-var fsexist = exists;
+var fsexist = async (path) => {
+  try {
+    await access(path, import_fs.default.constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+};
 var fsget = async (path) => {
   try {
-    return readFile(path, "utf8");
+    const res = await readFile(path, "utf8");
+    return res;
   } catch {
     return null;
   }

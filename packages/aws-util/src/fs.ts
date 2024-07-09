@@ -1,18 +1,26 @@
 import fs from 'fs';
 import { promisify } from 'util';
 
-const exists = promisify(fs.exists); // exists is deprecated, look for replacement/error handling in the future
+const access = promisify(fs.access);
 const readFile = promisify(fs.readFile);
 const readdir = promisify(fs.readdir);
 const mkdir = promisify(fs.mkdir);
 const writeFile = promisify(fs.writeFile);
 const rm = promisify(fs.rm);
 
-export const fsexist = exists;
+export const fsexist = async (path: string) => {
+    try {
+        await access(path, fs.constants.F_OK);
+        return true;
+    } catch {
+        return false;
+    }
+};
 
 export const fsget = async (path: string) => {
     try {
-        return readFile(path, 'utf8');
+        const res = await readFile(path, 'utf8');
+        return res;
     } catch {
         return null;
     }
@@ -21,18 +29,18 @@ export const fsget = async (path: string) => {
 export const fsput = async (path: string, data: string) => {
     const dir = path.split('/').slice(0, -1).join('/');
     try {
-        return writeFile(path, data, 'utf8');
+        await writeFile(path, data, 'utf8');
     } catch {
         await mkdir(dir, { recursive: true });
-        return writeFile(path, data, 'utf8');
+        await writeFile(path, data, 'utf8');
     }
 };
 
 export const fsdelete = async (path: string) => {
     try {
-        return rm(path);
+        await rm(path);
     } catch {
-        return null;
+        // Does not exist
     }
 };
 

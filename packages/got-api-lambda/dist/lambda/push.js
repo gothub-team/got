@@ -23868,16 +23868,24 @@ var import_nodemailer = __toESM(require_nodemailer(), 1);
 // ../aws-util/dist/module/fs.js
 var import_fs = __toESM(require("fs"), 1);
 var import_util2 = require("util");
-var exists = (0, import_util2.promisify)(import_fs.default.exists);
+var access = (0, import_util2.promisify)(import_fs.default.access);
 var readFile = (0, import_util2.promisify)(import_fs.default.readFile);
 var readdir = (0, import_util2.promisify)(import_fs.default.readdir);
 var mkdir = (0, import_util2.promisify)(import_fs.default.mkdir);
 var writeFile = (0, import_util2.promisify)(import_fs.default.writeFile);
 var rm = (0, import_util2.promisify)(import_fs.default.rm);
-var fsexist = exists;
+var fsexist = async (path) => {
+  try {
+    await access(path, import_fs.default.constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+};
 var fsget = async (path) => {
   try {
-    return readFile(path, "utf8");
+    const res = await readFile(path, "utf8");
+    return res;
   } catch {
     return null;
   }
@@ -23885,17 +23893,16 @@ var fsget = async (path) => {
 var fsput = async (path, data) => {
   const dir = path.split("/").slice(0, -1).join("/");
   try {
-    return writeFile(path, data, "utf8");
+    await writeFile(path, data, "utf8");
   } catch {
     await mkdir(dir, { recursive: true });
-    return writeFile(path, data, "utf8");
+    await writeFile(path, data, "utf8");
   }
 };
 var fsdelete = async (path) => {
   try {
-    return rm(path);
+    await rm(path);
   } catch {
-    return null;
   }
 };
 var fslistRecursive = async (path) => {
@@ -24444,8 +24451,8 @@ var push = async (graph, userEmail, asRole, asAdmin, dependencies) => {
     return obj;
   };
   const updateReadRight = async (nodeId, principalType, principal, right) => {
-    const exists2 = await loader.getRead(nodeId, principalType, principal);
-    if (!!exists2 !== right) {
+    const exists = await loader.getRead(nodeId, principalType, principal);
+    if (!!exists !== right) {
       if (right) {
         await writer.setRead(nodeId, principalType, principal, true);
         writeRightsChangelog(nodeId, principalType, principal, "read", "true");
@@ -24456,8 +24463,8 @@ var push = async (graph, userEmail, asRole, asAdmin, dependencies) => {
     }
   };
   const updateWriteRight = async (nodeId, principalType, principal, right) => {
-    const exists2 = await loader.getWrite(nodeId, principalType, principal);
-    if (!!exists2 !== right) {
+    const exists = await loader.getWrite(nodeId, principalType, principal);
+    if (!!exists !== right) {
       if (right) {
         await writer.setWrite(nodeId, principalType, principal, true);
         writeRightsChangelog(nodeId, principalType, principal, "write", "true");
@@ -24468,8 +24475,8 @@ var push = async (graph, userEmail, asRole, asAdmin, dependencies) => {
     }
   };
   const updateAdminRight = async (nodeId, principalType, principal, right) => {
-    const exists2 = await loader.getAdmin(nodeId, principalType, principal);
-    if (!!exists2 !== right) {
+    const exists = await loader.getAdmin(nodeId, principalType, principal);
+    if (!!exists !== right) {
       if (right) {
         await writer.setAdmin(nodeId, principalType, principal, true);
         writeRightsChangelog(nodeId, principalType, principal, "admin", "true");

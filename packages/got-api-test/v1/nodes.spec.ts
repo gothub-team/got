@@ -46,11 +46,11 @@ describe('nodes', () => {
         });
     });
 
-    describe.only('one node', () => {
+    describe('one node', () => {
         it('pushes one node', async () => {
             expect(pushResult).toHaveProperty(['nodes', testId, 'statusCode'], 200);
         });
-        it.skip('pulls the same node', async () => {
+        it('pulls the same node', async () => {
             expect(graph).toEqual({
                 nodes: {
                     [testId]: {
