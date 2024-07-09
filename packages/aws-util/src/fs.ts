@@ -46,15 +46,17 @@ export const fsdelete = async (path: string) => {
 
 const fslistRecursive = async (location: string, path: string) => {
     try {
-        const items = await readdir(path, { recursive: true, withFileTypes: true });
+        const items = await readdir(`${location}/${path}`, { recursive: true, withFileTypes: true });
 
         const files = [];
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
             if (item.isFile()) {
-                files.push(item.name.replace(`${location}/`, ''));
+                files.push(`${path}/${item.name}`);
             }
         }
+
+        console.log('list', path, files.length, 'files', files);
 
         return files;
     } catch {
@@ -71,16 +73,16 @@ export const fslist = async (location: string, path: string) => {
     }
 
     try {
-        const items = await readdir(basePath, { withFileTypes: true });
+        const items = await readdir(`${location}/${basePath}`, { withFileTypes: true });
 
         const files = [];
         const promises = [];
 
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
-            if (item.name.startsWith(path)) {
+            if (item.name.startsWith(wildcard)) {
                 if (item.isFile()) {
-                    files.push(item.name.replace(`${location}/`, ''));
+                    files.push(`${basePath}/${item.name}`);
                 } else if (item.isDirectory()) {
                     promises.push(fslistRecursive(location, `${basePath}/${item.name}`));
                 }

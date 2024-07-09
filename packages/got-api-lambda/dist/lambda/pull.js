@@ -23880,14 +23880,15 @@ var fsget = async (path) => {
 };
 var fslistRecursive = async (location, path) => {
   try {
-    const items = await readdir(path, { recursive: true, withFileTypes: true });
+    const items = await readdir(`${location}/${path}`, { recursive: true, withFileTypes: true });
     const files = [];
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (item.isFile()) {
-        files.push(item.name.replace(`${location}/`, ""));
+        files.push(`${path}/${item.name}`);
       }
     }
+    console.log("list", path, files.length, "files", files);
     return files;
   } catch {
     return [];
@@ -23900,14 +23901,14 @@ var fslist = async (location, path) => {
     return fslistRecursive(location, basePath);
   }
   try {
-    const items = await readdir(basePath, { withFileTypes: true });
+    const items = await readdir(`${location}/${basePath}`, { withFileTypes: true });
     const files = [];
     const promises = [];
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
-      if (item.name.startsWith(path)) {
+      if (item.name.startsWith(wildcard)) {
         if (item.isFile()) {
-          files.push(item.name.replace(`${location}/`, ""));
+          files.push(`${basePath}/${item.name}`);
         } else if (item.isDirectory()) {
           promises.push(fslistRecursive(location, `${basePath}/${item.name}`));
         }
@@ -24565,12 +24566,12 @@ var DIR_LOGS = `${EFS_MOUNT}/logs`;
 
 // src/pull/util/efsloader.ts
 var { queueLoad } = loadQueue(200);
-var listNodes = async (wildcardPrefix) => fslist(DIR_NODES, `${DIR_NODES}/${wildcardPrefix}`);
-var listEdge = async (fromId, edgeTypes) => fslist(DIR_EDGES, `${DIR_EDGES}/${fromId}/${edgeTypes}/`);
-var listReverseEdge = async (toId, edgeTypes) => fslist(DIR_REVERSE_EDGES, `${DIR_REVERSE_EDGES}/${toId}/${edgeTypes}/`);
+var listNodes = async (wildcardPrefix) => fslist(DIR_NODES, `${wildcardPrefix}`);
+var listEdge = async (fromId, edgeTypes) => fslist(DIR_EDGES, `${fromId}/${edgeTypes}/`);
+var listReverseEdge = async (toId, edgeTypes) => fslist(DIR_REVERSE_EDGES, `${toId}/${edgeTypes}/`);
 var listEdgeWildcard = async (fromId, edgeTypes) => {
   const edgePrefix = substringToFirst(edgeTypes, "*");
-  const edgeKeys = await fslist(DIR_EDGES, `${DIR_EDGES}/${fromId}/${edgePrefix}`);
+  const edgeKeys = await fslist(DIR_EDGES, `${fromId}/${edgePrefix}`);
   const pattern = new RegExp(edgeTypes.replaceAll("*", ".*").replaceAll("/", "\\/"));
   if (edgePrefix.length < edgeTypes.length - 2) {
     return edgeKeys.filter((edgeKey) => edgeKey.match(pattern));
@@ -24584,7 +24585,7 @@ var loadRef = async (refId) => {
   return { prop, fileKey };
 };
 var listRefs = async (nodeId) => {
-  const keys = await fslist(DIR_MEDIA, `${DIR_MEDIA}/ref/${nodeId}/`);
+  const keys = await fslist(DIR_MEDIA, `ref/${nodeId}/`);
   const promises = new Array(keys.length);
   for (let i = 0; i < keys.length; i++) {
     promises[i] = loadRef(keys[i]);
@@ -24611,7 +24612,26 @@ var efsloader = () => {
     return data;
   };
   const getFileHead = async (fileKey) => void 0;
+  const getFileRef = async (nodeId, prop) => {
+    const refId = `ref/${nodeId}/${prop}`;
+    const res = await fsget(`${DIR_MEDIA}/${refId}`);
+    if (!res) return null;
+    const { fileKey = "" } = JSON.parse(res);
+    return { prop, fileKey };
+  };
   const getFileRefs = async (nodeId) => queueLoad(() => listRefs(nodeId));
+  const getFileMetadata = async (fileKey) => {
+    const metadataKey = `metadata/${fileKey}`;
+    const res = await fsget(`${DIR_MEDIA}/${metadataKey}`);
+    if (!res) return null;
+    return JSON.parse(res);
+  };
+  const getUpload = async (uploadId) => {
+    const res = await fsget(`${DIR_MEDIA}/uploads/${uploadId}`);
+    if (!res) return null;
+    const { fileKey = "" } = JSON.parse(res);
+    return fileKey;
+  };
   const getEdgesWildcard = async (nodeId, edgeType) => {
     const edgeKeys = await queueLoad(() => listEdgeWildcard(nodeId, `${edgeType}/`));
     if (!edgeKeys) return [];
@@ -24642,9 +24662,9 @@ var efsloader = () => {
   };
   const getNodesWildcard = async (wildcardPrefix) => queueLoad(() => listNodes(wildcardPrefix));
   const listRights = async (nodeId) => {
-    const readRightsPromise = queueLoad(() => fslist(DIR_RIGHTS_READ, `${DIR_RIGHTS_READ}/${nodeId}/`));
-    const writeRightsPromise = queueLoad(() => fslist(DIR_RIGHTS_WRITE, `${DIR_RIGHTS_WRITE}/${nodeId}/`));
-    const adminRightsPromise = queueLoad(() => fslist(DIR_RIGHTS_ADMIN, `${DIR_RIGHTS_ADMIN}/${nodeId}/`));
+    const readRightsPromise = queueLoad(() => fslist(DIR_RIGHTS_READ, `${nodeId}/`));
+    const writeRightsPromise = queueLoad(() => fslist(DIR_RIGHTS_WRITE, `${nodeId}/`));
+    const adminRightsPromise = queueLoad(() => fslist(DIR_RIGHTS_ADMIN, `${nodeId}/`));
     const readRights = await readRightsPromise;
     const writeRights = await writeRightsPromise;
     const adminRights = await adminRightsPromise;
@@ -24670,7 +24690,7 @@ var efsloader = () => {
     return res;
   };
   const ownerExists = async (nodeId) => {
-    const owners = await queueLoad(() => fslist(DIR_OWNERS, `${DIR_OWNERS}/${nodeId}/`));
+    const owners = await queueLoad(() => fslist(DIR_OWNERS, `${nodeId}/`));
     return owners && owners.length > 0;
   };
   const getLog = () => {
@@ -24688,10 +24708,10 @@ var efsloader = () => {
     ownerExists,
     getMetadata,
     getFileHead,
-    // getFileRef,
+    getFileRef,
     getFileRefs,
-    // getFileMetadata,
-    // getUpload,
+    getFileMetadata,
+    getUpload,
     getEdges,
     getReverseEdges,
     getEdgesWildcard,
