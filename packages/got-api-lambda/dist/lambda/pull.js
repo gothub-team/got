@@ -23885,10 +23885,9 @@ var fslistRecursive = async (location, path) => {
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (item.isFile()) {
-        files.push(`${path}/${item.name}`);
+        files.push(`${item.parentPath.replace(`${location}/`, "")}/${item.name}`);
       }
     }
-    console.log("list", path, files.length, "files", files);
     return files;
   } catch {
     return [];
@@ -23908,7 +23907,7 @@ var fslist = async (location, path) => {
       const item = items[i];
       if (item.name.startsWith(wildcard)) {
         if (item.isFile()) {
-          files.push(`${basePath}/${item.name}`);
+          files.push(`${item.parentPath.replace(`${location}/`, "")}/${item.name}`);
         } else if (item.isDirectory()) {
           promises.push(fslistRecursive(location, `${basePath}/${item.name}`));
         }
@@ -24612,26 +24611,7 @@ var efsloader = () => {
     return data;
   };
   const getFileHead = async (fileKey) => void 0;
-  const getFileRef = async (nodeId, prop) => {
-    const refId = `ref/${nodeId}/${prop}`;
-    const res = await fsget(`${DIR_MEDIA}/${refId}`);
-    if (!res) return null;
-    const { fileKey = "" } = JSON.parse(res);
-    return { prop, fileKey };
-  };
   const getFileRefs = async (nodeId) => queueLoad(() => listRefs(nodeId));
-  const getFileMetadata = async (fileKey) => {
-    const metadataKey = `metadata/${fileKey}`;
-    const res = await fsget(`${DIR_MEDIA}/${metadataKey}`);
-    if (!res) return null;
-    return JSON.parse(res);
-  };
-  const getUpload = async (uploadId) => {
-    const res = await fsget(`${DIR_MEDIA}/uploads/${uploadId}`);
-    if (!res) return null;
-    const { fileKey = "" } = JSON.parse(res);
-    return fileKey;
-  };
   const getEdgesWildcard = async (nodeId, edgeType) => {
     const edgeKeys = await queueLoad(() => listEdgeWildcard(nodeId, `${edgeType}/`));
     if (!edgeKeys) return [];
@@ -24708,10 +24688,10 @@ var efsloader = () => {
     ownerExists,
     getMetadata,
     getFileHead,
-    getFileRef,
+    // getFileRef,
     getFileRefs,
-    getFileMetadata,
-    getUpload,
+    // getFileMetadata,
+    // getUpload,
     getEdges,
     getReverseEdges,
     getEdgesWildcard,

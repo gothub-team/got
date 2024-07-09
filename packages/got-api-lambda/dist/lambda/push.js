@@ -23912,10 +23912,9 @@ var fslistRecursive = async (location, path) => {
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (item.isFile()) {
-        files.push(`${path}/${item.name}`);
+        files.push(`${item.parentPath.replace(`${location}/`, "")}/${item.name}`);
       }
     }
-    console.log("list", path, files.length, "files", files);
     return files;
   } catch {
     return [];
@@ -23935,7 +23934,7 @@ var fslist = async (location, path) => {
       const item = items[i];
       if (item.name.startsWith(wildcard)) {
         if (item.isFile()) {
-          files.push(`${basePath}/${item.name}`);
+          files.push(`${item.parentPath.replace(`${location}/`, "")}/${item.name}`);
         } else if (item.isDirectory()) {
           promises.push(fslistRecursive(location, `${basePath}/${item.name}`));
         }

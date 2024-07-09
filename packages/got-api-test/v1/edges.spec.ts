@@ -54,8 +54,8 @@ describe('edges', () => {
         });
     });
 
-    describe.only('one edge', () => {
-        it.skip('pushes the edge', () => {
+    describe('one edge', () => {
+        it('pushes the edge', () => {
             expect(pushResult).toHaveProperty(['edges', 'from', `${testId}-1`, 'to', `${testId}-2`, 'statusCode'], 200);
         });
         it('pulls the edge', () => {

@@ -52,11 +52,9 @@ const fslistRecursive = async (location: string, path: string) => {
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
             if (item.isFile()) {
-                files.push(`${path}/${item.name}`);
+                files.push(`${item.parentPath.replace(`${location}/`, '')}/${item.name}`);
             }
         }
-
-        console.log('list', path, files.length, 'files', files);
 
         return files;
     } catch {
@@ -82,7 +80,7 @@ export const fslist = async (location: string, path: string) => {
             const item = items[i];
             if (item.name.startsWith(wildcard)) {
                 if (item.isFile()) {
-                    files.push(`${basePath}/${item.name}`);
+                    files.push(`${item.parentPath.replace(`${location}/`, '')}/${item.name}`);
                 } else if (item.isDirectory()) {
                     promises.push(fslistRecursive(location, `${basePath}/${item.name}`));
                 }
