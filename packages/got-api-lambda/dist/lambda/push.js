@@ -24069,6 +24069,24 @@ var s3putMultipartSignedUrls = async (bucket, key, { contentType, fileSize, part
     return void 0;
   }
 };
+var s3head = async (bucket, key) => {
+  const command = new import_client_s3.HeadObjectCommand({
+    Bucket: bucket,
+    Key: key
+  });
+  try {
+    const results = await client6.send(command);
+    return {
+      etag: results.ETag || "",
+      contentType: results.ContentType || "",
+      modifiedDate: results.LastModified?.toISOString() || "",
+      metadata: results.Metadata,
+      size: results.ContentLength || 0
+    };
+  } catch (err) {
+    return false;
+  }
+};
 
 // ../aws-util/dist/module/stringify.js
 var stringify = (input) => {
@@ -25169,7 +25187,7 @@ var efsloader = () => {
     }
     return data;
   };
-  const getFileHead = async (fileKey) => void 0;
+  const getFileHead = async (fileKey) => queueLoad(() => s3head(BUCKET_MEDIA, fileKey));
   const getFileRef = async (nodeId, prop) => {
     const refId = `ref/${nodeId}/${prop}`;
     const res = await fsget(`${DIR_MEDIA}/${refId}`);

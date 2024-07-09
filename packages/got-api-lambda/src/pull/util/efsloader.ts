@@ -1,7 +1,8 @@
-import { loadQueue, substringToFirst, assocMap3, fsget, fsexist, fslist } from '@gothub/aws-util';
+import { loadQueue, substringToFirst, assocMap3, fsget, fsexist, fslist, s3head } from '@gothub/aws-util';
 import { type EdgeWildcard, type FileHead, type FileRef, type Loader } from '../types/loader';
 import type { LoaderLog } from '../types/logs';
 import {
+    BUCKET_MEDIA,
     DIR_EDGES,
     DIR_MEDIA,
     DIR_NODES,
@@ -72,7 +73,9 @@ export const efsloader: () => Loader = () => {
         return data;
     };
 
-    const getFileHead = async (fileKey: string): Promise<FileHead | false | undefined> => undefined; //         queueLoad(() => s3head(BUCKET_MEDIA, fileKey) as Promise<FileHead | false | undefined>);
+    // TODO: maybe this needs to be somewhere else as it is always s3 and not efs
+    const getFileHead = async (fileKey: string): Promise<FileHead | false | undefined> =>
+        queueLoad(() => s3head(BUCKET_MEDIA, fileKey) as Promise<FileHead | false | undefined>);
 
     // const getFileRef = async (nodeId: string, prop: string): Promise<FileRef | null> => {
     //     const refId = `ref/${nodeId}/${prop}`;
