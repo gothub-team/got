@@ -2,11 +2,12 @@ import { CORS_HEADERS, internalServerError, validate, type ValidationResult } fr
 import { Graph } from '@gothub/got-core';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Context, Handler } from 'aws-lambda';
 import { push } from '../push';
-import { s3loader } from '../push/util/s3loader';
-import { s3writer } from '../push/util/s3writer';
 import { cfSigner } from '../push/util/signer';
 import { graphAssembler } from '../push/util/graphAssembler';
 import { createDataCache } from '../push/caches/dataCache';
+import { efswriter } from '../push/util/efswriter';
+import { efsloader } from '../push/util/efsloader';
+import { Signer } from '../push/types/signer';
 
 const AUTHENTICATED = true;
 
@@ -282,13 +283,13 @@ const handle = async (
     context: Context,
 ): Promise<APIGatewayProxyResult> => {
     // TODO: fix useremail thingies
-    const signer = await cfSigner();
-    const writer = s3writer();
+    const signer: Signer = { getUrl: () => '', signUrl: () => '' }; // await cfSigner();
+    const writer = efswriter();
     const [result, changelog] = await push(body, userEmail || '', asRole || 'user', asAdmin, {
         dataCache: createDataCache(),
         graphAssembler: graphAssembler(),
         changelogAssembler: graphAssembler(),
-        loader: s3loader(),
+        loader: efsloader(),
         writer: writer,
         signer,
     });
