@@ -24856,6 +24856,21 @@ var push = async (graph, userEmail, asRole, asAdmin, dependencies) => {
   return [res, changelog, log];
 };
 
+// src/push/util/signer.ts
+var import_cloudfront_signer2 = require("@aws-sdk/cloudfront-signer");
+var cfSigner = async () => {
+  const CLOUDFRONT_ACCESS_KEY = await ssmGetParameter(CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER, true);
+  const oneDay2 = 1 * 24 * 60 * 60 * 1e3;
+  const getUrl = (fileKey, etag) => `https://${MEDIA_DOMAIN}/${fileKey}?etag=${etag}`;
+  const signUrl2 = (url, expires = oneDay2) => (0, import_cloudfront_signer2.getSignedUrl)({
+    url,
+    keyPairId: CLOUDFRONT_ACCESS_KEY_ID || "",
+    dateLessThan: new Date(Date.now() + expires).toISOString(),
+    privateKey: CLOUDFRONT_ACCESS_KEY || ""
+  });
+  return { getUrl, signUrl: signUrl2 };
+};
+
 // src/push/util/graphAssembler.ts
 var graphAssembler = () => {
   const nodes = /* @__PURE__ */ new Map();
@@ -25521,7 +25536,7 @@ var schema = {
   }
 };
 var handle = async ({ userEmail, asAdmin, asRole, body }, context) => {
-  const signer = { getUrl: () => "", signUrl: () => "" };
+  const signer = await cfSigner();
   const writer = efswriter();
   const [result, changelog] = await push(body, userEmail || "", asRole || "user", asAdmin, {
     dataCache: createDataCache(),

@@ -3,7 +3,6 @@ import { View } from '@gothub/got-core';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
 import { pull } from '../pull';
 import { graphAssembler } from '../pull/util/graphAssembler';
-import { Signer } from '../pull/types/signer';
 import { cfSigner } from '../pull/util/signer';
 import { createDataCache } from '../pull/caches/dataCache';
 import { efsloader } from '../pull/util/efsloader';
@@ -93,7 +92,7 @@ export const schema = {
 export type Body = View;
 
 const handle = async ({ userEmail, asAdmin, asRole, body }: ValidationResult<Body>): Promise<APIGatewayProxyResult> => {
-    const signer: Signer = { getUrl: () => '', signUrl: () => '' }; // await cfSigner();
+    const signer = await cfSigner();
     // TODO: fix useremail thingies
     const [result] = await pull(body, userEmail || '', asAdmin, {
         dataCache: createDataCache(),

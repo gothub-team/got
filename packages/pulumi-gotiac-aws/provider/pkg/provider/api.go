@@ -133,6 +133,30 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	_, err = ec2.NewVpcEndpoint(ctx, name+"SSMEndpoint", &ec2.VpcEndpointArgs{
+		VpcEndpointType: pulumi.String("Interface"),
+		ServiceName:     pulumi.String("com.amazonaws.eu-central-1.ssm"),
+		VpcId:           vpc.ID(),
+		SubnetIds:       pulumi.StringArray{subnet.ID()},
+		SecurityGroupIds: pulumi.StringArray{
+			vpc.DefaultSecurityGroupId,
+		},
+		Policy: pulumi.String(`{
+			"Version": "2012-10-17",
+			"Statement": [
+				{
+					"Effect": "Allow",
+					"Principal": "*",
+					"Action": "ssm:GetParameter'",
+					"Resource": "*"
+				}
+			]
+		}`),
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	corsConfiguration := &apigatewayv2.ApiCorsConfigurationArgs{
 		AllowCredentials: pulumi.Bool(false),
 		AllowHeaders: pulumi.StringArray{

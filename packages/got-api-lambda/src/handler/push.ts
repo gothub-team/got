@@ -283,7 +283,7 @@ const handle = async (
     context: Context,
 ): Promise<APIGatewayProxyResult> => {
     // TODO: fix useremail thingies
-    const signer: Signer = { getUrl: () => '', signUrl: () => '' }; // await cfSigner();
+    const signer = await cfSigner();
     const writer = efswriter();
     const [result, changelog] = await push(body, userEmail || '', asRole || 'user', asAdmin, {
         dataCache: createDataCache(),

@@ -24453,6 +24453,21 @@ var graphAssembler = () => {
   };
 };
 
+// src/pull/util/signer.ts
+var import_cloudfront_signer2 = require("@aws-sdk/cloudfront-signer");
+var cfSigner = async () => {
+  const CLOUDFRONT_ACCESS_KEY = await ssmGetParameter(CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER, true);
+  const oneDay2 = 1 * 24 * 60 * 60 * 1e3;
+  const getUrl = (fileKey, etag) => `https://${MEDIA_DOMAIN}/${fileKey}?etag=${etag}`;
+  const signUrl2 = (url, expires = oneDay2) => (0, import_cloudfront_signer2.getSignedUrl)({
+    url,
+    keyPairId: CLOUDFRONT_ACCESS_KEY_ID || "",
+    dateLessThan: new Date(Date.now() + expires).toISOString(),
+    privateKey: CLOUDFRONT_ACCESS_KEY || ""
+  });
+  return { getUrl, signUrl: signUrl2 };
+};
+
 // ../aws-util/src/pathMap.ts
 var pathMap2 = (prop1, prop2, map) => {
   const map1 = map.get(prop1);
@@ -24781,7 +24796,7 @@ var schema = {
   }
 };
 var handle = async ({ userEmail, asAdmin, asRole, body }) => {
-  const signer = { getUrl: () => "", signUrl: () => "" };
+  const signer = await cfSigner();
   const [result] = await pull(body, userEmail || "", asAdmin, {
     dataCache: createDataCache(),
     graphAssembler: graphAssembler(),
