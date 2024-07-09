@@ -156,6 +156,45 @@ func NewApi(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	routeTable, err := ec2.NewRouteTable(ctx, name+"RouteTable", &ec2.RouteTableArgs{
+		VpcId: vpc.ID(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = ec2.NewRouteTableAssociation(ctx, name+"SubnetRouteTableAssociation", &ec2.RouteTableAssociationArgs{
+		SubnetId:     subnet.ID(),
+		RouteTableId: routeTable.ID(),
+	}, pulumi.DependsOn([]pulumi.Resource{routeTable}))
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = ec2.NewVpcEndpoint(ctx, name+"S3Endpoint", &ec2.VpcEndpointArgs{
+		VpcEndpointType: pulumi.String("Gateway"),
+		ServiceName:     pulumi.String("com.amazonaws.eu-central-1.s3"),
+		VpcId:           vpc.ID(),
+		RouteTableIds: pulumi.StringArray{
+			routeTable.ID(),
+		},
+		Policy: pulumi.String(`{
+			"Version": "2012-10-17",
+			"Statement": [
+				{
+					"Sid": "Allow-access-to-VPCE",
+					"Effect": "Allow",
+					"Action": ["s3:GetObject","s3:GetObjectVersion"],
+					"Principal": "*",
+					"Resource": "*"
+				}
+			]
+		}`),
+	}, pulumi.DependsOn([]pulumi.Resource{routeTable, vpc}))
+	if err != nil {
+		return nil, err
+	}
+
 	corsConfiguration := &apigatewayv2.ApiCorsConfigurationArgs{
 		AllowCredentials: pulumi.Bool(false),
 		AllowHeaders: pulumi.StringArray{

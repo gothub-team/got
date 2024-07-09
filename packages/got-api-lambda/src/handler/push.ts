@@ -7,7 +7,6 @@ import { graphAssembler } from '../push/util/graphAssembler';
 import { createDataCache } from '../push/caches/dataCache';
 import { efswriter } from '../push/util/efswriter';
 import { efsloader } from '../push/util/efsloader';
-import { Signer } from '../push/types/signer';
 
 const AUTHENTICATED = true;
 

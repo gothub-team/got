@@ -25187,7 +25187,12 @@ var efsloader = () => {
     }
     return data;
   };
-  const getFileHead = async (fileKey) => queueLoad(() => s3head(BUCKET_MEDIA, fileKey));
+  const getFileHead = async (fileKey) => queueLoad(async () => {
+    console.log("loading file head");
+    const res = await s3head(BUCKET_MEDIA, fileKey);
+    console.log("loaded file head");
+    return res;
+  });
   const getFileRef = async (nodeId, prop) => {
     const refId = `ref/${nodeId}/${prop}`;
     const res = await fsget(`${DIR_MEDIA}/${refId}`);
