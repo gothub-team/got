@@ -11,7 +11,10 @@ import (
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/acm"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/apigatewayv2"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/cognito"
+	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/ec2"
+	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/efs"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/iam"
+	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/lambda"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/route53"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/ssm"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
@@ -77,6 +80,55 @@ func NewApi(ctx *pulumi.Context,
 
 	component := &Api{}
 	err := ctx.RegisterComponentResource("gotiac:index:Api", name, component, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	vpc, err := ec2.NewDefaultVpc(ctx, "DefaultVPC", &ec2.DefaultVpcArgs{})
+	if err != nil {
+		return nil, err
+	}
+
+	subnet, err := ec2.NewDefaultSubnet(ctx, "default_subnet", &ec2.DefaultSubnetArgs{
+		AvailabilityZone: pulumi.String("eu-central-1a"),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	fileSystem, err := efs.NewFileSystem(ctx, name+"FileSystem", &efs.FileSystemArgs{
+		CreationToken: pulumi.String(name + "FileSystem"),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	mountTarget, err := efs.NewMountTarget(ctx, name+"FileSystemMountTarget", &efs.MountTargetArgs{
+		FileSystemId: fileSystem.ID(),
+		SubnetId:     subnet.ID(),
+		SecurityGroups: pulumi.StringArray{
+			vpc.DefaultSecurityGroupId,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	accessPoint, err := efs.NewAccessPoint(ctx, name+"FileSystemAccessPoint", &efs.AccessPointArgs{
+		FileSystemId: fileSystem.ID(),
+		PosixUser: &efs.AccessPointPosixUserArgs{
+			Gid: pulumi.Int(1000),
+			Uid: pulumi.Int(1000),
+		},
+		RootDirectory: &efs.AccessPointRootDirectoryArgs{
+			Path: pulumi.String("/got"),
+			CreationInfo: &efs.AccessPointRootDirectoryCreationInfoArgs{
+				OwnerGid:    pulumi.Int(1000),
+				OwnerUid:    pulumi.Int(1000),
+				Permissions: pulumi.String("755"),
+			},
+		},
+	}, pulumi.DependsOn([]pulumi.Resource{fileSystem, mountTarget}))
 	if err != nil {
 		return nil, err
 	}
@@ -392,6 +444,14 @@ func NewApi(ctx *pulumi.Context,
 			graphStore.mediaBucketReadPolicyArn,
 		},
 		Environment: pullEnv,
+		VpcConfig: &lambda.FunctionVpcConfigArgs{
+			SubnetIds:        pulumi.StringArray{subnet.ID()},
+			SecurityGroupIds: pulumi.StringArray{vpc.DefaultSecurityGroupId},
+		},
+		FileSystemConfig: &lambda.FunctionFileSystemConfigArgs{
+			Arn:            accessPoint.Arn,
+			LocalMountPath: pulumi.String("/mnt/efs"),
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -435,6 +495,14 @@ func NewApi(ctx *pulumi.Context,
 		ExecutionArn: api.ExecutionArn,
 		RoutePath:    pulumi.String("/pull"),
 		Environment:  pullEnv,
+		VpcConfig: &lambda.FunctionVpcConfigArgs{
+			SubnetIds:        pulumi.StringArray{subnet.ID()},
+			SecurityGroupIds: pulumi.StringArray{vpc.DefaultSecurityGroupId},
+		},
+		FileSystemConfig: &lambda.FunctionFileSystemConfigArgs{
+			Arn:            accessPoint.Arn,
+			LocalMountPath: pulumi.String("/mnt/efs"),
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -470,6 +538,14 @@ func NewApi(ctx *pulumi.Context,
 			graphStore.logsBucketWritePolicyArn,
 		},
 		Environment: pushEnv,
+		VpcConfig: &lambda.FunctionVpcConfigArgs{
+			SubnetIds:        pulumi.StringArray{subnet.ID()},
+			SecurityGroupIds: pulumi.StringArray{vpc.DefaultSecurityGroupId},
+		},
+		FileSystemConfig: &lambda.FunctionFileSystemConfigArgs{
+			Arn:            accessPoint.Arn,
+			LocalMountPath: pulumi.String("/mnt/efs"),
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -516,6 +592,14 @@ func NewApi(ctx *pulumi.Context,
 		ExecutionArn: api.ExecutionArn,
 		RoutePath:    pulumi.String("/push"),
 		Environment:  pushEnv,
+		VpcConfig: &lambda.FunctionVpcConfigArgs{
+			SubnetIds:        pulumi.StringArray{subnet.ID()},
+			SecurityGroupIds: pulumi.StringArray{vpc.DefaultSecurityGroupId},
+		},
+		FileSystemConfig: &lambda.FunctionFileSystemConfigArgs{
+			Arn:            accessPoint.Arn,
+			LocalMountPath: pulumi.String("/mnt/efs"),
+		},
 	})
 	if err != nil {
 		return nil, err

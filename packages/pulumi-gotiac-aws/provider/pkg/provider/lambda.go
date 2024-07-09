@@ -23,7 +23,9 @@ type LambdaArgs struct {
 	// Map of environment variables to pass to the lambda function
 	Environment pulumi.StringMapInput `pulumi:"environment"`
 	// The array of policy arns that should be attachen to the lambda function role
-	PolicyArns pulumi.StringArrayInput `pulumi:"policyArns"`
+	PolicyArns       pulumi.StringArrayInput                 `pulumi:"policyArns"`
+	VpcConfig        lambda.FunctionVpcConfigPtrInput        `pulumi:"vpcConfig"`
+	FileSystemConfig lambda.FunctionFileSystemConfigPtrInput `pulumi:"fileSystemConfig"`
 }
 
 // The Lambda component resource.
@@ -91,6 +93,37 @@ func NewLambda(ctx *pulumi.Context,
 		return nil, err
 	}
 
+	vpcPolicy, err := iam.NewPolicy(ctx, name+"-vpc", &iam.PolicyArgs{
+		Path:        pulumi.String("/"),
+		Description: pulumi.String("IAM policy for connecting to a VPC"),
+		Policy: pulumi.Any(map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				{
+					"Effect": "Allow",
+					"Action": []interface{}{
+						"ec2:CreateNetworkInterface",
+						"ec2:DescribeNetworkInterfaces",
+						"ec2:DescribeSubnets",
+						"ec2:DeleteNetworkInterface",
+						"ec2:AssignPrivateIpAddresses",
+						"ec2:UnassignPrivateIpAddresses",
+						"ec2:DescribeSecurityGroups",
+						"ec2:DescribeVpcs",
+
+						"ec2:AttachNetworkInterface",
+					},
+					"Resource": []interface{}{
+						pulumi.String("*"),
+					},
+				},
+			},
+		}),
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	allow := "Allow"
 	assumeRolePolicy, err := iam.GetPolicyDocument(ctx, &iam.GetPolicyDocumentArgs{
 		Statements: []iam.GetPolicyDocumentStatement{
@@ -116,8 +149,8 @@ func NewLambda(ctx *pulumi.Context,
 
 	iamRole, err := iam.NewRole(ctx, name+"-role", &iam.RoleArgs{
 		AssumeRolePolicy: pulumi.String(assumeRolePolicy.Json),
-		ManagedPolicyArns: pulumi.All(args.PolicyArns, loggingPolicy.Arn).ApplyT(func(args []interface{}) []string {
-			return append(args[0].([]string), args[1].(string))
+		ManagedPolicyArns: pulumi.All(args.PolicyArns, loggingPolicy.Arn, vpcPolicy.Arn).ApplyT(func(args []interface{}) []string {
+			return append(args[0].([]string), args[1].(string), args[2].(string))
 		}).(pulumi.StringArrayOutput),
 	}, pulumi.DependsOn([]pulumi.Resource{loggingPolicy}))
 	if err != nil {
@@ -171,6 +204,8 @@ func NewLambda(ctx *pulumi.Context,
 			LogGroup:  logGroup.Name,
 			LogFormat: pulumi.String("Text"),
 		},
+		VpcConfig:        args.VpcConfig,
+		FileSystemConfig: args.FileSystemConfig,
 	}, pulumi.DependsOn([]pulumi.Resource{iamRole}))
 	if err != nil {
 		return nil, err
