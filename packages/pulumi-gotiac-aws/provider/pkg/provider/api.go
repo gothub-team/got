@@ -146,8 +146,7 @@ func NewApi(ctx *pulumi.Context,
 			"Statement": [
 				{
 					"Effect": "Allow",
-					"Principal": "*",
-					"Action": "ssm:GetParameter'",
+					"Action": "ssm:GetParameter",
 					"Resource": "*"
 				}
 			]
