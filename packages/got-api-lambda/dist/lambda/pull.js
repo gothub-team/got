@@ -23899,15 +23899,10 @@ var fslist = async (location, path) => {
   if (!wildcard) {
     return fslistRecursive(location, basePath);
   }
-  console.log("wildcard mode", path, `${location}/${basePath}`, wildcard);
   try {
     const items = await readdir(basePath ? `${location}/${basePath}` : location, { withFileTypes: true });
     const files = [];
     const promises = [];
-    console.log(
-      "found items",
-      items.map((i) => `${i.parentPath}/${i.name}`)
-    );
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (item.name.startsWith(wildcard)) {
@@ -23915,7 +23910,6 @@ var fslist = async (location, path) => {
           const dir = item.parentPath.replace(`${location}`, "");
           files.push(dir ? `${dir}/${item.name}` : item.name);
         } else if (item.isDirectory()) {
-          console.log("found directory", `${item.parentPath}/${item.name}`);
           promises.push(fslistRecursive(location, `${item.parentPath}/${item.name}`));
         }
       }
@@ -23924,7 +23918,6 @@ var fslist = async (location, path) => {
     for (let i = 0; i < nestedFiles.length; i++) {
       files.push(...nestedFiles[i]);
     }
-    console.log("found matching files", files);
     return files;
   } catch {
     return [];
