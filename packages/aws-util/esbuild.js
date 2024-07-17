@@ -1,3 +1,8 @@
 import build from '@gothub/typescript-util/esbuild.js';
 
-build();
+build({
+    minBundle: true,
+    min: {
+        external: ['aws-sdk*', '@aws-sdk*', 'aws-lambda'],
+    },
+});
