@@ -1,6 +1,6 @@
 import { type DataCache } from '../types/dataCache';
 import { type RightType, type ExistsCache } from '../types/existCache';
-import { s3mapListKeysPaged as _s3mapListKeysPaged } from '@gothub/aws-util';
+import { s3mapListKeysPaged as _s3mapListKeysPaged } from '@gothub/aws-util/s3';
 import {
     BUCKET_EDGES,
     BUCKET_NODES,

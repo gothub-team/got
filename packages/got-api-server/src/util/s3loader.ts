@@ -1,8 +1,9 @@
 /* eslint-disable prefer-template */
-import { s3get, s3head, loadQueue, s3listKeysPaged, substringToFirst } from '@gothub/aws-util';
+import { loadQueue, substringToFirst } from '@gothub/aws-util';
 import { type EdgeWildcard, type FileHead, type FileRef, type Loader } from '../types/loader';
 import { BUCKET_EDGES, BUCKET_MEDIA, BUCKET_NODES } from '../config';
 import type { LoaderLog } from '../types/logs';
+import { s3get, s3head, s3listKeysPaged } from '@gothub/aws-util/s3';
 
 // TODO: maybe we could trial seperate queues for each bucket or request time?
 const { queueLoad } = loadQueue(200);
