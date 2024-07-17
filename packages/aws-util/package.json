@@ -1,36 +1,86 @@
 {
-  "name": "@gothub/aws-util",
-  "version": "0.0.6",
-  "license": "MIT",
-  "type": "module",
-  "main": "dist/module/index.js",
-  "types": "dist/module/index.d.ts",
-  "scripts": {
-    "lint": "eslint ./src",
-    "typecheck": "tsc --noEmit",
-    "build": "bun run esbuild.js"
-  },
-  "devDependencies": {
-    "@gothub/typescript-util": "workspace:*",
-    "@types/aws-lambda": "^8.10.138",
-    "@types/nodemailer": "^6.4.15",
-    "@types/uuid": "^9.0.8",
-    "aws-lambda": "^1.0.7"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "@aws-sdk/client-cognito-identity-provider": "^3.596.0",
-    "@aws-sdk/client-ec2": "^3.592.0",
-    "@aws-sdk/client-ecs": "^3.594.0",
-    "@aws-sdk/client-lambda": "^3.592.0",
-    "@aws-sdk/client-s3": "^3.592.0",
-    "@aws-sdk/client-ssm": "^3.592.0",
-    "@aws-sdk/cloudfront-signer": "^3.576.0",
-    "@aws-sdk/s3-request-presigner": "^3.592.0",
-    "ajv": "^8.16.0",
-    "nodemailer": "^6.9.13",
-    "uuid": "^10.0.0"
-  }
+    "name": "@gothub/aws-util",
+    "version": "0.0.6",
+    "license": "MIT",
+    "type": "module",
+    "main": "dist/cjs/index.js",
+    "types": "dist/module/index.d.ts",
+    "scripts": {
+        "lint": "eslint ./src",
+        "typecheck": "tsc --noEmit",
+        "build": "bun run esbuild.js"
+    },
+    "devDependencies": {
+        "@gothub/typescript-util": "workspace:*",
+        "@types/aws-lambda": "^8.10.138",
+        "@types/nodemailer": "^6.4.15",
+        "@types/uuid": "^9.0.8",
+        "aws-lambda": "^1.0.7"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "@aws-sdk/client-cognito-identity-provider": "^3.596.0",
+        "@aws-sdk/client-ec2": "^3.592.0",
+        "@aws-sdk/client-ecs": "^3.594.0",
+        "@aws-sdk/client-lambda": "^3.592.0",
+        "@aws-sdk/client-s3": "^3.592.0",
+        "@aws-sdk/client-ssm": "^3.592.0",
+        "@aws-sdk/cloudfront-signer": "^3.576.0",
+        "@aws-sdk/s3-request-presigner": "^3.592.0",
+        "ajv": "^8.16.0",
+        "nodemailer": "^6.9.13",
+        "uuid": "^10.0.0"
+    },
+    "files": [
+        "dist"
+    ],
+    "exports": {
+        ".": {
+            "require": "./dist/cjs/index.js",
+            "import": "./dist/module/index.js",
+            "types": "./dist/module/index.d.ts"
+        },
+        "./cloudfront": {
+            "require": "./dist/cjs/cloudfront/index.js",
+            "import": "./dist/module/cloudfront/index.js",
+            "types": "./dist/module/cloudfront/index.d.ts"
+        },
+        "./cognito": {
+            "require": "./dist/cjs/cognito/index.js",
+            "import": "./dist/module/cognito/index.js",
+            "types": "./dist/module/cognito/index.d.ts"
+        },
+        "./ec2": {
+            "require": "./dist/cjs/ec2/index.js",
+            "import": "./dist/module/ec2/index.js",
+            "types": "./dist/module/ec2/index.d.ts"
+        },
+        "./ecs": {
+            "require": "./dist/cjs/ecs/index.js",
+            "import": "./dist/module/ecs/index.js",
+            "types": "./dist/module/ecs/index.d.ts"
+        },
+        "./email": {
+            "require": "./dist/cjs/email/index.js",
+            "import": "./dist/module/email/index.js",
+            "types": "./dist/module/email/index.d.ts"
+        },
+        "./lambda": {
+            "require": "./dist/cjs/lambda/index.js",
+            "import": "./dist/module/lambda/index.js",
+            "types": "./dist/module/lambda/index.d.ts"
+        },
+        "./s3": {
+            "require": "./dist/cjs/s3/index.js",
+            "import": "./dist/module/s3/index.js",
+            "types": "./dist/module/s3/index.d.ts"
+        },
+        "./ssm": {
+            "require": "./dist/cjs/ssm/index.js",
+            "import": "./dist/module/ssm/index.js",
+            "types": "./dist/module/ssm/index.d.ts"
+        }
+    }
 }

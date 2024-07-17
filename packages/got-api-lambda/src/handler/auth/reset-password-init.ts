@@ -3,12 +3,12 @@ import {
     InvalidEmailError,
     UserNotFoundError,
     UserNotVerifiedError,
-    cognitoForgotPassword,
     internalServerError,
     matchEmail,
     validate,
     type ValidationResult,
 } from '@gothub/aws-util';
+import { cognitoForgotPassword } from '@gothub/aws-util/cognito';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
 
 const AUTHENTICATED = false;

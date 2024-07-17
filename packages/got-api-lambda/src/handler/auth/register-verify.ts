@@ -4,12 +4,12 @@ import {
     UserNotFoundError,
     VerificationCodeExpiredError,
     VerificationCodeMismatchError,
-    cognitoConfirmSignup,
     internalServerError,
     matchEmail,
     validate,
     type ValidationResult,
 } from '@gothub/aws-util';
+import { cognitoConfirmSignup } from '@gothub/aws-util/cognito';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
 
 const AUTHENTICATED = false;

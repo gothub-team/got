@@ -2,12 +2,12 @@ import {
     CORS_HEADERS,
     InvalidEmailError,
     UserNotFoundError,
-    cognitoResendConfirmationCode,
     internalServerError,
     matchEmail,
     validate,
     type ValidationResult,
 } from '@gothub/aws-util';
+import { cognitoResendConfirmationCode } from '@gothub/aws-util/cognito';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
 
 const AUTHENTICATED = false;

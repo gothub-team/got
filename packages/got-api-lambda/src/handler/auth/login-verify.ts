@@ -4,11 +4,11 @@ import {
     PasswordResetRequiredError,
     UserNotFoundError,
     UserNotVerifiedError,
-    cognitoRespondVerifySrp,
     internalServerError,
     validate,
     type ValidationResult,
 } from '@gothub/aws-util';
+import { cognitoRespondVerifySrp } from '@gothub/aws-util/cognito';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
 
 const AUTHENTICATED = false;

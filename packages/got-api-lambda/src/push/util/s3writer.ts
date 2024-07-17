@@ -1,4 +1,4 @@
-import { s3delete, s3put } from '@gothub/aws-util';
+import { s3delete, s3put } from '@gothub/aws-util/s3';
 import {
     BUCKET_EDGES,
     BUCKET_LOGS,

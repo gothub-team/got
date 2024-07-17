@@ -1,5 +1,5 @@
-import { CLOUDFRONT_ACCESS_KEY_ID, CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER } from './config';
-import { ssmGetParameter } from './ssm';
+import { CLOUDFRONT_ACCESS_KEY_ID, CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER } from '../config.js';
+import { ssmGetParameter } from '../ssm';
 import { getSignedUrl } from '@aws-sdk/cloudfront-signer';
 
 const createGetAccessKey = () => {

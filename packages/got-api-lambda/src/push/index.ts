@@ -13,9 +13,10 @@ import { type GraphAssembler } from './types/graphAssembler';
 import { promiseManager } from './util/promiseManager';
 import { Log } from './types/logs';
 import { Writer } from './types/writer';
-import { MEDIA_DOMAIN, s3putMultipartSignedUrls, sha256 } from '@gothub/aws-util';
+import { MEDIA_DOMAIN, sha256 } from '@gothub/aws-util';
 import { BUCKET_MEDIA } from './config';
 import { Signer } from './types/signer';
+import { s3putMultipartSignedUrls } from '@gothub/aws-util/s3';
 
 type Dependencies = {
     // existsCache: ExistsCache;
