@@ -7,7 +7,7 @@ import {
     isEmptyObject,
     mergeDeepRight,
     mergeGraphObjRight,
-} from './util';
+} from './util.js';
 
 const mergeObjRight =
     <TMerge>(depth: number, fnMergeRight: (l: TMerge | undefined, r: TMerge | undefined) => TMerge) =>

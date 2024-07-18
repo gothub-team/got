@@ -302,7 +302,7 @@ func NewApi(ctx *pulumi.Context,
 	cloudfrontNewAccessKeyParameterName := pulumi.String("").ToStringOutput()
 	mediaDomain := pulumi.String("").ToStringOutput()
 	var bucketMediaName *pulumi.StringInput
-	var ssmGetAccessKeyParameterPolicy *iam.Policy
+	ssmGetAccessKeyParameterPolicyArn := pulumi.String("").ToStringOutput()
 	if args.FileHosting != nil {
 		cloudfrontAccessKeyId = args.FileHosting.PrivateKeyId.ToStringOutput()
 		cloudfrontNewAccessKeyParameterName = args.FileHosting.PrivateKeyParameterName.ToStringOutput()
@@ -320,7 +320,7 @@ func NewApi(ctx *pulumi.Context,
 			return ssmParameter.Arn, nil
 		}).(pulumi.StringOutput)
 
-		ssmGetAccessKeyParameterPolicy, err = iam.NewPolicy(ctx, name+"-ssm-get-parameter-policy", &iam.PolicyArgs{
+		ssmGetAccessKeyParameterPolicy, err := iam.NewPolicy(ctx, name+"-ssm-get-parameter-policy", &iam.PolicyArgs{
 			Path:        pulumi.String("/"),
 			Description: pulumi.String("IAM policy for retrieving the cloudfront access key parameter"),
 			Policy: pulumi.Any(map[string]interface{}{
@@ -341,6 +341,7 @@ func NewApi(ctx *pulumi.Context,
 		if err != nil {
 			return nil, err
 		}
+		ssmGetAccessKeyParameterPolicyArn = ssmGetAccessKeyParameterPolicy.Arn
 	}
 
 	graphStore, err := NewGraphStore(ctx, name+"-graph-store", &GraphStoreArgs{
@@ -388,7 +389,7 @@ func NewApi(ctx *pulumi.Context,
 		MemorySize:  &pullMem,
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
-			ssmGetAccessKeyParameterPolicy.Arn,
+			ssmGetAccessKeyParameterPolicyArn,
 			graphStore.mediaBucketReadPolicyArn,
 		},
 		Environment: pullEnv,
@@ -428,7 +429,7 @@ func NewApi(ctx *pulumi.Context,
 		AuthorizerId: authorizer.ID(),
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
-			ssmGetAccessKeyParameterPolicy.Arn,
+			ssmGetAccessKeyParameterPolicyArn,
 			graphStore.mediaBucketReadPolicyArn,
 		},
 		ApiId:        api.ID(),
@@ -464,7 +465,7 @@ func NewApi(ctx *pulumi.Context,
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
 			graphStore.StorageWritePolicyArn,
-			ssmGetAccessKeyParameterPolicy.Arn,
+			ssmGetAccessKeyParameterPolicyArn,
 			graphStore.mediaBucketReadPolicyArn,
 			graphStore.mediaBucketWritePolicyArn,
 			graphStore.logsBucketWritePolicyArn,
@@ -507,7 +508,7 @@ func NewApi(ctx *pulumi.Context,
 		PolicyArns: pulumi.StringArray{
 			graphStore.StorageReadPolicyArn,
 			graphStore.StorageWritePolicyArn,
-			ssmGetAccessKeyParameterPolicy.Arn,
+			ssmGetAccessKeyParameterPolicyArn,
 			graphStore.mediaBucketReadPolicyArn,
 			graphStore.mediaBucketWritePolicyArn,
 			graphStore.logsBucketWritePolicyArn,
