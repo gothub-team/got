@@ -1,8 +1,8 @@
 import type { ValidationResult } from '@gothub/aws-util';
 import { CORS_HEADERS, internalServerError, validate } from '@gothub/aws-util';
-import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
+import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
 
-const AUTHENTICATED = true;
+const AUTHENTICATED = false;
 
 export const schema = {};
 
@@ -26,11 +26,11 @@ export const handleHttp: APIGatewayProxyHandler = async (event) => {
     }
 };
 
-export const handleInvoke: Handler = async ({ body }) => {
-    try {
-        const result = await handle(body as ValidationResult<Body>);
-        return result;
-    } catch (err) {
-        return internalServerError(err as Error);
-    }
-};
+// export const handleInvoke: Handler = async ({ body }) => {
+//     try {
+//         const result = await handle(body as ValidationResult<Body>);
+//         return result;
+//     } catch (err) {
+//         return internalServerError(err as Error);
+//     }
+// };

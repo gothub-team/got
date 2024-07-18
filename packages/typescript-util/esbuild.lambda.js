@@ -42,7 +42,7 @@ const buildTs = async (options = {}) => {
     const srcDir = options.srcDir || './src/handler';
     const outDir = options.outDir || './dist/lambda';
 
-    // clean(outDir);
+    clean(outDir);
 
     const entryFiles = getAllFiles(srcDir);
     // compiled code

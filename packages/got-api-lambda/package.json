@@ -17,6 +17,7 @@
         "typescript": "^5.0.0"
     },
     "dependencies": {
+        "@aws-crypto/client-node": "^4.0.0",
         "@gothub/aws-util": "workspace:*",
         "uuid": "^10.0.0"
     }
