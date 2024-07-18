@@ -1,11 +1,11 @@
-import {
-    type GraphElementResult,
-    type GraphError,
-    type Metadata,
-    type NodeFileView,
-    type UploadElementResult,
-    type UploadNodeFileView,
-    type Node,
+import type {
+    GraphElementResult,
+    GraphError,
+    Metadata,
+    NodeFileView,
+    UploadElementResult,
+    UploadNodeFileView,
+    Node,
 } from './graphObjects';
 
 export declare type Nodes<TNode> = {

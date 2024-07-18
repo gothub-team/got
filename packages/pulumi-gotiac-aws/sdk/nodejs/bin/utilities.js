@@ -63,7 +63,7 @@ function getVersion() {
 }
 /** @internal */
 function resourceOptsDefaults() {
-    return { version: getVersion(), pluginDownloadURL: "https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.1.13" };
+    return { version: getVersion(), pluginDownloadURL: "https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.1.14" };
 }
 /** @internal */
 function lazyLoad(exports, props, loadModule) {

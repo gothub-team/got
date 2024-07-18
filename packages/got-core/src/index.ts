@@ -59,5 +59,5 @@ export * from './store/createCurriedGraph';
 export * from './local-store/createLocalGraph';
 export * from './local-store/createLocalCurriedGraph';
 
-export * from './utils/util';
-export * from './reducer/reducer';
+export * from './utils/util.js';
+export * from './reducer/reducer.js';
