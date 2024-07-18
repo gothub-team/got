@@ -1,22 +1,22 @@
 {
     "name": "@gothub/typescript-util",
-    "version": "0.0.5",
+    "version": "0.0.8",
     "license": "MIT",
     "type": "module",
-    "devDependencies": {
+    "devDependencies": {},
+    "peerDependencies": {
+        "typescript": "^5.5.2"
+    },
+    "dependencies": {
+        "zod": "^3.23.8",
         "@eslint/js": "^9.1.1",
         "@types/bun": "latest",
         "eslint": "^9.1.1",
         "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-import": "2.29.1",
         "eslint-utils": "^3.0.0",
         "typescript-eslint": "^7.7.1",
         "esbuild": "^0.21.4",
         "esbuild-plugin-d.ts": "^1.2.3"
-    },
-    "peerDependencies": {
-        "typescript": "^5.0.0"
-    },
-    "dependencies": {
-        "zod": "^3.23.8"
     }
 }
