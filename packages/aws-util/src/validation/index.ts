@@ -1,6 +1,6 @@
 import type { Schema } from 'ajv';
 import { Ajv } from 'ajv';
-import type { APIGatewayProxyEvent } from 'aws-lambda';
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { decodeJwt, jsonParseOr } from '../util.js';
 import { ADMIN_EMAILS } from '../config.js';
 import { badRequest, unauthorized } from '../errors.js';
@@ -16,6 +16,8 @@ export type ValidationResult<TBody> = {
 };
 
 export const validateBody = async <TBody>(schema: Schema, event: APIGatewayProxyEvent) => {
+    let ApiError: APIGatewayProxyResult | null = null;
+
     try {
         const body = jsonParseOr<TBody>((event.body || {}) as TBody, event.body || '');
 
@@ -25,11 +27,13 @@ export const validateBody = async <TBody>(schema: Schema, event: APIGatewayProxy
         if (valid) {
             return { body };
         } else {
-            throw badRequest(JSON.stringify(ajv.errors));
+            ApiError = badRequest(JSON.stringify(ajv.errors));
         }
     } catch (error) {
-        throw badRequest((error as Error).message);
+        ApiError = badRequest((error as Error).message);
     }
+
+    throw ApiError;
 };
 
 export const validateAuthed = async <TBody>(schema: Schema, event: APIGatewayProxyEvent) => {
@@ -40,6 +44,7 @@ export const validateAuthed = async <TBody>(schema: Schema, event: APIGatewayPro
         throw unauthorized();
     }
 
+    let ApiError: APIGatewayProxyResult | null = null;
     try {
         const body = jsonParseOr<TBody>((event.body || {}) as TBody, event.body || '');
 
@@ -52,9 +57,11 @@ export const validateAuthed = async <TBody>(schema: Schema, event: APIGatewayPro
             const asAdmin = !!event.headers['x-as-admin'] && ADMIN_EMAILS.includes(userEmail);
             return { userEmail, body, asAdmin, asRole };
         } else {
-            throw badRequest(JSON.stringify(ajv.errors));
+            ApiError = badRequest(JSON.stringify(ajv.errors));
         }
     } catch (error) {
-        throw badRequest((error as Error).message);
+        ApiError = badRequest((error as Error).message);
     }
+
+    throw ApiError;
 };
