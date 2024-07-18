@@ -56,6 +56,8 @@ export type * from './types/graphObjects';
 export type * from './types/view';
 export * from './store/createGraph';
 export * from './store/createCurriedGraph';
+export * from './local-store/createLocalGraph';
+export * from './local-store/createLocalCurriedGraph';
 
 export * from './utils/util';
 export * from './reducer/reducer';
