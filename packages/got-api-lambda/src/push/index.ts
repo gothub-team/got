@@ -1,21 +1,14 @@
-import { type DataCache } from './types/dataCache';
-import {
-    Graph,
-    Node,
-    forEachObjDepth,
-    Metadata,
-    UploadNodeFileView,
-    NodeFilesView,
-    mergeGraphObjRight,
-} from '@gothub/got-core';
-import { FileMetadata, type Loader } from './types/loader';
-import { type GraphAssembler } from './types/graphAssembler';
+import type { DataCache } from './types/dataCache';
+import type { Graph, Node, Metadata, UploadNodeFileView, NodeFilesView } from '@gothub/got-core';
+import { forEachObjDepth, mergeGraphObjRight } from '@gothub/got-core';
+import type { FileMetadata, Loader } from './types/loader';
+import type { GraphAssembler } from './types/graphAssembler';
 import { promiseManager } from './util/promiseManager';
-import { Log } from './types/logs';
-import { Writer } from './types/writer';
+import type { Log } from './types/logs';
+import type { Writer } from './types/writer';
 import { MEDIA_DOMAIN, sha256 } from '@gothub/aws-util';
 import { BUCKET_MEDIA } from './config';
-import { Signer } from './types/signer';
+import type { Signer } from './types/signer';
 import { s3putMultipartSignedUrls } from '@gothub/aws-util/s3';
 
 type Dependencies = {

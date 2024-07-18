@@ -2,9 +2,9 @@ import { configureCreateCurriedGraph } from './store/createCurriedGraph';
 import { configureCreateGraph } from './store/createGraph';
 import { createCurriedStore } from './store/curried';
 import { createErrorHandledStore } from './store/errorHandling';
-import { type StoreAPI } from './types/api';
-import { type State } from './types/state';
-import { type GOT_ACTION } from './types/actions';
+import type { StoreAPI } from './types/api';
+import type { State } from './types/state';
+import type { GOT_ACTION } from './types/actions';
 import { configureCreateLocalGraph } from './local-store/createLocalGraph';
 import { configureCreateLocalCurriedGraph } from './local-store/createLocalCurriedGraph';
 

@@ -1,4 +1,4 @@
-import { type AnyGraph } from '../types/graph';
+import type { AnyGraph } from '../types/graph';
 import {
     assocPathMutate,
     dissocPathMutate,

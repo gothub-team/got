@@ -1,11 +1,12 @@
 import { promiseManager } from '../util/promiseManager';
-import { type DataCache } from '../types/dataCache';
-import { type ExistsCache } from '../types/existCache';
-import { type NodeView, type EdgeView, type View } from '@gothub/got-core';
-import { withEdgeTypes, type WithEdgeTypes } from '../util/withEdgeTypes';
-import { type Loader, type FileRef } from '../types/loader';
-import { type Signer } from '../types/signer';
-import { type GraphAssembler } from '../types/graphAssembler';
+import type { DataCache } from '../types/dataCache';
+import type { ExistsCache } from '../types/existCache';
+import type { NodeView, EdgeView, View } from '@gothub/got-core';
+import type { WithEdgeTypes } from '../util/withEdgeTypes';
+import { withEdgeTypes } from '../util/withEdgeTypes';
+import type { Loader, FileRef } from '../types/loader';
+import type { Signer } from '../types/signer';
+import type { GraphAssembler } from '../types/graphAssembler';
 import type { Log } from '../types/logs';
 
 const parseRole = (role: string, nodeId: string): string => role.replaceAll('$NODEID', nodeId);

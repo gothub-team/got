@@ -1,8 +1,8 @@
-import { type Metadata, type Node, type RightTypes } from '../types/graphObjects';
-import { type State } from '../types/state';
-import { type View } from '../types/view';
+import type { Metadata, Node, RightTypes } from '../types/graphObjects';
+import type { State } from '../types/state';
+import type { View } from '../types/view';
 import { decideStack } from '../utils/util';
-import { type Store } from './store';
+import type { Store } from './store';
 
 export const createCurriedStore = (store: Store) => {
     const merge = store.merge;

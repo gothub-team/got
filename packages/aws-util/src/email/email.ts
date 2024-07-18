@@ -1,4 +1,5 @@
-import nodemailer, { type Transporter } from 'nodemailer';
+import type { Transporter } from 'nodemailer';
+import nodemailer from 'nodemailer';
 import type Mail from 'nodemailer/lib/mailer/index.js';
 import { ssmGetParameter } from '../ssm';
 

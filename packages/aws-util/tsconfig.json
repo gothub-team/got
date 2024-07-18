@@ -1,5 +1,5 @@
 {
-    "extends": "@gothub/typescript-util/tsconfig-frontend.json",
+    "extends": "@gothub/typescript-util/tsconfig-backend.json",
     "include": ["**/*.ts"],
     "exclude": ["**/*.spec.ts"]
 }

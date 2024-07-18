@@ -1,6 +1,6 @@
 /* eslint-disable prefer-template */
 import { loadQueue, substringToFirst } from '@gothub/aws-util';
-import { type EdgeWildcard, type FileHead, type FileRef, type Loader } from '../types/loader';
+import type { EdgeWildcard, FileHead, FileRef, Loader } from '../types/loader';
 import { BUCKET_EDGES, BUCKET_MEDIA, BUCKET_NODES } from '../config';
 import type { LoaderLog } from '../types/logs';
 import { s3get, s3head, s3listKeysPaged } from '@gothub/aws-util/s3';

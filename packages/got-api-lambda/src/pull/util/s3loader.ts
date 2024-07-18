@@ -1,7 +1,7 @@
 /* eslint-disable prefer-template */
 import { loadQueue, substringToFirst, assocMap3 } from '@gothub/aws-util';
 import { s3get, s3listKeysPaged, s3head } from '@gothub/aws-util/s3';
-import { type EdgeWildcard, type FileHead, type FileRef, type Loader } from '../types/loader';
+import type { EdgeWildcard, FileHead, FileRef, Loader } from '../types/loader';
 import {
     BUCKET_EDGES,
     BUCKET_MEDIA,
