@@ -10,7 +10,7 @@ import { createDataCache } from '../pull/caches/dataCache';
 
 const AUTHENTICATED = true;
 
-const querySchema = (recursiveRef: { $ref: string }) => ({
+export const querySchema = (recursiveRef: { $ref: string }) => ({
     type: 'object',
     description:
         'Holds a query object that specifies how the graph should be queried from a given entry point. The entry point can be a node ID or an edge pointing do a set of nodes',
