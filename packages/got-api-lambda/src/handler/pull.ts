@@ -1,10 +1,10 @@
 import { CORS_HEADERS, internalServerError, validate, type ValidationResult } from '@gothub/aws-util';
-import { View } from '@gothub/got-core';
+import type { View } from '@gothub/got-core';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
 import { pull } from '../pull';
 import { graphAssembler } from '../pull/util/graphAssembler';
 import { s3loader } from '../pull/util/s3loader';
-import { Signer } from '../pull/types/signer';
+import type { Signer } from '../pull/types/signer';
 import { cfSigner } from '../pull/util/signer';
 import { createDataCache } from '../pull/caches/dataCache';
 

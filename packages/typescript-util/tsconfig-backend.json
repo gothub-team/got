@@ -10,8 +10,7 @@
 
         // Bundler mode
         "moduleResolution": "bundler",
-        // "importsNotUsedAsValues": "remove",
-        "allowImportingTsExtensions": true,
+        // "allowImportingTsExtensions": true,
         "verbatimModuleSyntax": true,
         "noEmit": false,
 

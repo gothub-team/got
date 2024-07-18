@@ -1,4 +1,4 @@
-import { Metadata, Node } from '@gothub/got-core';
+import type { Metadata, Node } from '@gothub/got-core';
 import type { FileMetadata } from './loader';
 
 export type Writer = {

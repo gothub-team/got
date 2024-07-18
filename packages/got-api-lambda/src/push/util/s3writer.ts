@@ -10,8 +10,8 @@ import {
     BUCKET_RIGHTS_READ,
     BUCKET_RIGHTS_WRITE,
 } from '../config';
-import { Writer } from '../types/writer';
-import { Metadata, Node } from '@gothub/got-core';
+import type { Writer } from '../types/writer';
+import type { Metadata, Node } from '@gothub/got-core';
 
 // TODO: load queue for s3?
 export const s3writer: () => Writer = () => {
