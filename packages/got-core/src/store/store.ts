@@ -1,12 +1,12 @@
-import { type ViewResult } from '../types/ViewResult';
-import { type GOT_ACTION, type GOT_UPLOAD_ACTION } from '../types/actions';
-import { type StoreAPI } from '../types/api';
-import { type ErrorGraph, type Graph } from '../types/graph';
-import { type Metadata, type Node, type RightTypes } from '../types/graphObjects';
-import { type State } from '../types/state';
-import { type View } from '../types/view';
-import { isEmptyGraph, selectDeleteGraph, selectSuccessAndErrorGraphs } from '../utils/graph';
-import { mergeGraphsRight } from '../utils/mergeGraph';
+import type { ViewResult } from '../types/ViewResult';
+import type { GOT_ACTION, GOT_UPLOAD_ACTION } from '../types/actions';
+import type { StoreAPI } from '../types/api';
+import type { ErrorGraph, Graph } from '../types/graph';
+import type { Metadata, Node, RightTypes } from '../types/graphObjects';
+import type { State } from '../types/state';
+import type { View } from '../types/view';
+import { isEmptyGraph, selectDeleteGraph, selectSuccessAndErrorGraphs } from '../utils/graph.js';
+import { mergeGraphsRight } from '../utils/mergeGraph.js';
 import {
     edgeFromStack,
     filesFromStack,
@@ -15,10 +15,10 @@ import {
     reverseEdgeFromStack,
     rightFromStack,
     selectGraphStack,
-} from '../utils/stack';
-import { createFileUploader } from '../utils/uploads';
-import { type Subscriber } from '../utils/util';
-import { subgraphFromStack, viewResFromStack } from '../utils/view';
+} from '../utils/stack.js';
+import { createFileUploader } from '../utils/uploads.js';
+import type { Subscriber } from '../utils/util';
+import { subgraphFromStack, viewResFromStack } from '../utils/view.js';
 
 export type Selector = <TRes>(fnSelect: (state: State) => TRes) => TRes;
 

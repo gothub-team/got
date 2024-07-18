@@ -1,4 +1,4 @@
-import { isEdgeTypeString } from './util';
+import { isEdgeTypeString } from './util.js';
 
 export const MISSING_PARAM_ERROR = 'MissingParamError';
 export class MissingParamError extends Error {

@@ -1,11 +1,11 @@
-import { type ViewResult } from '../types/ViewResult';
-import { type Graph } from '../types/graph';
-import { type Metadata, type Node, type RightTypes } from '../types/graphObjects';
-import { type State } from '../types/state';
-import { type View } from '../types/view';
-import { createInputValidator } from '../utils/errors';
-import { isEmptyObject } from '../utils/util';
-import { createStore, type CreateStoreOptions, type PushObservables, type Store } from './store';
+import type { ViewResult } from '../types/ViewResult';
+import type { Graph } from '../types/graph';
+import type { Metadata, Node, RightTypes } from '../types/graphObjects';
+import type { State } from '../types/state';
+import type { View } from '../types/view';
+import { createInputValidator } from '../utils/errors.js';
+import { isEmptyObject } from '../utils/util.js';
+import { createStore, type CreateStoreOptions, type PushObservables, type Store } from './store.js';
 
 const GOT_STORE_CONFIG = 'GOT_STORE_CONFIG';
 const GOT_MERGE = 'GOT_MERGE';

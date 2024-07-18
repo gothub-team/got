@@ -6,7 +6,7 @@ import {
     type Nodes,
     type PushResult,
     type Rights,
-} from '../types/graph';
+} from '../types/graph.js';
 import {
     type GraphElementResult,
     type GraphError,
@@ -14,8 +14,8 @@ import {
     type NodeFileView,
     type UploadNodeFileView,
     type Node,
-} from '../types/graphObjects';
-import { assocPathMutate, forEachObjDepth, getPathOr, isEmptyObject } from './util';
+} from '../types/graphObjects.js';
+import { assocPathMutate, forEachObjDepth, getPathOr, isEmptyObject } from './util.js';
 
 export const isEmptyGraph = (graph: Graph | ErrorGraph): boolean => {
     if (!graph || isEmptyObject(graph)) return true;
