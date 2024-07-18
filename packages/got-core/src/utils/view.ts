@@ -10,7 +10,7 @@ import {
     nodeFromStack,
     reverseEdgeFromStack,
     rightFromStack,
-} from './stack';
+} from './stack.js';
 
 export const viewResFromStack = <TView extends View>(graphStack: Graph[], view: TView): ViewResult<TView> => {
     const queryNode = <TSubView extends NodeView | EdgeView>(
