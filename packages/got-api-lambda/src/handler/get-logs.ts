@@ -1,10 +1,8 @@
-import type { ValidationResult } from '@gothub/aws-util';
-import { CORS_HEADERS, internalServerError, validate } from '@gothub/aws-util';
+import { CORS_HEADERS, internalServerError } from '@gothub/aws-util';
 import { s3get, s3list } from '@gothub/aws-util/s3';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
 import { BUCKET_LOGS } from '../push/config';
-
-const AUTHENTICATED = true;
+import { validateAuthed, type AuthedValidationResult } from '@gothub/aws-util/validation';
 
 export const schema = {
     type: 'object',
@@ -25,7 +23,7 @@ export type Body = {
     prefix?: string;
 };
 
-const handle = async ({ userEmail, body }: ValidationResult<Body>): Promise<APIGatewayProxyResult> => {
+const handle = async ({ userEmail, body }: AuthedValidationResult<Body>): Promise<APIGatewayProxyResult> => {
     const { id, prefix = '' } = body;
     if (id) {
         try {
@@ -65,7 +63,7 @@ const handle = async ({ userEmail, body }: ValidationResult<Body>): Promise<APIG
 
 export const handleHttp: APIGatewayProxyHandler = async (event) => {
     try {
-        const validationResult = await validate<Body>(schema, event, { auth: AUTHENTICATED });
+        const validationResult = await validateAuthed<Body>(schema, event);
         const result = await handle(validationResult);
         return result;
     } catch (err) {

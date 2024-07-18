@@ -6,13 +6,10 @@ import {
     VerificationCodeMismatchError,
     internalServerError,
     matchEmail,
-    validate,
-    type ValidationResult,
 } from '@gothub/aws-util';
 import { cognitoConfirmSignup } from '@gothub/aws-util/cognito';
+import { validateBody, type ValidationResult } from '@gothub/aws-util/validation';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
-
-const AUTHENTICATED = false;
 
 export const schema = {
     type: 'object',
@@ -62,7 +59,7 @@ const handle = async ({ body }: ValidationResult<Body>): Promise<APIGatewayProxy
 
 export const handleHttp: APIGatewayProxyHandler = async (event) => {
     try {
-        const validationResult = await validate<Body>(schema, event, { auth: AUTHENTICATED });
+        const validationResult = await validateBody<Body>(schema, event);
         const result = await handle(validationResult);
         return result;
     } catch (err) {
