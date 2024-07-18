@@ -10,7 +10,7 @@ import { createDataCache } from '../pull/caches/dataCache';
 
 const AUTHENTICATED = true;
 
-const querySchema = (recursiveRef) => ({
+const querySchema = (recursiveRef: { $ref: string }) => ({
     type: 'object',
     description:
         'Holds a query object that specifies how the graph should be queried from a given entry point. The entry point can be a node ID or an edge pointing do a set of nodes',
@@ -92,7 +92,7 @@ export const schema = {
 
 export type Body = View;
 
-const handle = async ({ userEmail, asAdmin, asRole, body }: ValidationResult<Body>): Promise<APIGatewayProxyResult> => {
+const handle = async ({ userEmail, asAdmin, body }: ValidationResult<Body>): Promise<APIGatewayProxyResult> => {
     const signer: Signer = await cfSigner();
     // TODO: fix useremail thingies
     const [result] = await pull(body, userEmail || '', asAdmin, {
