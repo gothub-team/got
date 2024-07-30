@@ -7,8 +7,10 @@ export const promiseManager = () => {
     };
 
     const awaitPromises = async () => {
-        while (promises.length > 0) {
-            console.log(`Awaiting ${promises.length} promises...`);
+        while (true) {
+            if (promises.length <= 0) break;
+
+            // console.log(`Awaiting ${promises.length} promises...`);
             const currPromises = promises;
             promises = [];
             await Promise.all(currPromises);
