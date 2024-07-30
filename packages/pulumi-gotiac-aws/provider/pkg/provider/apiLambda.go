@@ -32,7 +32,9 @@ type ApiLambdaArgs struct {
 	// Map of environment variables to pass to the lambda function
 	Environment pulumi.StringMapInput `pulumi:"environment"`
 	// The array of policy arns that should be attachen to the lambda function role
-	PolicyArns pulumi.StringArrayInput `pulumi:"policyArns"`
+	PolicyArns       pulumi.StringArrayInput                 `pulumi:"policyArns"`
+	VpcConfig        lambda.FunctionVpcConfigPtrInput        `pulumi:"vpcConfig"`
+	FileSystemConfig lambda.FunctionFileSystemConfigPtrInput `pulumi:"fileSystemConfig"`
 }
 
 // The ApiLambda component resource.
@@ -65,12 +67,14 @@ func NewApiLambda(ctx *pulumi.Context,
 
 	// Create the lambda function
 	lambdaFunction, err := NewLambda(ctx, name, &LambdaArgs{
-		CodePath:    args.CodePath,
-		HandlerPath: args.HandlerPath,
-		MemorySize:  args.MemorySize,
-		Runtime:     args.Runtime,
-		Environment: args.Environment,
-		PolicyArns:  args.PolicyArns,
+		CodePath:         args.CodePath,
+		HandlerPath:      args.HandlerPath,
+		MemorySize:       args.MemorySize,
+		Runtime:          args.Runtime,
+		Environment:      args.Environment,
+		PolicyArns:       args.PolicyArns,
+		VpcConfig:        args.VpcConfig,
+		FileSystemConfig: args.FileSystemConfig,
 	})
 	if err != nil {
 		return nil, err

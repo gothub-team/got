@@ -3,10 +3,9 @@ import type { View } from '@gothub/got-core';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
 import { pull } from '../pull';
 import { graphAssembler } from '../pull/util/graphAssembler';
-import { s3loader } from '../pull/util/s3loader';
-import type { Signer } from '../pull/types/signer';
 import { cfSigner } from '../pull/util/signer';
 import { createDataCache } from '../pull/caches/dataCache';
+import { efsloader } from '../pull/util/efsloader';
 import { validateAuthed, type AuthedValidationResult } from '@gothub/aws-util/validation';
 
 export const querySchema = (recursiveRef: { $ref: string }) => ({
@@ -91,12 +90,18 @@ export const schema = {
 
 export type Body = View;
 
-const handle = async ({ userEmail, asAdmin, body }: AuthedValidationResult<Body>): Promise<APIGatewayProxyResult> => {
-    const signer: Signer = await cfSigner();
-    const [result] = await pull(body, userEmail, asAdmin, {
+const handle = async ({
+    userEmail,
+    asAdmin,
+    asRole,
+    body,
+}: AuthedValidationResult<Body>): Promise<APIGatewayProxyResult> => {
+    const signer = await cfSigner();
+    // TODO: fix useremail thingies
+    const [result] = await pull(body, userEmail || '', asAdmin, {
         dataCache: createDataCache(),
         graphAssembler: graphAssembler(),
-        loader: s3loader(),
+        loader: efsloader(),
         signer,
     });
 

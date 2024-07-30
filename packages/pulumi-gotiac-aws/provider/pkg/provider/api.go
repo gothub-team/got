@@ -11,7 +11,10 @@ import (
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/acm"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/apigatewayv2"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/cognito"
+	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/ec2"
+	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/efs"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/iam"
+	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/lambda"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/route53"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/ssm"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
@@ -77,6 +80,119 @@ func NewApi(ctx *pulumi.Context,
 
 	component := &Api{}
 	err := ctx.RegisterComponentResource("gotiac:index:Api", name, component, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	vpc, err := ec2.NewDefaultVpc(ctx, "DefaultVPC", &ec2.DefaultVpcArgs{})
+	if err != nil {
+		return nil, err
+	}
+
+	subnet, err := ec2.NewDefaultSubnet(ctx, "default_subnet", &ec2.DefaultSubnetArgs{
+		AvailabilityZone: pulumi.String("eu-central-1a"),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	fileSystem, err := efs.NewFileSystem(ctx, name+"FileSystem", &efs.FileSystemArgs{
+		CreationToken:   pulumi.String(name + "FileSystem"),
+		PerformanceMode: pulumi.String("generalPurpose"),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	mountTarget, err := efs.NewMountTarget(ctx, name+"FileSystemMountTarget", &efs.MountTargetArgs{
+		FileSystemId: fileSystem.ID(),
+		SubnetId:     subnet.ID(),
+		SecurityGroups: pulumi.StringArray{
+			vpc.DefaultSecurityGroupId,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	accessPoint, err := efs.NewAccessPoint(ctx, name+"FileSystemAccessPoint", &efs.AccessPointArgs{
+		FileSystemId: fileSystem.ID(),
+		PosixUser: &efs.AccessPointPosixUserArgs{
+			Gid: pulumi.Int(1000),
+			Uid: pulumi.Int(1000),
+		},
+		RootDirectory: &efs.AccessPointRootDirectoryArgs{
+			Path: pulumi.String("/got"),
+			CreationInfo: &efs.AccessPointRootDirectoryCreationInfoArgs{
+				OwnerGid:    pulumi.Int(1000),
+				OwnerUid:    pulumi.Int(1000),
+				Permissions: pulumi.String("755"),
+			},
+		},
+	}, pulumi.DependsOn([]pulumi.Resource{fileSystem, mountTarget}))
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = ec2.NewVpcEndpoint(ctx, name+"SSMEndpoint", &ec2.VpcEndpointArgs{
+		VpcEndpointType: pulumi.String("Interface"),
+		ServiceName:     pulumi.String("com.amazonaws.eu-central-1.ssm"),
+		VpcId:           vpc.ID(),
+		SubnetIds:       pulumi.StringArray{subnet.ID()},
+		SecurityGroupIds: pulumi.StringArray{
+			vpc.DefaultSecurityGroupId,
+		},
+		Policy: pulumi.String(`{
+			"Version": "2012-10-17",
+			"Statement": [
+				{
+					"Effect": "Allow",
+					"Principal": "*",
+					"Action": ["ssm:GetParameter"],
+					"Resource": "*"
+				}
+			]
+		}`),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	routeTable, err := ec2.NewRouteTable(ctx, name+"RouteTable", &ec2.RouteTableArgs{
+		VpcId: vpc.ID(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = ec2.NewRouteTableAssociation(ctx, name+"SubnetRouteTableAssociation", &ec2.RouteTableAssociationArgs{
+		SubnetId:     subnet.ID(),
+		RouteTableId: routeTable.ID(),
+	}, pulumi.DependsOn([]pulumi.Resource{routeTable}))
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = ec2.NewVpcEndpoint(ctx, name+"S3Endpoint", &ec2.VpcEndpointArgs{
+		VpcEndpointType: pulumi.String("Gateway"),
+		ServiceName:     pulumi.String("com.amazonaws.eu-central-1.s3"),
+		VpcId:           vpc.ID(),
+		RouteTableIds: pulumi.StringArray{
+			routeTable.ID(),
+		},
+		Policy: pulumi.String(`{
+			"Version": "2012-10-17",
+			"Statement": [
+				{
+					"Sid": "Allow-access-to-VPCE",
+					"Effect": "Allow",
+					"Action": ["s3:GetObject","s3:GetObjectVersion", "s3:PutObject"],
+					"Principal": "*",
+					"Resource": "*"
+				}
+			]
+		}`),
+	}, pulumi.DependsOn([]pulumi.Resource{routeTable, vpc}))
 	if err != nil {
 		return nil, err
 	}
@@ -393,6 +509,14 @@ func NewApi(ctx *pulumi.Context,
 			graphStore.mediaBucketReadPolicyArn,
 		},
 		Environment: pullEnv,
+		VpcConfig: &lambda.FunctionVpcConfigArgs{
+			SubnetIds:        pulumi.StringArray{subnet.ID()},
+			SecurityGroupIds: pulumi.StringArray{vpc.DefaultSecurityGroupId},
+		},
+		FileSystemConfig: &lambda.FunctionFileSystemConfigArgs{
+			Arn:            accessPoint.Arn,
+			LocalMountPath: pulumi.String("/mnt/efs"),
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -436,6 +560,14 @@ func NewApi(ctx *pulumi.Context,
 		ExecutionArn: api.ExecutionArn,
 		RoutePath:    pulumi.String("/pull"),
 		Environment:  pullEnv,
+		VpcConfig: &lambda.FunctionVpcConfigArgs{
+			SubnetIds:        pulumi.StringArray{subnet.ID()},
+			SecurityGroupIds: pulumi.StringArray{vpc.DefaultSecurityGroupId},
+		},
+		FileSystemConfig: &lambda.FunctionFileSystemConfigArgs{
+			Arn:            accessPoint.Arn,
+			LocalMountPath: pulumi.String("/mnt/efs"),
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -471,6 +603,14 @@ func NewApi(ctx *pulumi.Context,
 			graphStore.logsBucketWritePolicyArn,
 		},
 		Environment: pushEnv,
+		VpcConfig: &lambda.FunctionVpcConfigArgs{
+			SubnetIds:        pulumi.StringArray{subnet.ID()},
+			SecurityGroupIds: pulumi.StringArray{vpc.DefaultSecurityGroupId},
+		},
+		FileSystemConfig: &lambda.FunctionFileSystemConfigArgs{
+			Arn:            accessPoint.Arn,
+			LocalMountPath: pulumi.String("/mnt/efs"),
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -517,6 +657,14 @@ func NewApi(ctx *pulumi.Context,
 		ExecutionArn: api.ExecutionArn,
 		RoutePath:    pulumi.String("/push"),
 		Environment:  pushEnv,
+		VpcConfig: &lambda.FunctionVpcConfigArgs{
+			SubnetIds:        pulumi.StringArray{subnet.ID()},
+			SecurityGroupIds: pulumi.StringArray{vpc.DefaultSecurityGroupId},
+		},
+		FileSystemConfig: &lambda.FunctionFileSystemConfigArgs{
+			Arn:            accessPoint.Arn,
+			LocalMountPath: pulumi.String("/mnt/efs"),
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -540,6 +688,14 @@ func NewApi(ctx *pulumi.Context,
 		ExecutionArn: api.ExecutionArn,
 		RoutePath:    pulumi.String("/media/complete-upload"),
 		Environment:  completeUploadEnv,
+		VpcConfig: &lambda.FunctionVpcConfigArgs{
+			SubnetIds:        pulumi.StringArray{subnet.ID()},
+			SecurityGroupIds: pulumi.StringArray{vpc.DefaultSecurityGroupId},
+		},
+		FileSystemConfig: &lambda.FunctionFileSystemConfigArgs{
+			Arn:            accessPoint.Arn,
+			LocalMountPath: pulumi.String("/mnt/efs"),
+		},
 	})
 	if err != nil {
 		return nil, err

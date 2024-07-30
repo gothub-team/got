@@ -1,8 +1,8 @@
 import { CORS_HEADERS, internalServerError } from '@gothub/aws-util';
 import { s3completeMultipartUpload } from '@gothub/aws-util/s3';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
-import { s3loader } from '../push/util/s3loader';
-import { s3writer } from '../push/util/s3writer';
+import { efsloader } from '../push/util/efsloader';
+import { efswriter } from '../push/util/efswriter';
 // TODO: we are currently importing utils from push
 import { BUCKET_MEDIA } from '../push/config';
 import { validateAuthed, type AuthedValidationResult } from '@gothub/aws-util/validation';
@@ -33,8 +33,8 @@ export type Body = {
 
 const handle = async ({ body }: AuthedValidationResult<Body>): Promise<APIGatewayProxyResult> => {
     const { uploadId, partEtags } = body;
-    const loader = s3loader();
-    const writer = s3writer();
+    const loader = efsloader();
+    const writer = efswriter();
 
     const fileKey = await loader.getUpload(uploadId);
     if (!fileKey) {

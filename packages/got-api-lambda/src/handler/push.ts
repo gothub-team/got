@@ -2,11 +2,12 @@ import { CORS_HEADERS, internalServerError } from '@gothub/aws-util';
 import type { Graph } from '@gothub/got-core';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Context, Handler } from 'aws-lambda';
 import { push } from '../push';
-import { s3loader } from '../push/util/s3loader';
-import { s3writer } from '../push/util/s3writer';
 import { cfSigner } from '../push/util/signer';
 import { graphAssembler } from '../push/util/graphAssembler';
 import { createDataCache } from '../push/caches/dataCache';
+import { efswriter } from '../push/util/efswriter';
+import { efsloader } from '../push/util/efsloader';
+
 import { validateAuthed, type AuthedValidationResult } from '@gothub/aws-util/validation';
 
 export const schema = {
@@ -281,12 +282,12 @@ const handle = async (
     context: Context,
 ): Promise<APIGatewayProxyResult> => {
     const signer = await cfSigner();
-    const writer = s3writer();
-    const [result, changelog] = await push(body, userEmail, asRole || 'user', asAdmin, {
+    const writer = efswriter();
+    const [result, changelog] = await push(body, userEmail || '', asRole || 'user', asAdmin, {
         dataCache: createDataCache(),
         graphAssembler: graphAssembler(),
         changelogAssembler: graphAssembler(),
-        loader: s3loader(),
+        loader: efsloader(),
         writer: writer,
         signer,
     });
