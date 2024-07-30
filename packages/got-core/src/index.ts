@@ -54,8 +54,10 @@ export type * from './types/actions';
 export type * from './types/graph';
 export type * from './types/graphObjects';
 export type * from './types/view';
-export * from './store/createGraph.js';
-export * from './store/createCurriedGraph.js';
+export * from './store/createGraph';
+export * from './store/createCurriedGraph';
+export * from './local-store/createLocalGraph';
+export * from './local-store/createLocalCurriedGraph';
 
 export * from './utils/util.js';
 export * from './reducer/reducer.js';
