@@ -127,8 +127,14 @@ export const push = async (
         return obj;
     };
 
-    const updateReadRight = async (nodeId: string, principalType: string, principal: string, right: boolean) => {
-        const exists = await loader.getRead(nodeId, principalType, principal);
+    const updateReadRight = async (
+        nodeId: string,
+        principalType: string,
+        principal: string,
+        right: boolean,
+        create: boolean,
+    ) => {
+        const exists = create ? false : await loader.getRead(nodeId, principalType, principal);
         if (!!exists !== right) {
             if (right) {
                 await writer.setRead(nodeId, principalType, principal, true);
@@ -139,8 +145,14 @@ export const push = async (
             }
         }
     };
-    const updateWriteRight = async (nodeId: string, principalType: string, principal: string, right: boolean) => {
-        const exists = await loader.getWrite(nodeId, principalType, principal);
+    const updateWriteRight = async (
+        nodeId: string,
+        principalType: string,
+        principal: string,
+        right: boolean,
+        create: boolean,
+    ) => {
+        const exists = create ? false : await loader.getWrite(nodeId, principalType, principal);
         if (!!exists !== right) {
             if (right) {
                 await writer.setWrite(nodeId, principalType, principal, true);
@@ -151,8 +163,14 @@ export const push = async (
             }
         }
     };
-    const updateAdminRight = async (nodeId: string, principalType: string, principal: string, right: boolean) => {
-        const exists = await loader.getAdmin(nodeId, principalType, principal);
+    const updateAdminRight = async (
+        nodeId: string,
+        principalType: string,
+        principal: string,
+        right: boolean,
+        create: boolean,
+    ) => {
+        const exists = create ? false : await loader.getAdmin(nodeId, principalType, principal);
         if (!!exists !== right) {
             if (right) {
                 await writer.setAdmin(nodeId, principalType, principal, true);
@@ -168,8 +186,8 @@ export const push = async (
         // TODO: add to changelog? owner log was previously not created
     };
 
-    const updateNode = async (nodeId: string, node: Node | null) => {
-        const nodeJSON = await loader.getNode(nodeId);
+    const updateNode = async (nodeId: string, node: Node | null, create: boolean) => {
+        const nodeJSON = create ? null : await loader.getNode(nodeId);
         if (!nodeJSON && node) {
             await writer.setNode(nodeId, node);
             writeNodeChangelog(nodeId, `{"old":null,"new":${JSON.stringify(node)}}`);
@@ -189,10 +207,10 @@ export const push = async (
         const principalType = asRole === 'user' ? 'user' : 'role';
         const principal = asRole === 'user' ? userEmail : asRole;
         await Promise.all([
-            updateNode(nodeId, node),
-            updateReadRight(nodeId, principalType, principal, true),
-            updateWriteRight(nodeId, principalType, principal, true),
-            updateAdminRight(nodeId, principalType, principal, true),
+            updateNode(nodeId, node, true),
+            updateReadRight(nodeId, principalType, principal, true, true),
+            updateWriteRight(nodeId, principalType, principal, true, true),
+            updateAdminRight(nodeId, principalType, principal, true, true),
             updateOwner(nodeId, userEmail),
         ]);
     };
@@ -200,7 +218,7 @@ export const push = async (
     const updateNodesAsync = async (nodeId: string, node: Node | false) => {
         const canWrite = await canWriteNode(nodeId);
         if (canWrite) {
-            await updateNode(nodeId, node ? node : null);
+            await updateNode(nodeId, node ? node : null, false);
             writeNode(nodeId, '{"statusCode":200}');
             return;
         }
@@ -322,19 +340,19 @@ export const push = async (
             const readFrom = fromRights?.get(user)?.get('read') === 'true';
             const readTo = toRights?.get(user)?.get('read') === 'true';
             if (readFrom !== readTo) {
-                promises.push(updateReadRight(toId, principalType, user, readFrom));
+                promises.push(updateReadRight(toId, principalType, user, readFrom, false));
             }
 
             const writeFrom = fromRights?.get(user)?.get('write') === 'true';
             const writeTo = toRights?.get(user)?.get('write') === 'true';
             if (writeFrom !== writeTo) {
-                promises.push(updateWriteRight(toId, principalType, user, writeFrom));
+                promises.push(updateWriteRight(toId, principalType, user, writeFrom, false));
             }
 
             const adminFrom = fromRights?.get(user)?.get('admin') === 'true';
             const adminTo = toRights?.get(user)?.get('admin') === 'true';
             if (adminFrom !== adminTo) {
-                promises.push(updateAdminRight(toId, principalType, user, adminFrom));
+                promises.push(updateAdminRight(toId, principalType, user, adminFrom, false));
             }
         }
 
@@ -387,11 +405,11 @@ export const push = async (
         val: boolean,
     ) => {
         if (right === 'read') {
-            await updateReadRight(nodeId, principalType, principal, val);
+            await updateReadRight(nodeId, principalType, principal, val, false);
         } else if (right === 'write') {
-            await updateWriteRight(nodeId, principalType, principal, val);
+            await updateWriteRight(nodeId, principalType, principal, val, false);
         } else if (right === 'admin') {
-            await updateAdminRight(nodeId, principalType, principal, val);
+            await updateAdminRight(nodeId, principalType, principal, val, false);
         }
 
         writePrincipalRight(nodeId, principalType, principal, right, '{"statusCode":200}');
@@ -585,10 +603,14 @@ export const push = async (
     };
 
     await updateNodes();
-    await updateEdges();
-    await inheritRights();
-    await updateRights();
-    await updateFiles();
+    const inheritRightsPromise = inheritRights();
+    const updateEdgesPromise = updateEdges();
+    const updateFilesPromise = updateFiles();
+
+    await inheritRightsPromise;
+    const updateRightsPromise = updateRights();
+
+    await Promise.all([updateEdgesPromise, updateRightsPromise, updateFilesPromise]);
 
     await awaitPromises();
 
