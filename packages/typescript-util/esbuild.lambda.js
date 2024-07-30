@@ -49,7 +49,7 @@ const buildTs = async (options = {}) => {
     await build({
         logLevel: 'info',
         bundle: true,
-        // minify: true,
+        minify: true,
         treeShaking: true,
         external: ['aws-sdk*', '@aws-sdk*', 'aws-lambda', ...builtinModules],
         target: 'node20.0',
