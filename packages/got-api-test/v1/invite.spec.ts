@@ -1,5 +1,5 @@
 import { describe, beforeAll, beforeEach, it, expect } from 'bun:test';
-import { type GotApi } from '@gothub/got-api';
+import type { GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import { createMailClient } from './shared/mail';
 import { GOT_API_URL, MAIL_IMAP_SERVER, MAIL_USERNAME, MAIL_USER_PW, parseEnv } from '@gothub/typescript-util';

@@ -1,4 +1,4 @@
-import { type LoaderLog } from '../caches/logsCache';
+import type { LoaderLog } from './logs';
 
 export type FileRef = {
     prop: string;

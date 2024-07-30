@@ -5,8 +5,8 @@ import type { ErrorGraph, Graph } from '../types/graph';
 import type { Metadata, Node, RightTypes } from '../types/graphObjects';
 import type { State } from '../types/state';
 import type { View } from '../types/view';
-import { isEmptyGraph, selectDeleteGraph, selectSuccessAndErrorGraphs } from '../utils/graph.js';
-import { mergeGraphsRight } from '../utils/mergeGraph.js';
+import { isEmptyGraph, selectDeleteGraph, selectSuccessAndErrorGraphs } from '../utils/graph';
+import { mergeGraphsRight } from '../utils/mergeGraph';
 import {
     edgeFromStack,
     filesFromStack,
@@ -15,10 +15,10 @@ import {
     reverseEdgeFromStack,
     rightFromStack,
     selectGraphStack,
-} from '../utils/stack.js';
-import { createFileUploader } from '../utils/uploads.js';
+} from '../utils/stack';
+import { createFileUploader } from '../utils/uploads';
 import type { Subscriber } from '../utils/util';
-import { subgraphFromStack, viewResFromStack } from '../utils/view.js';
+import { subgraphFromStack, viewResFromStack } from '../utils/view';
 
 export type Selector = <TRes>(fnSelect: (state: State) => TRes) => TRes;
 

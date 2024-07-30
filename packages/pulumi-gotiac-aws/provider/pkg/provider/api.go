@@ -759,7 +759,9 @@ func NewApi(ctx *pulumi.Context,
 		ApiId:        api.ID(),
 		ExecutionArn: api.ExecutionArn,
 		RoutePath:    pulumi.String("/api"),
-		Environment:  pulumi.StringMap{},
+		Environment: pulumi.StringMap{
+			"API_BASE_URL": pulumi.Sprintf("https://%s/", args.DomainName),
+		},
 	})
 	if err != nil {
 		return nil, err

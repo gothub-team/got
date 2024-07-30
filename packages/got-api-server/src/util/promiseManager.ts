@@ -1,14 +1,13 @@
 export const promiseManager = () => {
     let promises: Promise<unknown>[] = [];
 
-    const addPromise = (promise: Promise<void>) => {
+    const addPromise = <TRes>(promise: Promise<TRes>): Promise<TRes> => {
         promises.push(promise);
+        return promise;
     };
 
     const awaitPromises = async () => {
-        while (true) {
-            if (promises.length <= 0) break;
-
+        while (promises.length > 0) {
             console.log(`Awaiting ${promises.length} promises...`);
             const currPromises = promises;
             promises = [];

@@ -1,6 +1,6 @@
 import { assocMap2, assocMap3 } from '@gothub/aws-util';
-import { type Rights, type ExistsCache, type RightType } from '../types/existCache';
-import { pathMap2, pathMap3 } from '@gothub/aws-util/src/pathMap';
+import type { Rights, ExistsCache, RightType } from '../types/existCache';
+import { pathMap2, pathMap3 } from '@gothub/aws-util';
 
 export const createExistsCache: () => ExistsCache = () => {
     /* #region Nodes */

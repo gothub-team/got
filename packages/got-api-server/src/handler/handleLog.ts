@@ -1,8 +1,8 @@
 import { forEachObjDepth as _forEachObjDepth } from '@gothub/got-core';
-import { type DataCache } from '../types/dataCache';
-import { type ExistsCache } from '../types/existCache';
-import { type Changes, type Changeset } from '../types/changeset';
-import { s3get } from '@gothub/aws-util';
+import type { DataCache } from '../types/dataCache';
+import type { ExistsCache } from '../types/existCache';
+import type { Changes, Changeset } from '../types/changeset';
+import { s3get } from '@gothub/aws-util/s3';
 import { BUCKET_LOGS } from '../config';
 
 const forEachObjDepth = _forEachObjDepth as (

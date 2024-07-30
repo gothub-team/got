@@ -1,9 +1,9 @@
-import { type ExistsCache } from '../types/existCache';
-import { type DataCache } from '../types/dataCache';
-import { type Loader } from '../types/loader';
-import { type View } from '@gothub/got-core';
+import type { ExistsCache } from '../types/existCache';
+import type { DataCache } from '../types/dataCache';
+import type { Loader } from '../types/loader';
+import type { View } from '@gothub/got-core';
 import { pull } from '../handler/pull';
-import { type Signer } from '../types/signer';
+import type { Signer } from '../types/signer';
 import { emptyAssembler } from '../util/emptyAssembler';
 
 export const initPull = async (existsCache: ExistsCache, dataCache: DataCache, signer: Signer, loader: Loader) => {

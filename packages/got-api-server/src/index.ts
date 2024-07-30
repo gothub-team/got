@@ -1,12 +1,13 @@
 import * as os from 'os';
 import * as v8 from 'v8';
 import equals from 'fast-deep-equal';
-import { type Graph, type View } from '@gothub/got-core';
-import { type Polka } from 'polka';
+import polka from 'polka';
+import type { Graph, View } from '@gothub/got-core';
 import { json } from 'body-parser';
-import { type RequestHandler } from 'express';
-import { type Signer } from './types/signer';
-import { type LogBody, handleLog } from './handler/handleLog';
+import type { RequestHandler } from 'express';
+import type { Signer } from './types/signer';
+import type { LogBody } from './handler/handleLog';
+import { handleLog } from './handler/handleLog';
 import { createExistsCache } from './caches/existsCache';
 import { createDataCache } from './caches/dataCache';
 import { initCaches } from './caches/initCaches';
@@ -17,9 +18,6 @@ import { s3loader } from './util/s3loader';
 import { graphAssembler } from './util/graphAssembler';
 import { initPull } from './handler/initPull';
 import { graphWithoutUrls } from './util/graphWithoutUrls';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const polka = require('polka') as () => Polka;
 
 const PORT = process.env.PORT || 4000;
 
