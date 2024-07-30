@@ -1,7 +1,7 @@
-import { type Graph, type NodeFilesView } from '../types/graph.js';
-import { type Metadata, type NodeFileView, type NodeRightsView, type Node } from '../types/graphObjects.js';
-import { type State } from '../types/state.js';
-import { mergeDeepRight, mergeGraphObjRight } from './util.js';
+import type { Graph, NodeFilesView } from '../types/graph';
+import type { Metadata, NodeFileView, NodeRightsView, Node } from '../types/graphObjects';
+import type { State } from '../types/state';
+import { mergeDeepRight, mergeGraphObjRight } from './util';
 
 export const selectGraphStack = (state: State, stack: string[]): Graph[] => {
     const acc = [];

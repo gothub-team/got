@@ -1,5 +1,5 @@
 import { describe, beforeAll, beforeEach, it, expect } from 'bun:test';
-import { type GotApi } from '@gothub/got-api';
+import type { GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
 import { createUserApi } from './shared';
 import type { Graph, PushResult } from '@gothub/got-core';

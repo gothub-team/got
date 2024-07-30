@@ -1,7 +1,8 @@
-import { getEmptyStore, gotReducer } from '../reducer/reducer.js';
-import { configureCreateCurriedGraph } from '../store/createCurriedGraph.js';
-import { createCurriedStore } from '../store/curried.js';
-import { type ErrorHandlers, createErrorHandledStore } from '../store/errorHandling.js';
+import { getEmptyStore, gotReducer } from '../reducer/reducer';
+import { configureCreateCurriedGraph } from '../store/createCurriedGraph';
+import { createCurriedStore } from '../store/curried';
+import type { ErrorHandlers } from '../store/errorHandling';
+import { createErrorHandledStore } from '../store/errorHandling';
 import type { Selector } from '../store/store';
 import type { GOT_ACTION } from '../types/actions';
 import type { StoreAPI } from '../types/api';

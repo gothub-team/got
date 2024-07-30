@@ -17,7 +17,6 @@
     },
     "scripts": {
         "generate:client-js": "bun client-js/generate.ts",
-        "build:lambda": "bun ./esbuild.lambda.js",
         "build": "bun ./esbuild.js",
         "lint": "eslint ."
     },

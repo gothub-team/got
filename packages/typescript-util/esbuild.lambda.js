@@ -4,36 +4,45 @@ const { build } = require('esbuild');
 const { builtinModules } = require('module');
 
 // Function to recursively get all files in a directory
-function getAllFiles(dirPath, arrayOfFiles = []) {
-    const entries = fs.readdirSync(dirPath);
+const getAllFiles = (entry) => {
+    if (!fs.statSync(entry).isDirectory()) {
+        return [entry];
+    }
 
-    const dirs = entries.filter((file) => fs.statSync(`${dirPath}/${file}`).isDirectory());
-    const files = entries.filter((file) => !fs.statSync(`${dirPath}/${file}`).isDirectory());
+    const arrayOfFiles = [];
+    const INNER = (dirPath) => {
+        const entries = fs.readdirSync(dirPath);
 
-    dirs.forEach((dir) => {
-        arrayOfFiles = getAllFiles(`${dirPath}/${dir}`, arrayOfFiles);
-    });
+        const dirs = entries.filter((file) => fs.statSync(`${dirPath}/${file}`).isDirectory());
+        const files = entries.filter((file) => !fs.statSync(`${dirPath}/${file}`).isDirectory());
 
-    files.forEach((file) => {
-        if (file.endsWith('.js') && !file.endsWith('.spec.js')) {
-            arrayOfFiles.push(path.join(dirPath, '/', file));
-        } else if (file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts')) {
-            arrayOfFiles.push(path.join(dirPath, '/', file));
-        }
-    });
+        dirs.forEach((dir) => {
+            INNER(`${dirPath}/${dir}`);
+        });
+
+        files.forEach((file) => {
+            if (file.endsWith('.js') && !file.endsWith('.spec.js')) {
+                arrayOfFiles.push(path.join(dirPath, '/', file));
+            } else if (file.endsWith('.ts') && !file.endsWith('.spec.ts') && !file.endsWith('.d.ts')) {
+                arrayOfFiles.push(path.join(dirPath, '/', file));
+            }
+        });
+    };
+
+    INNER(entry);
 
     return arrayOfFiles;
-}
+};
 
 const clean = (targetDir) => {
     fs.existsSync(targetDir) && fs.rmSync(targetDir, { recursive: true, force: true });
 };
 
-const buildTs = async () => {
-    const srcDir = './lambda/auth';
-    const targetDir = './dist/lambda/auth';
+const buildTs = async (options = {}) => {
+    const srcDir = options.srcDir || './src/handler';
+    const outDir = options.outDir || './dist/lambda';
 
-    clean(targetDir);
+    clean(outDir);
 
     const entryFiles = getAllFiles(srcDir);
     // compiled code
@@ -42,12 +51,12 @@ const buildTs = async () => {
         bundle: true,
         minify: true,
         treeShaking: true,
-        external: ['aws-sdk*', '@aws-sdk*', ...builtinModules],
+        external: ['aws-sdk*', '@aws-sdk*', 'aws-lambda', ...builtinModules],
         target: 'node20.0',
         platform: 'node',
         format: 'cjs',
         entryPoints: entryFiles,
-        outdir: targetDir,
+        outdir: outDir,
     });
 };
 

@@ -2,8 +2,8 @@ import type { Graph } from '../types/graph';
 import type { Metadata, Node, RightTypes } from '../types/graphObjects';
 import type { State } from '../types/state';
 import type { View } from '../types/view';
-import { createInputValidator } from '../utils/errors.js';
-import { decideStack } from '../utils/util.js';
+import { createInputValidator } from '../utils/errors';
+import { decideStack } from '../utils/util';
 import type { Store } from './store';
 
 export const configureCreateGraph = (store: Store, onError: (e: Error) => void) => {
