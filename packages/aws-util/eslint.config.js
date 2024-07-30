@@ -1,5 +1,5 @@
 // @ts-check
 
-import eslintFrontend from '@gothub/typescript-util/eslint-frontend.config.js';
+import eslintConfig from '@gothub/typescript-util/eslint-backend.config.js';
 
-export default [...eslintFrontend];
+export default [...eslintConfig];

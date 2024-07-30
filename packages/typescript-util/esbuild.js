@@ -42,10 +42,8 @@ const buildTs = async (options = {}) => {
         target: 'node18.0',
         platform: 'node',
         format: 'cjs',
-        external: options?.cjs?.external || [],
         entryPoints: entryFiles,
         outdir: './dist/cjs',
-        // outExtension: { '.js': '.cjs' },
     });
 
     if (options.minBundle) {
@@ -73,7 +71,7 @@ const buildTs = async (options = {}) => {
             platform: 'node',
             format: 'cjs',
             external: options?.min?.external || [],
-            entryPoints: ['./src/index.ts'],
+            entryPoints: [`${srcDir}/index.ts`],
             outfile: './dist/min-bundle/index.js',
         });
     }
@@ -86,7 +84,6 @@ const buildTs = async (options = {}) => {
         target: 'node18.0',
         platform: 'node',
         format: 'esm',
-        external: options?.esm?.external || [],
         entryPoints: entryFiles,
         outdir: './dist/module',
         plugins: [

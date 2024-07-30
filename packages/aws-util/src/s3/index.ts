@@ -10,8 +10,8 @@ import {
     S3Client,
     UploadPartCommand,
 } from '@aws-sdk/client-s3';
-import { AWS_REGION, CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER, MEDIA_DOMAIN } from './config.js';
-import { signUrl } from './cloudfront.js';
+import { AWS_REGION, CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER, MEDIA_DOMAIN } from '../config.js';
+import { signUrl } from '../cloudfront/index.js';
 
 const client = new S3Client({
     region: AWS_REGION,

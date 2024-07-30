@@ -42,7 +42,7 @@ const buildTs = async (options = {}) => {
     const srcDir = options.srcDir || './src/handler';
     const outDir = options.outDir || './dist/lambda';
 
-    // clean(outDir);
+    clean(outDir);
 
     const entryFiles = getAllFiles(srcDir);
     // compiled code
@@ -51,7 +51,7 @@ const buildTs = async (options = {}) => {
         bundle: true,
         // minify: true,
         treeShaking: true,
-        external: ['aws-sdk*', '@aws-sdk*', ...builtinModules],
+        external: ['aws-sdk*', '@aws-sdk*', 'aws-lambda', ...builtinModules],
         target: 'node20.0',
         platform: 'node',
         format: 'cjs',

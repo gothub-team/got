@@ -1,7 +1,7 @@
-import { type Graph } from '../types/graph';
-import { type View } from '../types/view';
+import type { Graph } from '../types/graph';
+import type { View } from '../types/view';
 import { createInputValidator } from '../utils/errors';
-import { type CurriedStore } from './curried';
+import type { CurriedStore } from './curried';
 
 export const configureCreateCurriedGraph = (store: CurriedStore, onError: (e: Error) => void) => {
     const validateError = createInputValidator(onError);

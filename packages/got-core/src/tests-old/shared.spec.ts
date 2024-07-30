@@ -3,7 +3,8 @@ import { test, expect, mock } from 'bun:test';
 import { assocPathMutate } from '@gothub-team/got-util';
 import * as R from 'ramda';
 import { createCurriedStore } from '../store/curried';
-import { type CreateErrorHandledStoreOptions, createErrorHandledStore } from '../store/errorHandling';
+import type { CreateErrorHandledStoreOptions } from '../store/errorHandling';
+import { createErrorHandledStore } from '../store/errorHandling';
 import { gotReducer } from '../reducer/reducer';
 import type { StoreAPI } from '../types/api';
 

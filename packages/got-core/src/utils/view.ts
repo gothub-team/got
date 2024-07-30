@@ -1,8 +1,8 @@
-import { type Edges, type Files, type Graph, type Nodes, type Rights } from '../types/graph';
-import { type Metadata, type NodeFileView, type Node } from '../types/graphObjects';
+import type { Edges, Files, Graph, Nodes, Rights } from '../types/graph';
+import type { Metadata, NodeFileView, Node } from '../types/graphObjects';
 import { assocPathMutate, isEmptyObject } from './util';
-import { type EdgeView, type NodeView, type View } from '../types/view';
-import { type NodeBagInternal, type ViewResult } from '../types/ViewResult';
+import type { EdgeView, NodeView, View } from '../types/view';
+import type { NodeBagInternal, ViewResult } from '../types/ViewResult';
 import {
     edgeFromStack,
     filesFromStack,
@@ -10,7 +10,7 @@ import {
     nodeFromStack,
     reverseEdgeFromStack,
     rightFromStack,
-} from './stack';
+} from './stack.js';
 
 export const viewResFromStack = <TView extends View>(graphStack: Graph[], view: TView): ViewResult<TView> => {
     const queryNode = <TSubView extends NodeView | EdgeView>(

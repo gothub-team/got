@@ -1,9 +1,9 @@
 import type { PushObservables } from '../store/store';
-import { type GOT_UPLOAD_ACTION } from '../types/actions';
-import { type StoreAPI } from '../types/api';
-import { type Graph, type PushResult } from '../types/graph';
-import { type OK_UPLOAD, type UploadNodeFileView } from '../types/graphObjects';
-import { type FileStore } from '../types/state';
+import type { GOT_UPLOAD_ACTION } from '../types/actions';
+import type { StoreAPI } from '../types/api';
+import type { Graph, PushResult } from '../types/graph';
+import type { OK_UPLOAD, UploadNodeFileView } from '../types/graphObjects';
+import type { FileStore } from '../types/state';
 import { createSubscribable, forEachObjDepth } from './util';
 
 export const createFileUploader = (

@@ -16,7 +16,7 @@ import {
     SignUpCommand,
     type UserType,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { AWS_REGION, CLIENT_ID, USER_POOL_ID } from './config.js';
+import { AWS_REGION, CLIENT_ID, USER_POOL_ID } from '../config.js';
 
 const USER_NOT_VERIFIED_ERROR = {
     name: 'UserNotVerifiedError',

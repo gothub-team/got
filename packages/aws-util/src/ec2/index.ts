@@ -1,5 +1,5 @@
 import { DescribeInstancesCommand, EC2Client, type Instance } from '@aws-sdk/client-ec2';
-import { AWS_REGION } from './config.js';
+import { AWS_REGION } from '../config.js';
 
 const client = new EC2Client({
     region: AWS_REGION,

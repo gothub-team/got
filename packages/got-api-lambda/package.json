@@ -3,7 +3,8 @@
     "version": "0.0.1",
     "type": "module",
     "scripts": {
-        "lint": "eslint .",
+        "lint": "eslint ./src",
+        "typecheck": "tsc --noEmit",
         "build": "bun esbuild.js"
     },
     "devDependencies": {
@@ -16,6 +17,7 @@
         "typescript": "^5.0.0"
     },
     "dependencies": {
+        "@aws-crypto/client-node": "^4.0.0",
         "@gothub/aws-util": "workspace:*",
         "uuid": "^10.0.0"
     }

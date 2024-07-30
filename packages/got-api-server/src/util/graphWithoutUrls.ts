@@ -1,4 +1,4 @@
-import { type Graph } from '@gothub/got-core';
+import type { Graph } from '@gothub/got-core';
 
 export const graphWithoutUrls = (graph: Graph) => {
     const files = graph.files || {};

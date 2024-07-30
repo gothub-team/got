@@ -1,17 +1,11 @@
-import {
-    CORS_HEADERS,
-    internalServerError,
-    s3completeMultipartUpload,
-    validate,
-    type ValidationResult,
-} from '@gothub/aws-util';
+import { CORS_HEADERS, internalServerError } from '@gothub/aws-util';
+import { s3completeMultipartUpload } from '@gothub/aws-util/s3';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
-import { BUCKET_MEDIA } from '../push/config';
 import { efsloader } from '../push/util/efsloader';
 import { efswriter } from '../push/util/efswriter';
 // TODO: we are currently importing utils from push
-
-const AUTHENTICATED = true;
+import { BUCKET_MEDIA } from '../push/config';
+import { validateAuthed, type AuthedValidationResult } from '@gothub/aws-util/validation';
 
 export const schema = {
     type: 'object',
@@ -37,7 +31,7 @@ export type Body = {
     partEtags: string[];
 };
 
-const handle = async ({ body }: ValidationResult<Body>): Promise<APIGatewayProxyResult> => {
+const handle = async ({ body }: AuthedValidationResult<Body>): Promise<APIGatewayProxyResult> => {
     const { uploadId, partEtags } = body;
     const loader = efsloader();
     const writer = efswriter();
@@ -63,7 +57,7 @@ const handle = async ({ body }: ValidationResult<Body>): Promise<APIGatewayProxy
 
 export const handleHttp: APIGatewayProxyHandler = async (event) => {
     try {
-        const validationResult = await validate<Body>(schema, event, { auth: AUTHENTICATED });
+        const validationResult = await validateAuthed<Body>(schema, event);
         const result = await handle(validationResult);
         return result;
     } catch (err) {
@@ -73,7 +67,7 @@ export const handleHttp: APIGatewayProxyHandler = async (event) => {
 
 export const handleInvoke: Handler = async ({ body }) => {
     try {
-        const result = await handle(body as ValidationResult<Body>);
+        const result = await handle(body as AuthedValidationResult<Body>);
         return result;
     } catch (err) {
         return internalServerError(err as Error);

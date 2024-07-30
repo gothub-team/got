@@ -1,4 +1,4 @@
-import { type View } from '@gothub/got-core';
+import type { View } from '@gothub/got-core';
 
 export type WithEdgeTypes = {
     fromType: string;

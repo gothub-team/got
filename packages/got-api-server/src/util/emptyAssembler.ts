@@ -1,4 +1,4 @@
-import { type GraphAssembler } from '../types/graphAssembler';
+import type { GraphAssembler } from '../types/graphAssembler';
 import type { GraphAssemblerLog } from '../types/logs';
 
 export const emptyAssembler = (): GraphAssembler => {

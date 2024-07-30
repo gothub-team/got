@@ -3,19 +3,15 @@ import {
     INVITE_USER_VALIDATION_VIEW,
     PULL_LAMBDA_NAME,
     UserExistsError,
-    cognitoInviteUser,
-    cognitoUserExists,
     internalServerError,
     nodeForbidden,
-    invokeLambda,
     jsonParseOr,
-    validate,
-    type ValidationResult,
 } from '@gothub/aws-util';
+import { invokeLambda } from '@gothub/aws-util/lambda';
+import { cognitoInviteUser, cognitoUserExists } from '@gothub/aws-util/cognito';
 import { v4 } from 'uuid';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
-
-const AUTHENTICATED = true;
+import { validateAuthed, type AuthedValidationResult } from '@gothub/aws-util/validation';
 
 export const schema = {
     type: 'object',
@@ -42,7 +38,7 @@ export type Body = {
     templateId?: string;
 };
 
-const handle = async ({ userEmail, body, asAdmin }: ValidationResult<Body>): Promise<APIGatewayProxyResult> => {
+const handle = async ({ userEmail, body, asAdmin }: AuthedValidationResult<Body>): Promise<APIGatewayProxyResult> => {
     const { email, id, templateId } = body;
 
     const userExists = await cognitoUserExists(email);
@@ -76,7 +72,7 @@ const handle = async ({ userEmail, body, asAdmin }: ValidationResult<Body>): Pro
 
 export const handleHttp: APIGatewayProxyHandler = async (event) => {
     try {
-        const validationResult = await validate<Body>(schema, event, { auth: AUTHENTICATED });
+        const validationResult = await validateAuthed<Body>(schema, event);
         const result = await handle(validationResult);
         return result;
     } catch (err) {
@@ -86,7 +82,7 @@ export const handleHttp: APIGatewayProxyHandler = async (event) => {
 
 export const handleInvoke: Handler = async ({ body }) => {
     try {
-        const result = await handle(body as ValidationResult<Body>);
+        const result = await handle(body as AuthedValidationResult<Body>);
         return result;
     } catch (err) {
         return internalServerError(err as Error);

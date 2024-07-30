@@ -11,7 +11,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.callAsync = exports.lazyLoad = exports.resourceOptsDefaults = exports.getVersion = exports.getEnvNumber = exports.getEnvBoolean = exports.getEnv = void 0;
+exports.getEnv = getEnv;
+exports.getEnvBoolean = getEnvBoolean;
+exports.getEnvNumber = getEnvNumber;
+exports.getVersion = getVersion;
+exports.resourceOptsDefaults = resourceOptsDefaults;
+exports.lazyLoad = lazyLoad;
+exports.callAsync = callAsync;
 const runtime = require("@pulumi/pulumi/runtime");
 function getEnv(...vars) {
     for (const v of vars) {
@@ -22,7 +28,6 @@ function getEnv(...vars) {
     }
     return undefined;
 }
-exports.getEnv = getEnv;
 function getEnvBoolean(...vars) {
     const s = getEnv(...vars);
     if (s !== undefined) {
@@ -37,7 +42,6 @@ function getEnvBoolean(...vars) {
     }
     return undefined;
 }
-exports.getEnvBoolean = getEnvBoolean;
 function getEnvNumber(...vars) {
     const s = getEnv(...vars);
     if (s !== undefined) {
@@ -48,7 +52,6 @@ function getEnvNumber(...vars) {
     }
     return undefined;
 }
-exports.getEnvNumber = getEnvNumber;
 function getVersion() {
     let version = require('./package.json').version;
     // Node allows for the version to be prefixed by a "v", while semver doesn't.
@@ -58,12 +61,10 @@ function getVersion() {
     }
     return version;
 }
-exports.getVersion = getVersion;
 /** @internal */
 function resourceOptsDefaults() {
-    return { version: getVersion(), pluginDownloadURL: "https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.1.13" };
+    return { version: getVersion(), pluginDownloadURL: "https://github.com/gothub-team/got/releases/download/packages/pulumi-gotiac-aws/v0.1.14" };
 }
-exports.resourceOptsDefaults = resourceOptsDefaults;
 /** @internal */
 function lazyLoad(exports, props, loadModule) {
     for (let property of props) {
@@ -75,7 +76,6 @@ function lazyLoad(exports, props, loadModule) {
         });
     }
 }
-exports.lazyLoad = lazyLoad;
 function callAsync(tok, props, res, opts) {
     return __awaiter(this, void 0, void 0, function* () {
         const o = runtime.call(tok, props, res);
@@ -97,5 +97,4 @@ function callAsync(tok, props, res, opts) {
         return value;
     });
 }
-exports.callAsync = callAsync;
 //# sourceMappingURL=utilities.js.map
