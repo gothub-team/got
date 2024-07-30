@@ -1,5 +1,6 @@
-import Ajv, { type Schema } from 'ajv';
-import { type APIGatewayProxyEvent } from 'aws-lambda';
+import type { Schema } from 'ajv';
+import { Ajv } from 'ajv';
+import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { decodeJwt, jsonParseOr } from './util.js';
 import { ADMIN_EMAILS } from './config.js';
 import { badRequest, unauthorized } from './errors.js';

@@ -4,7 +4,7 @@ import {
     ECSClient,
     ListTasksCommand,
 } from '@aws-sdk/client-ecs';
-import { AWS_REGION } from './config.js';
+import { AWS_REGION } from '../config.js';
 
 const client = new ECSClient({
     region: AWS_REGION,

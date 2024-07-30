@@ -4,13 +4,13 @@ import {
     validate,
     matchEmail,
     InvalidEmailError,
-    cognitoInitiateAuthSrp,
     UserNotFoundError,
     InvalidSrpAError,
     UserNotVerifiedError,
     PasswordResetRequiredError,
     type ValidationResult,
 } from '@gothub/aws-util';
+import { cognitoInitiateAuthSrp } from '@gothub/aws-util/cognito';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
 
 const AUTHENTICATED = false;

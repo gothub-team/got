@@ -8,16 +8,18 @@ import {
     UserNotVerifiedError,
     VerificationCodeExpiredError,
     VerificationCodeMismatchError,
-    cognitoAdminInitiateAuthPassword,
-    cognitoConfirmForgotPassword,
-    cognitoGetUser,
-    cognitoRespondToPasswordChallenge,
     internalServerError,
     matchDigits,
     matchEmail,
     validate,
     type ValidationResult,
 } from '@gothub/aws-util';
+import {
+    cognitoAdminInitiateAuthPassword,
+    cognitoConfirmForgotPassword,
+    cognitoGetUser,
+    cognitoRespondToPasswordChallenge,
+} from '@gothub/aws-util/cognito';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
 
 const AUTHENTICATED = false;

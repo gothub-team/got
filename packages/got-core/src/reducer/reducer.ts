@@ -1,8 +1,8 @@
 import type { GOT_ACTION } from '../types/actions';
 import type { ErrorGraph, Graph } from '../types/graph';
 import type { State } from '../types/state';
-import { mergeGraphsRight, mergeOverwriteGraphsRight } from '../utils/mergeGraph.js';
-import { assocPathMutate, dissocPathMutate, getPathOr, mergeGraphObjRight } from '../utils/util.js';
+import { mergeGraphsRight, mergeOverwriteGraphsRight } from '../utils/mergeGraph';
+import { assocPathMutate, dissocPathMutate, getPathOr, mergeGraphObjRight } from '../utils/util';
 
 export const getEmptyStack = () => ({
     graph: {},

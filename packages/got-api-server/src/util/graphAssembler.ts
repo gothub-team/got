@@ -1,4 +1,4 @@
-import { type GraphAssembler } from '../types/graphAssembler';
+import type { GraphAssembler } from '../types/graphAssembler';
 import { assocMap4, assocMap2, stringify } from '@gothub/aws-util';
 import type { GraphAssemblerLog } from '../types/logs';
 

@@ -1,6 +1,6 @@
-import { type GraphAssembler } from '../types/graphAssembler';
+import type { GraphAssembler } from '../types/graphAssembler';
 import { assocMap4, assocMap2, stringify } from '@gothub/aws-util';
-import { GraphAssemblerLog } from '../types/logs';
+import type { GraphAssemblerLog } from '../types/logs';
 
 export const graphAssembler = (): GraphAssembler => {
     const nodes = new Map<string, string>();

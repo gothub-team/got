@@ -1,16 +1,16 @@
 import { CORS_HEADERS, internalServerError, validate, type ValidationResult } from '@gothub/aws-util';
-import { View } from '@gothub/got-core';
+import type { View } from '@gothub/got-core';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
 import { pull } from '../pull';
 import { graphAssembler } from '../pull/util/graphAssembler';
 import { s3loader } from '../pull/util/s3loader';
-import { Signer } from '../pull/types/signer';
+import type { Signer } from '../pull/types/signer';
 import { cfSigner } from '../pull/util/signer';
 import { createDataCache } from '../pull/caches/dataCache';
 
 const AUTHENTICATED = true;
 
-const querySchema = (recursiveRef) => ({
+const querySchema = (recursiveRef: { $ref: string }) => ({
     type: 'object',
     description:
         'Holds a query object that specifies how the graph should be queried from a given entry point. The entry point can be a node ID or an edge pointing do a set of nodes',
@@ -92,7 +92,7 @@ export const schema = {
 
 export type Body = View;
 
-const handle = async ({ userEmail, asAdmin, asRole, body }: ValidationResult<Body>): Promise<APIGatewayProxyResult> => {
+const handle = async ({ userEmail, asAdmin, body }: ValidationResult<Body>): Promise<APIGatewayProxyResult> => {
     const signer: Signer = await cfSigner();
     // TODO: fix useremail thingies
     const [result] = await pull(body, userEmail || '', asAdmin, {

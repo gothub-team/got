@@ -3,15 +3,14 @@ import {
     INVITE_USER_VALIDATION_VIEW,
     PULL_LAMBDA_NAME,
     UserExistsError,
-    cognitoInviteUser,
-    cognitoUserExists,
     internalServerError,
     nodeForbidden,
-    invokeLambda,
     jsonParseOr,
     validate,
     type ValidationResult,
 } from '@gothub/aws-util';
+import { invokeLambda } from '@gothub/aws-util/lambda';
+import { cognitoInviteUser, cognitoUserExists } from '@gothub/aws-util/cognito';
 import { v4 } from 'uuid';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
 

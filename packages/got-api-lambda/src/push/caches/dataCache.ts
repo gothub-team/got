@@ -1,7 +1,7 @@
 /* eslint-disable prefer-template */
 import { assocMap3 } from '@gothub/aws-util';
-import { type UrlObject, type DataCache } from '../types/dataCache';
-import { pathMap2, pathMap3 } from '@gothub/aws-util/src/pathMap';
+import type { UrlObject, DataCache } from '../types/dataCache';
+import { pathMap2, pathMap3 } from '@gothub/aws-util';
 
 export const createDataCache: () => DataCache = () => {
     /* #region Nodes */

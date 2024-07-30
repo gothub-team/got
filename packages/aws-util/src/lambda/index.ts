@@ -1,5 +1,5 @@
 import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
-import { AWS_REGION } from './config.js';
+import { AWS_REGION } from '../config.js';
 
 const client = new LambdaClient({
     region: AWS_REGION,

@@ -1,12 +1,12 @@
-import { configureCreateCurriedGraph } from './store/createCurriedGraph.js';
-import { configureCreateGraph } from './store/createGraph.js';
-import { createCurriedStore } from './store/curried.js';
-import { createErrorHandledStore } from './store/errorHandling.js';
-import { type StoreAPI } from './types/api.js';
-import { type State } from './types/state.js';
-import { type GOT_ACTION } from './types/actions.js';
-import { configureCreateLocalGraph } from './local-store/createLocalGraph.js';
-import { configureCreateLocalCurriedGraph } from './local-store/createLocalCurriedGraph.js';
+import { configureCreateCurriedGraph } from './store/createCurriedGraph';
+import { configureCreateGraph } from './store/createGraph';
+import { createCurriedStore } from './store/curried';
+import { createErrorHandledStore } from './store/errorHandling';
+import type { StoreAPI } from './types/api';
+import type { State } from './types/state';
+import type { GOT_ACTION } from './types/actions';
+import { configureCreateLocalGraph } from './local-store/createLocalGraph';
+import { configureCreateLocalCurriedGraph } from './local-store/createLocalCurriedGraph';
 
 type SetupOption = {
     api: StoreAPI; // TODO: make type module and fix this

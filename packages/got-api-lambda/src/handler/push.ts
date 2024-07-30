@@ -1,5 +1,5 @@
 import { CORS_HEADERS, internalServerError, validate, type ValidationResult } from '@gothub/aws-util';
-import { Graph } from '@gothub/got-core';
+import type { Graph } from '@gothub/got-core';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Context, Handler } from 'aws-lambda';
 import { push } from '../push';
 import { s3loader } from '../push/util/s3loader';

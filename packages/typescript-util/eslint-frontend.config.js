@@ -14,7 +14,7 @@ export default tseslint.config(eslint.configs.recommended, ...tseslint.configs.r
             {
                 prefer: 'type-imports',
                 disallowTypeAnnotations: true,
-                fixStyle: 'inline-type-imports',
+                fixStyle: 'separate-type-imports',
             },
         ],
         'import/extensions': ['error', 'ignorePackages'],

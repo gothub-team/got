@@ -1,10 +1,5 @@
-import {
-    CORS_HEADERS,
-    internalServerError,
-    s3completeMultipartUpload,
-    validate,
-    type ValidationResult,
-} from '@gothub/aws-util';
+import { CORS_HEADERS, internalServerError, validate, type ValidationResult } from '@gothub/aws-util';
+import { s3completeMultipartUpload } from '@gothub/aws-util/s3';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
 import { s3loader } from '../push/util/s3loader';
 import { s3writer } from '../push/util/s3writer';

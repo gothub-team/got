@@ -4,11 +4,11 @@ import {
     PasswordResetRequiredError,
     UserNotFoundError,
     UserNotVerifiedError,
-    cognitoRespondVerifySrp,
     internalServerError,
     validate,
     type ValidationResult,
 } from '@gothub/aws-util';
+import { cognitoRespondVerifySrp } from '@gothub/aws-util/cognito';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
 
 const AUTHENTICATED = false;
@@ -55,7 +55,7 @@ const handle = async ({ body }: ValidationResult<Body>): Promise<APIGatewayProxy
             body: JSON.stringify(result),
         };
     } catch (err) {
-        switch (err.name) {
+        switch ((err as Error).name) {
             case 'UserNotFoundException':
                 return UserNotFoundError;
             case 'UserNotConfirmedException':

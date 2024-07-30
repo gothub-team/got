@@ -1,5 +1,5 @@
 import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
-import { AWS_REGION } from './config';
+import { AWS_REGION } from '../config.js';
 
 const client = new SSMClient({
     region: AWS_REGION,
