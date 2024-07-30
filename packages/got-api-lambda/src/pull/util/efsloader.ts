@@ -1,4 +1,5 @@
-import { loadQueue, substringToFirst, assocMap3, fsget, fsexist, fslist, s3head } from '@gothub/aws-util';
+import { loadQueue, substringToFirst, assocMap3, fsget, fsexist, fslist } from '@gothub/aws-util';
+import { s3head } from '@gothub/aws-util/s3';
 import { type EdgeWildcard, type FileHead, type FileRef, type Loader } from '../types/loader';
 import type { LoaderLog } from '../types/logs';
 import {

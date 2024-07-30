@@ -1,5 +1,5 @@
-import { Writer } from '../types/writer';
-import { Metadata, Node } from '@gothub/got-core';
+import type { Writer } from '../types/writer';
+import type { Metadata, Node } from '@gothub/got-core';
 import { fsput, fsdelete } from '@gothub/aws-util';
 import {
     DIR_EDGES,
