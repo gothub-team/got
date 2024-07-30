@@ -15,7 +15,7 @@ import {
 import type { LoaderLog } from '../types/logs';
 
 // TODO: maybe we could trial seperate queues for each bucket or request time?
-const { queueLoad } = loadQueue(200);
+const { queueLoad } = loadQueue(100);
 
 const listNodes = async (wildcardPrefix: string) => s3listKeysPaged(BUCKET_NODES, wildcardPrefix);
 
