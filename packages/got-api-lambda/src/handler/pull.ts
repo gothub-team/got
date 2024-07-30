@@ -1,4 +1,4 @@
-import { CORS_HEADERS, internalServerError, validate, type ValidationResult } from '@gothub/aws-util';
+import { CORS_HEADERS, internalServerError } from '@gothub/aws-util';
 import type { View } from '@gothub/got-core';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
 import { pull } from '../pull';
@@ -7,10 +7,9 @@ import { s3loader } from '../pull/util/s3loader';
 import type { Signer } from '../pull/types/signer';
 import { cfSigner } from '../pull/util/signer';
 import { createDataCache } from '../pull/caches/dataCache';
+import { validateAuthed, type AuthedValidationResult } from '@gothub/aws-util/validation';
 
-const AUTHENTICATED = true;
-
-const querySchema = (recursiveRef: { $ref: string }) => ({
+export const querySchema = (recursiveRef: { $ref: string }) => ({
     type: 'object',
     description:
         'Holds a query object that specifies how the graph should be queried from a given entry point. The entry point can be a node ID or an edge pointing do a set of nodes',
@@ -92,10 +91,9 @@ export const schema = {
 
 export type Body = View;
 
-const handle = async ({ userEmail, asAdmin, body }: ValidationResult<Body>): Promise<APIGatewayProxyResult> => {
+const handle = async ({ userEmail, asAdmin, body }: AuthedValidationResult<Body>): Promise<APIGatewayProxyResult> => {
     const signer: Signer = await cfSigner();
-    // TODO: fix useremail thingies
-    const [result] = await pull(body, userEmail || '', asAdmin, {
+    const [result] = await pull(body, userEmail, asAdmin, {
         dataCache: createDataCache(),
         graphAssembler: graphAssembler(),
         loader: s3loader(),
@@ -111,7 +109,7 @@ const handle = async ({ userEmail, asAdmin, body }: ValidationResult<Body>): Pro
 
 export const handleHttp: APIGatewayProxyHandler = async (event) => {
     try {
-        const validationResult = await validate<Body>(schema, event, { auth: AUTHENTICATED });
+        const validationResult = await validateAuthed<Body>(schema, event);
         const result = await handle(validationResult);
         return result;
     } catch (err) {
@@ -121,7 +119,7 @@ export const handleHttp: APIGatewayProxyHandler = async (event) => {
 
 export const handleInvoke: Handler = async ({ body }) => {
     try {
-        const result = await handle(body as ValidationResult<Body>);
+        const result = await handle(body as AuthedValidationResult<Body>);
         return result;
     } catch (err) {
         return internalServerError(err as Error);

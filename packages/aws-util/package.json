@@ -81,6 +81,11 @@
             "require": "./dist/cjs/ssm/index.js",
             "import": "./dist/module/ssm/index.js",
             "types": "./dist/module/ssm/index.d.ts"
+        },
+        "./validation": {
+            "require": "./dist/cjs/validation/index.js",
+            "import": "./dist/module/validation/index.js",
+            "types": "./dist/module/validation/index.d.ts"
         }
     }
 }

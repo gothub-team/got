@@ -1,4 +1,4 @@
-import { CORS_HEADERS, internalServerError, validate, type ValidationResult } from '@gothub/aws-util';
+import { CORS_HEADERS, internalServerError } from '@gothub/aws-util';
 import type { Graph } from '@gothub/got-core';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Context, Handler } from 'aws-lambda';
 import { push } from '../push';
@@ -7,8 +7,7 @@ import { s3writer } from '../push/util/s3writer';
 import { cfSigner } from '../push/util/signer';
 import { graphAssembler } from '../push/util/graphAssembler';
 import { createDataCache } from '../push/caches/dataCache';
-
-const AUTHENTICATED = true;
+import { validateAuthed, type AuthedValidationResult } from '@gothub/aws-util/validation';
 
 export const schema = {
     type: 'object',
@@ -278,13 +277,12 @@ export const schema = {
 export type Body = Graph;
 
 const handle = async (
-    { userEmail, asAdmin, asRole, body }: ValidationResult<Body>,
+    { userEmail, asAdmin, asRole, body }: AuthedValidationResult<Body>,
     context: Context,
 ): Promise<APIGatewayProxyResult> => {
-    // TODO: fix useremail thingies
     const signer = await cfSigner();
     const writer = s3writer();
-    const [result, changelog] = await push(body, userEmail || '', asRole || 'user', asAdmin, {
+    const [result, changelog] = await push(body, userEmail, asRole || 'user', asAdmin, {
         dataCache: createDataCache(),
         graphAssembler: graphAssembler(),
         changelogAssembler: graphAssembler(),
@@ -293,7 +291,7 @@ const handle = async (
         signer,
     });
 
-    await writer.setPushLog(userEmail || '', context.awsRequestId, changelog);
+    await writer.setPushLog(userEmail, context.awsRequestId, changelog);
 
     return {
         statusCode: 200,
@@ -304,7 +302,7 @@ const handle = async (
 
 export const handleHttp: APIGatewayProxyHandler = async (event, context) => {
     try {
-        const validationResult = await validate<Body>(schema, event, { auth: AUTHENTICATED });
+        const validationResult = await validateAuthed<Body>(schema, event);
         const result = await handle(validationResult, context);
         return result;
     } catch (err) {
@@ -315,7 +313,7 @@ export const handleHttp: APIGatewayProxyHandler = async (event, context) => {
 
 export const handleInvoke: Handler = async ({ body }, context) => {
     try {
-        const result = await handle(body as ValidationResult<Body>, context);
+        const result = await handle(body as AuthedValidationResult<Body>, context);
         return result;
     } catch (err) {
         return internalServerError(err as Error);
