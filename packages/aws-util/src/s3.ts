@@ -125,7 +125,7 @@ export const s3putMultipartSignedUrls = async (
 
     try {
         const promises = [];
-        for (let i = 0; i <= Math.ceil(fileSize / partSize); i++) {
+        for (let i = 0; i < Math.ceil(fileSize / partSize); i++) {
             if (CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER) {
                 promises.push(signUrl(`https://${MEDIA_DOMAIN}/${key}?partNumber=${i + 1}&uploadId=${uploadId || ''}`));
             } else {
