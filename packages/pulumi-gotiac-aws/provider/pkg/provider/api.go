@@ -97,7 +97,8 @@ func NewApi(ctx *pulumi.Context,
 	}
 
 	fileSystem, err := efs.NewFileSystem(ctx, name+"FileSystem", &efs.FileSystemArgs{
-		CreationToken: pulumi.String(name + "FileSystem"),
+		CreationToken:   pulumi.String(name + "FileSystem"),
+		PerformanceMode: pulumi.String("generalPurpose"),
 	})
 	if err != nil {
 		return nil, err
@@ -146,7 +147,8 @@ func NewApi(ctx *pulumi.Context,
 			"Statement": [
 				{
 					"Effect": "Allow",
-					"Action": "ssm:GetParameter",
+					"Principal": "*",
+					"Action": ["ssm:GetParameter"],
 					"Resource": "*"
 				}
 			]

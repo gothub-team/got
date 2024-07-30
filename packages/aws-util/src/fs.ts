@@ -28,12 +28,8 @@ export const fsget = async (path: string) => {
 
 export const fsput = async (path: string, data: string) => {
     const dir = path.split('/').slice(0, -1).join('/');
-    try {
-        await writeFile(path, data, 'utf8');
-    } catch {
-        await mkdir(dir, { recursive: true });
-        await writeFile(path, data, 'utf8');
-    }
+    await mkdir(dir, { recursive: true });
+    await writeFile(path, data, 'utf8');
 };
 
 export const fsdelete = async (path: string) => {

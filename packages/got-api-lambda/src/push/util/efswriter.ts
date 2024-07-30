@@ -40,11 +40,11 @@ export const efswriter: () => Writer = () => {
 
     const setRight =
         (dirName: string) => async (nodeId: string, principalType: string, principal: string, right: boolean) => {
-            // const rightKey = `${nodeId}/${principalType}/${principal}`;
+            const rightKey = `${dirName}/${nodeId}/${principalType}/${principal}`;
             if (!right) {
-                return fsdelete(`${dirName}/${nodeId}/${principalType}/${principal}`);
+                return fsdelete(rightKey);
             } else {
-                return fsput(`${dirName}/${nodeId}/${principalType}/${principal}`, 'true');
+                return fsput(rightKey, 'true');
             }
         };
     const setOwner = async (nodeId: string, principal: string | null) => {
@@ -52,7 +52,7 @@ export const efswriter: () => Writer = () => {
             throw new Error('Cannot set owner to null');
         }
 
-        return fsput(`${DIR_OWNERS}/${nodeId}/${principal}`, 'true');
+        return fsput(`${DIR_OWNERS}/${nodeId}`, principal);
     };
 
     const setFileRef = async (nodeId: string, prop: string, fileRef: { fileKey: string } | null) => {

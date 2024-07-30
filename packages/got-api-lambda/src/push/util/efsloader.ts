@@ -178,10 +178,7 @@ export const efsloader: () => Loader = () => {
         return res;
     };
 
-    const ownerExists = async (nodeId: string) => {
-        const owners = await queueLoad(() => fslist(DIR_OWNERS, `${nodeId}/`));
-        return owners && owners.length > 0;
-    };
+    const ownerExists = (nodeId: string) => queueLoad(() => fsexist(`${DIR_OWNERS}/${nodeId}`));
 
     const getLog = (): LoaderLog => {
         return {
