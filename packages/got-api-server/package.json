@@ -8,7 +8,11 @@
     "scripts": {
         "lint": "eslint ./src",
         "typecheck": "tsc --noEmit",
-        "build": "bun run esbuild.js"
+        "build": "bun run esbuild.js",
+        "docker:build:arm": "docker build . -t gothub/got-api-server:v2-arm --platform Linux/ARM64",
+        "docker:build:x86": "docker build . -t gothub/got-api-server:v2-x86 --platform Linux/AMD64",
+        "docker:build": "bun run build; bun run docker:build:arm; bun run docker:build:x86",
+        "docker:push": "docker login; docker image push gothub/got-api-server:v2-arm; docker image push gothub/got-api-server:v2-x86"
     },
     "devDependencies": {
         "@gothub/got-core": "workspace:*",
