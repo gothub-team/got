@@ -136,7 +136,7 @@ export const pull = async (
         if (data != null) {
             onData && onData(fromId, fromType, toType, toId, data);
         } else {
-            addPromise(loadMetadataAsync(fromId, edgeTypes, fromType, toType, toId));
+            addPromise(loadMetadataAsync(fromId, edgeTypes, fromType, toType, toId, onData));
         }
     };
 
@@ -203,7 +203,6 @@ export const pull = async (
         const urlObject = dataCache.urls.getUrl(fileKey, etag);
         if (urlObject && urlObject.expire > Date.now()) {
             onData && onData(nodeId, prop, JSON.stringify({ etag, contentType, modifiedDate, url: urlObject.url }));
-            return;
         } else {
             dataCache.urls.removeUrl(fileKey, etag);
             const url = signer.signUrl(signer.getUrl(fileKey, etag));
