@@ -74,8 +74,8 @@ build_nodejs_sdk:: gen_nodejs_sdk
 		cp ../../README.md ../../LICENSE package.json ./bin/ && \
 		sed -i.bak 's/$${VERSION}/$(VERSION)/g' bin/package.json && \
 		jq '. + {main: "bin/index.js"}' package.json > temp.json && mv temp.json package.json && \
-		rm ./bin/package.json.bak
-		bun run prettier --write ./**/*.ts
+		rm ./bin/package.json.bak && \
+		bun run prettier --write .
 
 install_nodejs_sdk:: install_provider build_nodejs_sdk
 #	bun link --cwd ${WORKING_DIR}/sdk/nodejs/bin
