@@ -1,0 +1,12 @@
+FROM node:22-bullseye-slim
+
+WORKDIR /got-api
+
+ENV PORT=4000
+
+# copy application
+COPY ./dist/min-bundle/index.js ./index.js
+COPY ./dist/min-bundle/index.js.map ./index.js.map
+
+SHELL ["/bin/bash", "-c"]
+CMD node --max-old-space-size=${MAX_MEMORY:-'1536'} --enable-source-maps ./index.js

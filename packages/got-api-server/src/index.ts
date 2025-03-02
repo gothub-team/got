@@ -67,7 +67,7 @@ export const handleResponse =
     };
 
 const run = async () => {
-    console.log(`Server starting up | version: 0.2.23 | ${logMemory()}`);
+    console.log(`Server starting up | version: 0.2.23-dev | ${logMemory()}`);
 
     const existsCache = createExistsCache();
     const dataCache = createDataCache();
