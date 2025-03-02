@@ -68,7 +68,7 @@ build_nodejs_sdk:: gen_nodejs_sdk
 		jq '. + {trustedDependencies: ["protobufjs"]}' package.json > temp.json && mv temp.json package.json && \
 		jq '. + {main: "index.js"}' package.json > temp.json && mv temp.json package.json && \
 		bun install && \
-		git checkout HEAD -- ../../../../bun.lockb && \
+		git checkout HEAD -- ../../../../bun.lock && \
 		bun x tsc --version && \
  		bun x tsc && \
 		cp ../../README.md ../../LICENSE package.json ./bin/ && \
