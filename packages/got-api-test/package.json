@@ -24,6 +24,6 @@
         "@gothub/typescript-util": "workspace:^",
         "@gothub/got-api": "workspace:^",
         "imapflow": "^1.0.162",
-        "sst": "ion"
+        "sst": "3.9.21"
     }
 }

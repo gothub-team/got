@@ -33,6 +33,6 @@
         "@gothub-team/got-srp": "^0.3.20",
         "@gothub/got-core": "workspace:^",
         "buffer": "^6.0.3",
-        "sst": "ion"
+        "sst": "3.9.21"
     }
 }
