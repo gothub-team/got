@@ -1,8 +1,7 @@
 /* tslint:disable */
 /* eslint-disable */
-import "sst"
-declare module "sst" {
-  export interface Resource {
-  }
+import 'sst';
+declare module 'sst' {
+    export interface Resource {}
 }
-export {}
+export {};
