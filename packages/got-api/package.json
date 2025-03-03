@@ -7,6 +7,9 @@
     "main": "dist/module/index.js",
     "scripts": {
         "generate:client-js": "bun client-js/generate.ts",
+        "dev:deploy": "sst deploy --stage dev",
+        "dev:refresh": "sst refresh --stage dev",
+        "dev:remove": "sst remove --stage dev",
         "build": "bun ./esbuild.js",
         "lint": "eslint ."
     },
@@ -30,6 +33,6 @@
         "@gothub-team/got-srp": "^0.3.20",
         "@gothub/got-core": "workspace:^",
         "buffer": "^6.0.3",
-        "sst": "ion"
+        "sst": "3.9.21"
     }
 }
