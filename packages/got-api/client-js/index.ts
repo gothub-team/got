@@ -350,7 +350,7 @@ export const createApi = ({
     return {
         ...api,
         push: async (body: PushBody, asRole?: string) =>
-            post(`${host}/push`, body, await getIdToken(), getAdminMode(), asRole),
+            post(`${_host}/push`, body, await getIdToken(), getAdminMode(), asRole), // TODO: this circumvents the low api
         login: async ({ email, password }: LoginInput) => {
             const { srpA, getSignature } = await useSrp();
 
