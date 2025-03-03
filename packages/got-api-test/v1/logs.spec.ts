@@ -4,30 +4,20 @@ import crypto from 'crypto';
 // import type { Graph, Node, PushResult } from '@gothub/got-core';
 import { createUserApi } from './shared';
 import { parseEnv } from '@gothub/typescript-util';
-import {
-    TEST_USER_1_EMAIL,
-    TEST_USER_1_PW,
-    // TEST_USER_2_EMAIL,
-    // TEST_USER_2_PW
-} from '../env';
+import { TEST_USER_1_EMAIL, TEST_USER_1_PW, TEST_USER_2_EMAIL } from '../env';
 
 const env = parseEnv({
     TEST_USER_1_EMAIL,
     TEST_USER_1_PW,
-    // TEST_USER_2_EMAIL,
-    // TEST_USER_2_PW,
+    TEST_USER_2_EMAIL,
 });
 
 let testId: string;
 let user1Api: GotApi;
 let user1Email: string;
-// let user2Api: GotApi;
-// let user2Email: string;
 beforeAll(async () => {
     user1Email = env.TEST_USER_1_EMAIL;
     user1Api = await createUserApi(user1Email, env.TEST_USER_1_PW);
-    // user2Email = env.TEST_USER_2_EMAIL;
-    // user2Api = await createUserApi(user2Email, env.TEST_USER_2_PW);
 });
 beforeEach(async () => {
     testId = `test-${crypto.randomBytes(8).toString('hex')}`;
@@ -58,7 +48,7 @@ describe('nodes', () => {
 
         expect(logEntry).toHaveProperty(['changeset', 'nodes'], {
             [testId]: {
-                old: null,
+                old: false,
                 new: {
                     id: testId,
                     name: 'Test Node',
@@ -109,7 +99,7 @@ describe('nodes', () => {
                     name: 'Test Node',
                     prop: 'value1',
                 },
-                new: null,
+                new: false,
             },
         });
     });
@@ -136,7 +126,7 @@ describe('edges', () => {
                 [`${testId}-1`]: {
                     to: {
                         [`${testId}-2`]: {
-                            old: null,
+                            old: false,
                             new: true,
                         },
                     },
@@ -201,11 +191,76 @@ describe('edges', () => {
                     to: {
                         [`${testId}-2`]: {
                             old: true,
-                            new: null,
+                            new: false,
                         },
                     },
                 },
             },
+        });
+    });
+});
+
+describe.only('rights', () => {
+    beforeEach(async () => {
+        await user1Api.push({
+            nodes: {
+                [testId]: { id: testId },
+            },
+            rights: {
+                [testId]: {
+                    user: {
+                        [env.TEST_USER_2_EMAIL]: {
+                            read: true,
+                            write: true,
+                            admin: true,
+                        },
+                    },
+                },
+            },
+        });
+    });
+
+    it("should create a log entry when a right is created'", async () => {
+        const logEntry = await getLatestLog(user1Api);
+
+        // has log for rights that are created on node create
+        expect(logEntry).toHaveProperty(['changeset', 'rights', testId, 'user', env.TEST_USER_1_EMAIL], {
+            read: { old: false, new: true },
+            write: { old: false, new: true },
+            admin: { old: false, new: true },
+        });
+
+        // has log for rights that are set
+        expect(logEntry).toHaveProperty(['changeset', 'rights', testId, 'user', env.TEST_USER_2_EMAIL], {
+            read: { old: false, new: true },
+            write: { old: false, new: true },
+            admin: { old: false, new: true },
+        });
+    });
+    it("should create a log entry when a right is removed'", async () => {
+        await user1Api.push({
+            nodes: {
+                [testId]: { id: testId },
+            },
+            rights: {
+                [testId]: {
+                    user: {
+                        [env.TEST_USER_2_EMAIL]: {
+                            read: false,
+                            write: false,
+                            admin: false,
+                        },
+                    },
+                },
+            },
+        });
+
+        const logEntry = await getLatestLog(user1Api);
+
+        expect(logEntry).toHaveProperty(['changeset', 'rights', testId, 'user', env.TEST_USER_2_EMAIL], {
+            read: { old: true, new: false },
+            write: { old: true, new: false },
+            admin: { old: true, new: false },
         });
     });
 });
