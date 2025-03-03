@@ -103,6 +103,7 @@ describe('nodes', () => {
             },
         });
     });
+    it.todo('should not create a log entry when there are no changes in the nodes data');
 });
 
 describe('edges', () => {
@@ -198,6 +199,8 @@ describe('edges', () => {
             },
         });
     });
+
+    it.todo('should not create a log entry when there are no changes in the edges metadata');
 });
 
 describe('rights', () => {
@@ -261,6 +264,94 @@ describe('rights', () => {
             read: { old: true, new: false },
             write: { old: true, new: false },
             admin: { old: true, new: false },
+        });
+    });
+
+    it.todo('should not create a log entry when there are no changes in rights');
+});
+
+describe('files', () => {
+    beforeEach(async () => {
+        await user1Api.push({
+            nodes: {
+                [testId]: { id: testId },
+            },
+            files: {
+                [testId]: {
+                    someFile: {
+                        filename: 'file1.txt',
+                        fileSize: 14,
+                        contentType: 'text/plain',
+                    },
+                },
+            },
+        });
+    });
+
+    const sha256 = (data: string): string => {
+        return crypto.createHash('sha256').update(data).digest('hex');
+    };
+
+    it("should create a log entry when a file is created'", async () => {
+        const logEntry = await getLatestLog(user1Api);
+
+        const fileKey = `file/${sha256(`${testId}/someFile`)}/file1.txt`;
+
+        expect(logEntry).toHaveProperty(['changeset', 'files', testId, 'someFile'], {
+            old: false,
+            new: expect.objectContaining({
+                // TODO: the old tests assumed filemetadata here, but filekey is probably the more important change?
+                fileKey,
+            }),
+        });
+    });
+
+    it("should create a log entry when a file is updated'", async () => {
+        await user1Api.push({
+            files: {
+                [testId]: {
+                    someFile: {
+                        filename: 'file2.json',
+                        fileSize: 28,
+                        contentType: 'application/json',
+                    },
+                },
+            },
+        });
+
+        const logEntry = await getLatestLog(user1Api);
+
+        const fileKeyOld = `file/${sha256(`${testId}/someFile`)}/file1.txt`;
+        const fileKeyNew = `file/${sha256(`${testId}/someFile`)}/file2.json`;
+
+        expect(logEntry).toHaveProperty(['changeset', 'files', testId, 'someFile'], {
+            old: expect.objectContaining({
+                fileKey: fileKeyOld,
+            }),
+            new: expect.objectContaining({
+                fileKey: fileKeyNew,
+            }),
+        });
+    });
+
+    it("should create a log entry when a file is deleted'", async () => {
+        await user1Api.push({
+            files: {
+                [testId]: {
+                    someFile: false,
+                },
+            },
+        });
+
+        const logEntry = await getLatestLog(user1Api);
+
+        const fileKey = `file/${sha256(`${testId}/someFile`)}/file1.txt`;
+
+        expect(logEntry).toHaveProperty(['changeset', 'files', testId, 'someFile'], {
+            old: expect.objectContaining({
+                fileKey: fileKey,
+            }),
+            new: false,
         });
     });
 });
