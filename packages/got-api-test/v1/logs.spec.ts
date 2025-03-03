@@ -299,10 +299,10 @@ describe('files', () => {
 
         expect(logEntry).toHaveProperty(['changeset', 'files', testId, 'someFile'], {
             old: false,
-            new: expect.objectContaining({
+            new: {
                 // TODO: the old tests assumed filemetadata here, but filekey is probably the more important change?
                 fileKey,
-            }),
+            },
         });
     });
 
@@ -325,12 +325,12 @@ describe('files', () => {
         const fileKeyNew = `file/${sha256(`${testId}/someFile`)}/file2.json`;
 
         expect(logEntry).toHaveProperty(['changeset', 'files', testId, 'someFile'], {
-            old: expect.objectContaining({
+            old: {
                 fileKey: fileKeyOld,
-            }),
-            new: expect.objectContaining({
+            },
+            new: {
                 fileKey: fileKeyNew,
-            }),
+            },
         });
     });
 
@@ -348,9 +348,9 @@ describe('files', () => {
         const fileKey = `file/${sha256(`${testId}/someFile`)}/file1.txt`;
 
         expect(logEntry).toHaveProperty(['changeset', 'files', testId, 'someFile'], {
-            old: expect.objectContaining({
+            old: {
                 fileKey: fileKey,
-            }),
+            },
             new: false,
         });
     });
