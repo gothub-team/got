@@ -482,7 +482,13 @@ export const push = async (
         } else if (fileRef && fileKey) {
             const newFileRef = { fileKey };
             await writer.setFileRef(nodeId, prop, newFileRef);
-            writeFilesChangelog(nodeId, prop, `{"old":${JSON.stringify(fileRef)},"new":${JSON.stringify(newFileRef)}}`);
+            if (fileRef.fileKey !== fileKey) {
+                writeFilesChangelog(
+                    nodeId,
+                    prop,
+                    `{"old":${JSON.stringify(fileRef)},"new":${JSON.stringify(newFileRef)}}`,
+                );
+            }
         }
     };
 
