@@ -22,6 +22,7 @@ export type CreateLowApiFn = (options: CreateLowApiOtions) => GotLowApi;
  * Creates the low level API which wraps all got REST API operations.
  */
 export const createLowApi: CreateLowApiFn = ({ host, getIdToken = async () => '', getAdminMode = () => false }) => ({
+    getLogs: async (input) => post(`${host}/get-logs`, input, await getIdToken(), getAdminMode()),
     pull: async (input) => post(`${host}/pull`, input, await getIdToken(), getAdminMode()),
     push: async (input) => post(`${host}/push`, input, await getIdToken(), getAdminMode()),
     completeUpload: async (input) => post(`${host}/media/complete-upload`, input, await getIdToken(), getAdminMode()),
@@ -37,6 +38,12 @@ export const createLowApi: CreateLowApiFn = ({ host, getIdToken = async () => ''
 });
 
 export interface GotLowApi {
+    /**
+     * This operation either gets a specific log or lists all logs with a specific prefix.
+     *
+     */
+    getLogs: (input: GetLogsInput) => Promise<unknown>;
+
     /**
      * This operation pulls a graph based on a given hashmap of queries.
      *
@@ -324,6 +331,17 @@ export interface PullInput {
      * Hash map of node entry points into the query. Edges will be retrieved starting at the `rootNodeId`s
      */
     [rootNodeId: string]: Query;
+}
+
+export interface GetLogsInput {
+    /**
+     * The id of the log to retrieve.
+     */
+    id?: string;
+    /**
+     * The prefix of the log to retrieve.
+     */
+    prefix?: string;
 }
 
 /**

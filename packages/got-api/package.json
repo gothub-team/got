@@ -6,7 +6,7 @@
     "types": "dist/module/index.d.ts",
     "main": "dist/module/index.js",
     "scripts": {
-        "generate:client-js": "bun client-js/generate.ts",
+        "generate:client-js": "bun client-js/generate.ts && prettier --write ./client-js/*",
         "dev:deploy": "sst deploy --stage dev",
         "dev:refresh": "sst refresh --stage dev",
         "dev:remove": "sst remove --stage dev",

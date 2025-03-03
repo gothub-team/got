@@ -4,7 +4,7 @@ export const getLogsApi = {
     summary: 'Get Push Logs',
     security: [{ BearerAuth: [] }],
     description: 'This operation either gets a specific log or lists all logs with a specific prefix.',
-    operationId: 'get-logs',
+    operationId: 'getLogs',
     responses: {
         200: {
             description: 'OK',
