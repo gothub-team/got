@@ -10,6 +10,7 @@ import { MEDIA_DOMAIN, sha256 } from '@gothub/aws-util';
 import { BUCKET_MEDIA } from './config';
 import type { Signer } from './types/signer';
 import { s3putMultipartSignedUrls } from '@gothub/aws-util/s3';
+import equal from 'fast-deep-equal';
 
 type Dependencies = {
     // existsCache: ExistsCache;
@@ -180,8 +181,10 @@ export const push = async (
             const oldNode = JSON.parse(nodeJSON);
             const newNode = mergeGraphObjRight(oldNode, node);
             typeof newNode === 'object' && removeNulls(newNode);
-            await writer.setNode(nodeId, newNode);
-            writeNodeChangelog(nodeId, `{"old":${nodeJSON},"new":${JSON.stringify(newNode)}}`);
+            if (!equal(oldNode, newNode)) {
+                await writer.setNode(nodeId, newNode);
+                writeNodeChangelog(nodeId, `{"old":${nodeJSON},"new":${JSON.stringify(newNode)}}`);
+            }
         }
     };
 
@@ -251,14 +254,16 @@ export const push = async (
             const oldMetadata = JSON.parse(metadataJson) as Metadata;
             const newMetadata = mergeGraphObjRight(oldMetadata, metadata);
             typeof newMetadata === 'object' && removeNulls(newMetadata);
-            await writer.setMetadata(fromId, `${fromType}/${toType}`, toId, newMetadata);
-            writeMetadataChangelog(
-                fromId,
-                fromType,
-                toType,
-                toId,
-                `{"old":${metadataJson},"new":${JSON.stringify(newMetadata)}}`,
-            );
+            if (!equal(oldMetadata, newMetadata)) {
+                await writer.setMetadata(fromId, `${fromType}/${toType}`, toId, newMetadata);
+                writeMetadataChangelog(
+                    fromId,
+                    fromType,
+                    toType,
+                    toId,
+                    `{"old":${metadataJson},"new":${JSON.stringify(newMetadata)}}`,
+                );
+            }
         }
     };
 
@@ -481,8 +486,8 @@ export const push = async (
             writeFilesChangelog(nodeId, prop, `{"old":${JSON.stringify(fileRef)},"new":false}`);
         } else if (fileRef && fileKey) {
             const newFileRef = { fileKey };
-            await writer.setFileRef(nodeId, prop, newFileRef);
-            if (fileRef.fileKey !== fileKey) {
+            if (!equal(fileRef, newFileRef)) {
+                await writer.setFileRef(nodeId, prop, newFileRef);
                 writeFilesChangelog(
                     nodeId,
                     prop,

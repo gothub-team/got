@@ -19,6 +19,7 @@
     "dependencies": {
         "@aws-crypto/client-node": "^4.0.0",
         "@gothub/aws-util": "workspace:*",
+        "fast-deep-equal": "^3.1.3",
         "uuid": "^10.0.0"
     }
 }
