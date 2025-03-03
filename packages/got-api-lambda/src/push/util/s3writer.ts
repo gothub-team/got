@@ -1,4 +1,4 @@
-import { s3delete, s3put } from '@gothub/aws-util/s3';
+import { s3delete, s3put, s3putRaw } from '@gothub/aws-util/s3';
 import {
     BUCKET_EDGES,
     BUCKET_LOGS,
@@ -84,7 +84,7 @@ export const s3writer: () => Writer = () => {
         const timestamp = new Date().toISOString();
         const logEntry = `{"userEmail":"${userEmail}","timestamp":"${timestamp}","requestId":"${requestId}","changeset":${changeset}}`;
         const logKey = `push/${userEmail}/${timestamp}/${requestId}`;
-        await s3put(BUCKET_LOGS, logKey, logEntry);
+        await s3putRaw(BUCKET_LOGS, logKey, Buffer.from(logEntry), { contentType: 'application/json' });
     };
 
     return {

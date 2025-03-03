@@ -31,7 +31,7 @@ const handle = async ({ userEmail, body }: AuthedValidationResult<Body>): Promis
             return {
                 statusCode: 200,
                 headers: CORS_HEADERS,
-                body: JSON.stringify(log),
+                body: log?.toString() ?? '{}',
             };
         } catch (err) {
             console.error(err);
