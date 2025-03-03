@@ -354,4 +354,22 @@ describe('files', () => {
             new: false,
         });
     });
+
+    it('should not create a log entry when there are no changes in files', async () => {
+        await user1Api.push({
+            files: {
+                [testId]: {
+                    someFile: {
+                        filename: 'file1.txt',
+                        fileSize: 14,
+                        contentType: 'text/plain',
+                    },
+                },
+            },
+        });
+
+        const logEntry = await getLatestLog(user1Api);
+
+        expect(logEntry).not.toHaveProperty(['changeset', 'files', testId, 'someFile']);
+    });
 });
