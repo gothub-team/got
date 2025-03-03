@@ -200,7 +200,7 @@ describe('edges', () => {
     });
 });
 
-describe.only('rights', () => {
+describe('rights', () => {
     beforeEach(async () => {
         await user1Api.push({
             nodes: {
