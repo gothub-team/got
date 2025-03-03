@@ -19,5 +19,5 @@
 make install_provider
 
 # Test Node.js SDK
-$ make install_nodejs_sdk
+make install_nodejs_sdk
 ```
