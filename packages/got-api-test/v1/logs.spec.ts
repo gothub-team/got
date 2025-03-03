@@ -46,14 +46,12 @@ describe('nodes', () => {
     it('should create a log entry when a node is created', async () => {
         const logEntry = await getLatestLog(user1Api);
 
-        expect(logEntry).toHaveProperty(['changeset', 'nodes'], {
-            [testId]: {
-                old: false,
-                new: {
-                    id: testId,
-                    name: 'Test Node',
-                    prop: 'value1',
-                },
+        expect(logEntry).toHaveProperty(['changeset', 'nodes', testId], {
+            old: false,
+            new: {
+                id: testId,
+                name: 'Test Node',
+                prop: 'value1',
             },
         });
     });
@@ -69,18 +67,16 @@ describe('nodes', () => {
         });
         const logEntry = await getLatestLog(user1Api);
 
-        expect(logEntry).toHaveProperty(['changeset', 'nodes'], {
-            [testId]: {
-                old: {
-                    id: testId,
-                    name: 'Test Node',
-                    prop: 'value1',
-                },
-                new: {
-                    id: testId,
-                    name: 'Updated Name',
-                    prop: 'Updated Value',
-                },
+        expect(logEntry).toHaveProperty(['changeset', 'nodes', testId], {
+            old: {
+                id: testId,
+                name: 'Test Node',
+                prop: 'value1',
+            },
+            new: {
+                id: testId,
+                name: 'Updated Name',
+                prop: 'Updated Value',
             },
         });
     });
@@ -92,18 +88,29 @@ describe('nodes', () => {
         });
         const logEntry = await getLatestLog(user1Api);
 
-        expect(logEntry).toHaveProperty(['changeset', 'nodes'], {
-            [testId]: {
-                old: {
+        expect(logEntry).toHaveProperty(['changeset', 'nodes', testId], {
+            old: {
+                id: testId,
+                name: 'Test Node',
+                prop: 'value1',
+            },
+            new: false,
+        });
+    });
+    it('should not create a log entry when there are no changes in the nodes data', async () => {
+        await user1Api.push({
+            nodes: {
+                [testId]: {
                     id: testId,
                     name: 'Test Node',
                     prop: 'value1',
                 },
-                new: false,
             },
         });
+        const logEntry = await getLatestLog(user1Api);
+
+        expect(logEntry).not.toHaveProperty(['changeset', 'nodes', testId]);
     });
-    it.todo('should not create a log entry when there are no changes in the nodes data');
 });
 
 describe('edges', () => {
@@ -122,17 +129,9 @@ describe('edges', () => {
     it("should create a log entry when an edge is created'", async () => {
         const logEntry = await getLatestLog(user1Api);
 
-        expect(logEntry).toHaveProperty(['changeset', 'edges'], {
-            from: {
-                [`${testId}-1`]: {
-                    to: {
-                        [`${testId}-2`]: {
-                            old: false,
-                            new: true,
-                        },
-                    },
-                },
-            },
+        expect(logEntry).toHaveProperty(['changeset', 'edges', 'from', `${testId}-1`, 'to', `${testId}-2`], {
+            old: false,
+            new: true,
         });
     });
 
@@ -144,17 +143,9 @@ describe('edges', () => {
         });
         const logEntry = await getLatestLog(user1Api);
 
-        expect(logEntry).toHaveProperty(['changeset', 'edges'], {
-            from: {
-                [`${testId}-1`]: {
-                    to: {
-                        [`${testId}-2`]: {
-                            old: true,
-                            new: { meta: 'data' },
-                        },
-                    },
-                },
-            },
+        expect(logEntry).toHaveProperty(['changeset', 'edges', 'from', `${testId}-1`, 'to', `${testId}-2`], {
+            old: true,
+            new: { meta: 'data' },
         });
 
         await user1Api.push({
@@ -164,17 +155,9 @@ describe('edges', () => {
         });
         const logEntry2 = await getLatestLog(user1Api);
 
-        expect(logEntry2).toHaveProperty(['changeset', 'edges'], {
-            from: {
-                [`${testId}-1`]: {
-                    to: {
-                        [`${testId}-2`]: {
-                            old: { meta: 'data' },
-                            new: { meta: 'updated' },
-                        },
-                    },
-                },
-            },
+        expect(logEntry2).toHaveProperty(['changeset', 'edges', 'from', `${testId}-1`, 'to', `${testId}-2`], {
+            old: { meta: 'data' },
+            new: { meta: 'updated' },
         });
     });
 
@@ -186,21 +169,38 @@ describe('edges', () => {
         });
         const logEntry = await getLatestLog(user1Api);
 
-        expect(logEntry).toHaveProperty(['changeset', 'edges'], {
-            from: {
-                [`${testId}-1`]: {
-                    to: {
-                        [`${testId}-2`]: {
-                            old: true,
-                            new: false,
-                        },
-                    },
-                },
-            },
+        expect(logEntry).toHaveProperty(['changeset', 'edges', 'from', `${testId}-1`, 'to', `${testId}-2`], {
+            old: true,
+            new: false,
         });
     });
 
-    it.todo('should not create a log entry when there are no changes in the edges metadata');
+    it('should not create a log entry when there are no changes in the edges existence', async () => {
+        await user1Api.push({
+            edges: {
+                from: { [`${testId}-1`]: { to: { [`${testId}-2`]: true } } },
+            },
+        });
+        const logEntry = await getLatestLog(user1Api);
+
+        expect(logEntry).not.toHaveProperty(['changeset', 'edges', 'from', `${testId}-1`, 'to', `${testId}-2`]);
+    });
+
+    it('should not create a log entry when there are no changes in the edges metadata', async () => {
+        await user1Api.push({
+            edges: {
+                from: { [`${testId}-1`]: { to: { [`${testId}-2`]: { meta: 'data' } } } },
+            },
+        });
+        await user1Api.push({
+            edges: {
+                from: { [`${testId}-1`]: { to: { [`${testId}-2`]: { meta: 'data' } } } },
+            },
+        });
+        const logEntry = await getLatestLog(user1Api);
+
+        expect(logEntry).not.toHaveProperty(['changeset', 'edges', 'from', `${testId}-1`, 'to', `${testId}-2`]);
+    });
 });
 
 describe('rights', () => {
@@ -267,7 +267,27 @@ describe('rights', () => {
         });
     });
 
-    it.todo('should not create a log entry when there are no changes in rights');
+    it('should not create a log entry when there are no changes in rights', async () => {
+        await user1Api.push({
+            rights: {
+                [testId]: {
+                    user: {
+                        [env.TEST_USER_2_EMAIL]: {
+                            read: true,
+                            write: true,
+                            admin: true,
+                        },
+                    },
+                },
+            },
+        });
+
+        const logEntry = await getLatestLog(user1Api);
+
+        expect(logEntry).not.toHaveProperty(['changeset', 'rights', testId, 'user', env.TEST_USER_2_EMAIL, 'read']);
+        expect(logEntry).not.toHaveProperty(['changeset', 'rights', testId, 'user', env.TEST_USER_2_EMAIL, 'write']);
+        expect(logEntry).not.toHaveProperty(['changeset', 'rights', testId, 'user', env.TEST_USER_2_EMAIL, 'admin']);
+    });
 });
 
 describe('files', () => {
