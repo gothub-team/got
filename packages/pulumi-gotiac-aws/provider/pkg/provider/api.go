@@ -94,6 +94,7 @@ func NewApi(ctx *pulumi.Context,
 			pulumi.String("Access-Control-Allow-Origin"),
 			pulumi.String("x-as-admin"),
 			pulumi.String("x-as-role"),
+			pulumi.String("x-as-user"),
 		},
 		AllowMethods: pulumi.StringArray{
 			pulumi.String("POST"),
