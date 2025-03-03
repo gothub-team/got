@@ -34,7 +34,6 @@ export const createLowApi: CreateLowApiFn = ({ host, getIdToken = async () => ''
     resetPasswordInit: async (input) => post(`${host}/auth/reset-password-init`, input),
     resetPasswordVerify: async (input) => post(`${host}/auth/reset-password-verify`, input),
     inviteUser: async (input) => post(`${host}/auth/invite-user`, input, await getIdToken(), getAdminMode()),
-    deleteUser: async (input) => post(`${host}/auth/delete-user`, input, await getIdToken(), getAdminMode()),
 });
 
 export interface GotLowApi {
@@ -318,12 +317,6 @@ export interface GotLowApi {
      *
      */
     inviteUser: (input: InviteUserInput) => Promise<unknown>;
-
-    /**
-     * This operation deletes a user with the given email.
-     *
-     */
-    deleteUser: (input: DeleteUserInput) => Promise<unknown>;
 }
 
 export interface PullInput {

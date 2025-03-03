@@ -107,7 +107,18 @@ ${R.compose(
             mapObj((status, r) =>
                 R.compose(
                     R.map(R.assoc('status', status)),
-                    R.pathOr([], ['content', 'application/json', 'schema', 'enum']),
+                    R.map((response) => {
+                        const body = JSON.parse(response.body);
+                        return {
+                            ...response,
+                            name: body.name,
+                            message: body.message,
+                        };
+                    }),
+                    R.pathOr<{ statusCode: number; headers: Record<string, string>; body: string }[]>(
+                        [],
+                        ['content', 'application/json', 'schema', 'enum'],
+                    ),
                 )(r),
             ),
             R.pickBy((_: string, status: string | number) => status >= '400'),
