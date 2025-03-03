@@ -9,6 +9,7 @@ import { authRegisterVerifyResendOpenApi } from './auth/register-verify-resend-o
 import { authResetPasswordInitOpenApi } from './auth/reset-password-init-openapi';
 import { authResetPasswordVerifyOpenApi } from './auth/reset-password-verify-openapi';
 import { completeUploadOpenApi } from './completeUpload-openapi';
+import { getLogsApi } from './get-logs';
 import { pullOpenApi } from './pull-openapi';
 import { pushOpenApi } from './push-openapi';
 
@@ -28,6 +29,9 @@ export const openApiSchema = (apiBaseUrl = '', version = '') => ({
         },
     },
     paths: {
+        '/get-logs': {
+            post: getLogsApi,
+        },
         '/pull': {
             post: pullOpenApi,
         },
