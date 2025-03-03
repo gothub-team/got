@@ -61,7 +61,7 @@ export declare interface GraphLayer<TNode, TEdge, TReverseEdge, TRight, TInherit
 }
 
 export declare type PushBody = Omit<
-    GraphLayer<Node | boolean, Metadata, never, boolean, string, UploadNodeFileView>,
+    GraphLayer<Node | boolean, Metadata, never, boolean, string, UploadNodeFileView | false>,
     'index'
 >;
 
