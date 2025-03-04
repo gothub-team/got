@@ -1,7 +1,6 @@
 import type { LoaderLog } from './logs';
 
 export type FileRef = {
-    prop: string;
     fileKey: string;
 };
 export type FileHead = {

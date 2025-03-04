@@ -10,6 +10,7 @@ import { MEDIA_DOMAIN, sha256 } from '@gothub/aws-util';
 import { BUCKET_MEDIA } from './config';
 import type { Signer } from './types/signer';
 import { s3putMultipartSignedUrls } from '@gothub/aws-util/s3';
+import equal from 'fast-deep-equal';
 
 type Dependencies = {
     // existsCache: ExistsCache;
@@ -129,37 +130,37 @@ export const push = async (
 
     const updateReadRight = async (nodeId: string, principalType: string, principal: string, right: boolean) => {
         const exists = await loader.getRead(nodeId, principalType, principal);
-        if (!!exists !== right) {
+        if (Boolean(exists) !== right) {
             if (right) {
                 await writer.setRead(nodeId, principalType, principal, true);
-                writeRightsChangelog(nodeId, principalType, principal, 'read', 'true');
+                writeRightsChangelog(nodeId, principalType, principal, 'read', '{"old":false,"new":true}');
             } else {
                 await writer.setRead(nodeId, principalType, principal, false);
-                writeRightsChangelog(nodeId, principalType, principal, 'read', 'false');
+                writeRightsChangelog(nodeId, principalType, principal, 'read', '{"old":true,"new":false}');
             }
         }
     };
     const updateWriteRight = async (nodeId: string, principalType: string, principal: string, right: boolean) => {
         const exists = await loader.getWrite(nodeId, principalType, principal);
-        if (!!exists !== right) {
+        if (Boolean(exists) !== right) {
             if (right) {
                 await writer.setWrite(nodeId, principalType, principal, true);
-                writeRightsChangelog(nodeId, principalType, principal, 'write', 'true');
+                writeRightsChangelog(nodeId, principalType, principal, 'write', '{"old":false,"new":true}');
             } else {
                 await writer.setWrite(nodeId, principalType, principal, false);
-                writeRightsChangelog(nodeId, principalType, principal, 'write', 'false');
+                writeRightsChangelog(nodeId, principalType, principal, 'write', '{"old":true,"new":false}');
             }
         }
     };
     const updateAdminRight = async (nodeId: string, principalType: string, principal: string, right: boolean) => {
         const exists = await loader.getAdmin(nodeId, principalType, principal);
-        if (!!exists !== right) {
+        if (Boolean(exists) !== right) {
             if (right) {
                 await writer.setAdmin(nodeId, principalType, principal, true);
-                writeRightsChangelog(nodeId, principalType, principal, 'admin', 'true');
+                writeRightsChangelog(nodeId, principalType, principal, 'admin', '{"old":false,"new":true}');
             } else {
                 await writer.setAdmin(nodeId, principalType, principal, false);
-                writeRightsChangelog(nodeId, principalType, principal, 'admin', 'false');
+                writeRightsChangelog(nodeId, principalType, principal, 'admin', '{"old":true,"new":false}');
             }
         }
     };
@@ -172,16 +173,18 @@ export const push = async (
         const nodeJSON = await loader.getNode(nodeId);
         if (!nodeJSON && node) {
             await writer.setNode(nodeId, node);
-            writeNodeChangelog(nodeId, `{"old":null,"new":${JSON.stringify(node)}}`);
+            writeNodeChangelog(nodeId, `{"old":false,"new":${JSON.stringify(node)}}`);
         } else if (nodeJSON && !node) {
             await writer.setNode(nodeId, null);
-            writeNodeChangelog(nodeId, `{"old":${nodeJSON},"new":null}`);
+            writeNodeChangelog(nodeId, `{"old":${nodeJSON},"new":false}`);
         } else if (nodeJSON && node) {
             const oldNode = JSON.parse(nodeJSON);
             const newNode = mergeGraphObjRight(oldNode, node);
             typeof newNode === 'object' && removeNulls(newNode);
-            await writer.setNode(nodeId, newNode);
-            writeNodeChangelog(nodeId, `{"old":${nodeJSON},"new":${JSON.stringify(newNode)}}`);
+            if (!equal(oldNode, newNode)) {
+                await writer.setNode(nodeId, newNode);
+                writeNodeChangelog(nodeId, `{"old":${nodeJSON},"new":${JSON.stringify(newNode)}}`);
+            }
         }
     };
 
@@ -242,23 +245,25 @@ export const push = async (
         if (!metadataJson && metadata) {
             await writer.setMetadata(fromId, `${fromType}/${toType}`, toId, metadata);
             await writer.setReverseEdge(toId, `${toType}/${fromType}`, fromId, true);
-            writeMetadataChangelog(fromId, fromType, toType, toId, `{"old":null,"new":${JSON.stringify(metadata)}}`);
+            writeMetadataChangelog(fromId, fromType, toType, toId, `{"old":false,"new":${JSON.stringify(metadata)}}`);
         } else if (metadataJson && !metadata) {
             await writer.setMetadata(fromId, `${fromType}/${toType}`, toId, false);
             await writer.setReverseEdge(toId, `${toType}/${fromType}`, fromId, false);
-            writeMetadataChangelog(fromId, fromType, toType, toId, `{"old":${metadataJson},"new":null}`);
+            writeMetadataChangelog(fromId, fromType, toType, toId, `{"old":${metadataJson},"new":false}`);
         } else if (metadataJson && metadata) {
             const oldMetadata = JSON.parse(metadataJson) as Metadata;
             const newMetadata = mergeGraphObjRight(oldMetadata, metadata);
             typeof newMetadata === 'object' && removeNulls(newMetadata);
-            await writer.setMetadata(fromId, `${fromType}/${toType}`, toId, newMetadata);
-            writeMetadataChangelog(
-                fromId,
-                fromType,
-                toType,
-                toId,
-                `{"old":${metadataJson},"new":${JSON.stringify(newMetadata)}}`,
-            );
+            if (!equal(oldMetadata, newMetadata)) {
+                await writer.setMetadata(fromId, `${fromType}/${toType}`, toId, newMetadata);
+                writeMetadataChangelog(
+                    fromId,
+                    fromType,
+                    toType,
+                    toId,
+                    `{"old":${metadataJson},"new":${JSON.stringify(newMetadata)}}`,
+                );
+            }
         }
     };
 
@@ -475,14 +480,20 @@ export const push = async (
         if (!fileRef && fileKey) {
             const newFileRef = { fileKey };
             await writer.setFileRef(nodeId, prop, newFileRef);
-            writeFilesChangelog(nodeId, prop, `{"old":null,"new":${JSON.stringify(newFileRef)}}`);
+            writeFilesChangelog(nodeId, prop, `{"old":false,"new":${JSON.stringify(newFileRef)}}`);
         } else if (fileRef && !fileKey) {
             await writer.setFileRef(nodeId, prop, null);
-            writeFilesChangelog(nodeId, prop, `{"old":${JSON.stringify(fileRef)},"new":null}`);
+            writeFilesChangelog(nodeId, prop, `{"old":${JSON.stringify(fileRef)},"new":false}`);
         } else if (fileRef && fileKey) {
             const newFileRef = { fileKey };
-            await writer.setFileRef(nodeId, prop, newFileRef);
-            writeFilesChangelog(nodeId, prop, `{"old":${JSON.stringify(fileRef)},"new":${JSON.stringify(newFileRef)}}`);
+            if (!equal(fileRef, newFileRef)) {
+                await writer.setFileRef(nodeId, prop, newFileRef);
+                writeFilesChangelog(
+                    nodeId,
+                    prop,
+                    `{"old":${JSON.stringify(fileRef)},"new":${JSON.stringify(newFileRef)}}`,
+                );
+            }
         }
     };
 
@@ -591,9 +602,6 @@ export const push = async (
     await updateFiles();
 
     await awaitPromises();
-
-    // TODO write changelog
-    await writer.setPushLog(userEmail, 'requestId', getGraphJsonChangelog());
 
     const res = getGraphJson();
     const changelog = getGraphJsonChangelog();

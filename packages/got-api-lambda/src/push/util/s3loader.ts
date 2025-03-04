@@ -93,11 +93,16 @@ export const s3loader: () => Loader = () => {
         const res = await s3get(BUCKET_MEDIA, refId);
         if (!res) return null;
 
-        const { fileKey = '' } = JSON.parse(res.toString()) as { fileKey: string };
-        return { prop, fileKey };
+        const fileRef = JSON.parse(res.toString()) as { fileKey: string };
+
+        if (!fileRef?.fileKey) {
+            return null;
+        }
+
+        return fileRef;
     };
 
-    const getFileRefs = async (nodeId: string) => queueLoad(() => listRefs(nodeId)) as Promise<Array<FileRef>>;
+    const getFileRefs = async (nodeId: string) => queueLoad(() => listRefs(nodeId)) as Promise<FileRef[]>;
 
     const getFileMetadata = async (fileKey: string): Promise<FileMetadata | null> => {
         const metadataKey = `metadata/${fileKey}`;
