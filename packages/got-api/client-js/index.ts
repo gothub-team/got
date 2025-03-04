@@ -226,30 +226,17 @@ const decodeJwt = (jwt: string) => {
     }
 };
 
-const useState = <T, FT extends (val: T) => T = (val: T) => T>(initialValue: T): [() => T, (v: T | FT) => void] => {
-    const reference = { current: initialValue };
-    const getState = () => reference.current;
-    const setState = (newValue: T | FT) => {
-        if (typeof newValue === 'function') {
-            reference.current = (newValue as FT)(reference.current);
-        } else {
-            reference.current = newValue;
-        }
-    };
-    return [getState, setState];
-};
-
-const useSingletonPromise = <T>(asyncFn: () => Promise<T>) => {
-    const [getSingletonPromise, setSingletonPromise] = useState<Promise<T> | null>(null);
+const createSingletonPromise = <T>(asyncFn: () => Promise<T>) => {
+    let singletonPromise: Promise<T> | null = null;
     return async () => {
-        if (!getSingletonPromise()) {
+        if (!singletonPromise) {
             const promise = asyncFn();
-            setSingletonPromise(promise);
+            singletonPromise = promise;
             const result = await promise;
-            setSingletonPromise(null);
+            singletonPromise = null;
             return result;
         }
-        getSingletonPromise();
+        singletonPromise;
     };
 };
 
@@ -297,19 +284,19 @@ export const createApi = ({
 
     const getSesh = getSession();
     const initialSession = getSesh && 'then' in getSesh ? undefined : getSesh;
-    const [_getLocalSession, _setLocalSession] = useState<Session | undefined>(initialSession);
-    const [getAdminMode, setAdminMode] = useState(adminMode);
+    let _localSession: Session | undefined = initialSession;
+    let _adminMode: boolean = !!adminMode;
 
     const getIdToken = async () => {
-        const { idToken } = _getLocalSession() || {};
+        const { idToken } = _localSession || {};
         if (idToken && isExpired(decodeJwt(idToken).exp)) {
             await refreshSession();
-            return _getLocalSession()?.idToken;
+            return _localSession?.idToken;
         }
         if (!idToken) {
             const session = await getSession();
             if (!session) return;
-            _setLocalSession(session);
+            _localSession = session;
             return session.idToken;
         }
         return idToken;
@@ -318,39 +305,37 @@ export const createApi = ({
     const api = createLowApi({
         host: _host,
         getIdToken,
-        getAdminMode,
+        getAdminMode: () => adminMode,
     });
 
-    const _setSession = (newValue: Parameters<typeof _setLocalSession>[0]) => {
-        _setLocalSession(newValue);
-        const session = _getLocalSession();
-        session && setSession(session);
+    const _setSession = (newValue: Session | undefined) => {
+        _localSession = newValue;
+        newValue && setSession(newValue);
     };
     const _removeSession = () => {
-        _setLocalSession(undefined);
+        _localSession = undefined;
         removeSession();
     };
 
-    const refreshSession = useSingletonPromise(async () => {
-        const { refreshToken } = _getLocalSession() || {};
+    const refreshSession = createSingletonPromise(async () => {
+        const { refreshToken } = _localSession || {};
         if (!refreshToken) return;
         const newSession = await api.loginRefresh({ refreshToken });
-        _setSession((oldSession: Session | undefined) => ({ ...oldSession, ...newSession }));
+        _localSession = { ..._localSession, ...newSession };
     });
 
     const getCurrentSession = () => {
-        const session = _getLocalSession();
-        if (isExpired(session?.refreshTokenExpires)) {
+        if (isExpired(_localSession?.refreshTokenExpires)) {
             _removeSession();
             return undefined;
         }
-        return session;
+        return _localSession;
     };
 
     return {
         ...api,
         push: async (body: PushBody, asRole?: string) =>
-            post(`${_host}/push`, body, await getIdToken(), getAdminMode(), asRole), // TODO: this circumvents the low api
+            post(`${_host}/push`, body, await getIdToken(), _adminMode, asRole), // TODO: this circumvents the low api
         login: async ({ email, password }: LoginInput) => {
             const { srpA, getSignature } = await useSrp();
 
@@ -404,8 +389,10 @@ export const createApi = ({
             const session = getCurrentSession();
             return session?.idToken ? decodeJwt(session.idToken) : undefined;
         },
-        getAdminMode,
-        setAdminMode,
+        getAdminMode: () => _adminMode,
+        setAdminMode: (adminMode: boolean) => {
+            _adminMode = adminMode;
+        },
         upload: async (
             uploadUrls: string[],
             file: Blob,
