@@ -54,8 +54,10 @@ export const validateAuthed = async <TBody>(schema: Schema, event: APIGatewayPro
         if (valid) {
             const userEmail = user.email as string;
             const asRole = event.headers['x-as-role'] || 'user';
-            const asAdmin = !!event.headers['x-as-admin'] && ADMIN_EMAILS.includes(userEmail);
-            return { userEmail, body, asAdmin, asRole };
+            const isAdmin = !!event.headers['x-as-admin'] && ADMIN_EMAILS.includes(userEmail);
+            const asUser = (isAdmin && event.headers['x-as-user']) || userEmail;
+            const asAdmin = event.headers['x-as-user'] ? false : isAdmin;
+            return { userEmail: asUser, body, asAdmin, asRole };
         } else {
             ApiError = badRequest(JSON.stringify(ajv.errors));
         }
