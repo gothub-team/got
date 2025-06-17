@@ -22,9 +22,9 @@ export const fsexist = async (path: string) => {
 export const fsget = async (path: string) => {
     try {
         const res = await readFile(path, 'utf8');
-        return res;
+        return res ?? null; // Return null if the file is empty
     } catch {
-        return null;
+        return undefined;
     }
 };
 
