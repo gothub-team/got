@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { promisify } from 'util';
 import type { Storage } from './storage.type';
+import * as Path from 'path';
 
 const access = promisify(fs.access);
 const readFile = promisify(fs.readFile);
@@ -97,9 +98,23 @@ export const fslist = async (location: string, path: string) => {
 };
 
 export class FSStorage implements Storage {
-    exist = fsexist;
-    get = fsget;
-    put = fsput;
-    delete = fsdelete;
-    list = fslist;
+    async exist(location: string, path: string) {
+        return fsexist(Path.join(location, path));
+    }
+
+    async get(location: string, path: string) {
+        return fsget(Path.join(location, path));
+    }
+
+    async put(location: string, path: string, data: string) {
+        return fsput(Path.join(location, path), data);
+    }
+
+    async delete(location: string, path: string) {
+        return fsdelete(Path.join(location, path));
+    }
+
+    async list(location: string, path: string) {
+        return fslist(location, path);
+    }
 }
