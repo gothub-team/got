@@ -19,7 +19,7 @@ export type FileMetadata = {
 
 export type EdgeWildcard = [fromType: string, toType: string, toId: string];
 
-export type Loader = {
+export interface Loader {
     getNode: (nodeId: string) => Promise<string | null>;
     getRead: (nodeId: string, principalType: string, principal: string) => Promise<boolean>;
     getWrite: (nodeId: string, principalType: string, principal: string) => Promise<boolean>;
@@ -37,4 +37,4 @@ export type Loader = {
     getNodesWildcard: (wildcardPrefix: string) => Promise<Array<string>>;
     listRights: (nodeId: string) => Promise<Map<string, unknown>>;
     ownerExists: (nodeId: string) => Promise<boolean>;
-};
+}
