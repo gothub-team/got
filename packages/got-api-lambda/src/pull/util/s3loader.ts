@@ -1,10 +1,9 @@
 /* eslint-disable prefer-template */
 import { loadQueue, substringToFirst, assocMap3 } from '@gothub/aws-util';
 import { s3get, s3listKeysPaged, s3head } from '@gothub/aws-util/s3';
-import type { EdgeWildcard, FileHead, FileRef, Loader } from '../types/loader';
+import type { EdgeWildcard, Loader } from '../types/loader';
 import {
     BUCKET_EDGES,
-    BUCKET_MEDIA,
     BUCKET_NODES,
     BUCKET_REVERSE_EDGES,
     BUCKET_RIGHTS_ADMIN,
@@ -33,22 +32,6 @@ const listEdgeWildcard = async (fromId: string, edgeTypes: string) => {
     }
 
     return edgeKeys;
-};
-
-const loadRef = async (refId: string) => {
-    const [, , prop] = refId.split('/');
-    const res = await s3get(BUCKET_MEDIA, refId);
-    const { fileKey = '' } = res ? (JSON.parse(res.toString()) as { fileKey: string }) : {};
-    return { prop, fileKey };
-};
-const listRefs = async (nodeId: string) => {
-    const keys = await s3listKeysPaged(BUCKET_MEDIA, `ref/${nodeId}`);
-
-    const promises = new Array(keys.length);
-    for (let i = 0; i < keys.length; i++) {
-        promises[i] = loadRef(keys[i]);
-    }
-    return Promise.all(promises);
 };
 
 export const s3loader: () => Loader = () => {
@@ -81,11 +64,6 @@ export const s3loader: () => Loader = () => {
         }
         return data.toString();
     };
-
-    const getFileHead = (fileKey: string): Promise<FileHead | false | undefined> =>
-        queueLoad(() => s3head(BUCKET_MEDIA, fileKey) as Promise<FileHead | false | undefined>);
-
-    const getFileRefs = async (nodeId: string) => queueLoad(() => listRefs(nodeId)) as Promise<Array<FileRef>>;
 
     const getEdgesWildcard = async (nodeId: string, edgeType: string): Promise<Array<EdgeWildcard>> => {
         const edgeKeys = (await queueLoad(() => listEdgeWildcard(nodeId, `${edgeType}/`))) as Array<string>;
@@ -173,8 +151,6 @@ export const s3loader: () => Loader = () => {
         getWrite: configureGetRight(BUCKET_RIGHTS_WRITE),
         getAdmin: configureGetRight(BUCKET_RIGHTS_ADMIN),
         getMetadata,
-        getFileHead,
-        getFileRefs,
         getEdges,
         getReverseEdges,
         getEdgesWildcard,

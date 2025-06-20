@@ -1,4 +1,4 @@
-import type { Storage } from './storage.type';
+import type { FileHead, Storage } from './storage.type';
 import Path from 'path';
 
 export class MemoryStorage implements Storage {
@@ -15,6 +15,10 @@ export class MemoryStorage implements Storage {
         }
 
         return this.storage.get(fullPath) ?? null;
+    }
+
+    async head(location: string, path: string): Promise<FileHead | undefined> {
+        throw new Error('MemoryStorage does not support head operation');
     }
 
     async delete(location: string, path: string) {

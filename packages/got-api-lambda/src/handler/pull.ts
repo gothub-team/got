@@ -8,6 +8,9 @@ import type { Signer } from '../pull/types/signer';
 import { cfSigner } from '../pull/util/signer';
 import { createDataCache } from '../pull/caches/dataCache';
 import { validateAuthed, type AuthedValidationResult } from '@gothub/aws-util/validation';
+import { FileService } from '../shared/files.service';
+import { S3Storage } from '@gothub/aws-util/s3';
+import { BUCKET_MEDIA } from '../pull/config';
 
 export const querySchema = (recursiveRef: { $ref: string }) => ({
     type: 'object',
@@ -92,11 +95,16 @@ export const schema = {
 export type Body = View;
 
 const handle = async ({ userEmail, asAdmin, body }: AuthedValidationResult<Body>): Promise<APIGatewayProxyResult> => {
+    const storage = new S3Storage();
     const signer: Signer = await cfSigner();
+    const fileService = new FileService(storage, {
+        MEDIA: BUCKET_MEDIA,
+    });
     const [result] = await pull(body, userEmail, asAdmin, {
         dataCache: createDataCache(),
         graphAssembler: graphAssembler(),
         loader: s3loader(),
+        fileService,
         signer,
     });
 

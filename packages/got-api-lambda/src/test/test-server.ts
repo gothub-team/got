@@ -12,6 +12,7 @@ import { ConfigurableWriter } from '../push/util/writer';
 import { ConfigurableLoader } from '../push/util/loader';
 import { mockSigner } from './signer.mock';
 import { PushLogsService } from '../shared/push-logs.service';
+import { FileService } from '../shared/files.service';
 
 const PORT = process.env.PORT || 4000;
 
@@ -36,6 +37,7 @@ const handlePush = async (
     const signer = await mockSigner();
     const loader = new ConfigurableLoader(storage, locations);
     const writer = new ConfigurableWriter(storage, locations);
+    const fileService = new FileService(storage, locations);
     const logsService = new PushLogsService(storage, locations);
     const [result, changelog] = await push(body as Graph, userEmail, asRole || 'user', asAdmin, {
         dataCache: createDataCache(),
@@ -43,6 +45,7 @@ const handlePush = async (
         changelogAssembler: graphAssembler(),
         loader: loader,
         writer: writer,
+        fileService,
         signer,
     });
 
@@ -59,11 +62,13 @@ const handlePull = async ({ userEmail, asAdmin, body }: AuthedValidationResult<B
     const signer = await mockSigner();
     // TODO: refactor for common dependency between push and pull
     const loader = new ConfigurableLoader(storage, locations) as unknown as PullLoader;
+    const fileService = new FileService(storage, locations);
 
     const [result] = await pull(body as unknown as View, userEmail, asAdmin, {
         dataCache: createDataCache(),
         graphAssembler: graphAssembler(),
         loader,
+        fileService,
         signer,
     });
 

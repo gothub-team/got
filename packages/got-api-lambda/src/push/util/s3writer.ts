@@ -1,8 +1,6 @@
-import { s3delete, s3put, s3putRaw } from '@gothub/aws-util/s3';
+import { s3delete, s3put } from '@gothub/aws-util/s3';
 import {
     BUCKET_EDGES,
-    BUCKET_LOGS,
-    BUCKET_MEDIA,
     BUCKET_NODES,
     BUCKET_OWNERS,
     BUCKET_REVERSE_EDGES,
@@ -32,20 +30,20 @@ export const s3writer: () => Writer = () => {
     };
 
     const setReverseEdge = async (toId: string, edgeTypes: string, fromId: string, data: boolean) => {
-        if (data) {
-            return s3put(BUCKET_REVERSE_EDGES, `${toId}/${edgeTypes}/${fromId}`, true);
-        } else {
+        if (!data) {
             return s3delete(BUCKET_REVERSE_EDGES, `${toId}/${edgeTypes}/${fromId}`);
+        } else {
+            return s3put(BUCKET_REVERSE_EDGES, `${toId}/${edgeTypes}/${fromId}`, true);
         }
     };
 
     const setRight =
         (rightBucket: string) => async (nodeId: string, principalType: string, principal: string, right: boolean) => {
             const rightKey = `${nodeId}/${principalType}/${principal}`;
-            if (right) {
-                return s3put(rightBucket, rightKey, true);
-            } else {
+            if (!right) {
                 return s3delete(rightBucket, rightKey);
+            } else {
+                return s3put(rightBucket, rightKey, true);
             }
         };
     const setOwner = async (nodeId: string, principal: string | null) => {
@@ -53,31 +51,6 @@ export const s3writer: () => Writer = () => {
             throw new Error('Cannot set owner to null');
         }
         return s3put(BUCKET_OWNERS, `${nodeId}/owner/${principal}`, true);
-    };
-
-    const setFileRef = async (nodeId: string, prop: string, fileRef: { fileKey: string } | null) => {
-        const refId = `ref/${nodeId}/${prop}`;
-        if (fileRef === null) {
-            return s3delete(BUCKET_MEDIA, refId);
-        } else {
-            return s3put(BUCKET_MEDIA, refId, fileRef);
-        }
-    };
-
-    const setFileMetadata = async (fileKey: string, metadata: Metadata | null) => {
-        if (metadata === null) {
-            return s3delete(BUCKET_MEDIA, `metadata/${fileKey}`);
-        } else {
-            return s3put(BUCKET_MEDIA, `metadata/${fileKey}`, metadata);
-        }
-    };
-
-    const setUploadId = async (uploadId: string, fileKey: string | null) => {
-        if (fileKey === null) {
-            return s3delete(BUCKET_MEDIA, `uploads/${uploadId}`);
-        } else {
-            return s3put(BUCKET_MEDIA, `uploads/${uploadId}`, { fileKey });
-        }
     };
 
     return {
@@ -88,8 +61,5 @@ export const s3writer: () => Writer = () => {
         setWrite: setRight(BUCKET_RIGHTS_WRITE),
         setAdmin: setRight(BUCKET_RIGHTS_ADMIN),
         setOwner,
-        setFileRef,
-        setFileMetadata,
-        setUploadId,
     };
 };

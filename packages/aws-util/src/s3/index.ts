@@ -12,7 +12,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { AWS_REGION, CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER, MEDIA_DOMAIN } from '../config.js';
 import { signUrl } from '../cloudfront/index.js';
-import type { Storage } from '../storage.type.js';
+import type { FileHead, Storage } from '../storage.type.js';
 
 const client = new S3Client({
     region: AWS_REGION,
@@ -336,6 +336,15 @@ export class S3Storage implements Storage {
         }
 
         return res.toString();
+    }
+
+    async head(location: string, path: string): Promise<FileHead | undefined> {
+        const res = await s3head(location, path);
+        if (!res) {
+            return undefined;
+        }
+
+        return res;
     }
 
     async put(location: string, path: string, data: string) {

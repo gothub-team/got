@@ -1,5 +1,5 @@
 import { assocMap3, loadQueue, substringToFirst, type Storage } from '@gothub/aws-util';
-import type { EdgeWildcard, FileHead, FileMetadata, FileRef, Loader } from '../types/loader';
+import type { EdgeWildcard, Loader } from '../types/loader';
 
 type Locations = {
     NODES: string;
@@ -171,26 +171,6 @@ export class ConfigurableLoader implements Loader {
         }
 
         return result;
-    }
-
-    async getFileHead(fileKey: string): Promise<FileHead | false | undefined> {
-        throw new Error('Not Implemented');
-    }
-
-    async getFileMetadata(fileKey: string): Promise<FileMetadata | null> {
-        throw new Error('Not Implemented');
-    }
-
-    async getFileRef(nodeId: string, prop: string): Promise<FileRef | null> {
-        throw new Error('Not Implemented');
-    }
-
-    async getFileRefs(nodeId: string): Promise<FileRef[]> {
-        throw new Error('Not Implemented');
-    }
-
-    async getUpload(uploadId: string): Promise<string | null> {
-        throw new Error('Not Implemented');
     }
 
     getLog() {

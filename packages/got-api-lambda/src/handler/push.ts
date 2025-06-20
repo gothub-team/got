@@ -9,8 +9,9 @@ import { graphAssembler } from '../push/util/graphAssembler';
 import { createDataCache } from '../push/caches/dataCache';
 import { validateAuthed, type AuthedValidationResult } from '@gothub/aws-util/validation';
 import { S3Storage } from '@gothub/aws-util/s3';
-import { BUCKET_LOGS } from '../push/config';
+import { BUCKET_LOGS, BUCKET_MEDIA } from '../push/config';
 import { PushLogsService } from '../shared/push-logs.service';
+import { FileService } from '../shared/files.service';
 
 export const schema = {
     type: 'object',
@@ -287,6 +288,9 @@ const handle = async (
     const signer = await cfSigner();
     const loader = s3loader();
     const writer = s3writer();
+    const fileService = new FileService(storage, {
+        MEDIA: BUCKET_MEDIA,
+    });
     const logsService = new PushLogsService(storage, {
         LOGS: BUCKET_LOGS,
     });
@@ -297,6 +301,7 @@ const handle = async (
         changelogAssembler: graphAssembler(),
         loader: loader,
         writer: writer,
+        fileService,
         signer,
     });
 
