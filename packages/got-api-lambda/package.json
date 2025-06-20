@@ -5,7 +5,8 @@
     "scripts": {
         "lint": "eslint ./src",
         "typecheck": "tsc --noEmit",
-        "build": "bun esbuild.js"
+        "build": "bun esbuild.js",
+        "test-server": "export AWS_REGION='test-region' && bun ./src/test/test-server.ts"
     },
     "devDependencies": {
         "@types/bun": "latest",
