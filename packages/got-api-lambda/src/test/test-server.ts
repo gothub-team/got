@@ -7,11 +7,11 @@ import type { Graph, View } from '@gothub/got-core';
 import { json, type RequestHandler } from 'express';
 import polka from 'polka';
 import { pull } from '../pull';
-import { Writer } from '../shared/writer';
-import { Loader } from '../shared/loader';
 import { mockSigner } from './signer.mock';
 import { PushLogsService } from '../shared/push-logs.service';
 import { FileService } from '../shared/files.service';
+import { GraphService } from '../shared/graph.service';
+import { RightsService } from '../shared/rights.service';
 
 const PORT = process.env.PORT || 4000;
 
@@ -34,16 +34,16 @@ const handlePush = async (
 ) => {
     // TODO: replace with inert dependencies
     const signer = await mockSigner();
-    const loader = new Loader(storage, locations);
-    const writer = new Writer(storage, locations);
+    const graphService = new GraphService(storage, locations);
+    const rightsService = new RightsService(storage, locations);
     const fileService = new FileService(storage, locations);
     const logsService = new PushLogsService(storage, locations);
     const [result, changelog] = await push(body as Graph, userEmail, asRole || 'user', asAdmin, {
         dataCache: createDataCache(),
         graphAssembler: graphAssembler(),
         changelogAssembler: graphAssembler(),
-        loader: loader,
-        writer: writer,
+        graphService,
+        rightsService,
         fileService,
         signer,
     });
@@ -60,13 +60,15 @@ const handlePush = async (
 const handlePull = async ({ userEmail, asAdmin, body }: AuthedValidationResult<Body>) => {
     const signer = await mockSigner();
     // TODO: refactor for common dependency between push and pull
-    const loader = new Loader(storage, locations);
+    const graphService = new GraphService(storage, locations);
+    const rightsService = new RightsService(storage, locations);
     const fileService = new FileService(storage, locations);
 
     const [result] = await pull(body as unknown as View, userEmail, asAdmin, {
         dataCache: createDataCache(),
         graphAssembler: graphAssembler(),
-        loader,
+        graphService,
+        rightsService,
         fileService,
         signer,
     });

@@ -6,15 +6,17 @@ import type { Signer } from './types/signer';
 import type { GraphAssembler } from './types/graphAssembler';
 import { promiseManager } from './util/promiseManager';
 import type { FileRef, FileService } from '../shared/files.service';
-import type { Loader } from '../shared/loader';
 import type { Log } from '../shared/logs';
+import type { GraphService } from '../shared/graph.service';
+import type { RightsService } from '../shared/rights.service';
 
 const parseRole = (role: string, nodeId: string): string => role.replaceAll('$NODEID', nodeId);
 
 type Dependencies = {
     // existsCache: ExistsCache;
     dataCache: DataCache;
-    loader: Loader;
+    graphService: GraphService;
+    rightsService: RightsService;
     fileService: FileService;
     signer: Signer;
     graphAssembler: GraphAssembler;
@@ -32,7 +34,7 @@ export const pull = async (
 
     const { addPromise, awaitPromises } = promiseManager();
 
-    const { dataCache, signer, loader, fileService, graphAssembler } = dependencies;
+    const { dataCache, signer, graphService, rightsService, fileService, graphAssembler } = dependencies;
     const {
         writeNode,
         writeMetadata,
@@ -48,19 +50,21 @@ export const pull = async (
     const timeLoadEdge = 0;
 
     const nodeExists = async (nodeId: string): Promise<boolean> => {
-        const data = await loader.getNode(nodeId);
+        const data = await graphService.getNode(nodeId);
         return data != null;
     };
 
-    const canUserRead = (nodeId: string): Promise<boolean> => loader.getRead(nodeId, 'user', userEmail);
-    const canUserWrite = (nodeId: string): Promise<boolean> => loader.getWrite(nodeId, 'user', userEmail);
-    const canUserAdmin = (nodeId: string): Promise<boolean> => loader.getAdmin(nodeId, 'user', userEmail);
+    const canUserRead = (nodeId: string): Promise<boolean> => rightsService.getRead(nodeId, 'user', userEmail);
+    const canUserWrite = (nodeId: string): Promise<boolean> => rightsService.getWrite(nodeId, 'user', userEmail);
+    const canUserAdmin = (nodeId: string): Promise<boolean> => rightsService.getAdmin(nodeId, 'user', userEmail);
 
     const userHasRole = async (role: string) => role === 'public' || (await canUserRead(role));
 
-    const canRoleRead = (nodeId: string, role: string): Promise<boolean> => loader.getRead(nodeId, 'role', role);
-    const canRoleWrite = (nodeId: string, role: string): Promise<boolean> => loader.getWrite(nodeId, 'role', role);
-    const canRoleAdmin = (nodeId: string, role: string): Promise<boolean> => loader.getAdmin(nodeId, 'role', role);
+    const canRoleRead = (nodeId: string, role: string): Promise<boolean> => rightsService.getRead(nodeId, 'role', role);
+    const canRoleWrite = (nodeId: string, role: string): Promise<boolean> =>
+        rightsService.getWrite(nodeId, 'role', role);
+    const canRoleAdmin = (nodeId: string, role: string): Promise<boolean> =>
+        rightsService.getAdmin(nodeId, 'role', role);
 
     const canViewNode = async (nodeId: string, asRole: string = 'user') => {
         if (asAdmin) return nodeExists(nodeId);
@@ -100,7 +104,7 @@ export const pull = async (
             onData && onData(nodeId, data);
             return data;
         } else {
-            const promise = loader.getNode(nodeId);
+            const promise = graphService.getNode(nodeId);
             dataCache.nodes.setNodePromise(nodeId, promise as Promise<string>);
             const data = await promise;
             if (data !== null) {
@@ -164,7 +168,7 @@ export const pull = async (
             const data = await cachedPromise;
             onData && onData(fromId, fromType, toType, toId, data);
         } else {
-            const promise = loader.getMetadata(fromId, edgeTypes, toId); // do a thing
+            const promise = graphService.getMetadata(fromId, edgeTypes, toId); // do a thing
             dataCache.metadata.setMetadataPromise(fromId, edgeTypes, toId, promise);
             const data = await promise;
             dataCache.metadata.setMetadata(fromId, edgeTypes, toId, data);
@@ -174,7 +178,7 @@ export const pull = async (
     };
 
     const loadRights = async (nodeId: string) => {
-        const resMap = await loader.listRights(nodeId);
+        const resMap = await rightsService.listRights(nodeId);
 
         const userRights = resMap.get('user') as Map<string, unknown>;
         const roleRights = resMap.get('role') as Map<string, unknown>;
@@ -286,7 +290,7 @@ export const pull = async (
 
         if (queryObject.reverse) {
             const toId = nodeId;
-            const fromIds = await loader.getReverseEdges(toId, `${toType}/${fromType}`);
+            const fromIds = await graphService.getReverseEdges(toId, `${toType}/${fromType}`);
             if (fromIds == null) return;
 
             const fromIdsKeys = fromIds.keys();
@@ -296,7 +300,7 @@ export const pull = async (
             }
         } else {
             const fromId = nodeId;
-            const toIds = await loader.getEdges(fromId, edgeTypes);
+            const toIds = await graphService.getEdges(fromId, edgeTypes);
             if (toIds == null) return;
 
             const toIdsKeys = toIds.keys();
@@ -312,7 +316,7 @@ export const pull = async (
             throw new Error('Reverse wildcards are not supported');
         } else {
             const fromId = nodeId;
-            const wildcardEdges = await loader.getEdgesWildcard(fromId, edgeTypes);
+            const wildcardEdges = await graphService.getEdgesWildcard(fromId, edgeTypes);
             for (let i = 0; i < wildcardEdges.length; i++) {
                 const [fromType, toType, toId] = wildcardEdges[i];
                 const role = queryObject.role ? parseRole(queryObject.role, toId) : _role;
@@ -348,7 +352,7 @@ export const pull = async (
     };
 
     const queryNodeViewWildcardAsync = async (wildcardPrefix: string, queryObject: NodeView) => {
-        const nodeIds = await loader.getNodesWildcard(wildcardPrefix);
+        const nodeIds = await graphService.getNodesWildcard(wildcardPrefix);
 
         if (!nodeIds) return;
 
@@ -388,7 +392,7 @@ export const pull = async (
     const res = getGraphJson();
     const log: Log = {
         graphAssembler: getLogGraphAssembler(),
-        loader: loader.getLog(),
+        loader: graphService.getLog(),
         request: {
             payloadBytes: res.length,
             time: performance.now() - start,

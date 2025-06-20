@@ -20,8 +20,8 @@ import {
 } from '../push/config';
 import { PushLogsService } from '../shared/push-logs.service';
 import { FileService } from '../shared/files.service';
-import { Writer } from '../shared/writer';
-import { Loader } from '../shared/loader';
+import { GraphService } from '../shared/graph.service';
+import { RightsService } from '../shared/rights.service';
 
 export const schema = {
     type: 'object',
@@ -308,8 +308,8 @@ const handle = async (
 ): Promise<APIGatewayProxyResult> => {
     const storage = new S3Storage();
     const signer = await cfSigner();
-    const loader = new Loader(storage, locations);
-    const writer = new Writer(storage, locations);
+    const graphService = new GraphService(storage, locations);
+    const rightsService = new RightsService(storage, locations);
     const fileService = new FileService(storage, locations);
     const logsService = new PushLogsService(storage, locations);
 
@@ -317,8 +317,8 @@ const handle = async (
         dataCache: createDataCache(),
         graphAssembler: graphAssembler(),
         changelogAssembler: graphAssembler(),
-        loader: loader,
-        writer: writer,
+        graphService,
+        rightsService,
         fileService,
         signer,
     });

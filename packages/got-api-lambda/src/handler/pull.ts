@@ -19,7 +19,8 @@ import {
     BUCKET_RIGHTS_READ,
     BUCKET_RIGHTS_WRITE,
 } from '../pull/config';
-import { Loader } from '../shared/loader';
+import { GraphService } from '../shared/graph.service';
+import { RightsService } from '../shared/rights.service';
 
 export const querySchema = (recursiveRef: { $ref: string }) => ({
     type: 'object',
@@ -117,12 +118,14 @@ export type Body = View;
 const handle = async ({ userEmail, asAdmin, body }: AuthedValidationResult<Body>): Promise<APIGatewayProxyResult> => {
     const storage = new S3Storage();
     const signer: Signer = await cfSigner();
-    const loader = new Loader(storage, locations);
+    const graphService = new GraphService(storage, locations);
+    const rightsService = new RightsService(storage, locations);
     const fileService = new FileService(storage, locations);
     const [result] = await pull(body, userEmail, asAdmin, {
         dataCache: createDataCache(),
         graphAssembler: graphAssembler(),
-        loader: loader,
+        graphService,
+        rightsService,
         fileService,
         signer,
     });

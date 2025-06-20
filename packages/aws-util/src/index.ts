@@ -3,6 +3,7 @@ export * from './assocMap';
 export * from './auth-errors';
 export * from './config';
 export * from './errors';
+export * from './fs';
 export * from './hash';
 export * from './loadQueue';
 export * from './memory-storage';
