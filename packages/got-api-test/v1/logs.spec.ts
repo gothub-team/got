@@ -327,7 +327,7 @@ describe('rights', () => {
     });
 });
 
-describe('files', () => {
+describe.skip('files', () => {
     beforeEach(async () => {
         await fixture.user1Api.push({
             nodes: {

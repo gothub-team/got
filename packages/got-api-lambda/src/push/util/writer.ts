@@ -84,8 +84,4 @@ export class ConfigurableWriter implements Writer {
     async setUploadId(uploadId: string, fileKey: string | null): Promise<void> {
         throw new Error('Not Implemented');
     }
-
-    async setPushLog(userEmail: string, requestId: string, changeset: string): Promise<void> {
-        throw new Error('Not Implemented');
-    }
 }
