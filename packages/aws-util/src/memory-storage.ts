@@ -26,8 +26,8 @@ export class MemoryStorage implements Storage {
         this.storage.delete(fullPath);
     }
 
-    async put(location: string, path: string, value: string) {
-        this.storage.set(Path.join(location, path), value);
+    async put(location: string, path: string, data: string) {
+        this.storage.set(Path.join(location, path), data);
     }
 
     async list(location: string, path: string) {
