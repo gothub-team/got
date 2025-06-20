@@ -1,8 +1,6 @@
-import { s3get, s3put } from '@gothub/aws-util/s3';
 import type { RightTypes } from '@gothub/got-core';
-import type { EntityRights, NodeEntityRights, RightsString } from './advanced.types';
-
-const rightBucket = 'some-new-rights-bucket'; // TODO: Replace with actual bucket name
+import type { EntityRights, NodeEntityRights, RightsString } from './rights.types';
+import type { Storage } from '@gothub/aws-util';
 
 const modifyRight = (rights: RightsString, rightsPatch: RightTypes): RightsString => {
     let rightString: RightsString = '';
@@ -45,7 +43,7 @@ const applyRightsPatches = (rights: EntityRights, patches: RightsPatches) => {
  * first takes in a bunch of rights patches, then applies them to the current rights
  * Stateful, needs to be initialized for each request
  */
-export class RightChangesManager {
+export class RightsWriter {
     userRightPatches: Record<PropertyKey, RightsPatches> = {};
     roleRightPathes: Record<PropertyKey, RightsPatches> = {};
 
@@ -57,7 +55,14 @@ export class RightChangesManager {
         }
     > = {};
 
-    getPrincipalRights(principalType: 'user' | 'role', nodeId: string, principal: string) {
+    constructor(
+        private readonly storage: Storage,
+        private readonly locations: {
+            RIGHTS: string;
+        },
+    ) {}
+
+    getPrincipalRights(principalType: 'user' | 'role', principal: string, nodeId: string) {
         if (principalType === 'user') {
             const userRightPatches = this.userRightPatches[principal] || {};
             this.userRightPatches[principal] = userRightPatches;
@@ -106,7 +111,7 @@ export class RightChangesManager {
     }
 
     async loadRights<T>(key: string) {
-        return s3get(rightBucket, key).then((buffer) => {
+        return this.storage.get(this.locations.RIGHTS, key).then((buffer) => {
             if (!buffer) {
                 return undefined;
             }
@@ -125,7 +130,7 @@ export class RightChangesManager {
 
         applyRightsPatches(roleRights, roleRightPatches);
 
-        return s3put(rightBucket, rightKey, roleRights);
+        return this.storage.put(this.locations.RIGHTS, rightKey, JSON.stringify(roleRights));
     }
 
     async storeUserRight(user: string) {
@@ -139,7 +144,7 @@ export class RightChangesManager {
 
         applyRightsPatches(userRights, userRightPatches);
 
-        return s3put(rightBucket, rightKey, userRights);
+        return this.storage.put(this.locations.RIGHTS, rightKey, JSON.stringify(userRights));
     }
 
     async storeNodeRight(nodeId: string) {
@@ -159,7 +164,7 @@ export class RightChangesManager {
         applyRightsPatches(nodeRights.role, nodeRightPatches.role);
         applyRightsPatches(nodeRights.user, nodeRightPatches.user);
 
-        return s3put(rightBucket, rightKey, nodeRights);
+        return this.storage.put(this.locations.RIGHTS, rightKey, JSON.stringify(nodeRights));
     }
 
     async storeAllRights() {

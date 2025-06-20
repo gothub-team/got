@@ -132,7 +132,12 @@ export const push = async (
         return obj;
     };
 
-    const updateReadRight = async (nodeId: string, principalType: string, principal: string, right: boolean) => {
+    const updateReadRight = async (
+        nodeId: string,
+        principalType: 'user' | 'role',
+        principal: string,
+        right: boolean,
+    ) => {
         const exists = await rightsService.getRead(nodeId, principalType, principal);
         if (Boolean(exists) !== right) {
             if (right) {
@@ -144,7 +149,12 @@ export const push = async (
             }
         }
     };
-    const updateWriteRight = async (nodeId: string, principalType: string, principal: string, right: boolean) => {
+    const updateWriteRight = async (
+        nodeId: string,
+        principalType: 'user' | 'role',
+        principal: string,
+        right: boolean,
+    ) => {
         const exists = await rightsService.getWrite(nodeId, principalType, principal);
         if (Boolean(exists) !== right) {
             if (right) {
@@ -156,7 +166,12 @@ export const push = async (
             }
         }
     };
-    const updateAdminRight = async (nodeId: string, principalType: string, principal: string, right: boolean) => {
+    const updateAdminRight = async (
+        nodeId: string,
+        principalType: 'user' | 'role',
+        principal: string,
+        right: boolean,
+    ) => {
         const exists = await rightsService.getAdmin(nodeId, principalType, principal);
         if (Boolean(exists) !== right) {
             if (right) {
@@ -310,7 +325,7 @@ export const push = async (
     const inheritPrincipalRights = (
         fromRights: Map<string, Map<string, string>> | undefined,
         toRights: Map<string, Map<string, string>> | undefined,
-        principalType: string,
+        principalType: 'user' | 'role',
         toId: string,
     ): Promise<unknown> => {
         const promises: Promise<unknown>[] = [];
@@ -395,6 +410,11 @@ export const push = async (
         right: string,
         val: boolean,
     ) => {
+        if (principalType !== 'user' && principalType !== 'role') {
+            writePrincipalRight(nodeId, principalType, principal, right, '{"statusCode":400}');
+            return;
+        }
+
         if (right === 'read') {
             await updateReadRight(nodeId, principalType, principal, val);
         } else if (right === 'write') {
@@ -601,6 +621,7 @@ export const push = async (
     await updateFiles();
 
     await awaitPromises();
+    await rightsService.storeAllRights();
 
     const res = getGraphJson();
     const changelog = getGraphJsonChangelog();

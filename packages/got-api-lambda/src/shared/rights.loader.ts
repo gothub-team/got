@@ -1,23 +1,28 @@
-import { s3get } from '@gothub/aws-util/s3';
-import type { EntityRights } from './advanced.types';
+import type { Storage } from '@gothub/aws-util';
+import type { EntityRights } from './rights.types';
 
-const rightBucket = 'some-new-rights-bucket'; // TODO: Replace with actual bucket name
-
-// TODO: implement interface for RightsLoder
-export class AdvancedLoader {
+export class RightsLoader {
     entityRightsPromises: Map<PropertyKey, Promise<EntityRights>> = new Map();
 
+    constructor(
+        private readonly storage: Storage,
+        private readonly locations: {
+            RIGHTS: string;
+        },
+    ) {}
+
     async loadRights(key: string) {
-        return s3get(rightBucket, key).then((buffer) => {
-            if (!buffer) {
-                return {} as EntityRights;
-            }
-            return JSON.parse(buffer.toString()) as EntityRights;
-        });
+        const json = await this.storage.get(this.locations.RIGHTS, key);
+        if (!json) {
+            return {} as EntityRights;
+        }
+
+        return JSON.parse(json) as EntityRights;
     }
 
     loadUserRights(user: string) {
         const rightKey = `user/${user}`;
+
         if (this.entityRightsPromises.has(rightKey)) {
             return this.entityRightsPromises.get(rightKey)!;
         }
@@ -50,18 +55,19 @@ export class AdvancedLoader {
     async getRead(nodeId: string, principalType: string, principal: string) {
         const principalRights = await this.loadPrincipalRights(principalType, principal);
         const nodeRights = principalRights[nodeId];
-        return nodeRights && nodeRights.includes('r');
+
+        return nodeRights ? nodeRights.includes('r') : false;
     }
 
     async getWrite(nodeId: string, principalType: string, principal: string) {
         const principalRights = await this.loadPrincipalRights(principalType, principal);
         const nodeRights = principalRights[nodeId];
-        return nodeRights && nodeRights.includes('w');
+        return nodeRights ? nodeRights.includes('w') : false;
     }
 
     async getAdmin(nodeId: string, principalType: string, principal: string) {
         const principalRights = await this.loadPrincipalRights(principalType, principal);
         const nodeRights = principalRights[nodeId];
-        return nodeRights && nodeRights.includes('a');
+        return nodeRights ? nodeRights.includes('a') : false;
     }
 }
