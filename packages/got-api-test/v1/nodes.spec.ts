@@ -32,7 +32,6 @@ describe('nodes', () => {
 
     describe('one node', () => {
         it('pushes one node', async () => {
-            console.log('pushResult', typeof pushResult, pushResult);
             expect(pushResult).toHaveProperty(['nodes', fixture.testId, 'statusCode'], 200);
         });
         it('pulls the same node', async () => {

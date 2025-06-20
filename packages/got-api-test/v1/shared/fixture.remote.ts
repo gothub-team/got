@@ -42,11 +42,11 @@ export class RemoteTestFixture implements TestFixture {
             TEST_USER_2_EMAIL,
             TEST_USER_2_PW,
         });
-        this.user1Api.login({
+        await this.user1Api.login({
             email: env.TEST_USER_1_EMAIL,
             password: env.TEST_USER_1_PW,
         });
-        this.user2Api.login({
+        await this.user2Api.login({
             email: env.TEST_USER_2_EMAIL,
             password: env.TEST_USER_2_PW,
         });
