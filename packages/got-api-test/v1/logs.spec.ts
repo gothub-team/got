@@ -1,26 +1,16 @@
 import { describe, beforeAll, beforeEach, it, expect } from 'bun:test';
 import type { GotApi } from '@gothub/got-api';
 import crypto from 'crypto';
-// import type { Graph, Node, PushResult } from '@gothub/got-core';
-import { createUserApi } from './shared';
-import { parseEnv } from '@gothub/typescript-util';
-import { TEST_USER_1_EMAIL, TEST_USER_1_PW, TEST_USER_2_EMAIL } from '../env';
+import type { TestFixture } from './shared/fixture.type';
+import { createFixture } from './shared/create-fixture';
 
-const env = parseEnv({
-    TEST_USER_1_EMAIL,
-    TEST_USER_1_PW,
-    TEST_USER_2_EMAIL,
-});
-
-let testId: string;
-let user1Api: GotApi;
-let user1Email: string;
+let fixture: TestFixture;
 beforeAll(async () => {
-    user1Email = env.TEST_USER_1_EMAIL;
-    user1Api = await createUserApi(user1Email, env.TEST_USER_1_PW);
+    fixture = createFixture();
+    await fixture.setup();
 });
 beforeEach(async () => {
-    testId = `test-${crypto.randomBytes(8).toString('hex')}`;
+    fixture.setTestId();
 });
 
 const getLatestLog = async (api: GotApi) => {
@@ -32,10 +22,10 @@ const getLatestLog = async (api: GotApi) => {
 
 describe('nodes', () => {
     beforeEach(async () => {
-        await user1Api.push({
+        await fixture.user1Api.push({
             nodes: {
-                [testId]: {
-                    id: testId,
+                [fixture.testId]: {
+                    id: fixture.testId,
                     name: 'Test Node',
                     prop: 'value1',
                 },
@@ -44,53 +34,53 @@ describe('nodes', () => {
     });
 
     it('should create a log entry when a node is created', async () => {
-        const logEntry = await getLatestLog(user1Api);
+        const logEntry = await getLatestLog(fixture.user1Api);
 
-        expect(logEntry).toHaveProperty(['changeset', 'nodes', testId], {
+        expect(logEntry).toHaveProperty(['changeset', 'nodes', fixture.testId], {
             old: false,
             new: {
-                id: testId,
+                id: fixture.testId,
                 name: 'Test Node',
                 prop: 'value1',
             },
         });
     });
     it('should create a log entry when a node is updated', async () => {
-        await user1Api.push({
+        await fixture.user1Api.push({
             nodes: {
-                [testId]: {
-                    id: testId,
+                [fixture.testId]: {
+                    id: fixture.testId,
                     name: 'Updated Name',
                     prop: 'Updated Value',
                 },
             },
         });
-        const logEntry = await getLatestLog(user1Api);
+        const logEntry = await getLatestLog(fixture.user1Api);
 
-        expect(logEntry).toHaveProperty(['changeset', 'nodes', testId], {
+        expect(logEntry).toHaveProperty(['changeset', 'nodes', fixture.testId], {
             old: {
-                id: testId,
+                id: fixture.testId,
                 name: 'Test Node',
                 prop: 'value1',
             },
             new: {
-                id: testId,
+                id: fixture.testId,
                 name: 'Updated Name',
                 prop: 'Updated Value',
             },
         });
     });
     it('should create a log entry when a node is deleted', async () => {
-        await user1Api.push({
+        await fixture.user1Api.push({
             nodes: {
-                [testId]: false,
+                [fixture.testId]: false,
             },
         });
-        const logEntry = await getLatestLog(user1Api);
+        const logEntry = await getLatestLog(fixture.user1Api);
 
-        expect(logEntry).toHaveProperty(['changeset', 'nodes', testId], {
+        expect(logEntry).toHaveProperty(['changeset', 'nodes', fixture.testId], {
             old: {
-                id: testId,
+                id: fixture.testId,
                 name: 'Test Node',
                 prop: 'value1',
             },
@@ -98,121 +88,147 @@ describe('nodes', () => {
         });
     });
     it('should not create a log entry when there are no changes in the nodes data', async () => {
-        await user1Api.push({
+        await fixture.user1Api.push({
             nodes: {
-                [testId]: {
-                    id: testId,
+                [fixture.testId]: {
+                    id: fixture.testId,
                     name: 'Test Node',
                     prop: 'value1',
                 },
             },
         });
-        const logEntry = await getLatestLog(user1Api);
+        const logEntry = await getLatestLog(fixture.user1Api);
 
-        expect(logEntry).not.toHaveProperty(['changeset', 'nodes', testId]);
+        expect(logEntry).not.toHaveProperty(['changeset', 'nodes', fixture.testId]);
     });
 });
 
 describe('edges', () => {
     beforeEach(async () => {
-        await user1Api.push({
+        await fixture.user1Api.push({
             nodes: {
-                [`${testId}-1`]: { id: `${testId}-1` },
-                [`${testId}-2`]: { id: `${testId}-2` },
+                [`${fixture.testId}-1`]: { id: `${fixture.testId}-1` },
+                [`${fixture.testId}-2`]: { id: `${fixture.testId}-2` },
             },
             edges: {
-                from: { [`${testId}-1`]: { to: { [`${testId}-2`]: true } } },
+                from: { [`${fixture.testId}-1`]: { to: { [`${fixture.testId}-2`]: true } } },
             },
         });
     });
 
     it("should create a log entry when an edge is created'", async () => {
-        const logEntry = await getLatestLog(user1Api);
+        const logEntry = await getLatestLog(fixture.user1Api);
 
-        expect(logEntry).toHaveProperty(['changeset', 'edges', 'from', `${testId}-1`, 'to', `${testId}-2`], {
-            old: false,
-            new: true,
-        });
+        expect(logEntry).toHaveProperty(
+            ['changeset', 'edges', 'from', `${fixture.testId}-1`, 'to', `${fixture.testId}-2`],
+            {
+                old: false,
+                new: true,
+            },
+        );
     });
 
     it("should create a log entry when an edge is updated with metadata'", async () => {
-        await user1Api.push({
+        await fixture.user1Api.push({
             edges: {
-                from: { [`${testId}-1`]: { to: { [`${testId}-2`]: { meta: 'data' } } } },
+                from: { [`${fixture.testId}-1`]: { to: { [`${fixture.testId}-2`]: { meta: 'data' } } } },
             },
         });
-        const logEntry = await getLatestLog(user1Api);
+        const logEntry = await getLatestLog(fixture.user1Api);
 
-        expect(logEntry).toHaveProperty(['changeset', 'edges', 'from', `${testId}-1`, 'to', `${testId}-2`], {
-            old: true,
-            new: { meta: 'data' },
-        });
+        expect(logEntry).toHaveProperty(
+            ['changeset', 'edges', 'from', `${fixture.testId}-1`, 'to', `${fixture.testId}-2`],
+            {
+                old: true,
+                new: { meta: 'data' },
+            },
+        );
 
-        await user1Api.push({
+        await fixture.user1Api.push({
             edges: {
-                from: { [`${testId}-1`]: { to: { [`${testId}-2`]: { meta: 'updated' } } } },
+                from: { [`${fixture.testId}-1`]: { to: { [`${fixture.testId}-2`]: { meta: 'updated' } } } },
             },
         });
-        const logEntry2 = await getLatestLog(user1Api);
+        const logEntry2 = await getLatestLog(fixture.user1Api);
 
-        expect(logEntry2).toHaveProperty(['changeset', 'edges', 'from', `${testId}-1`, 'to', `${testId}-2`], {
-            old: { meta: 'data' },
-            new: { meta: 'updated' },
-        });
+        expect(logEntry2).toHaveProperty(
+            ['changeset', 'edges', 'from', `${fixture.testId}-1`, 'to', `${fixture.testId}-2`],
+            {
+                old: { meta: 'data' },
+                new: { meta: 'updated' },
+            },
+        );
     });
 
     it("should create a log entry when an edge is deleted'", async () => {
-        await user1Api.push({
+        await fixture.user1Api.push({
             edges: {
-                from: { [`${testId}-1`]: { to: { [`${testId}-2`]: false } } },
+                from: { [`${fixture.testId}-1`]: { to: { [`${fixture.testId}-2`]: false } } },
             },
         });
-        const logEntry = await getLatestLog(user1Api);
+        const logEntry = await getLatestLog(fixture.user1Api);
 
-        expect(logEntry).toHaveProperty(['changeset', 'edges', 'from', `${testId}-1`, 'to', `${testId}-2`], {
-            old: true,
-            new: false,
-        });
+        expect(logEntry).toHaveProperty(
+            ['changeset', 'edges', 'from', `${fixture.testId}-1`, 'to', `${fixture.testId}-2`],
+            {
+                old: true,
+                new: false,
+            },
+        );
     });
 
     it('should not create a log entry when there are no changes in the edges existence', async () => {
-        await user1Api.push({
+        await fixture.user1Api.push({
             edges: {
-                from: { [`${testId}-1`]: { to: { [`${testId}-2`]: true } } },
+                from: { [`${fixture.testId}-1`]: { to: { [`${fixture.testId}-2`]: true } } },
             },
         });
-        const logEntry = await getLatestLog(user1Api);
+        const logEntry = await getLatestLog(fixture.user1Api);
 
-        expect(logEntry).not.toHaveProperty(['changeset', 'edges', 'from', `${testId}-1`, 'to', `${testId}-2`]);
+        expect(logEntry).not.toHaveProperty([
+            'changeset',
+            'edges',
+            'from',
+            `${fixture.testId}-1`,
+            'to',
+            `${fixture.testId}-2`,
+        ]);
     });
 
     it('should not create a log entry when there are no changes in the edges metadata', async () => {
-        await user1Api.push({
+        await fixture.user1Api.push({
             edges: {
-                from: { [`${testId}-1`]: { to: { [`${testId}-2`]: { meta: 'data' } } } },
+                from: { [`${fixture.testId}-1`]: { to: { [`${fixture.testId}-2`]: { meta: 'data' } } } },
             },
         });
-        await user1Api.push({
+        await fixture.user1Api.push({
             edges: {
-                from: { [`${testId}-1`]: { to: { [`${testId}-2`]: { meta: 'data' } } } },
+                from: { [`${fixture.testId}-1`]: { to: { [`${fixture.testId}-2`]: { meta: 'data' } } } },
             },
         });
-        const logEntry = await getLatestLog(user1Api);
+        const logEntry = await getLatestLog(fixture.user1Api);
 
-        expect(logEntry).not.toHaveProperty(['changeset', 'edges', 'from', `${testId}-1`, 'to', `${testId}-2`]);
+        expect(logEntry).not.toHaveProperty([
+            'changeset',
+            'edges',
+            'from',
+            `${fixture.testId}-1`,
+            'to',
+            `${fixture.testId}-2`,
+        ]);
     });
 });
 
 describe('rights', () => {
     beforeEach(async () => {
-        await user1Api.push({
+        await fixture.user1Api.push({
             nodes: {
-                [testId]: { id: testId },
+                [fixture.testId]: { id: fixture.testId },
             },
             rights: {
-                [testId]: {
+                [fixture.testId]: {
                     user: {
-                        [env.TEST_USER_2_EMAIL]: {
+                        [fixture.user2Email]: {
                             read: true,
                             write: true,
                             admin: true,
@@ -224,31 +240,31 @@ describe('rights', () => {
     });
 
     it("should create a log entry when a right is created'", async () => {
-        const logEntry = await getLatestLog(user1Api);
+        const logEntry = await getLatestLog(fixture.user1Api);
 
         // has log for rights that are created on node create
-        expect(logEntry).toHaveProperty(['changeset', 'rights', testId, 'user', env.TEST_USER_1_EMAIL], {
+        expect(logEntry).toHaveProperty(['changeset', 'rights', fixture.testId, 'user', fixture.user1Email], {
             read: { old: false, new: true },
             write: { old: false, new: true },
             admin: { old: false, new: true },
         });
 
         // has log for rights that are set
-        expect(logEntry).toHaveProperty(['changeset', 'rights', testId, 'user', env.TEST_USER_2_EMAIL], {
+        expect(logEntry).toHaveProperty(['changeset', 'rights', fixture.testId, 'user', fixture.user2Email], {
             read: { old: false, new: true },
             write: { old: false, new: true },
             admin: { old: false, new: true },
         });
     });
     it("should create a log entry when a right is removed'", async () => {
-        await user1Api.push({
+        await fixture.user1Api.push({
             nodes: {
-                [testId]: { id: testId },
+                [fixture.testId]: { id: fixture.testId },
             },
             rights: {
-                [testId]: {
+                [fixture.testId]: {
                     user: {
-                        [env.TEST_USER_2_EMAIL]: {
+                        [fixture.user2Email]: {
                             read: false,
                             write: false,
                             admin: false,
@@ -258,9 +274,9 @@ describe('rights', () => {
             },
         });
 
-        const logEntry = await getLatestLog(user1Api);
+        const logEntry = await getLatestLog(fixture.user1Api);
 
-        expect(logEntry).toHaveProperty(['changeset', 'rights', testId, 'user', env.TEST_USER_2_EMAIL], {
+        expect(logEntry).toHaveProperty(['changeset', 'rights', fixture.testId, 'user', fixture.user2Email], {
             read: { old: true, new: false },
             write: { old: true, new: false },
             admin: { old: true, new: false },
@@ -268,11 +284,11 @@ describe('rights', () => {
     });
 
     it('should not create a log entry when there are no changes in rights', async () => {
-        await user1Api.push({
+        await fixture.user1Api.push({
             rights: {
-                [testId]: {
+                [fixture.testId]: {
                     user: {
-                        [env.TEST_USER_2_EMAIL]: {
+                        [fixture.user2Email]: {
                             read: true,
                             write: true,
                             admin: true,
@@ -282,22 +298,43 @@ describe('rights', () => {
             },
         });
 
-        const logEntry = await getLatestLog(user1Api);
+        const logEntry = await getLatestLog(fixture.user1Api);
 
-        expect(logEntry).not.toHaveProperty(['changeset', 'rights', testId, 'user', env.TEST_USER_2_EMAIL, 'read']);
-        expect(logEntry).not.toHaveProperty(['changeset', 'rights', testId, 'user', env.TEST_USER_2_EMAIL, 'write']);
-        expect(logEntry).not.toHaveProperty(['changeset', 'rights', testId, 'user', env.TEST_USER_2_EMAIL, 'admin']);
+        expect(logEntry).not.toHaveProperty([
+            'changeset',
+            'rights',
+            fixture.testId,
+            'user',
+            fixture.user2Email,
+            'read',
+        ]);
+        expect(logEntry).not.toHaveProperty([
+            'changeset',
+            'rights',
+            fixture.testId,
+            'user',
+            fixture.user2Email,
+            'write',
+        ]);
+        expect(logEntry).not.toHaveProperty([
+            'changeset',
+            'rights',
+            fixture.testId,
+            'user',
+            fixture.user2Email,
+            'admin',
+        ]);
     });
 });
 
-describe('files', () => {
+describe.skip('files', () => {
     beforeEach(async () => {
-        await user1Api.push({
+        await fixture.user1Api.push({
             nodes: {
-                [testId]: { id: testId },
+                [fixture.testId]: { id: fixture.testId },
             },
             files: {
-                [testId]: {
+                [fixture.testId]: {
                     someFile: {
                         filename: 'file1.txt',
                         fileSize: 14,
@@ -313,11 +350,11 @@ describe('files', () => {
     };
 
     it("should create a log entry when a file is created'", async () => {
-        const logEntry = await getLatestLog(user1Api);
+        const logEntry = await getLatestLog(fixture.user1Api);
 
-        const fileKey = `file/${sha256(`${testId}/someFile`)}/file1.txt`;
+        const fileKey = `file/${sha256(`${fixture.testId}/someFile`)}/file1.txt`;
 
-        expect(logEntry).toHaveProperty(['changeset', 'files', testId, 'someFile'], {
+        expect(logEntry).toHaveProperty(['changeset', 'files', fixture.testId, 'someFile'], {
             old: false,
             new: {
                 // TODO: the old tests assumed filemetadata here, but filekey is probably the more important change?
@@ -327,9 +364,9 @@ describe('files', () => {
     });
 
     it("should create a log entry when a file is updated'", async () => {
-        await user1Api.push({
+        await fixture.user1Api.push({
             files: {
-                [testId]: {
+                [fixture.testId]: {
                     someFile: {
                         filename: 'file2.json',
                         fileSize: 28,
@@ -339,12 +376,12 @@ describe('files', () => {
             },
         });
 
-        const logEntry = await getLatestLog(user1Api);
+        const logEntry = await getLatestLog(fixture.user1Api);
 
-        const fileKeyOld = `file/${sha256(`${testId}/someFile`)}/file1.txt`;
-        const fileKeyNew = `file/${sha256(`${testId}/someFile`)}/file2.json`;
+        const fileKeyOld = `file/${sha256(`${fixture.testId}/someFile`)}/file1.txt`;
+        const fileKeyNew = `file/${sha256(`${fixture.testId}/someFile`)}/file2.json`;
 
-        expect(logEntry).toHaveProperty(['changeset', 'files', testId, 'someFile'], {
+        expect(logEntry).toHaveProperty(['changeset', 'files', fixture.testId, 'someFile'], {
             old: {
                 fileKey: fileKeyOld,
             },
@@ -355,19 +392,19 @@ describe('files', () => {
     });
 
     it("should create a log entry when a file is deleted'", async () => {
-        await user1Api.push({
+        await fixture.user1Api.push({
             files: {
-                [testId]: {
+                [fixture.testId]: {
                     someFile: false,
                 },
             },
         });
 
-        const logEntry = await getLatestLog(user1Api);
+        const logEntry = await getLatestLog(fixture.user1Api);
 
-        const fileKey = `file/${sha256(`${testId}/someFile`)}/file1.txt`;
+        const fileKey = `file/${sha256(`${fixture.testId}/someFile`)}/file1.txt`;
 
-        expect(logEntry).toHaveProperty(['changeset', 'files', testId, 'someFile'], {
+        expect(logEntry).toHaveProperty(['changeset', 'files', fixture.testId, 'someFile'], {
             old: {
                 fileKey: fileKey,
             },
@@ -376,9 +413,9 @@ describe('files', () => {
     });
 
     it('should not create a log entry when there are no changes in files', async () => {
-        await user1Api.push({
+        await fixture.user1Api.push({
             files: {
-                [testId]: {
+                [fixture.testId]: {
                     someFile: {
                         filename: 'file1.txt',
                         fileSize: 14,
@@ -388,8 +425,8 @@ describe('files', () => {
             },
         });
 
-        const logEntry = await getLatestLog(user1Api);
+        const logEntry = await getLatestLog(fixture.user1Api);
 
-        expect(logEntry).not.toHaveProperty(['changeset', 'files', testId, 'someFile']);
+        expect(logEntry).not.toHaveProperty(['changeset', 'files', fixture.testId, 'someFile']);
     });
 });

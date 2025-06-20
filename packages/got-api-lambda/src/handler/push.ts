@@ -8,6 +8,9 @@ import { cfSigner } from '../push/util/signer';
 import { graphAssembler } from '../push/util/graphAssembler';
 import { createDataCache } from '../push/caches/dataCache';
 import { validateAuthed, type AuthedValidationResult } from '@gothub/aws-util/validation';
+import { S3Storage } from '@gothub/aws-util/s3';
+import { BUCKET_LOGS } from '../push/config';
+import { PushLogsService } from '../shared/push-logs.service';
 
 export const schema = {
     type: 'object',
@@ -280,18 +283,24 @@ const handle = async (
     { userEmail, asAdmin, asRole, body }: AuthedValidationResult<Body>,
     context: Context,
 ): Promise<APIGatewayProxyResult> => {
+    const storage = new S3Storage();
     const signer = await cfSigner();
+    const loader = s3loader();
     const writer = s3writer();
+    const logsService = new PushLogsService(storage, {
+        LOGS: BUCKET_LOGS,
+    });
+
     const [result, changelog] = await push(body, userEmail, asRole || 'user', asAdmin, {
         dataCache: createDataCache(),
         graphAssembler: graphAssembler(),
         changelogAssembler: graphAssembler(),
-        loader: s3loader(),
+        loader: loader,
         writer: writer,
         signer,
     });
 
-    await writer.setPushLog(userEmail, context.awsRequestId, changelog);
+    await logsService.setPushLog(userEmail, context.awsRequestId, changelog);
 
     return {
         statusCode: 200,

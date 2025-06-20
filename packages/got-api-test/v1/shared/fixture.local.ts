@@ -30,9 +30,14 @@ const createLocalApi = (userEmail: string) => {
         return post<Graph>('http://localhost:4000/pull', view);
     };
 
+    const getLogs = (body: { id?: string; prefix?: string }) => {
+        return post<string[] | string>('http://localhost:4000/get-logs', body);
+    };
+
     return {
         push,
         pull,
+        getLogs,
     } as GotApi;
 };
 

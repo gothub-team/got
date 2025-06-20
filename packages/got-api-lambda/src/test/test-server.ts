@@ -11,6 +11,7 @@ import { pull } from '../pull';
 import { ConfigurableWriter } from '../push/util/writer';
 import { ConfigurableLoader } from '../push/util/loader';
 import { mockSigner } from './signer.mock';
+import { PushLogsService } from '../shared/push-logs.service';
 
 const PORT = process.env.PORT || 4000;
 
@@ -24,6 +25,7 @@ const locations = {
     RIGHTS_ADMIN: 'RIGHTS_ADMIN',
     OWNERS: 'OWNERS',
     MEDIA: 'MEDIA',
+    LOGS: 'LOGS',
 };
 
 const handlePush = async (
@@ -34,6 +36,7 @@ const handlePush = async (
     const signer = await mockSigner();
     const loader = new ConfigurableLoader(storage, locations);
     const writer = new ConfigurableWriter(storage, locations);
+    const logsService = new PushLogsService(storage, locations);
     const [result, changelog] = await push(body as Graph, userEmail, asRole || 'user', asAdmin, {
         dataCache: createDataCache(),
         graphAssembler: graphAssembler(),
@@ -43,7 +46,7 @@ const handlePush = async (
         signer,
     });
 
-    // await writer.setPushLog(userEmail, context.awsRequestId, changelog);
+    await logsService.setPushLog(userEmail, context.awsRequestId, changelog);
 
     return {
         statusCode: 200,
@@ -68,6 +71,38 @@ const handlePull = async ({ userEmail, asAdmin, body }: AuthedValidationResult<B
         statusCode: 200,
         headers: CORS_HEADERS,
         body: result,
+    };
+};
+
+const handleLogs = async ({ userEmail, body }: AuthedValidationResult<Body>) => {
+    const { id, prefix = '' } = body as {
+        id?: string;
+        prefix?: string;
+    };
+
+    const logsService = new PushLogsService(storage, locations);
+    if (id) {
+        const log = await logsService.getPushLog(userEmail, id);
+        if (log === undefined) {
+            return {
+                statusCode: 404,
+                headers: CORS_HEADERS,
+                body: JSON.stringify({ message: 'Log not found' }),
+            };
+        }
+
+        return {
+            statusCode: 200,
+            headers: CORS_HEADERS,
+            body: log?.toString() ?? '{}',
+        };
+    }
+
+    const logs = await logsService.listPushLogs(userEmail, prefix);
+    return {
+        statusCode: 200,
+        headers: CORS_HEADERS,
+        body: JSON.stringify(logs),
     };
 };
 
@@ -117,7 +152,7 @@ const run = async () => {
         const userEmail = req.headers['x-test-user'];
         const asRole = req.headers['x-as-role'] as string | undefined;
         // @ts-expect-error TODO: correct types
-        const res = await handlePush({ userEmail, asRole, asAdmin: false, body: req.body }, { awsRequestId: '123123' }); // TODO: support role
+        const res = await handlePush({ userEmail, asRole, asAdmin: false, body: req.body }, { awsRequestId: '123123' });
         return {
             statusCode: res.statusCode,
             headers: res.headers,
@@ -139,6 +174,19 @@ const run = async () => {
     };
 
     server.post('/pull', handleResponse(_handlePull));
+
+    const _handleLogs: CustomRequestHandler = async (req) => {
+        const userEmail = req.headers['x-test-user'];
+        // @ts-expect-error TODO: correct types
+        const res = await handleLogs({ userEmail, body: req.body });
+        return {
+            statusCode: res.statusCode,
+            headers: res.headers,
+            body: res.body,
+        };
+    };
+
+    server.post('/get-logs', handleResponse(_handleLogs));
 };
 
 void run();

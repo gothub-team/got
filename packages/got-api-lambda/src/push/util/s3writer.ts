@@ -80,13 +80,6 @@ export const s3writer: () => Writer = () => {
         }
     };
 
-    const setPushLog = async (userEmail: string, requestId: string, changeset: string) => {
-        const timestamp = new Date().toISOString();
-        const logEntry = `{"userEmail":"${userEmail}","timestamp":"${timestamp}","requestId":"${requestId}","changeset":${changeset}}`;
-        const logKey = `push/${userEmail}/${timestamp}/${requestId}`;
-        await s3putRaw(BUCKET_LOGS, logKey, Buffer.from(logEntry), { contentType: 'application/json' });
-    };
-
     return {
         setNode,
         setMetadata,
@@ -98,6 +91,5 @@ export const s3writer: () => Writer = () => {
         setFileRef,
         setFileMetadata,
         setUploadId,
-        setPushLog,
     };
 };

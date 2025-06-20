@@ -12,5 +12,4 @@ export interface Writer {
     setFileRef: (nodeId: string, prop: string, fileRef: { fileKey: string } | null) => Promise<void>;
     setFileMetadata: (fileKey: string, metadata: FileMetadata | null) => Promise<void>;
     setUploadId: (uploadId: string, fileKey: string | null) => Promise<void>;
-    setPushLog: (userEmail: string, requestId: string, changeset: string) => Promise<void>;
 }
