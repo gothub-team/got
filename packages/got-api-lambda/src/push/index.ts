@@ -1,23 +1,23 @@
 import type { DataCache } from './types/dataCache';
 import type { Graph, Node, Metadata, UploadNodeFileView, NodeFilesView } from '@gothub/got-core';
 import { forEachObjDepth, mergeGraphObjRight } from '@gothub/got-core';
-import type { Loader } from '../shared/loader.type';
 import type { GraphAssembler } from './types/graphAssembler';
 import { promiseManager } from './util/promiseManager';
 import type { Log } from '../shared/logs';
-import type { Writer } from '../shared/writer.type';
 import { MEDIA_DOMAIN, sha256 } from '@gothub/aws-util';
 import { BUCKET_MEDIA } from './config';
 import type { Signer } from './types/signer';
 import { s3putMultipartSignedUrls } from '@gothub/aws-util/s3';
 import equal from 'fast-deep-equal';
 import type { FileMetadata, FileService } from '../shared/files.service';
+import type { GraphService } from '../shared/graph.service';
+import type { RightsService } from '../shared/rights.service';
 
 type Dependencies = {
     // existsCache: ExistsCache;
     dataCache: DataCache;
-    loader: Loader;
-    writer: Writer;
+    graphService: GraphService;
+    rightsService: RightsService;
     fileService: FileService;
     signer: Signer;
     graphAssembler: GraphAssembler;
@@ -35,7 +35,7 @@ export const push = async (
 
     const { awaitPromises } = promiseManager();
 
-    const { signer, loader, writer, fileService, graphAssembler, changelogAssembler } = dependencies;
+    const { signer, graphService, rightsService, fileService, graphAssembler, changelogAssembler } = dependencies;
     const {
         writeNode,
         writeMetadata,
@@ -58,19 +58,21 @@ export const push = async (
     const timeLoadEdge = 0;
 
     const nodeExists = async (nodeId: string): Promise<boolean> => {
-        const data = await loader.getNode(nodeId);
+        const data = await graphService.getNode(nodeId);
         return data != null;
     };
 
-    const canUserRead = (nodeId: string): Promise<boolean> => loader.getRead(nodeId, 'user', userEmail);
-    const canUserWrite = (nodeId: string): Promise<boolean> => loader.getWrite(nodeId, 'user', userEmail);
-    const canUserAdmin = (nodeId: string): Promise<boolean> => loader.getAdmin(nodeId, 'user', userEmail);
+    const canUserRead = (nodeId: string): Promise<boolean> => rightsService.getRead(nodeId, 'user', userEmail);
+    const canUserWrite = (nodeId: string): Promise<boolean> => rightsService.getWrite(nodeId, 'user', userEmail);
+    const canUserAdmin = (nodeId: string): Promise<boolean> => rightsService.getAdmin(nodeId, 'user', userEmail);
 
     const userHasRole = async (role: string) => role === 'public' || (await canUserRead(role));
 
-    // const canRoleRead = (nodeId: string, role: string): Promise<boolean> => loader.getRead(nodeId, 'role', role);
-    const canRoleWrite = (nodeId: string, role: string): Promise<boolean> => loader.getWrite(nodeId, 'role', role);
-    const canRoleAdmin = (nodeId: string, role: string): Promise<boolean> => loader.getAdmin(nodeId, 'role', role);
+    // const canRoleRead = (nodeId: string, role: string): Promise<boolean> => rightsService.getRead(nodeId, 'role', role);
+    const canRoleWrite = (nodeId: string, role: string): Promise<boolean> =>
+        rightsService.getWrite(nodeId, 'role', role);
+    const canRoleAdmin = (nodeId: string, role: string): Promise<boolean> =>
+        rightsService.getAdmin(nodeId, 'role', role);
 
     // const canViewNode = async (nodeId: string) => {
     //     if (asAdmin) return nodeExists(nodeId);
@@ -131,60 +133,60 @@ export const push = async (
     };
 
     const updateReadRight = async (nodeId: string, principalType: string, principal: string, right: boolean) => {
-        const exists = await loader.getRead(nodeId, principalType, principal);
+        const exists = await rightsService.getRead(nodeId, principalType, principal);
         if (Boolean(exists) !== right) {
             if (right) {
-                await writer.setRead(nodeId, principalType, principal, true);
+                await rightsService.setRead(nodeId, principalType, principal, true);
                 writeRightsChangelog(nodeId, principalType, principal, 'read', '{"old":false,"new":true}');
             } else {
-                await writer.setRead(nodeId, principalType, principal, false);
+                await rightsService.setRead(nodeId, principalType, principal, false);
                 writeRightsChangelog(nodeId, principalType, principal, 'read', '{"old":true,"new":false}');
             }
         }
     };
     const updateWriteRight = async (nodeId: string, principalType: string, principal: string, right: boolean) => {
-        const exists = await loader.getWrite(nodeId, principalType, principal);
+        const exists = await rightsService.getWrite(nodeId, principalType, principal);
         if (Boolean(exists) !== right) {
             if (right) {
-                await writer.setWrite(nodeId, principalType, principal, true);
+                await rightsService.setWrite(nodeId, principalType, principal, true);
                 writeRightsChangelog(nodeId, principalType, principal, 'write', '{"old":false,"new":true}');
             } else {
-                await writer.setWrite(nodeId, principalType, principal, false);
+                await rightsService.setWrite(nodeId, principalType, principal, false);
                 writeRightsChangelog(nodeId, principalType, principal, 'write', '{"old":true,"new":false}');
             }
         }
     };
     const updateAdminRight = async (nodeId: string, principalType: string, principal: string, right: boolean) => {
-        const exists = await loader.getAdmin(nodeId, principalType, principal);
+        const exists = await rightsService.getAdmin(nodeId, principalType, principal);
         if (Boolean(exists) !== right) {
             if (right) {
-                await writer.setAdmin(nodeId, principalType, principal, true);
+                await rightsService.setAdmin(nodeId, principalType, principal, true);
                 writeRightsChangelog(nodeId, principalType, principal, 'admin', '{"old":false,"new":true}');
             } else {
-                await writer.setAdmin(nodeId, principalType, principal, false);
+                await rightsService.setAdmin(nodeId, principalType, principal, false);
                 writeRightsChangelog(nodeId, principalType, principal, 'admin', '{"old":true,"new":false}');
             }
         }
     };
     const updateOwner = async (nodeId: string, principal: string) => {
-        return writer.setOwner(nodeId, principal);
+        return rightsService.setOwner(nodeId, principal);
         // TODO: add to changelog? owner log was previously not created
     };
 
     const updateNode = async (nodeId: string, node: Node | null) => {
-        const nodeJSON = await loader.getNode(nodeId);
+        const nodeJSON = await graphService.getNode(nodeId);
         if (!nodeJSON && node) {
-            await writer.setNode(nodeId, node);
+            await graphService.setNode(nodeId, node);
             writeNodeChangelog(nodeId, `{"old":false,"new":${JSON.stringify(node)}}`);
         } else if (nodeJSON && !node) {
-            await writer.setNode(nodeId, null);
+            await graphService.setNode(nodeId, null);
             writeNodeChangelog(nodeId, `{"old":${nodeJSON},"new":false}`);
         } else if (nodeJSON && node) {
             const oldNode = JSON.parse(nodeJSON);
             const newNode = mergeGraphObjRight(oldNode, node);
             typeof newNode === 'object' && removeNulls(newNode);
             if (!equal(oldNode, newNode)) {
-                await writer.setNode(nodeId, newNode);
+                await graphService.setNode(nodeId, newNode);
                 writeNodeChangelog(nodeId, `{"old":${nodeJSON},"new":${JSON.stringify(newNode)}}`);
             }
         }
@@ -210,7 +212,7 @@ export const push = async (
             return;
         }
 
-        if (node && (await canWriteScope(nodeId)) && !(await loader.ownerExists(nodeId))) {
+        if (node && (await canWriteScope(nodeId)) && !(await rightsService.ownerExists(nodeId))) {
             await createNode(nodeId, node);
             writeNode(nodeId, '{"statusCode":200}');
             return;
@@ -242,22 +244,22 @@ export const push = async (
         toId: string,
         metadata: Metadata | boolean,
     ) => {
-        const metadataJson = await loader.getMetadata(fromId, `${fromType}/${toType}`, toId);
+        const metadataJson = await graphService.getMetadata(fromId, `${fromType}/${toType}`, toId);
 
         if (!metadataJson && metadata) {
-            await writer.setMetadata(fromId, `${fromType}/${toType}`, toId, metadata);
-            await writer.setReverseEdge(toId, `${toType}/${fromType}`, fromId, true);
+            await graphService.setMetadata(fromId, `${fromType}/${toType}`, toId, metadata);
+            await graphService.setReverseEdge(toId, `${toType}/${fromType}`, fromId, true);
             writeMetadataChangelog(fromId, fromType, toType, toId, `{"old":false,"new":${JSON.stringify(metadata)}}`);
         } else if (metadataJson && !metadata) {
-            await writer.setMetadata(fromId, `${fromType}/${toType}`, toId, false);
-            await writer.setReverseEdge(toId, `${toType}/${fromType}`, fromId, false);
+            await graphService.setMetadata(fromId, `${fromType}/${toType}`, toId, false);
+            await graphService.setReverseEdge(toId, `${toType}/${fromType}`, fromId, false);
             writeMetadataChangelog(fromId, fromType, toType, toId, `{"old":${metadataJson},"new":false}`);
         } else if (metadataJson && metadata) {
             const oldMetadata = JSON.parse(metadataJson) as Metadata;
             const newMetadata = mergeGraphObjRight(oldMetadata, metadata);
             typeof newMetadata === 'object' && removeNulls(newMetadata);
             if (!equal(oldMetadata, newMetadata)) {
-                await writer.setMetadata(fromId, `${fromType}/${toType}`, toId, newMetadata);
+                await graphService.setMetadata(fromId, `${fromType}/${toType}`, toId, newMetadata);
                 writeMetadataChangelog(
                     fromId,
                     fromType,
@@ -352,11 +354,11 @@ export const push = async (
         const canAdmin = await canAdminNode(toId);
 
         if (canAdmin) {
-            const fromRights = await loader.listRights(fromId);
+            const fromRights = await rightsService.listRights(fromId);
             const userRightsFrom = fromRights.get('user') as Map<string, Map<string, string>> | undefined;
             const roleRightsFrom = fromRights.get('role') as Map<string, Map<string, string>> | undefined;
 
-            const toRights = await loader.listRights(toId);
+            const toRights = await rightsService.listRights(toId);
             const userRightsTo = toRights.get('user') as Map<string, Map<string, string>> | undefined;
             const roleRightsTo = toRights.get('role') as Map<string, Map<string, string>> | undefined;
 
@@ -604,7 +606,7 @@ export const push = async (
     const changelog = getGraphJsonChangelog();
     const log: Log = {
         graphAssembler: getLogGraphAssembler(),
-        loader: loader.getLog(),
+        loader: graphService.getLog(),
         request: {
             payloadBytes: res.length,
             time: performance.now() - start,
