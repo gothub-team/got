@@ -1,5 +1,5 @@
 import { assocMap3, loadQueue, substringToFirst, type Storage } from '@gothub/aws-util';
-import type { EdgeWildcard, Loader } from '../types/loader';
+import type { EdgeWildcard, Loader as LoaderInterface } from './loader.type';
 
 type Locations = {
     NODES: string;
@@ -12,7 +12,7 @@ type Locations = {
     MEDIA: string;
 };
 
-export class ConfigurableLoader implements Loader {
+export class Loader implements LoaderInterface {
     taskQueue = loadQueue(200);
 
     numNodes = 0;

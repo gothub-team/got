@@ -1,18 +1,8 @@
 import type { LoaderLog } from './logs';
 
-export type FileRef = {
-    prop: string;
-    fileKey: string;
-};
-export type FileHead = {
-    etag: string;
-    contentType: string;
-    modifiedDate: string;
-};
-
 export type EdgeWildcard = [fromType: string, toType: string, toId: string];
 
-export type Loader = {
+export interface Loader {
     getNode: (nodeId: string) => Promise<string | null>;
     getRead: (nodeId: string, principalType: string, principal: string) => Promise<boolean>;
     getWrite: (nodeId: string, principalType: string, principal: string) => Promise<boolean>;
@@ -24,4 +14,5 @@ export type Loader = {
     getEdgesWildcard: (nodeId: string, edgeType: string) => Promise<Array<EdgeWildcard>>;
     getNodesWildcard: (wildcardPrefix: string) => Promise<Array<string>>;
     listRights: (nodeId: string) => Promise<Map<string, unknown>>;
-};
+    ownerExists: (nodeId: string) => Promise<boolean>;
+}

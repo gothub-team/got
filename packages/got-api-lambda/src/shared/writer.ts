@@ -1,5 +1,5 @@
 import { loadQueue, type Storage } from '@gothub/aws-util';
-import type { Writer } from '../types/writer';
+import type { Writer as WriterInterface } from './writer.type';
 import type { Metadata, Node } from '@gothub/got-core';
 
 // TODO: duplicate
@@ -11,10 +11,9 @@ type Locations = {
     RIGHTS_WRITE: string;
     RIGHTS_ADMIN: string;
     OWNERS: string;
-    MEDIA: string;
 };
 
-export class ConfigurableWriter implements Writer {
+export class Writer implements WriterInterface {
     taskQueue = loadQueue(200);
 
     constructor(

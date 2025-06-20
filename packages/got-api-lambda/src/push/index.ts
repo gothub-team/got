@@ -1,17 +1,17 @@
 import type { DataCache } from './types/dataCache';
 import type { Graph, Node, Metadata, UploadNodeFileView, NodeFilesView } from '@gothub/got-core';
 import { forEachObjDepth, mergeGraphObjRight } from '@gothub/got-core';
-import type { FileMetadata, Loader } from './types/loader';
+import type { Loader } from '../shared/loader.type';
 import type { GraphAssembler } from './types/graphAssembler';
 import { promiseManager } from './util/promiseManager';
-import type { Log } from './types/logs';
-import type { Writer } from './types/writer';
+import type { Log } from '../shared/logs';
+import type { Writer } from '../shared/writer.type';
 import { MEDIA_DOMAIN, sha256 } from '@gothub/aws-util';
 import { BUCKET_MEDIA } from './config';
 import type { Signer } from './types/signer';
 import { s3putMultipartSignedUrls } from '@gothub/aws-util/s3';
 import equal from 'fast-deep-equal';
-import type { FileService } from '../shared/files.service';
+import type { FileMetadata, FileService } from '../shared/files.service';
 
 type Dependencies = {
     // existsCache: ExistsCache;

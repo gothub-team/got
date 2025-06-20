@@ -2,16 +2,26 @@ import { CORS_HEADERS, internalServerError } from '@gothub/aws-util';
 import type { Graph } from '@gothub/got-core';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Context, Handler } from 'aws-lambda';
 import { push } from '../push';
-import { s3loader } from '../push/util/s3loader';
-import { s3writer } from '../push/util/s3writer';
 import { cfSigner } from '../push/util/signer';
 import { graphAssembler } from '../push/util/graphAssembler';
 import { createDataCache } from '../push/caches/dataCache';
 import { validateAuthed, type AuthedValidationResult } from '@gothub/aws-util/validation';
 import { S3Storage } from '@gothub/aws-util/s3';
-import { BUCKET_LOGS, BUCKET_MEDIA } from '../push/config';
+import {
+    BUCKET_EDGES,
+    BUCKET_LOGS,
+    BUCKET_MEDIA,
+    BUCKET_NODES,
+    BUCKET_OWNERS,
+    BUCKET_REVERSE_EDGES,
+    BUCKET_RIGHTS_ADMIN,
+    BUCKET_RIGHTS_READ,
+    BUCKET_RIGHTS_WRITE,
+} from '../push/config';
 import { PushLogsService } from '../shared/push-logs.service';
 import { FileService } from '../shared/files.service';
+import { Writer } from '../shared/writer';
+import { Loader } from '../shared/loader';
 
 export const schema = {
     type: 'object',
@@ -280,20 +290,28 @@ export const schema = {
 
 export type Body = Graph;
 
+const locations = {
+    NODES: BUCKET_NODES,
+    EDGES: BUCKET_EDGES,
+    REVERSE_EDGES: BUCKET_REVERSE_EDGES,
+    RIGHTS_READ: BUCKET_RIGHTS_READ,
+    RIGHTS_WRITE: BUCKET_RIGHTS_WRITE,
+    RIGHTS_ADMIN: BUCKET_RIGHTS_ADMIN,
+    OWNERS: BUCKET_OWNERS,
+    MEDIA: BUCKET_MEDIA,
+    LOGS: BUCKET_LOGS,
+};
+
 const handle = async (
     { userEmail, asAdmin, asRole, body }: AuthedValidationResult<Body>,
     context: Context,
 ): Promise<APIGatewayProxyResult> => {
     const storage = new S3Storage();
     const signer = await cfSigner();
-    const loader = s3loader();
-    const writer = s3writer();
-    const fileService = new FileService(storage, {
-        MEDIA: BUCKET_MEDIA,
-    });
-    const logsService = new PushLogsService(storage, {
-        LOGS: BUCKET_LOGS,
-    });
+    const loader = new Loader(storage, locations);
+    const writer = new Writer(storage, locations);
+    const fileService = new FileService(storage, locations);
+    const logsService = new PushLogsService(storage, locations);
 
     const [result, changelog] = await push(body, userEmail, asRole || 'user', asAdmin, {
         dataCache: createDataCache(),

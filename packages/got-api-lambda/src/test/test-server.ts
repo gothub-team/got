@@ -2,14 +2,13 @@ import { CORS_HEADERS, MemoryStorage } from '@gothub/aws-util';
 import type { AuthedValidationResult } from '@gothub/aws-util/validation';
 import { createDataCache } from '../push/caches/dataCache';
 import { graphAssembler } from '../push/util/graphAssembler';
-import type { Loader as PullLoader } from '../pull/types/loader';
 import { push } from '../push';
 import type { Graph, View } from '@gothub/got-core';
 import { json, type RequestHandler } from 'express';
 import polka from 'polka';
 import { pull } from '../pull';
-import { ConfigurableWriter } from '../push/util/writer';
-import { ConfigurableLoader } from '../push/util/loader';
+import { Writer } from '../shared/writer';
+import { Loader } from '../shared/loader';
 import { mockSigner } from './signer.mock';
 import { PushLogsService } from '../shared/push-logs.service';
 import { FileService } from '../shared/files.service';
@@ -35,8 +34,8 @@ const handlePush = async (
 ) => {
     // TODO: replace with inert dependencies
     const signer = await mockSigner();
-    const loader = new ConfigurableLoader(storage, locations);
-    const writer = new ConfigurableWriter(storage, locations);
+    const loader = new Loader(storage, locations);
+    const writer = new Writer(storage, locations);
     const fileService = new FileService(storage, locations);
     const logsService = new PushLogsService(storage, locations);
     const [result, changelog] = await push(body as Graph, userEmail, asRole || 'user', asAdmin, {
@@ -61,7 +60,7 @@ const handlePush = async (
 const handlePull = async ({ userEmail, asAdmin, body }: AuthedValidationResult<Body>) => {
     const signer = await mockSigner();
     // TODO: refactor for common dependency between push and pull
-    const loader = new ConfigurableLoader(storage, locations) as unknown as PullLoader;
+    const loader = new Loader(storage, locations);
     const fileService = new FileService(storage, locations);
 
     const [result] = await pull(body as unknown as View, userEmail, asAdmin, {

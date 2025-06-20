@@ -2,12 +2,12 @@ import type { DataCache } from './types/dataCache';
 import type { NodeView, EdgeView, View } from '@gothub/got-core';
 import type { WithEdgeTypes } from './util/withEdgeTypes';
 import { withEdgeTypes } from './util/withEdgeTypes';
-import type { Loader, FileRef } from './types/loader';
 import type { Signer } from './types/signer';
 import type { GraphAssembler } from './types/graphAssembler';
 import { promiseManager } from './util/promiseManager';
-import type { Log } from './types/logs';
-import type { FileService } from '../shared/files.service';
+import type { FileRef, FileService } from '../shared/files.service';
+import type { Loader } from '../shared/loader';
+import type { Log } from '../shared/logs';
 
 const parseRole = (role: string, nodeId: string): string => role.replaceAll('$NODEID', nodeId);
 

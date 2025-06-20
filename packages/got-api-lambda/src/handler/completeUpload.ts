@@ -1,11 +1,10 @@
 import { CORS_HEADERS, internalServerError } from '@gothub/aws-util';
-import { s3completeMultipartUpload } from '@gothub/aws-util/s3';
+import { s3completeMultipartUpload, S3Storage } from '@gothub/aws-util/s3';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
-import { s3loader } from '../push/util/s3loader';
-import { s3writer } from '../push/util/s3writer';
 // TODO: we are currently importing utils from push
 import { BUCKET_MEDIA } from '../push/config';
 import { validateAuthed, type AuthedValidationResult } from '@gothub/aws-util/validation';
+import { FileService } from '../shared/files.service';
 
 export const schema = {
     type: 'object',
@@ -33,10 +32,13 @@ export type Body = {
 
 const handle = async ({ body }: AuthedValidationResult<Body>): Promise<APIGatewayProxyResult> => {
     const { uploadId, partEtags } = body;
-    const loader = s3loader();
-    const writer = s3writer();
 
-    const fileKey = await loader.getUpload(uploadId);
+    const storage = new S3Storage();
+    const fileService = new FileService(storage, {
+        MEDIA: BUCKET_MEDIA,
+    });
+
+    const fileKey = await fileService.getUpload(uploadId);
     if (!fileKey) {
         return {
             statusCode: 400,
@@ -45,8 +47,9 @@ const handle = async ({ body }: AuthedValidationResult<Body>): Promise<APIGatewa
         };
     }
 
+    // TODO: move to storage and file service
     await s3completeMultipartUpload(BUCKET_MEDIA, fileKey, { uploadId, partEtags });
-    await writer.setUploadId(uploadId, null);
+    await fileService.setUploadId(uploadId, null);
 
     return {
         statusCode: 200,
