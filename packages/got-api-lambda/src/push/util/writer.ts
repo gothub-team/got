@@ -1,7 +1,6 @@
 import { loadQueue, type Storage } from '@gothub/aws-util';
 import type { Writer } from '../types/writer';
 import type { Metadata, Node } from '@gothub/got-core';
-import type { FileMetadata } from '../types/loader';
 
 // TODO: duplicate
 type Locations = {
@@ -40,19 +39,19 @@ export class ConfigurableWriter implements Writer {
     }
 
     async setReverseEdge(toId: string, edgeTypes: string, fromId: string, data: boolean) {
-        if (data) {
-            return this.storage.put(this.locations.REVERSE_EDGES, `${toId}/${edgeTypes}/${fromId}`, true);
-        } else {
+        if (!data) {
             return this.storage.delete(this.locations.REVERSE_EDGES, `${toId}/${edgeTypes}/${fromId}`);
+        } else {
+            return this.storage.put(this.locations.REVERSE_EDGES, `${toId}/${edgeTypes}/${fromId}`, 'true');
         }
     }
 
     private async setRight(location: string, nodeId: string, principalType: string, principal: string, right: boolean) {
         const rightKey = `${nodeId}/${principalType}/${principal}`;
-        if (right) {
-            return this.storage.put(location, rightKey, 'true');
-        } else {
+        if (!right) {
             return this.storage.delete(location, rightKey);
+        } else {
+            return this.storage.put(location, rightKey, 'true');
         }
     }
 
@@ -71,17 +70,5 @@ export class ConfigurableWriter implements Writer {
             throw new Error('Cannot set owner to null');
         }
         return this.storage.put(this.locations.OWNERS, `${nodeId}/owner/${principal}`, 'true');
-    }
-
-    async setFileMetadata(fileKey: string, metadata: FileMetadata | null): Promise<void> {
-        throw new Error('Not Implemented');
-    }
-
-    async setFileRef(nodeId: string, prop: string, fileRef: { fileKey: string } | null): Promise<void> {
-        throw new Error('Not Implemented');
-    }
-
-    async setUploadId(uploadId: string, fileKey: string | null): Promise<void> {
-        throw new Error('Not Implemented');
     }
 }
