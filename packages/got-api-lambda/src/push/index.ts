@@ -1,22 +1,24 @@
 import type { DataCache } from './types/dataCache';
 import type { Graph, Node, Metadata, UploadNodeFileView, NodeFilesView } from '@gothub/got-core';
 import { forEachObjDepth, mergeGraphObjRight } from '@gothub/got-core';
-import type { FileMetadata, Loader } from './types/loader';
+import type { Loader } from '../shared/loader.type';
 import type { GraphAssembler } from './types/graphAssembler';
 import { promiseManager } from './util/promiseManager';
-import type { Log } from './types/logs';
-import type { Writer } from './types/writer';
+import type { Log } from '../shared/logs';
+import type { Writer } from '../shared/writer.type';
 import { MEDIA_DOMAIN, sha256 } from '@gothub/aws-util';
 import { BUCKET_MEDIA } from './config';
 import type { Signer } from './types/signer';
 import { s3putMultipartSignedUrls } from '@gothub/aws-util/s3';
 import equal from 'fast-deep-equal';
+import type { FileMetadata, FileService } from '../shared/files.service';
 
 type Dependencies = {
     // existsCache: ExistsCache;
     dataCache: DataCache;
     loader: Loader;
     writer: Writer;
+    fileService: FileService;
     signer: Signer;
     graphAssembler: GraphAssembler;
     changelogAssembler: GraphAssembler;
@@ -33,7 +35,7 @@ export const push = async (
 
     const { awaitPromises } = promiseManager();
 
-    const { signer, loader, writer, graphAssembler, changelogAssembler } = dependencies;
+    const { signer, loader, writer, fileService, graphAssembler, changelogAssembler } = dependencies;
     const {
         writeNode,
         writeMetadata,
@@ -475,38 +477,33 @@ export const push = async (
     };
 
     const updateFileRef = async (nodeId: string, prop: string, fileKey: string | null) => {
-        const fileRef = await loader.getFileRef(nodeId, prop);
+        const fileRef = await fileService.getFileRef(nodeId, prop);
+        const oldFileKey = fileRef?.fileKey;
 
-        if (!fileRef && fileKey) {
-            const newFileRef = { fileKey };
-            await writer.setFileRef(nodeId, prop, newFileRef);
-            writeFilesChangelog(nodeId, prop, `{"old":false,"new":${JSON.stringify(newFileRef)}}`);
-        } else if (fileRef && !fileKey) {
-            await writer.setFileRef(nodeId, prop, null);
-            writeFilesChangelog(nodeId, prop, `{"old":${JSON.stringify(fileRef)},"new":false}`);
-        } else if (fileRef && fileKey) {
-            const newFileRef = { fileKey };
-            if (!equal(fileRef, newFileRef)) {
-                await writer.setFileRef(nodeId, prop, newFileRef);
-                writeFilesChangelog(
-                    nodeId,
-                    prop,
-                    `{"old":${JSON.stringify(fileRef)},"new":${JSON.stringify(newFileRef)}}`,
-                );
+        if (!oldFileKey && fileKey) {
+            await fileService.setFileRef(nodeId, prop, { fileKey });
+            writeFilesChangelog(nodeId, prop, `{"old":false,"new":{"fileKey":"${fileKey}"}}`);
+        } else if (oldFileKey && !fileKey) {
+            await fileService.setFileRef(nodeId, prop, null);
+            writeFilesChangelog(nodeId, prop, `{"old":{"fileKey":"${oldFileKey}"},"new":false}`);
+        } else if (oldFileKey && fileKey) {
+            if (!equal(oldFileKey, fileKey)) {
+                await fileService.setFileRef(nodeId, prop, { fileKey });
+                writeFilesChangelog(nodeId, prop, `{"old":{"fileKey":"${oldFileKey}"},"new":{"fileKey":"${fileKey}"}}`);
             }
         }
     };
 
     const updateFileMetadata = async (fileKey: string, metadata: FileMetadata) => {
-        const oldMetadata = await loader.getFileMetadata(fileKey);
+        const oldMetadata = await fileService.getFileMetadata(fileKey);
 
         if (!oldMetadata && metadata) {
-            await writer.setFileMetadata(fileKey, metadata);
+            await fileService.setFileMetadata(fileKey, metadata);
         } else if (oldMetadata && !metadata) {
-            await writer.setFileMetadata(fileKey, null);
+            await fileService.setFileMetadata(fileKey, null);
         } else if (oldMetadata && metadata) {
             const newMetadata = mergeGraphObjRight(oldMetadata, metadata);
-            await writer.setFileMetadata(fileKey, newMetadata);
+            await fileService.setFileMetadata(fileKey, newMetadata);
         }
     };
 
@@ -537,7 +534,7 @@ export const push = async (
             }
 
             const { uploadUrls, uploadId } = multipartUpload;
-            await writer.setUploadId(uploadId, fileKey);
+            await fileService.setUploadId(uploadId, fileKey);
             writeFiles(
                 nodeId,
                 prop,

@@ -1,42 +1,26 @@
 import { describe, beforeAll, beforeEach, it, expect } from 'bun:test';
-import type { GotApi } from '@gothub/got-api';
-import crypto from 'crypto';
 import type { PushResult } from '@gothub/got-core';
-import { createUserApi } from './shared';
-import { parseEnv } from '@gothub/typescript-util';
-import { TEST_USER_1_EMAIL, TEST_USER_1_PW, TEST_USER_2_EMAIL, TEST_USER_2_PW } from '../env';
+import type { TestFixture } from './shared/fixture.type';
+import { createFixture } from './shared/create-fixture';
 
-const env = parseEnv({
-    TEST_USER_1_EMAIL,
-    TEST_USER_1_PW,
-    TEST_USER_2_EMAIL,
-    TEST_USER_2_PW,
-});
-
-let testId: string;
-let user1Api: GotApi;
-let user1Email: string;
-let user2Api: GotApi;
-let user2Email: string;
+let fixture: TestFixture;
 beforeAll(async () => {
-    user1Email = env.TEST_USER_1_EMAIL;
-    user1Api = await createUserApi(user1Email, env.TEST_USER_1_PW);
-    user2Email = env.TEST_USER_2_EMAIL;
-    user2Api = await createUserApi(user2Email, env.TEST_USER_2_PW);
+    fixture = createFixture();
+    await fixture.setup();
 });
 beforeEach(async () => {
-    testId = `test-${crypto.randomBytes(8).toString('hex')}`;
+    fixture.setTestId();
 });
 
 describe('scopes', () => {
     let pushResult: PushResult;
     let scopeId: string;
     beforeEach(async () => {
-        scopeId = `${testId}-scope.`;
+        scopeId = `${fixture.testId}-scope.`;
     });
     describe('scope does not exist', () => {
         beforeEach(async () => {
-            pushResult = await user1Api.push({
+            pushResult = await fixture.user1Api.push({
                 nodes: { [`${scopeId}node-1`]: { id: `${scopeId}node-1` } },
             });
         });
@@ -48,7 +32,7 @@ describe('scopes', () => {
 
     describe('scope is pushed in same request', () => {
         beforeEach(async () => {
-            pushResult = await user1Api.push({
+            pushResult = await fixture.user1Api.push({
                 nodes: {
                     [scopeId]: { id: scopeId },
                     [`${scopeId}node-1`]: { id: `${scopeId}node-1` },
@@ -66,10 +50,10 @@ describe('scopes', () => {
 
     describe('scope exists', () => {
         beforeEach(async () => {
-            await user1Api.push({
+            await fixture.user1Api.push({
                 nodes: { [scopeId]: { id: scopeId } },
             });
-            pushResult = await user1Api.push({
+            pushResult = await fixture.user1Api.push({
                 nodes: { [`${scopeId}node-1`]: { id: `${scopeId}node-1` } },
             });
         });
@@ -82,7 +66,7 @@ describe('scopes', () => {
 
         describe('without write rights', async () => {
             beforeEach(async () => {
-                pushResult = await user2Api.push({
+                pushResult = await fixture.user2Api.push({
                     nodes: { [`${scopeId}node-1`]: { id: `${scopeId}node-1` } },
                 });
             });
@@ -94,10 +78,10 @@ describe('scopes', () => {
 
         describe('with write rights', async () => {
             beforeEach(async () => {
-                await user1Api.push({
-                    rights: { [`${scopeId}node-1`]: { user: { [user2Email]: { write: true } } } },
+                await fixture.user1Api.push({
+                    rights: { [`${scopeId}node-1`]: { user: { [fixture.user2Email]: { write: true } } } },
                 });
-                pushResult = await user2Api.push({
+                pushResult = await fixture.user2Api.push({
                     nodes: { [`${scopeId}node-1`]: { id: `${scopeId}node-1` } },
                 });
             });

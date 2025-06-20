@@ -2,11 +2,12 @@ import type { DataCache } from './types/dataCache';
 import type { NodeView, EdgeView, View } from '@gothub/got-core';
 import type { WithEdgeTypes } from './util/withEdgeTypes';
 import { withEdgeTypes } from './util/withEdgeTypes';
-import type { Loader, FileRef } from './types/loader';
 import type { Signer } from './types/signer';
 import type { GraphAssembler } from './types/graphAssembler';
 import { promiseManager } from './util/promiseManager';
-import type { Log } from './types/logs';
+import type { FileRef, FileService } from '../shared/files.service';
+import type { Loader } from '../shared/loader';
+import type { Log } from '../shared/logs';
 
 const parseRole = (role: string, nodeId: string): string => role.replaceAll('$NODEID', nodeId);
 
@@ -14,6 +15,7 @@ type Dependencies = {
     // existsCache: ExistsCache;
     dataCache: DataCache;
     loader: Loader;
+    fileService: FileService;
     signer: Signer;
     graphAssembler: GraphAssembler;
 };
@@ -30,7 +32,7 @@ export const pull = async (
 
     const { addPromise, awaitPromises } = promiseManager();
 
-    const { dataCache, signer, loader, graphAssembler } = dependencies;
+    const { dataCache, signer, loader, fileService, graphAssembler } = dependencies;
     const {
         writeNode,
         writeMetadata,
@@ -206,7 +208,7 @@ export const pull = async (
 
     type OnFileData = (nodeId: string, prop: string, data: string) => void;
     const loadFileAsync = async (nodeId: string, { fileKey, prop }: FileRef, onData?: OnFileData) => {
-        const fileHead = await loader.getFileHead(fileKey);
+        const fileHead = await fileService.getFileHead(fileKey);
 
         if (!fileHead) return;
         const { contentType, etag, modifiedDate } = fileHead;
@@ -226,7 +228,7 @@ export const pull = async (
     };
 
     const loadFilesAsync = async (nodeId: string, onData?: OnFileData) => {
-        const fileRefs = await loader.getFileRefs(nodeId);
+        const fileRefs = await fileService.getFileRefs(nodeId);
 
         if (!fileRefs) return;
 

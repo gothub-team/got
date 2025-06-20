@@ -12,6 +12,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { AWS_REGION, CLOUDFRONT_NEW_ACCESS_KEY_PARAMETER, MEDIA_DOMAIN } from '../config.js';
 import { signUrl } from '../cloudfront/index.js';
+import type { FileHead, Storage } from '../storage.type.js';
 
 const client = new S3Client({
     region: AWS_REGION,
@@ -321,3 +322,40 @@ export const s3listKeysPaged = async (bucket: string, prefix: string) => {
     });
     return records;
 };
+
+export class S3Storage implements Storage {
+    async exist(location: string, path: string) {
+        return s3exists(location, path);
+    }
+
+    async get(location: string, path: string) {
+        const res = await s3get(location, path);
+
+        if (res == null) {
+            return res;
+        }
+
+        return res.toString();
+    }
+
+    async head(location: string, path: string): Promise<FileHead | undefined> {
+        const res = await s3head(location, path);
+        if (!res) {
+            return undefined;
+        }
+
+        return res;
+    }
+
+    async put(location: string, path: string, data: string) {
+        return s3putRaw(location, path, Buffer.from(data), { contentType: 'application/json' });
+    }
+
+    async delete(location: string, path: string) {
+        return s3delete(location, path);
+    }
+
+    async list(location: string, path: string) {
+        return s3listKeysPaged(location, path);
+    }
+}

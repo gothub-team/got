@@ -11,7 +11,8 @@
         "@types/bun": "latest",
         "@types/aws-lambda": "8.10.138",
         "@gothub/typescript-util": "workspace:*",
-        "@gothub/got-core": "workspace:*"
+        "@gothub/got-core": "workspace:*",
+        "polka": "^0.5.2"
     },
     "peerDependencies": {
         "typescript": "^5.0.0"

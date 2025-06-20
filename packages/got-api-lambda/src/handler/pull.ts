@@ -3,11 +3,23 @@ import type { View } from '@gothub/got-core';
 import type { APIGatewayProxyHandler, APIGatewayProxyResult, Handler } from 'aws-lambda';
 import { pull } from '../pull';
 import { graphAssembler } from '../pull/util/graphAssembler';
-import { s3loader } from '../pull/util/s3loader';
 import type { Signer } from '../pull/types/signer';
 import { cfSigner } from '../pull/util/signer';
 import { createDataCache } from '../pull/caches/dataCache';
 import { validateAuthed, type AuthedValidationResult } from '@gothub/aws-util/validation';
+import { FileService } from '../shared/files.service';
+import { S3Storage } from '@gothub/aws-util/s3';
+import {
+    BUCKET_EDGES,
+    BUCKET_MEDIA,
+    BUCKET_NODES,
+    BUCKET_OWNERS,
+    BUCKET_REVERSE_EDGES,
+    BUCKET_RIGHTS_ADMIN,
+    BUCKET_RIGHTS_READ,
+    BUCKET_RIGHTS_WRITE,
+} from '../pull/config';
+import { Loader } from '../shared/loader';
 
 export const querySchema = (recursiveRef: { $ref: string }) => ({
     type: 'object',
@@ -89,14 +101,29 @@ export const schema = {
     },
 };
 
+const locations = {
+    NODES: BUCKET_NODES,
+    EDGES: BUCKET_EDGES,
+    REVERSE_EDGES: BUCKET_REVERSE_EDGES,
+    RIGHTS_READ: BUCKET_RIGHTS_READ,
+    RIGHTS_WRITE: BUCKET_RIGHTS_WRITE,
+    RIGHTS_ADMIN: BUCKET_RIGHTS_ADMIN,
+    OWNERS: BUCKET_OWNERS,
+    MEDIA: BUCKET_MEDIA,
+};
+
 export type Body = View;
 
 const handle = async ({ userEmail, asAdmin, body }: AuthedValidationResult<Body>): Promise<APIGatewayProxyResult> => {
+    const storage = new S3Storage();
     const signer: Signer = await cfSigner();
+    const loader = new Loader(storage, locations);
+    const fileService = new FileService(storage, locations);
     const [result] = await pull(body, userEmail, asAdmin, {
         dataCache: createDataCache(),
         graphAssembler: graphAssembler(),
-        loader: s3loader(),
+        loader: loader,
+        fileService,
         signer,
     });
 
