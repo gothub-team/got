@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { promisify } from 'util';
-import type { Storage } from './storage.type';
+import type { FileHead, Storage } from './storage.type';
 import * as Path from 'path';
 
 const access = promisify(fs.access);
@@ -104,6 +104,11 @@ export class FSStorage implements Storage {
 
     async get(location: string, path: string) {
         return fsget(Path.join(location, path));
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    head(location: string, path: string): Promise<FileHead | undefined> {
+        throw new Error('FSStorage does not support head operation');
     }
 
     async put(location: string, path: string, data: string) {
