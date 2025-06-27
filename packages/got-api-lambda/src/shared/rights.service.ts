@@ -11,14 +11,12 @@ export class RightsService {
     constructor(
         private readonly storage: Storage,
         private readonly locations: {
-            RIGHTS_READ: string;
-            RIGHTS_WRITE: string;
-            RIGHTS_ADMIN: string;
+            RIGHTS: string;
             OWNERS: string;
         },
     ) {
-        this.rightsLoader = new RightsLoader(this.storage, { RIGHTS: 'RIGHTS_RWA' });
-        this.rightsWriter = new RightsWriter(this.storage, { RIGHTS: 'RIGHTS_RWA' });
+        this.rightsLoader = new RightsLoader(this.storage, { RIGHTS: this.locations.RIGHTS });
+        this.rightsWriter = new RightsWriter(this.storage, { RIGHTS: this.locations.RIGHTS });
     }
 
     private async setRight(location: string, nodeId: string, principalType: string, principal: string, right: boolean) {

@@ -15,9 +15,7 @@ import {
     BUCKET_NODES,
     BUCKET_OWNERS,
     BUCKET_REVERSE_EDGES,
-    BUCKET_RIGHTS_ADMIN,
-    BUCKET_RIGHTS_READ,
-    BUCKET_RIGHTS_WRITE,
+    BUCKET_RIGHTS_PWA,
 } from '../pull/config';
 import { GraphService } from '../shared/graph.service';
 import { RightsService } from '../shared/rights.service';
@@ -106,9 +104,7 @@ const locations = {
     NODES: BUCKET_NODES,
     EDGES: BUCKET_EDGES,
     REVERSE_EDGES: BUCKET_REVERSE_EDGES,
-    RIGHTS_READ: BUCKET_RIGHTS_READ,
-    RIGHTS_WRITE: BUCKET_RIGHTS_WRITE,
-    RIGHTS_ADMIN: BUCKET_RIGHTS_ADMIN,
+    RIGHTS: BUCKET_RIGHTS_PWA,
     OWNERS: BUCKET_OWNERS,
     MEDIA: BUCKET_MEDIA,
 };

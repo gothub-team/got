@@ -13,10 +13,8 @@ import {
     BUCKET_MEDIA,
     BUCKET_NODES,
     BUCKET_OWNERS,
+    BUCKET_RIGHTS_PWA,
     BUCKET_REVERSE_EDGES,
-    BUCKET_RIGHTS_ADMIN,
-    BUCKET_RIGHTS_READ,
-    BUCKET_RIGHTS_WRITE,
 } from '../push/config';
 import { PushLogsService } from '../shared/push-logs.service';
 import { FileService } from '../shared/files.service';
@@ -294,9 +292,7 @@ const locations = {
     NODES: BUCKET_NODES,
     EDGES: BUCKET_EDGES,
     REVERSE_EDGES: BUCKET_REVERSE_EDGES,
-    RIGHTS_READ: BUCKET_RIGHTS_READ,
-    RIGHTS_WRITE: BUCKET_RIGHTS_WRITE,
-    RIGHTS_ADMIN: BUCKET_RIGHTS_ADMIN,
+    RIGHTS: BUCKET_RIGHTS_PWA
     OWNERS: BUCKET_OWNERS,
     MEDIA: BUCKET_MEDIA,
     LOGS: BUCKET_LOGS,
