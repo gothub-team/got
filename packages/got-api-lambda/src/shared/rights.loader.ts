@@ -1,8 +1,9 @@
-import type { Storage } from '@gothub/aws-util';
-import type { EntityRights } from './rights.types';
+import { assocMap3, type Storage } from '@gothub/aws-util';
+import type { EntityRights, NodeEntityRights } from './rights.types';
 
 export class RightsLoader {
     entityRightsPromises: Map<PropertyKey, Promise<EntityRights>> = new Map();
+    nodeRightsPromises: Map<PropertyKey, Promise<NodeEntityRights>> = new Map();
 
     constructor(
         private readonly storage: Storage,
@@ -11,36 +12,53 @@ export class RightsLoader {
         },
     ) {}
 
-    async loadRights(key: string) {
-        const json = await this.storage.get(this.locations.RIGHTS, key);
-        if (!json) {
-            return {} as EntityRights;
+    loadEntityRights(key: string) {
+        if (this.entityRightsPromises.has(key)) {
+            return this.entityRightsPromises.get(key)!;
         }
 
-        return JSON.parse(json) as EntityRights;
+        const promise = this.storage.get(this.locations.RIGHTS, key).then((json) => {
+            if (!json) {
+                return {} as EntityRights;
+            }
+
+            return JSON.parse(json) as EntityRights;
+        });
+
+        this.entityRightsPromises.set(key, promise);
+        return promise;
+    }
+
+    loadNodeEntityRights(key: string) {
+        if (this.nodeRightsPromises.has(key)) {
+            return this.nodeRightsPromises.get(key)!;
+        }
+
+        const promise = this.storage.get(this.locations.RIGHTS, key).then((json) => {
+            if (!json) {
+                return {} as NodeEntityRights;
+            }
+
+            return JSON.parse(json) as NodeEntityRights;
+        });
+
+        this.nodeRightsPromises.set(key, promise);
+        return promise;
     }
 
     loadUserRights(user: string) {
         const rightKey = `user/${user}`;
-
-        if (this.entityRightsPromises.has(rightKey)) {
-            return this.entityRightsPromises.get(rightKey)!;
-        }
-
-        const promise = this.loadRights(rightKey);
-        this.entityRightsPromises.set(rightKey, promise);
-        return promise;
+        return this.loadEntityRights(rightKey);
     }
 
     loadRoleRights(roleId: string) {
         const rightKey = `role/${roleId}`;
-        if (this.entityRightsPromises.has(rightKey)) {
-            return this.entityRightsPromises.get(rightKey)!;
-        }
+        return this.loadEntityRights(rightKey);
+    }
 
-        const promise = this.loadRights(rightKey);
-        this.entityRightsPromises.set(rightKey, promise);
-        return promise;
+    loadNodeRights(nodeId: string) {
+        const rightKey = `node/${nodeId}`;
+        return this.loadNodeEntityRights(rightKey);
     }
 
     loadPrincipalRights(principalType: string, principal: string): Promise<EntityRights> {
@@ -68,5 +86,25 @@ export class RightsLoader {
         const principalRights = await this.loadPrincipalRights(principalType, principal);
         const nodeRights = principalRights[nodeId];
         return nodeRights ? nodeRights.includes('a') : false;
+    }
+
+    async listRights(nodeId: string): Promise<Map<string, unknown>> {
+        const nodeRights = await this.loadNodeRights(nodeId);
+
+        const res = new Map<string, unknown>();
+
+        for (const [principalType, rights] of Object.entries(nodeRights)) {
+            for (const [principal, rightsList] of Object.entries(rights)) {
+                if (principalType !== 'user' && principalType !== 'role') {
+                    continue; // Skip unsupported principal types
+                }
+
+                rightsList.includes('r') && assocMap3(principalType, principal, 'read', 'true', res);
+                rightsList.includes('w') && assocMap3(principalType, principal, 'write', 'true', res);
+                rightsList.includes('a') && assocMap3(principalType, principal, 'admin', 'true', res);
+            }
+        }
+
+        return res;
     }
 }

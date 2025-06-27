@@ -78,42 +78,7 @@ export class RightsService {
     }
 
     async listRights(nodeId: string): Promise<Map<string, unknown>> {
-        throw new Error('listRights is not implemented yet');
-        // const readRightsPromise = this.taskQueue.queueLoad(() =>
-        //     this.storage.list(this.locations.RIGHTS_READ, `${nodeId}/`),
-        // );
-        // const writeRightsPromise = this.taskQueue.queueLoad(() =>
-        //     this.storage.list(this.locations.RIGHTS_WRITE, `${nodeId}/`),
-        // );
-        // const adminRightsPromise = this.taskQueue.queueLoad(() =>
-        //     this.storage.list(this.locations.RIGHTS_ADMIN, `${nodeId}/`),
-        // );
-
-        // const readRights = await readRightsPromise;
-        // const writeRights = await writeRightsPromise;
-        // const adminRights = await adminRightsPromise;
-
-        // const res = new Map<string, unknown>();
-        // for (let i = 0; i < readRights.length; i++) {
-        //     const [, principalType, principal] = readRights[i].split('/');
-        //     if (principalType === 'user' || principalType === 'role') {
-        //         assocMap3(principalType, principal, 'read', 'true', res);
-        //     }
-        // }
-        // for (let i = 0; i < writeRights.length; i++) {
-        //     const [, principalType, principal] = writeRights[i].split('/');
-        //     if (principalType === 'user' || principalType === 'role') {
-        //         assocMap3(principalType, principal, 'write', 'true', res);
-        //     }
-        // }
-        // for (let i = 0; i < adminRights.length; i++) {
-        //     const [, principalType, principal] = adminRights[i].split('/');
-        //     if (principalType === 'user' || principalType === 'role') {
-        //         assocMap3(principalType, principal, 'admin', 'true', res);
-        //     }
-        // }
-
-        // return res;
+        return this.rightsLoader.listRights(nodeId);
     }
 
     async storeAllRights() {
