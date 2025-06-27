@@ -95,6 +95,10 @@ export class RightsWriter {
         return principalPatch;
     }
 
+    getRightPatch(rightType: keyof RightTypes, nodeId: string, principalType: 'user' | 'role', principal: string) {
+        return this.nodeRightPatches[nodeId]?.[principalType]?.[principal]?.[rightType];
+    }
+
     setRight(
         rightType: keyof RightTypes,
         nodeId: string,

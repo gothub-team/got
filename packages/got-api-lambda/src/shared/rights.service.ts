@@ -47,20 +47,28 @@ export class RightsService {
         return this.storage.put(this.locations.OWNERS, `${nodeId}/owner/${principal}`, 'true');
     }
 
-    async getRight(location: string, nodeId: string, principalType: 'user' | 'role', principal: string) {
-        const head = await this.taskQueue.queueLoad(() =>
-            this.storage.exist(location, `${nodeId}/${principalType}/${principal}`),
-        );
-        return Boolean(head);
-    }
-
     async getRead(nodeId: string, principalType: 'user' | 'role', principal: string) {
+        const patch = this.rightsWriter.getRightPatch('read', nodeId, principalType, principal);
+        if (patch !== undefined) {
+            return patch;
+        }
+
         return this.rightsLoader.getRead(nodeId, principalType, principal);
     }
     async getWrite(nodeId: string, principalType: 'user' | 'role', principal: string) {
+        const patch = this.rightsWriter.getRightPatch('read', nodeId, principalType, principal);
+        if (patch !== undefined) {
+            return patch;
+        }
+
         return this.rightsLoader.getWrite(nodeId, principalType, principal);
     }
     async getAdmin(nodeId: string, principalType: 'user' | 'role', principal: string) {
+        const patch = this.rightsWriter.getRightPatch('read', nodeId, principalType, principal);
+        if (patch !== undefined) {
+            return patch;
+        }
+
         return this.rightsLoader.getAdmin(nodeId, principalType, principal);
     }
 

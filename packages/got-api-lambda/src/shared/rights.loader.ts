@@ -55,7 +55,6 @@ export class RightsLoader {
     async getRead(nodeId: string, principalType: string, principal: string) {
         const principalRights = await this.loadPrincipalRights(principalType, principal);
         const nodeRights = principalRights[nodeId];
-
         return nodeRights ? nodeRights.includes('r') : false;
     }
 
