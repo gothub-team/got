@@ -11,9 +11,7 @@ type GraphStoreArgs struct {
 	BucketNodesName        *pulumi.StringInput `pulumi:"bucketNodesName"`
 	BucketEdgesName        *pulumi.StringInput `pulumi:"bucketEdgesName"`
 	BucketReverseEdgesName *pulumi.StringInput `pulumi:"bucketReverseEdgesName"`
-	BucketRightsReadName   *pulumi.StringInput `pulumi:"bucketRightsReadName"`
-	BucketRightsWriteName  *pulumi.StringInput `pulumi:"bucketRightsWriteName"`
-	BucketRightsAdminName  *pulumi.StringInput `pulumi:"bucketRightsAdminName"`
+	BucketRightsRWAName    *pulumi.StringInput `pulumi:"bucketRightsRWAName"`
 	BucketRightsOwnerName  *pulumi.StringInput `pulumi:"bucketRightsOwnerName"`
 	BucketLogsName         *pulumi.StringInput `pulumi:"bucketLogsName"`
 	BucketMediaName        *pulumi.StringInput `pulumi:"bucketMediaName"`
@@ -26,9 +24,7 @@ type GraphStore struct {
 	BucketNodesName           pulumi.StringOutput `pulumi:"bucketNodesName"`
 	BucketEdgesName           pulumi.StringOutput `pulumi:"bucketEdges"`
 	BucketReverseEdgesName    pulumi.StringOutput `pulumi:"bucketReverseEdges"`
-	BucketRightsReadName      pulumi.StringOutput `pulumi:"bucketRightsRead"`
-	BucketRightsWriteName     pulumi.StringOutput `pulumi:"bucketRightsWrite"`
-	BucketRightsAdminName     pulumi.StringOutput `pulumi:"bucketRightsAdmin"`
+	BucketRightsRWAName       pulumi.StringOutput `pulumi:"bucketRightsRWA"`
 	BucketRightsOwnerName     pulumi.StringOutput `pulumi:"bucketRightsOwner"`
 	BucketLogsName            pulumi.StringOutput `pulumi:"bucketLogs"`
 	BucketMediaName           pulumi.StringOutput `pulumi:"bucketMedia"`
@@ -75,15 +71,7 @@ func NewGraphStore(ctx *pulumi.Context,
 	}
 
 	// create right buckets
-	bucketRightsRead, err := lookupOrCreateBucket(ctx, args.BucketRightsReadName, name+"-rights-read", args.ForceDestroy)
-	if err != nil {
-		return nil, err
-	}
-	bucketRightsWrite, err := lookupOrCreateBucket(ctx, args.BucketRightsWriteName, name+"-rights-write", args.ForceDestroy)
-	if err != nil {
-		return nil, err
-	}
-	bucketRightsAdmin, err := lookupOrCreateBucket(ctx, args.BucketRightsAdminName, name+"-rights-admin", args.ForceDestroy)
+	bucketRightsRwa, err := lookupOrCreateBucket(ctx, args.BucketRightsRWAName, name+"-rights-rwa", args.ForceDestroy)
 	if err != nil {
 		return nil, err
 	}
@@ -116,9 +104,7 @@ func NewGraphStore(ctx *pulumi.Context,
 						pulumi.Sprintf("%v/*", bucketNodes.Arn),
 						pulumi.Sprintf("%v/*", bucketEdges.Arn),
 						pulumi.Sprintf("%v/*", bucketReverseEdges.Arn),
-						pulumi.Sprintf("%v/*", bucketRightsRead.Arn),
-						pulumi.Sprintf("%v/*", bucketRightsWrite.Arn),
-						pulumi.Sprintf("%v/*", bucketRightsAdmin.Arn),
+						pulumi.Sprintf("%v/*", bucketRightsRwa.Arn),
 						pulumi.Sprintf("%v/*", bucketRightsOwner.Arn),
 					},
 				},
@@ -131,9 +117,7 @@ func NewGraphStore(ctx *pulumi.Context,
 						pulumi.Sprintf("%v", bucketNodes.Arn),
 						pulumi.Sprintf("%v", bucketEdges.Arn),
 						pulumi.Sprintf("%v", bucketReverseEdges.Arn),
-						pulumi.Sprintf("%v", bucketRightsRead.Arn),
-						pulumi.Sprintf("%v", bucketRightsWrite.Arn),
-						pulumi.Sprintf("%v", bucketRightsAdmin.Arn),
+						pulumi.Sprintf("%v", bucketRightsRwa.Arn),
 						pulumi.Sprintf("%v", bucketRightsOwner.Arn),
 					},
 				},
@@ -161,9 +145,7 @@ func NewGraphStore(ctx *pulumi.Context,
 						pulumi.Sprintf("%v/*", bucketNodes.Arn),
 						pulumi.Sprintf("%v/*", bucketEdges.Arn),
 						pulumi.Sprintf("%v/*", bucketReverseEdges.Arn),
-						pulumi.Sprintf("%v/*", bucketRightsRead.Arn),
-						pulumi.Sprintf("%v/*", bucketRightsWrite.Arn),
-						pulumi.Sprintf("%v/*", bucketRightsAdmin.Arn),
+						pulumi.Sprintf("%v/*", bucketRightsRwa.Arn),
 						pulumi.Sprintf("%v/*", bucketRightsOwner.Arn),
 					},
 				},
@@ -289,9 +271,7 @@ func NewGraphStore(ctx *pulumi.Context,
 	component.BucketNodesName = bucketNodes.Name.ToStringOutput()
 	component.BucketEdgesName = bucketEdges.Name.ToStringOutput()
 	component.BucketReverseEdgesName = bucketReverseEdges.Name.ToStringOutput()
-	component.BucketRightsReadName = bucketRightsRead.Name.ToStringOutput()
-	component.BucketRightsWriteName = bucketRightsWrite.Name.ToStringOutput()
-	component.BucketRightsAdminName = bucketRightsAdmin.Name.ToStringOutput()
+	component.BucketRightsRWAName = bucketRightsRWA.Name.ToStringOutput()
 	component.BucketRightsOwnerName = bucketRightsOwner.Name.ToStringOutput()
 	component.BucketLogsName = bucketLogs.Name.ToStringOutput()
 	component.BucketMediaName = bucketMedia.Name.ToStringOutput()
