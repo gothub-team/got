@@ -1,6 +1,12 @@
 import type { Metadata, NodeFileView, NodeRightsView, Node } from './graphObjects';
 import type { NodeFilesView } from './graph';
-import type { EdgeInclude, EdgeView, EdgesView, NodeInclude, NodeView, View } from './view';
+import type { EdgeInclude, EdgeView, EdgesView, NodeInclude, NodeView, View, nodeTypeBrand } from './view';
+
+type InferFlagType<TFlag> = TFlag extends { readonly [nodeTypeBrand]?: infer N }
+    ? N extends Record<string, unknown>
+        ? N
+        : Record<string, unknown>
+    : Record<string, unknown>;
 
 type AliasKey<TView extends View | EdgesView, K extends keyof TView> = TView[K]['as'] extends string
     ? TView[K]['as']
@@ -40,7 +46,7 @@ type ExtractIncludeNode<TNodeView extends NodeView | EdgeView, TInclude = TNodeV
     | EdgeInclude
     ? TInclude['node'] extends true
         ? {
-              node: Node;
+              node: Node<InferFlagType<TInclude['node']>>;
           }
         : NonNullable<unknown>
     : NonNullable<unknown>;
@@ -51,7 +57,7 @@ type ExtractIncludeMetadata<
 > = TInclude extends EdgeInclude
     ? TInclude['metadata'] extends true
         ? {
-              metadata: Metadata;
+              metadata: Metadata<InferFlagType<TInclude['metadata']>>;
           }
         : NonNullable<unknown>
     : NonNullable<unknown>;

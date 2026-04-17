@@ -53,7 +53,7 @@ export type * from './types/state';
 export type * from './types/actions';
 export type * from './types/graph';
 export type * from './types/graphObjects';
-export type * from './types/view';
+export * from './types/view';
 export * from './store/createGraph';
 export * from './store/createCurriedGraph';
 export * from './local-store/createLocalGraph';

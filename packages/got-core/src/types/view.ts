@@ -1,3 +1,5 @@
+export declare const nodeTypeBrand: unique symbol;
+
 export declare type View = Record<string, NodeView>;
 export declare type EdgesView = Record<string, EdgeView>;
 
@@ -96,3 +98,21 @@ export declare interface EdgeView {
      */
     edges?: EdgesView;
 }
+
+/**
+ * Brands `include: { node: ... }` with an entity type so the node body is typed
+ * as `Node<TNode>` in the `ViewResult` instead of the default `Node`. Returns
+ * `true` at runtime — the brand is a phantom, compile-time only.
+ */
+export const includeNode = <TNode extends Record<string, unknown>>(): true & {
+    readonly [nodeTypeBrand]?: TNode;
+} => true as true & { readonly [nodeTypeBrand]?: TNode };
+
+/**
+ * Brands `include: { metadata: ... }` with a metadata shape so the resulting
+ * `metadata` field is typed as `Metadata<TMeta>` instead of `Metadata`. Returns
+ * `true` at runtime.
+ */
+export const includeMetadata = <TMeta extends Record<string, unknown>>(): true & {
+    readonly [nodeTypeBrand]?: TMeta;
+} => true as true & { readonly [nodeTypeBrand]?: TMeta };
