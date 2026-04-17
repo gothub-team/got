@@ -1,3 +1,5 @@
+export declare const nodeTypeBrand: unique symbol;
+
 export declare type View = Record<string, NodeView>;
 export declare type EdgesView = Record<string, EdgeView>;
 
@@ -26,6 +28,11 @@ export declare type NodeInclude = {
 };
 
 export declare interface NodeView {
+    /**
+     * Phantom type-only brand used by `nodeView<T>()` to carry the entity type
+     * into `ViewResult`. Never set at runtime.
+     */
+    readonly [nodeTypeBrand]?: Record<string, unknown>;
     /**
      * Defines an optional alias for the node view
      */
@@ -72,6 +79,7 @@ export declare type EdgeInclude = {
     files?: boolean;
 };
 export declare interface EdgeView {
+    readonly [nodeTypeBrand]?: Record<string, unknown>;
     /**
      * Defines an optional alias for the edge view
      */
@@ -96,3 +104,33 @@ export declare interface EdgeView {
      */
     edges?: EdgesView;
 }
+
+/**
+ * Brands a `NodeView` literal with an entity type `TNode` so the node body in
+ * the resulting `ViewResult` is typed as `Node<TNode>` instead of `Node`.
+ *
+ * Curried so the `TNode` type can be supplied explicitly while `V` is still
+ * inferred with `const`-preserved literal types (TS cannot do both in a single
+ * call when the constraint is a named type).
+ *
+ * @example
+ *   nodeView<Contract>()({ include: { node: true }, edges: { ... } })
+ *
+ * Plain object views remain valid — this helper is purely additive.
+ */
+export const nodeView =
+    <TNode extends Record<string, unknown> = Record<string, unknown>>() =>
+    <const V extends NodeView>(view: V): V & { readonly [nodeTypeBrand]?: TNode } =>
+        view as V & { readonly [nodeTypeBrand]?: TNode };
+
+/**
+ * Brands an `EdgeView` literal with an entity type `TNode` so the node body of
+ * every node reached through this edge is typed as `Node<TNode>`.
+ *
+ * @example
+ *   edgeView<Position>()({ include: { node: true } })
+ */
+export const edgeView =
+    <TNode extends Record<string, unknown> = Record<string, unknown>>() =>
+    <const V extends EdgeView>(view: V): V & { readonly [nodeTypeBrand]?: TNode } =>
+        view as V & { readonly [nodeTypeBrand]?: TNode };
