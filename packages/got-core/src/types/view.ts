@@ -29,11 +29,6 @@ export declare type NodeInclude = {
 
 export declare interface NodeView {
     /**
-     * Phantom type-only brand used by `nodeView<T>()` to carry the entity type
-     * into `ViewResult`. Never set at runtime.
-     */
-    readonly [nodeTypeBrand]?: Record<string, unknown>;
-    /**
      * Defines an optional alias for the node view
      */
     as?: string;
@@ -79,7 +74,6 @@ export declare type EdgeInclude = {
     files?: boolean;
 };
 export declare interface EdgeView {
-    readonly [nodeTypeBrand]?: Record<string, unknown>;
     /**
      * Defines an optional alias for the edge view
      */
@@ -106,31 +100,19 @@ export declare interface EdgeView {
 }
 
 /**
- * Brands a `NodeView` literal with an entity type `TNode` so the node body in
- * the resulting `ViewResult` is typed as `Node<TNode>` instead of `Node`.
- *
- * Curried so the `TNode` type can be supplied explicitly while `V` is still
- * inferred with `const`-preserved literal types (TS cannot do both in a single
- * call when the constraint is a named type).
- *
- * @example
- *   nodeView<Contract>()({ include: { node: true }, edges: { ... } })
- *
- * Plain object views remain valid — this helper is purely additive.
+ * Brands `include: { node: ... }` with an entity type so the node body is typed
+ * as `Node<TNode>` in the `ViewResult` instead of the default `Node`. Returns
+ * `true` at runtime — the brand is a phantom, compile-time only.
  */
-export const nodeView =
-    <TNode extends Record<string, unknown> = Record<string, unknown>>() =>
-    <const V extends NodeView>(view: V): V & { readonly [nodeTypeBrand]?: TNode } =>
-        view as V & { readonly [nodeTypeBrand]?: TNode };
+export const includeNode = <TNode extends Record<string, unknown>>(): true & {
+    readonly [nodeTypeBrand]?: TNode;
+} => true as true & { readonly [nodeTypeBrand]?: TNode };
 
 /**
- * Brands an `EdgeView` literal with an entity type `TNode` so the node body of
- * every node reached through this edge is typed as `Node<TNode>`.
- *
- * @example
- *   edgeView<Position>()({ include: { node: true } })
+ * Brands `include: { metadata: ... }` with a metadata shape so the resulting
+ * `metadata` field is typed as `Metadata<TMeta>` instead of `Metadata`. Returns
+ * `true` at runtime.
  */
-export const edgeView =
-    <TNode extends Record<string, unknown> = Record<string, unknown>>() =>
-    <const V extends EdgeView>(view: V): V & { readonly [nodeTypeBrand]?: TNode } =>
-        view as V & { readonly [nodeTypeBrand]?: TNode };
+export const includeMetadata = <TMeta extends Record<string, unknown>>(): true & {
+    readonly [nodeTypeBrand]?: TMeta;
+} => true as true & { readonly [nodeTypeBrand]?: TMeta };

@@ -2,7 +2,7 @@ import type { Metadata, NodeFileView, NodeRightsView, Node } from './graphObject
 import type { NodeFilesView } from './graph';
 import type { EdgeInclude, EdgeView, EdgesView, NodeInclude, NodeView, View, nodeTypeBrand } from './view';
 
-type InferNodeType<T> = T extends { readonly [nodeTypeBrand]?: infer N }
+type InferFlagType<TFlag> = TFlag extends { readonly [nodeTypeBrand]?: infer N }
     ? N extends Record<string, unknown>
         ? N
         : Record<string, unknown>
@@ -46,7 +46,7 @@ type ExtractIncludeNode<TNodeView extends NodeView | EdgeView, TInclude = TNodeV
     | EdgeInclude
     ? TInclude['node'] extends true
         ? {
-              node: Node<InferNodeType<TNodeView>>;
+              node: Node<InferFlagType<TInclude['node']>>;
           }
         : NonNullable<unknown>
     : NonNullable<unknown>;
@@ -57,7 +57,7 @@ type ExtractIncludeMetadata<
 > = TInclude extends EdgeInclude
     ? TInclude['metadata'] extends true
         ? {
-              metadata: Metadata;
+              metadata: Metadata<InferFlagType<TInclude['metadata']>>;
           }
         : NonNullable<unknown>
     : NonNullable<unknown>;
